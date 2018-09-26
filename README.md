@@ -1,6 +1,10 @@
 * [导航](#导航)
 * [数据库](#数据库)
 	* [MongoDB](#mongodb)
+		* [文档](#文档)
+		* [mongo Shell](#mongo-shell)
+			* [配置mongo Shell](#配置mongo-shell)
+	* [MySQL](#mysql)
 
 # 导航
 w3school 在线教程  
@@ -88,3 +92,76 @@ MongoDB根据写操作来保存文档字段的顺序，除了下面的情况：
 * 默认情况下，MongoDB creates a unique index on the **\_id** field during the creation of a collection.  
 * **\_id** 字段总是文档中的第一个字段。如果服务器收到的文档的 **\_id** 字段不在第一个字段，则服务器会将 **\_id** 字段移动到第一个字段。  
 * **\_id** 字段的值可以是任意的 [BSON 数据类型](https://docs.mongodb.com/manual/reference/bson-types/)，除了数组。
+
+### mongo Shell
+查询collection中的所有记录
+
+```
+> db.collection.find()
+```
+
+查询collection中的指定列_id和timestamp
+
+```
+> db.collection.find({}, {_id: true, timestamp: true})
+```
+
+或
+
+```
+> db.collection.find({}, {_id: 1, timestamp: 1})
+```
+
+查询collection中的所有列，除了result列
+
+```
+> db.collection.find({}, {result: false})
+```
+
+或
+
+```
+> db.collection.find({}, {result: 0})
+```
+
+查询_id为`http://google.com`的记录
+
+```
+> db.collection.find({_id: 'http://google.com'})
+```
+
+查询前2条记录
+
+```
+> db.collection.find().limit(2)
+```
+
+**排序**  
+将db.collection.find()查询的结果按timestamp的值升序排列
+
+```
+> db.collection.find({}, {_id: true, timestamp: true}).sort({timestamp: 1})
+```
+
+将db.collection.find()查询的结果按timestamp的值降序排列
+
+```
+> db.collection.find({}, {_id: true, timestamp: true}).sort({timestamp: -1})
+```
+
+#### 配置mongo Shell
+**改变 mongo Shell Batch Size**  
+[db.collection.find()](https://docs.mongodb.com/manual/reference/method/db.collection.find/#db.collection.find) 方法是一个从 [collection](https://docs.mongodb.com/manual/reference/glossary/#term-collection) 中检索文档的 JavaScript 方法。[db.collection.find()](https://docs.mongodb.com/manual/reference/method/db.collection.find/#db.collection.find) 方法返回一个游标给结果；然而，在 [mongo](https://docs.mongodb.com/manual/reference/program/mongo/#bin.mongo) shell 中，如果返回的游标没有赋值给一个通过 **var** 关键字定义的变量，则游标自动迭代20次，以打印匹配查询的前20个文档。[mongo](https://docs.mongodb.com/manual/reference/program/mongo/#bin.mongo) shell 将提示 **Type it** 以迭代另外20次。
+
+你可以设置 **DBQuery.shellBatchSize** 属性以改变文档的数量（默认值为20），如下面的例子将它设置为10：
+
+```
+DBQuery.shellBatchSize = 10;
+```
+
+## MySQL
+将ID表的MARKET字段的长度改为10
+
+```
+mysql> alter table ID modify column MARKET varchar(10);
+```
