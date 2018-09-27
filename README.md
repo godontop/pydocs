@@ -5,6 +5,7 @@
 		* [mongo Shell](#mongo-shell)
 			* [配置mongo Shell](#配置mongo-shell)
 	* [MySQL](#mysql)
+		* [UPDATE语法](#update语法)
 
 # 导航
 w3school 在线教程  
@@ -26,7 +27,7 @@ MongoDB将数据记录存储为BSON文档。BSON是 [JSON](https://docs.mongodb.
 #### 文档结构
 MongoDB documents are composed of field-and-value pairs and have the following structure:
 
-```
+```sql
 {
    field1: value1,
    field2: value2,
@@ -38,7 +39,7 @@ MongoDB documents are composed of field-and-value pairs and have the following s
 
 字段的值可以是任意的BSON [数据类型](https://docs.mongodb.com/manual/reference/bson-types/)，包括其它文档，数组，和文档数组。例如，下面的文档包含各种类型的值：
 
-```
+```sql
 var mydoc = {
                _id: ObjectId("5099803df3f4948bd2f98391"),
                name: { first: "Alan", last: "Turing" },
@@ -96,56 +97,56 @@ MongoDB根据写操作来保存文档字段的顺序，除了下面的情况：
 ### mongo Shell
 查询collection中的所有记录
 
-```
+```sql
 > db.collection.find()
 ```
 
 查询collection中的指定列_id和timestamp
 
-```
+```sql
 > db.collection.find({}, {_id: true, timestamp: true})
 ```
 
 或
 
-```
+```sql
 > db.collection.find({}, {_id: 1, timestamp: 1})
 ```
 
 查询collection中的所有列，除了result列
 
-```
+```sql
 > db.collection.find({}, {result: false})
 ```
 
 或
 
-```
+```sql
 > db.collection.find({}, {result: 0})
 ```
 
 查询_id为`http://google.com`的记录
 
-```
+```sql
 > db.collection.find({_id: 'http://google.com'})
 ```
 
 查询前2条记录
 
-```
+```sql
 > db.collection.find().limit(2)
 ```
 
 **排序**  
 将db.collection.find()查询的结果按timestamp的值升序排列
 
-```
+```sql
 > db.collection.find({}, {_id: true, timestamp: true}).sort({timestamp: 1})
 ```
 
 将db.collection.find()查询的结果按timestamp的值降序排列
 
-```
+```sql
 > db.collection.find({}, {_id: true, timestamp: true}).sort({timestamp: -1})
 ```
 
@@ -155,13 +156,41 @@ MongoDB根据写操作来保存文档字段的顺序，除了下面的情况：
 
 你可以设置 **DBQuery.shellBatchSize** 属性以改变文档的数量（默认值为20），如下面的例子将它设置为10：
 
-```
+```sql
 DBQuery.shellBatchSize = 10;
 ```
 
 ## MySQL
 将ID表的MARKET字段的长度改为10
 
-```
+```sql
 mysql> alter table ID modify column MARKET varchar(10);
+```
+
+### UPDATE语法
+UPDATE是一个数据操纵语言语句，用于修改表格中的行。
+
+单表语法：
+
+```sql
+UPDATE [LOW_PRIORITY] [IGNORE] table_reference
+    SET assignment_list
+    [WHERE where_condition]
+    [ORDER BY ...]
+    [LIMIT row_count]
+
+value:
+    {expr | DEFAULT}
+
+assignment:
+    col_name = value
+
+assignment_list:
+    assignment [, assignment] ...
+```
+
+将IDCARD表中id为2912157145的行的id修改为2113075673
+
+```sql
+update IDCARD set id='2113075673' where id='2912157145'
 ```
