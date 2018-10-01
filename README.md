@@ -5,9 +5,17 @@
 		* [mongo Shell](#mongo-shell)
 			* [配置mongo Shell](#配置mongo-shell)
 	* [MySQL](#mysql)
+		* [MySQL Workbench](#mysql-workbench)
 		* [UPDATE语法](#update语法)
+* [vim](#vim)
+	* [vim插件](#vim插件)
+		* [YouCompleteMe](#youcompleteme)
 
 # 导航
+StackEdit  
+[https://stackedit.io/app](https://stackedit.io/app)  
+支持GFM的Markdown在线编辑器
+
 w3school 在线教程  
 [http://www.w3school.com.cn](http://www.w3school.com.cn)  
 中文版的w3school
@@ -167,6 +175,13 @@ DBQuery.shellBatchSize = 10;
 mysql> alter table ID modify column MARKET varchar(10);
 ```
 
+### MySQL Workbench
+在整个数据库中搜索指定字符串：  
+
+1. 左侧导航窗口选中要搜索的数据库；  
+2. 右键选择“Search Table Data...”；  
+3. 在弹出的窗口中输入指定字符串。
+
 ### UPDATE语法
 UPDATE是一个数据操纵语言语句，用于修改表格中的行。
 
@@ -194,3 +209,19 @@ assignment_list:
 ```sql
 update IDCARD set id='2113075673' where id='2912157145'
 ```
+
+# vim
+在vim中输入下面的指令，看vim是否支持python或python3，返回1则表示支持
+
+```vim
+:echo has('python') || has('python3')
+```
+
+**查找**  
+在Normal模式下按下`/`，然后输入要查找的字符并按下回车键，vim便会跳转到第一个匹配位置，按`n`查找下一个，按`N`查找上一个。
+
+## vim插件
+### YouCompleteMe
+#### 命令
+**`:YcmDebugInfo`**  
+可以查看用于当前文件的编译命令
