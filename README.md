@@ -5,6 +5,7 @@
 		* [文档](#文档)
 		* [mongo Shell](#mongo-shell)
 			* [配置mongo Shell](#配置mongo-shell)
+        * [mongoexport](#mongoexport)    
 	* [MySQL](#mysql)
 		* [MySQL Workbench](#mysql-workbench)
 		* [UPDATE语法](#update语法)
@@ -27,6 +28,8 @@ w3school 在线教程
 
 # Markdown
 要在Markdown中显示`<`和`>`，必须使用使用转义字符`&lt;`和`&gt;`。
+
+Markdown中的多个空行会被认为是一个空行。
 
 # 数据库
 **PRIMARY KEY**  
@@ -194,21 +197,16 @@ DBQuery.shellBatchSize = 10;
 指定要导出的字段，如果有多个字段，使用逗号分隔
 
 --type &lt;string&gt;  
-  默认值：json  
-  在版本3.0中新增  
-  指定要导出的格式。为CSV格式指定csv，为JSON格式指定json。  
-  如果指定csv，则你必须使用--fields或--fieldFile选项来声明要从collection中导出的字段。
+  *默认值：* json  
+  *在版本3.0中新增*  
+  指定要导出的格式。为[CSV](https://docs.mongodb.com/manual/reference/glossary/#term-csv)格式指定csv，为[JSON](https://docs.mongodb.com/manual/reference/glossary/#term-json)格式指定json。  
+  如果指定csv，则你必须使用[--fields](https://docs.mongodb.com/manual/reference/program/mongoexport/#cmdoption-mongoexport-fields)或[--fieldFile](https://docs.mongodb.com/manual/reference/program/mongoexport/#cmdoption-mongoexport-fieldfile)选项来声明要从collection中导出的字段。
 
 --out &lt;file&gt;, -o &lt;file&gt;  
-  指定一个文件以写入导出的数据。如果没有指定文件名，mongoexport会将数据写到标准输出。
-
-
-
-
-
+  指定一个文件以写入导出的数据。如果没有指定文件名，[mongoexport](https://docs.mongodb.com/manual/reference/program/mongoexport/#bin.mongoexport)会将数据写到标准输出。
 
 **用法**  
-*在版本3.0中发生变化：* mongoexport删除了--csv选项。使用--type=csv选项来为输出指定CSV格式。
+*在版本3.0中发生变化：* [mongoexport](https://docs.mongodb.com/manual/reference/program/mongoexport/#bin.mongoexport)删除了--csv选项。使用[--type=csv](https://docs.mongodb.com/manual/reference/program/mongoexport/#cmdoption-mongoexport-type)选项来为输出指定CSV格式。
 
 以csv格式导出cache数据库的twentythreads collection的_id字段
 
