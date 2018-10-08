@@ -12,6 +12,10 @@
 		* [YouCompleteMe](#youcompleteme)
 
 # 导航
+DistroWatch  
+[https://distrowatch.com](https://distrowatch.com)  
+Linux发行版排名统计
+
 StackEdit  
 [https://stackedit.io/app](https://stackedit.io/app)  
 支持GFM的Markdown在线编辑器
@@ -158,6 +162,12 @@ MongoDB根据写操作来保存文档字段的顺序，除了下面的情况：
 > db.collection.find({}, {_id: true, timestamp: true}).sort({timestamp: -1})
 ```
 
+重命名collection
+
+```sql
+> db.collection.renameCollection('newName')
+```
+
 #### 配置mongo Shell
 **改变 mongo Shell Batch Size**  
 [db.collection.find()](https://docs.mongodb.com/manual/reference/method/db.collection.find/#db.collection.find) 方法是一个从 [collection](https://docs.mongodb.com/manual/reference/glossary/#term-collection) 中检索文档的 JavaScript 方法。[db.collection.find()](https://docs.mongodb.com/manual/reference/method/db.collection.find/#db.collection.find) 方法返回一个游标给结果；然而，在 [mongo](https://docs.mongodb.com/manual/reference/program/mongo/#bin.mongo) shell 中，如果返回的游标没有赋值给一个通过 **var** 关键字定义的变量，则游标自动迭代20次，以打印匹配查询的前20个文档。[mongo](https://docs.mongodb.com/manual/reference/program/mongo/#bin.mongo) shell 将提示 **Type it** 以迭代另外20次。
@@ -166,6 +176,36 @@ MongoDB根据写操作来保存文档字段的顺序，除了下面的情况：
 
 ```sql
 DBQuery.shellBatchSize = 10;
+```
+
+### mongoexport
+**选项**  
+--db <database>, -d <database>  
+  指定数据库的名字
+
+--collection <collection>, -c <collection>  
+  指定要导出的collection
+
+--fields <field1[,field2]>, -f <field1[,field2]>  
+指定要导出的字段，如果有多个字段，使用逗号分隔
+
+--type <string>  
+  默认值：json  
+  在版本3.0中新增  
+  指定要导出的格式。为CSV格式指定csv，为JSON格式指定json。  
+  如果指定csv，则你必须使用--fields或--fieldFile选项来声明要从collection中导出的字段。
+
+--out <file>, -o <file>  
+  指定一个文件以写入导出的数据。如果没有指定文件名，mongoexport会将数据写到标准输出。
+
+
+**用法**  
+*在版本3.0中发生变化：* mongoexport删除了--csv选项。使用--type=csv选项来为输出指定CSV格式。
+
+以csv格式导出cache数据库的twentythreads collection的_id字段
+
+```sh
+mongoexport --db cache --collection twentythreads --type=csv --fields _id --out url.csv
 ```
 
 ## MySQL
@@ -215,6 +255,12 @@ update IDCARD set id='2113075673' where id='2912157145'
 
 ```vim
 :echo has('python') || has('python3')
+```
+
+显示当前文件的文件类型
+
+```vim
+:set ft?
 ```
 
 **查找**  
