@@ -1,4 +1,5 @@
 * [导航](#导航)
+* [Markdown](#markdown)
 * [数据库](#数据库)
 	* [MongoDB](#mongodb)
 		* [文档](#文档)
@@ -23,6 +24,9 @@ StackEdit
 w3school 在线教程  
 [http://www.w3school.com.cn](http://www.w3school.com.cn)  
 中文版的w3school
+
+# Markdown
+要在Markdown中显示`<`和`>`，必须使用使用转义字符`&lt;`和`&gt;`。
 
 # 数据库
 **PRIMARY KEY**  
@@ -180,22 +184,22 @@ DBQuery.shellBatchSize = 10;
 
 ### mongoexport
 **选项**  
---db <database>, -d <database>  
+--db &lt;database&gt;, -d &lt;database&gt;  
   指定数据库的名字
 
---collection <collection>, -c <collection>  
+--collection &lt;collection&gt;, -c &lt;collection&gt;  
   指定要导出的collection
 
---fields <field1[,field2]>, -f <field1[,field2]>  
+--fields &lt;field1[,field2]&gt;, -f &lt;field1[,field2]&gt;  
 指定要导出的字段，如果有多个字段，使用逗号分隔
 
---type <string>  
+--type &lt;string&gt;  
   默认值：json  
   在版本3.0中新增  
   指定要导出的格式。为CSV格式指定csv，为JSON格式指定json。  
   如果指定csv，则你必须使用--fields或--fieldFile选项来声明要从collection中导出的字段。
 
---out <file>, -o <file>  
+--out &lt;file&gt;, -o &lt;file&gt;  
   指定一个文件以写入导出的数据。如果没有指定文件名，mongoexport会将数据写到标准输出。
 
 
