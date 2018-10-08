@@ -203,6 +203,10 @@ DBQuery.shellBatchSize = 10;
   指定一个文件以写入导出的数据。如果没有指定文件名，mongoexport会将数据写到标准输出。
 
 
+
+
+
+
 **用法**  
 *在版本3.0中发生变化：* mongoexport删除了--csv选项。使用--type=csv选项来为输出指定CSV格式。
 
