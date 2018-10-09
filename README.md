@@ -13,6 +13,7 @@
         * [mongoexport](#mongoexport)    
 	* [MySQL](#mysql)
 		* [MySQL Workbench](#mysql-workbench)
+        * [LOAD DATA INFILE语法](#load-data-infile语法)
 		* [UPDATE语法](#update语法)
 * [vim](#vim)
 	* [vim插件](#vim插件)
@@ -277,6 +278,42 @@ mysql> alter table ID modify column MARKET varchar(10);
 1. 左侧导航窗口选中要搜索的数据库；  
 2. 右键选择“Search Table Data...”；  
 3. 在弹出的窗口中输入指定字符串。
+
+### LOAD DATA INFILE语法
+
+```sql
+LOAD DATA [LOW_PRIORITY | CONCURRENT] [LOCAL] INFILE 'file_name'
+    [REPLACE | IGNORE]
+    INTO TABLE tbl_name
+    [PARTITION (partition_name [, partition_name] ...)]
+    [CHARACTER SET charset_name]
+    [{FIELDS | COLUMNS}
+        [TERMINATED BY 'string']
+        [[OPTIONALLY] ENCLOSED BY 'char']
+        [ESCAPED BY 'char']
+    ]
+    [LINES
+        [STARTING BY 'string']
+        [TERMINATED BY 'string']
+    ]
+    [IGNORE number {LINES | ROWS}]
+    [(col_name_or_user_var
+        [, col_name_or_user_var] ...)]
+    [SET col_name={expr | DEFAULT},
+        [, col_name={expr | DEFAULT}] ...]
+```
+
+```sh
+mysql -h 192.168.2.4 -u user -p
+Enter password:
+```
+
+```sql
+mysql> use ocean;
+mysql> load data local infile "/home/paxy/cardid.csv" into table ID fields terminated by ',';
+```
+
+将客户端上的cardid.csv文件以逗号（','）为字段分隔符导入到192.168.2.4上的MySQL数据库模式ocean的ID表中，该命令的导入几乎是瞬时的，比MySQL Workbench的Table Data Import快无数倍。
 
 ### UPDATE语法
 UPDATE是一个数据操纵语言语句，用于修改表格中的行。
