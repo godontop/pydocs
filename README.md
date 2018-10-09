@@ -1,5 +1,10 @@
 * [导航](#导航)
 * [Markdown](#markdown)
+* [Python](#python)
+    * [Python标准库](#python标准库)
+        * [互联网协议与支持](#互联网协议与支持)
+            * [urllib.parse — 将URLs解析为组件](#urllibparse--将urls解析为组件)
+                * [URL解析](#url解析)
 * [数据库](#数据库)
 	* [MongoDB](#mongodb)
 		* [文档](#文档)
@@ -30,6 +35,51 @@ w3school 在线教程
 要在Markdown中显示`<`和`>`，必须使用使用转义字符`&lt;`和`&gt;`。
 
 Markdown中的多个空行会被认为是一个空行。
+
+# Python
+## Python标准库
+### 互联网协议与支持
+#### urllib.parse — 将URLs解析为组件
+##### URL解析
+urllib.parse.**urljoin**(*base, url, allow_fragments=True*)  
+通过组合一个 "base URL" (*base*) 和另一个 URL (*url*) 来构造一个完整的 ("绝对的") URL。Informally, this uses components of the base URL, in particular the addressing scheme, the network location and (part of) the path, to provide missing components in the relative URL. 例如：
+
+```python
+>>> from urllib.parse import urljoin
+>>> urljoin('https://docs.python.org/3.6/library/urllib.parse.html', 'urllib.error.html')
+'https://docs.python.org/3.6/library/urllib.error.html'
+>>>
+```
+
+The *allow_fragments* argument has the same meaning and default as for [urlparse()](https://docs.python.org/3.6/library/urllib.parse.html#urllib.parse.urlparse).
+
+**注意：** 如果 *url* 是一个绝对 URL (即，以 `//` 或 `scheme://` 开头), 则 *url*’s 主机名和/或方案将出现在结果中。例如：
+
+```python
+>>> urljoin('http://www.cwi.nl/%7Eguido/Python.html', '//www.python.org/%7Eguido')
+'http://www.python.org/%7Eguido'
+>>> urljoin('http://www.cwi.nl/%7Eguido/Python.html', 'https://www.python.org/%7Eguido')
+'https://www.python.org/%7Eguido'
+>>>
+```
+
+If you do not want that behavior, preprocess the *url* with [urlsplit()](https://docs.python.org/3.6/library/urllib.parse.html#urllib.parse.urlsplit) and [urlunsplit()](https://docs.python.org/3.6/library/urllib.parse.html#urllib.parse.urlunsplit), removing possible *scheme* and *netloc* parts.
+
+*在版本3.5中发生变化：* Behaviour updated to match the semantics defined in [RFC 3986](https://tools.ietf.org/html/rfc3986.html).
+
+urllib.parse.**urldefrag**(*url*)  
+如果 *url* 包含一个分片标识符，则返回一个不带分片标识符的修改后的 *url* 版本，及分片标识符作为一个单独的字符串。如果 *url* 中没有分片标识符，则返回原 *url* 及一个空串。
+
+返回值实际上是 [tuple](https://docs.python.org/3/library/stdtypes.html#tuple) 的一个子类的一个实例。这个类还有下面额外的方便的只读属性：
+
+Attribute  |Index  |Value            |Value if not present
+-----------|-------|-----------------|--------------------
+url        | 0     |不带分片的 URL    |空串
+fragment   | 1     |分片标识符        |空串
+
+关于结果对象的详细信息请看[结构化的解析结果](https://docs.python.org/3/library/urllib.parse.html#urlparse-result-object)小节。
+
+*在版本3.2中发生变化：* 结果是一个结构化的对象而不是一个简单的2-元组。
 
 # 数据库
 **PRIMARY KEY**  
