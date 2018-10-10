@@ -2,6 +2,9 @@
 * [Markdown](#markdown)
 * [Python](#python)
     * [Python标准库](#python标准库)
+        * [内置类型](#内置类型)
+            * [数值类型 — int, float, complex](#数值类型--int-float-complex)
+                * [整型数类型的按位运算](#整型数类型的按位运算)
         * [互联网协议与支持](#互联网协议与支持)
             * [urllib.parse — 将URLs解析为组件](#urllibparse--将urls解析为组件)
                 * [URL解析](#url解析)
@@ -35,10 +38,29 @@ w3school 在线教程
 # Markdown
 要在Markdown中显示`<`和`>`，必须使用使用转义字符`&lt;`和`&gt;`。
 
-Markdown中的多个空行会被认为是一个空行。
+Markdown中的多个空行会被当做一个空行来处理。
 
 # Python
 ## Python标准库
+### 内置类型
+#### 数值类型 — int, float, complex
+##### 整型数类型的按位运算
+这个表格列出的按位运算按优先级升序排列：
+
+Operation  |Result          |Notes
+-----------|----------------|-----
+`x ^ y`    |x和y的按位异或   |(4)
+
+```python
+>>> 0 ^ 1
+1
+>>> 0 ^ 0
+0
+>>> 1 ^ 1
+0
+>>>
+```
+
 ### 互联网协议与支持
 #### urllib.parse — 将URLs解析为组件
 ##### URL解析
