@@ -48,10 +48,6 @@ DistroWatch
 [https://distrowatch.com](https://distrowatch.com)  
 Linux发行版排名统计
 
-Markdown  
-[http://tool.oschina.net/markdown](http://tool.oschina.net/markdown)  
-开源中国的在线Markdown编辑器
-
 MongoDB文档  
 [https://docs.mongodb.com](https://docs.mongodb.com)
 
@@ -520,16 +516,7 @@ Parameter  |Type  |Description
 query      |文档  |可选的。用于修改的选择条件。**query** 字段使用的[查询选择器](https://docs.mongodb.com/manual/reference/operator/query/#query-selectors)与 [db.collection.find()](https://docs.mongodb.com/manual/reference/method/db.collection.find/#db.collection.find) 方法中所使用的[查询选择器](https://docs.mongodb.com/manual/reference/operator/query/#query-selectors)一致。虽然查询可能匹配多个文档，[db.collection.findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) **将仅选择一个文档进行修改**。
 update     |文档  |必须指定 **remove** 或 **update** 字段。对选择的文档进行更新。**update** 字段使用与 [update operators](https://docs.mongodb.com/manual/reference/operator/update/#id1) 或 **field: value** 相同的规范来修改选择的文档。
 new        |布尔  |可选的。当为 **真** 时，返回修改后的文档而不是原始文档。[db.collection.findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) 方法的 **remove** 操作忽略 **new** 选项。默认值为 **false**。
-upsert     |布尔  |可选的。与 **update** 字段一起使用。
-
-当为 **真** 时，[findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) either:
-
-* 如果没有文档匹配**查询**则创建一个新的文档。详细信息请看 [upsert behavior](https://docs.mongodb.com/manual/reference/method/db.collection.update/#upsert-behavior)。
-* 更新一个匹配**查询**的单一的文档。
-
-为避免多次 upserts，请确保**查询**字段是[唯一索引的](https://docs.mongodb.com/manual/core/index-unique/#index-type-unique)。
-
-默认值为 **false**。
+upsert     |布尔  |可选的。与 **update** 字段一起使用。<br><br>当为 **真** 时，[findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) either:<br><br><ul><li>如果没有文档匹配**查询**则创建一个新的文档。详细信息请看 [upsert behavior](https://docs.mongodb.com/manual/reference/method/db.collection.update/#upsert-behavior)。</li><li>更新一个匹配**查询**的单一的文档。</li></ul>为避免多次 upserts，请确保**查询**字段是[唯一索引的](https://docs.mongodb.com/manual/core/index-unique/#index-type-unique)。<br><br>默认值为 **false**。
 
 db.collection.findOne(**query, projection**)  
 
