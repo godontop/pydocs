@@ -16,6 +16,8 @@
             * [3.3. 特殊方法名](#33-特殊方法名)
                 * [3.3.1. 基本自定义](#331-基本自定义)
                 * [3.3.7. 仿真容器类型](#337-仿真容器类型)
+    * [PyPI](#pypi)
+        * [PyMongo](#pymongo)
 * [Python2](#python2)
     * [Python 2 语言参考](#python-2-语言参考)
         * [3. 数据模型](#3-数据模型-1)
@@ -26,11 +28,17 @@
 		* [文档](#文档)
 		* [mongo Shell](#mongo-shell)
 			* [配置mongo Shell](#配置mongo-shell)
-        * [mongoexport](#mongoexport)    
+        * [mongo Shell方法](#mongo-shell方法)
+            * [集合方法](#集合方法)
+        * [mongoexport](#mongoexport)
+        * [Operators](#operators)    
+            * [Query and Projection Operators](#query-and-projection-operators)
 	* [MySQL](#mysql)
 		* [MySQL Workbench](#mysql-workbench)
         * [LOAD DATA INFILE语法](#load-data-infile语法)
+        * [SELECT语法](#select语法)
 		* [UPDATE语法](#update语法)
+        * [比较函数与运算符](#比较函数与运算符)
 * [vim](#vim)
 	* [vim插件](#vim插件)
 		* [YouCompleteMe](#youcompleteme)
@@ -39,6 +47,19 @@
 DistroWatch  
 [https://distrowatch.com](https://distrowatch.com)  
 Linux发行版排名统计
+
+Markdown  
+[http://tool.oschina.net/markdown](http://tool.oschina.net/markdown)  
+开源中国的在线Markdown编辑器
+
+MongoDB文档  
+[https://docs.mongodb.com](https://docs.mongodb.com)
+
+MongoDB Reference  
+[https://docs.mongodb.com/manual/reference/](https://docs.mongodb.com/manual/reference/)
+
+PyMongo  
+[http://api.mongodb.com/python/current/index.html](http://api.mongodb.com/python/current/index.html)
 
 StackEdit  
 [https://stackedit.io/app](https://stackedit.io/app)  
@@ -292,6 +313,12 @@ object.**\_\_getitem\_\_**(*self, key*)
 object.**\_\_setitem\_\_**(*self, key, value*)  
 调用以实现赋值给 `self[key]`。注意事项同 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__)。这应该仅为映射实现如果对象支持改变键的值，或者如果可以增加新键，或者对于序列如果元素可以被替换。对于不正确的 *key* 值应该抛出和 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__) 方法相同的异常。
 
+## PyPI
+### PyMongo
+使用 [find_one()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one) 获取一个单一的文档
+
+在MongoDB中可以被执行的最基本的查询类型是 [find_one()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one)。这个方法返回一个匹配查询的单一的文档 (或者 `None` 如果没有文档被匹配)。这很有用当你知道那里仅有一个匹配文档，或者仅对第一个匹配有兴趣。
+
 # Python2
 ## Python 2 语言参考
 ### 3. 数据模型
@@ -460,6 +487,111 @@ MongoDB根据写操作来保存文档字段的顺序，除了下面的情况：
 DBQuery.shellBatchSize = 10;
 ```
 
+### mongo Shell方法
+#### 集合方法
+db.collection.findAndModify(**document**)
+
+修改并返回一个单一的文档。默认情况下，返回的文档不包含 update 的修改。要返回带 update 的修改的文档，使用 **new** 选项。The [findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) method is a shell helper around the [findAndModify](https://docs.mongodb.com/manual/reference/command/findAndModify/#dbcmd.findAndModify) command.
+
+[findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) 方法拥有下面的形式：
+
+*在版本3.6中发生变化。*
+
+```sql
+db.collection.findAndModify({
+    query: <document>,
+    sort: <document>,
+    remove: <boolean>,
+    update: <document>,
+    new: <boolean>,
+    fields: <document>,
+    upsert: <boolean>,
+    bypassDocumentValidation: <boolean>,
+    writeConcern: <document>,
+    collation: <document>,
+    arrayFilters: [ <filterdocument1>, ... ]
+});
+```
+
+[db.collection.findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) 方法接收一个带有下面的嵌套文档字段的文档参数：
+
+Parameter  |Type  |Description
+-----------|------|-----------
+query      |文档  |可选的。用于修改的选择条件。**query** 字段使用的[查询选择器](https://docs.mongodb.com/manual/reference/operator/query/#query-selectors)与 [db.collection.find()](https://docs.mongodb.com/manual/reference/method/db.collection.find/#db.collection.find) 方法中所使用的[查询选择器](https://docs.mongodb.com/manual/reference/operator/query/#query-selectors)一致。虽然查询可能匹配多个文档，[db.collection.findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) **将仅选择一个文档进行修改**。
+update     |文档  |必须指定 **remove** 或 **update** 字段。对选择的文档进行更新。**update** 字段使用与 [update operators](https://docs.mongodb.com/manual/reference/operator/update/#id1) 或 **field: value** 相同的规范来修改选择的文档。
+new        |布尔  |可选的。当为 **真** 时，返回修改后的文档而不是原始文档。[db.collection.findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) 方法的 **remove** 操作忽略 **new** 选项。默认值为 **false**。
+upsert     |布尔  |可选的。与 **update** 字段一起使用。
+
+当为 **真** 时，[findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) either:
+
+* 如果没有文档匹配**查询**则创建一个新的文档。详细信息请看 [upsert behavior](https://docs.mongodb.com/manual/reference/method/db.collection.update/#upsert-behavior)。
+* 更新一个匹配**查询**的单一的文档。
+
+为避免多次 upserts，请确保**查询**字段是[唯一索引的](https://docs.mongodb.com/manual/core/index-unique/#index-type-unique)。
+
+默认值为 **false**。
+
+db.collection.findOne(**query, projection**)  
+
+返回集合或[视图](https://docs.mongodb.com/manual/core/views/)中满足特定查询条件的一个文档。如果有多个文档满足查询条件，这个方法根据映射到磁盘上的文档的[自然顺序](https://docs.mongodb.com/manual/reference/glossary/#term-natural-order)返回第一个文档。在[限制集合](https://docs.mongodb.com/manual/reference/glossary/#term-capped-collection)中，自然顺序等同于插入顺序。如果没有文档满足查询条件，这个方法返回 null。
+
+Parameter  |Type  |Description
+-----------|------|-----------
+query      |文档  |可选的。指定查询选择条件使用 [query operators](https://docs.mongodb.com/manual/reference/operator/)。
+projection |文档  |可选的。指定返回的字段使用 [projection operators](https://docs.mongodb.com/manual/reference/operator/projection/)。省略这个参数将返回匹配文档的所有字段。
+
+db.collection.insert()  
+
+插入一个文档或多个文档到一个集合中。
+
+[insert()](https://docs.mongodb.com/manual/reference/method/db.collection.insert/index.html#db.collection.insert) 方法拥有下面的语法：
+
+*在版本2.6中发生变化。*
+
+```sql
+db.collection.insert(
+   <document or array of documents>,
+   {
+     writeConcern: <document>,
+     ordered: <boolean>
+   }
+)
+```
+
+Parameter    |Type      |Description
+-------------|----------|-----------
+document     |文档或数组 |要插入到集合中的一个文档或文档数组。
+writeConcern |文档      |可选的。
+ordered      |布尔      |可选的。
+
+**举例**
+
+```sql
+db.products.insert( { item: "card", qty: 15 } )
+```
+
+插入多个文档
+
+```sql
+db.products.insert(
+   [
+     { _id: 11, item: "pencil", qty: 50, type: "no.2" },
+     { item: "pen", qty: 20 },
+     { item: "eraser", qty: 25 }
+   ]
+)
+```
+
+上面的操作插入了下面3个文档：
+
+```sql
+> db.products.find()
+{ "_id" : 11, "item" : "pencil", "qty" : 50, "type" : "no.2" }
+{ "_id" : ObjectId("5bc44295d1d2620f7c85bd05"), "item" : "pen", "qty" : 20 }
+{ "_id" : ObjectId("5bc44295d1d2620f7c85bd06"), "item" : "eraser", "qty" : 25 }
+> 
+```
+
 ### mongoexport
 **选项**  
 --db &lt;database&gt;, -d &lt;database&gt;  
@@ -488,6 +620,17 @@ DBQuery.shellBatchSize = 10;
 ```sh
 mongoexport --db cache --collection twentythreads --type=csv --fields _id --out url.csv
 ```
+
+### Operators
+#### Query and Projection Operators
+**查询选择器**  
+**比较**  
+
+比较不同的BSON类型值，参考 [特定的BSON比较顺序](https://docs.mongodb.com/manual/reference/bson-type-comparison-order/#bson-types-comparison-order)。
+
+Name  |Description
+------|-----------------------
+$ne   |匹配所有不等于指定值的值。
 
 ## MySQL
 将ID表的MARKET字段的长度改为10
@@ -539,6 +682,35 @@ mysql> load data local infile "/home/paxy/cardid.csv" into table ID fields termi
 
 将客户端上的cardid.csv文件以逗号（','）为字段分隔符导入到192.168.2.4上的MySQL数据库模式ocean的ID表中，该命令的导入几乎是瞬时的，比MySQL Workbench的Table Data Import快无数倍。
 
+### SELECT语法
+
+```sql
+SELECT
+    [ALL | DISTINCT | DISTINCTROW ]
+      [HIGH_PRIORITY]
+      [STRAIGHT_JOIN]
+      [SQL_SMALL_RESULT] [SQL_BIG_RESULT] [SQL_BUFFER_RESULT]
+      SQL_NO_CACHE [SQL_CALC_FOUND_ROWS]
+    select_expr [, select_expr ...]
+    [FROM table_references
+      [PARTITION partition_list]
+    [WHERE where_condition]
+    [GROUP BY {col_name | expr | position}, ... [WITH ROLLUP]]
+    [HAVING where_condition]
+    [WINDOW window_name AS (window_spec)
+        [, window_name AS (window_spec)] ...]
+    [ORDER BY {col_name | expr | position}
+      [ASC | DESC], ... [WITH ROLLUP]]
+    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
+    [INTO OUTFILE 'file_name'
+        [CHARACTER SET charset_name]
+        export_options
+      | INTO DUMPFILE 'file_name'
+      | INTO var_name [, var_name]]
+    [FOR {UPDATE | SHARE} [OF tbl_name [, tbl_name] ...] [NOWAIT | SKIP LOCKED] 
+      | LOCK IN SHARE MODE]]
+```
+
 ### UPDATE语法
 UPDATE是一个数据操纵语言语句，用于修改表格中的行。
 
@@ -565,6 +737,27 @@ assignment_list:
 
 ```sql
 update IDCARD set id='2113075673' where id='2912157145'
+```
+
+### 比较函数与运算符
+**比较运算符**
+
+Name  |Description
+------|---------------------------
+[IN()](https://dev.mysql.com/doc/refman/8.0/en/comparison-operators.html#function_in)  |检查一个值是否在一个值的集合中
+
+* *expr* IN (*value,...*)
+
+你永远都不应该在一个 IN 列表中混用引用的和非引用的值，因为引用值 (如字符串) 和非引用值 (如数字) 的比较规则不同。混用类型可能因此导致前后矛盾的结果。例如，不要像这样写一个 IN 表达式：
+
+```sql
+SELECT val1 FROM tbl1 WHERE val1 IN (1,2,'a');
+```
+
+用这种写法替代：
+
+```sql
+SELECT val1 FROM tbl1 WHERE val1 IN ('1','2','a');
 ```
 
 # vim
