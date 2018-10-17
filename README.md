@@ -33,6 +33,8 @@
         * [mongoexport](#mongoexport)
         * [Operators](#operators)    
             * [Query and Projection Operators](#query-and-projection-operators)
+            * [Update Operators](#update-operators)
+                * [字段更新运算符](#字段更新运算符)
 	* [MySQL](#mysql)
 		* [MySQL Workbench](#mysql-workbench)
         * [LOAD DATA INFILE语法](#load-data-infile语法)
@@ -318,6 +320,11 @@ object.**\_\_setitem\_\_**(*self, key, value*)
 
 在MongoDB中可以被执行的最基本的查询类型是 [find_one()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one)。这个方法返回一个匹配查询的单一的文档 (或者 `None` 如果没有文档被匹配)。这很有用当你知道那里仅有一个匹配文档，或者仅对第一个匹配有兴趣。
 
+**find_and_modify**(*query={}, update=None, upsert=False, sort=None, full_response=False, manipulate=False, \*\*kwargs*)  
+更新并返回一个对象。
+
+**弃用** - 使用 [find_one_and_delete()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one_and_delete), [find_one_and_replace()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one_and_replace), 或者 [find_one_and_update()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one_and_update) 代替。
+
 # Python2
 ## Python 2 语言参考
 ### 3. 数据模型
@@ -521,6 +528,23 @@ update     |文档  |必须指定 **remove** 或 **update** 字段。对选择�
 new        |布尔  |可选的。当为 **真** 时，返回修改后的文档而不是原始文档。[db.collection.findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) 方法的 **remove** 操作忽略 **new** 选项。默认值为 **false**。
 upsert     |布尔  |可选的。与 **update** 字段一起使用。<br><br>当为 **真** 时，[findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) 执行两者中的一个：<br><br><ul><li>如果没有文档匹配**查询**则创建一个新的文档。详细信息请看 [upsert behavior](https://docs.mongodb.com/manual/reference/method/db.collection.update/#upsert-behavior)。</li><li>更新一个匹配**查询**的单一的文档。</li></ul>为避免多次 upserts，请确保**查询**字段是[唯一索引的](https://docs.mongodb.com/manual/core/index-unique/#index-type-unique)。<br><br>默认值为 **false**。
 
+**返回数据**
+
+对于删除操作，如果查询匹配一个文档，[findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) 返回删除的文档。如果没有匹配查询的文档，[findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) 返回 **null**。
+
+对于更新操作，[findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) 返回下面的其中一个：
+
+* 如果 **new** 参数没有设置或者为 **false**：
+    * 如果查询匹配一个文档则返回修改前的文档；
+    * 否则，**null**。
+* 如果 **new** 为 **true**：
+    * 如果查询返回一个匹配则返回修改后的文档；
+    * 如果 **upsert: true** 且没有文档匹配查询，则返回插入的文档；
+    * 否则，**null**。
+
+*在版本3.0中发生变化：* 在之前的版本中，对于 update，如果 **sort** 指定了，且 **upsert: true**，**new** 选项没有设置或者为 **false**，则 [db.collection.findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) 将返回一个空的文档 {} 而不是 **null**。
+<br><br>
+
 db.collection.findOne(**query, projection**)  
 
 返回集合或[视图](https://docs.mongodb.com/manual/core/views/)中满足特定查询条件的一个文档。如果有多个文档满足查询条件，这个方法根据映射到磁盘上的文档的[自然顺序](https://docs.mongodb.com/manual/reference/glossary/#term-natural-order)返回第一个文档。在[限制集合](https://docs.mongodb.com/manual/reference/glossary/#term-capped-collection)中，自然顺序等同于插入顺序。如果没有文档满足查询条件，这个方法返回 null。
@@ -621,6 +645,46 @@ mongoexport --db cache --collection twentythreads --type=csv --fields _id --out 
 Name  |Description
 ------|-----------------------
 $ne   |匹配所有不等于指定值的值。
+
+#### Update Operators
+
+下面的修改器在更新操作中是可用的；例如，在 [db.collection.update()](https://docs.mongodb.com/manual/reference/method/db.collection.update/#db.collection.update) 和 [db.collection.findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/#db.collection.findAndModify) 中。
+
+在一个文档中指定运算表达式的形式：
+
+```sql
+{
+   <operator1>: { <field1>: <value1>, ... },
+   <operator2>: { <field2>: <value2>, ... },
+   ...
+}
+```
+
+**注意：**  
+指定运算符的详细信息，包括语法和例子，点击指定运算符跳转到它的参考页面。
+
+**更新运算符**
+
+**字段**  
+
+Name    |Description
+--------|------------
+[$set](https://docs.mongodb.com/manual/reference/operator/update/set/#up._S_set)  |在一个文档中设置字段的值。
+
+##### 字段更新运算符
+**$set**
+
+**定义**
+
+[$set](https://docs.mongodb.com/manual/reference/operator/update/set/#up._S_set) 运算符用指定的值替换字段的值。
+
+[$set](https://docs.mongodb.com/manual/reference/operator/update/set/#up._S_set) 运算符表达式拥有下面的形式：
+
+```sql
+{ $set: { <field1>: <value1>, ... } }
+```
+
+指定一个嵌套文档或一个数组中的一个<**字段**>，使用 [dot notation](https://docs.mongodb.com/manual/core/document/#document-dot-notation)。
 
 ## MySQL
 将ID表的MARKET字段的长度改为10
