@@ -645,7 +645,7 @@ mongoexport --db cache --collection twentythreads --type=csv --fields _id --out 
 Name  |Description
 ------|-----------------------
 [$lt](https://docs.mongodb.com/manual/reference/operator/query/lt/#op._S_lt)   |匹配小于一个指定值的所有值。
-$ne(https://docs.mongodb.com/manual/reference/operator/query/ne/#op._S_ne)   |匹配所有不等于指定值的值。
+[$ne](https://docs.mongodb.com/manual/reference/operator/query/ne/#op._S_ne)   |匹配所有不等于指定值的值。
 
 #### Update Operators
 
