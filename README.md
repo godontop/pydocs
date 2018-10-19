@@ -41,6 +41,7 @@
         * [SELECT语法](#select语法)
 		* [UPDATE语法](#update语法)
         * [比较函数与运算符](#比较函数与运算符)
+        * [13.2.6 INSERT语法](#1326-insert语法)
 * [vim](#vim)
 	* [vim插件](#vim插件)
 		* [YouCompleteMe](#youcompleteme)
@@ -65,6 +66,10 @@ PyMongo
 StackEdit  
 [https://stackedit.io/app](https://stackedit.io/app)  
 支持GFM的Markdown在线编辑器
+
+w3schools.com  
+[https://www.w3schools.com](https://www.w3schools.com)  
+世界上最大的WEB开发者站点
 
 w3school 在线教程  
 [http://www.w3school.com.cn](http://www.w3school.com.cn)  
@@ -813,6 +818,60 @@ SELECT val1 FROM tbl1 WHERE val1 IN (1,2,'a');
 
 ```sql
 SELECT val1 FROM tbl1 WHERE val1 IN ('1','2','a');
+```
+
+### 13.2.6 INSERT语法
+
+```sql
+INSERT [LOW_PRIORITY | DELAYED | HIGH_PRIORITY] [IGNORE]
+    [INTO] tbl_name
+    [PARTITION (partition_name [, partition_name] ...)]
+    [(col_name [, col_name] ...)]
+    {VALUES | VALUE} (value_list) [, (value_list)] ...
+    [ON DUPLICATE KEY UPDATE assignment_list]
+
+INSERT [LOW_PRIORITY | DELAYED | HIGH_PRIORITY] [IGNORE]
+    [INTO] tbl_name
+    [PARTITION (partition_name [, partition_name] ...)]
+    SET assignment_list
+    [ON DUPLICATE KEY UPDATE assignment_list]
+
+INSERT [LOW_PRIORITY | HIGH_PRIORITY] [IGNORE]
+    [INTO] tbl_name
+    [PARTITION (partition_name [, partition_name] ...)]
+    [(col_name [, col_name] ...)]
+    SELECT ...
+    [ON DUPLICATE KEY UPDATE assignment_list]
+
+value:
+    {expr | DEFAULT}
+
+value_list:
+    value [, value] ...
+
+assignment:
+    col_name = value
+
+assignment_list:
+    assignment [, assignment] ...
+```
+
+**INSERT INTO语法**  
+
+用两种方式写 INSERT INTO 语句是可能的。
+
+第一种方式指定列名和要被插入的值：
+
+```sql
+INSERT INTO table_name (column1, column2, column3, ...)
+VALUES (value1, value2, value3, ...);
+```
+
+如果你为表格的所有列增加值，你不必在 SQL 查询中指定列名。然而，请确保值的顺序与表格中的列的顺序相同。INSERT INTO 语法将会如下：
+
+```sql
+INSERT INTO table_name
+VALUES (value1, value2, value3, ...);
 ```
 
 # vim
