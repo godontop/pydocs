@@ -5,9 +5,15 @@
         * [内置类型](#内置类型)
             * [数值类型 — int, float, complex](#数值类型--int-float-complex)
                 * [整型数类型的按位运算](#整型数类型的按位运算)
+        * [通用操作系统服务](#通用操作系统服务)
+            * [os — 各种各样的操作系统接口](#os--各种各样的操作系统接口)
+                * [进程参数](#进程参数)
+                * [各种各样的系统信息](#各种各样的系统信息)
         * [并行执行](#并行执行)
             * [threading — 基于线程的并行](#threading--基于线程的并行)
                 * [线程对象](#线程对象)
+            * [multiprocessing — 基于进程的并行](#multiprocessing--基于进程的并行)
+                * [介绍](#介绍)
         * [互联网协议与支持](#互联网协议与支持)
             * [urllib.parse — 将URLs解析为组件](#urllibparse--将urls解析为组件)
                 * [URL解析](#url解析)
@@ -116,8 +122,38 @@ Operation  |Result          |Notes
 >>>
 ```
 
-### 并行执行
-#### threading — 基于线程的并行
+## 通用操作系统服务
+这章描述的模块提供在（几乎）所有操作系统上都可用的操作系统特征接口，如文件和时钟。这些接口通常是根据 Unix 或 C 接口仿写的，但它们在大多数其它系统下也是可用的。这里是一个概述：
+
+### os — 各种各样的操作系统接口
+**源代码：** [Lib/os.py](https://github.com/python/cpython/tree/3.7/Lib/os.py)
+
+这个模块提供了一种便携的方式使用依赖于操作系统的功能。如果你仅仅只想读或写一个文件请看 [open()](https://docs.python.org/3/library/functions.html#open)，如果你想操作路径，请看 [os.path](https://docs.python.org/3/library/os.path.html#module-os.path) 模块，如果你想在命令行下读取所有文件中的所有行请看 [fileinput](https://docs.python.org/3/library/fileinput.html#module-fileinput) 模块。创建临时文件和目录请看 [tempfile](https://docs.python.org/3/library/tempfile.html#module-tempfile) 模块，高级文件和目录处理请看 [shutil](https://docs.python.org/3/library/shutil.html#module-shutil) 模块。
+
+#### 进程参数
+这些函数和数据条目提供当前进程和用户的信息及操作。
+
+os.**getpid()**  
+返回当前的进程id。
+
+os.**getppid()**  
+返回父进程的id。当父进程退出时，在 Unix 上返回的id是其中一个 init 进程 (1)，在 Windows 上它仍是同一个id，这个id有可能已经被另一个进程重用了。
+
+**可用性：** Unix，Windows。
+
+*在版本3.2中发生变化：* 增加对Windows的支持。
+
+#### 各种各样的系统信息
+
+下面的数据值被用于支持路径操作运算。这些是为所有平台定义。
+
+高层次的路径名操作被定义在 [os.path](https://docs.python.org/3.6/library/os.path.html#module-os.path) 模块中。
+
+os.**sep**  
+操作系统用来分隔路径名组件的字符。POSIX 为 `'/'` 而 Windows 为 `'\\'`。Note that knowing this is not sufficient to be able to parse or concatenate pathnames — 使用 [os.path.split()](https://docs.python.org/3.6/library/os.path.html#os.path.split) 和 [os.path.join()](https://docs.python.org/3.6/library/os.path.html#os.path.join) — 但它偶尔是有用的。Also available via [os.path](https://docs.python.org/3.6/library/os.path.html#module-os.path)。
+
+## 并行执行
+### threading — 基于线程的并行
 **源代码：** [Lib/threading.py](https://github.com/python/cpython/tree/3.7/Lib/threading.py)
 
 这个模块在低级 [\_thread](https://docs.python.org/3/library/_thread.html#module-_thread) 模块之上构建了高级线程接口。另请参见 [queue](https://docs.python.org/3/library/queue.html#module-queue) 模块。
@@ -217,6 +253,56 @@ This method returns `True` just before the [run()](https://docs.python.org/3/lib
 用于 [daemon](https://docs.python.org/3/library/threading.html#threading.Thread.daemon) 的旧的 getter/setter API；直接使用 [daemon](https://docs.python.org/3/library/threading.html#threading.Thread.daemon) 作为一个属性替代。
 
 **CPython实现细节：** 在CPython中，因为[全局解释器锁](https://docs.python.org/3/glossary.html#term-global-interpreter-lock)，每次仅有一个线程可以执行Python代码 (虽然某些面向性能的库可以克服这个限制)。如果你希望你的应用程序可以更好地利用多核机器的计算资源，建议你使用 [multiprocessing](https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing) 或者 [concurrent.futures.ProcessPoolExecutor](https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor)。然而，如果你想同时运行多个 I/O-bound 任务，threading 仍是一个合适的模型。
+
+### multiprocessing — 基于进程的并行
+**源代码：** [Lib/multiprocessing/](https://github.com/python/cpython/tree/3.7/Lib/multiprocessing/)
+
+#### 介绍
+
+[multiprocessing](https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing) 是一个支持使用一个类似于 [threading](https://docs.python.org/3/library/threading.html#module-threading) 模块的API大量生成进程的包。[multiprocessing](https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing) 包既提供本地并发又提供远程并发，通过使用子进程替代线程有效地回避了[全局解释器锁](https://docs.python.org/3/glossary.html#term-global-interpreter-lock)。因为这，[multiprocessing](https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing) 模块允许程序员彻底地利用指定机器上的多个处理器。它既可以在 Unix 上运行又可以在 Windows 上运行。
+
+##### **[进程](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process)类**
+
+在 [multiprocessing](https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing)中，进程是通过创建一个[进程](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process)对象然后调用它的 [start()](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.start) 方法繁衍的。[Process](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process) 遵循 [threading.Thread](https://docs.python.org/3/library/threading.html#threading.Thread) 的API。一个很小的多进程程序的例子是
+
+```python
+from multiprocessing import Process
+
+def f(name):
+    print('hello', name)
+
+if __name__ == '__main__':
+    p = Process(target=f, args=('bob',))
+    p.start()
+    p.join()
+```
+
+显示单独的被调用的进程ID，这里是一个扩展的例子：
+
+```python
+from multiprocessing import Process
+import os
+
+def info(title):
+    print(title)
+    print('module name:', __name__)
+    print('parent process:', os.getppid())
+    print('process id:', os.getpid())
+
+def f(name):
+    info('function f')
+    print('hello', name)
+
+if __name__ == '__main__':
+    info('main line')
+    p = Process(target=f, args=('bob',))
+    p.start()
+    p.join()
+```
+
+对于为什么 `if __name__ == '__main__'` 部分是必要的一个解释，请看 [Programming guidelines](https://docs.python.org/3/library/multiprocessing.html#multiprocessing-programming)。
+
+##### Contexts and start methods
 
 ### 互联网协议与支持
 #### urllib.parse — 将URLs解析为组件
