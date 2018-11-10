@@ -309,17 +309,17 @@ if __name__ == '__main__':
 ##### 上下文和启动方法
 取决于平台，[multiprocessing](https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing) 支持三种方式启动一个进程。这些*启动方法*是
 
-* *spawn*
+* *spawn*  
     父进程启动一个全新的python解释器进程。子进程将只继承那些运行进程对象的 [run()](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.run) 方法所必须的资源。特别地，不必要的文件描述符和句柄（handles）将不会从父进程继承。使用这种方法启动一个进程与使用 *fork* 或 *forkserver* 相比要慢很多。
 
 在 Unix 和 Windows上可用。*spawn* 是 Windows 上的默认启动方法。
 
-* *fork*
+* *fork*  
 父进程使用 [os.fork()](https://docs.python.org/3/library/os.html#os.fork) 来 fork Python 解释器。子进程，当它开始时，实际上与父进程完全相同。父进程的所有资源都被子进程继承。注意安全地 forking 一个多线程进程是有问题的。
 
 仅在 Unix 上可用。*fork* 是 Unix 上的默认启动方式。
 
-* *forkserver*
+* *forkserver*  
 当程序启动并选择 *forkserver* 启动方法时，一个服务器进程被启动。从那时起，每当需要一个新进程，父进程连接到服务器并请求它fork一个新进程。fork server 进程是一个单一的线程所以它使用 [os.fork()](https://docs.python.org/3/library/os.html#os.fork) 是安全的。没有不必要的资源被继承。
 
 在支持通过 Unix 管道传递文件描述符的 Unix 平台上可用。
