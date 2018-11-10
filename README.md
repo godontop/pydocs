@@ -14,6 +14,10 @@
                 * [线程对象](#线程对象)
             * [multiprocessing — 基于进程的并行](#multiprocessing--基于进程的并行)
                 * [介绍](#介绍)
+                    * [进程类](#进程类)
+                    * [上下文和启动方法](#上下文和启动方法)
+                * [参考](#参考)
+                    * [进程和异常](#进程和异常)
         * [互联网协议与支持](#互联网协议与支持)
             * [urllib.parse — 将URLs解析为组件](#urllibparse--将urls解析为组件)
                 * [URL解析](#url解析)
@@ -261,7 +265,7 @@ This method returns `True` just before the [run()](https://docs.python.org/3/lib
 
 [multiprocessing](https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing) 是一个支持使用一个类似于 [threading](https://docs.python.org/3/library/threading.html#module-threading) 模块的API大量生成进程的包。[multiprocessing](https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing) 包既提供本地并发又提供远程并发，通过使用子进程替代线程有效地回避了[全局解释器锁](https://docs.python.org/3/glossary.html#term-global-interpreter-lock)。因为这，[multiprocessing](https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing) 模块允许程序员彻底地利用指定机器上的多个处理器。它既可以在 Unix 上运行又可以在 Windows 上运行。
 
-##### **[进程](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process)类**
+##### 进程类
 
 在 [multiprocessing](https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing)中，进程是通过创建一个[进程](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process)对象然后调用它的 [start()](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.start) 方法繁衍的。[Process](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process) 遵循 [threading.Thread](https://docs.python.org/3/library/threading.html#threading.Thread) 的API。一个很小的多进程程序的例子是
 
@@ -302,7 +306,57 @@ if __name__ == '__main__':
 
 对于为什么 `if __name__ == '__main__'` 部分是必要的一个解释，请看 [Programming guidelines](https://docs.python.org/3/library/multiprocessing.html#multiprocessing-programming)。
 
-##### Contexts and start methods
+##### 上下文和启动方法
+取决于平台，[multiprocessing](https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing) 支持三种方式启动一个进程。这些*启动方法*是
+
+* *spawn*
+    父进程启动一个全新的python解释器进程。子进程将只继承那些运行进程对象的 [run()](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.run) 方法所必须的资源。特别地，不必要的文件描述符和句柄（handles）将不会从父进程继承。使用这种方法启动一个进程与使用 *fork* 或 *forkserver* 相比要慢很多。
+
+在 Unix 和 Windows上可用。*spawn* 是 Windows 上的默认启动方法。
+
+* *fork*
+父进程使用 [os.fork()](https://docs.python.org/3/library/os.html#os.fork) 来 fork Python 解释器。子进程，当它开始时，实际上与父进程完全相同。父进程的所有资源都被子进程继承。注意安全地 forking 一个多线程进程是有问题的。
+
+仅在 Unix 上可用。*fork* 是 Unix 上的默认启动方式。
+
+* *forkserver*
+当程序启动并选择 *forkserver* 启动方法时，一个服务器进程被启动。从那时起，每当需要一个新进程，父进程连接到服务器并请求它fork一个新进程。fork server 进程是一个单一的线程所以它使用 [os.fork()](https://docs.python.org/3/library/os.html#os.fork) 是安全的。没有不必要的资源被继承。
+
+在支持通过 Unix 管道传递文件描述符的 Unix 平台上可用。
+
+*在版本3.4中发生变化：* 在所有unix平台上增加了 *spawn*，在一些unix平台增加了 *forkserver*。在 Windows 上子进程不再继承所有父进程可继承的句柄。
+
+#### 参考
+[multiprocessing](https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing) 包大部分复制的 [threading](https://docs.python.org/3/library/threading.html#module-threading) 模块的API。
+
+##### 进程和异常
+*class* multiprocessing.**Process**(*group=None, target=None, name=None, args=(), kwargs={}, \*, daemon=None*)  
+进程对象在一个单独的进程中运行表示活跃的。[Process](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process) 类有等同于 [threading.Thread](https://docs.python.org/3/library/threading.html#threading.Thread) 的所有方法。
+
+构造函数应该总是通过关键字参数被调用。*group* 应该总是 `None`；它存在仅仅是为了与 [threading.Thread](https://docs.python.org/3/library/threading.html#threading.Thread) 兼容。*target* 是被 [run()](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.run) 方法调用的可调用对象。它默认为 `None`，意味着没有东西被调用。*name* 是进程名 (详细信息请看 [name](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.name))。*args* 是用于目标调用的参数元组。*kwargs* 是一个用于目标调用的关键字参数字典。如果提供，the keyword-only *daemon* argument sets the process [daemon](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.daemon) flag to `True` or `False`。如果为 `None` (默认值)，this flag will be inherited from the creating process。
+
+默认情况下，没有参数传递给 *target*。
+
+如果一个子类重写构造函数，它必须确保在对进程做任何别的事以前先调用基类构造函数 (Process.\_\_init\_\_())。
+
+*在版本3.3中发生变化：* 增加了 *daemon* 参数。
+
+**run()**  
+代表进程的活动的方法。
+
+你可以在子类中重写这个方法。标准 [run()](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.run) 方法调用传递给对象的构造函数作为目标参数的可调用对象，如果有的话，并分别从 *args* 和 *kwargs* 参数中读取顺序参数和关键字参数。
+
+start()
+Start the process’s activity.
+
+This must be called at most once per process object. It arranges for the object’s run() method to be invoked in a separate process.
+
+join([timeout])
+If the optional argument timeout is None (the default), the method blocks until the process whose join() method is called terminates. If timeout is a positive number, it blocks at most timeout seconds. Note that the method returns None if its process terminates or if the method times out. Check the process’s exitcode to determine if it terminated.
+
+A process can be joined many times.
+
+A process cannot join itself because this would cause a deadlock. It is an error to attempt to join a process before it has been started.
 
 ### 互联网协议与支持
 #### urllib.parse — 将URLs解析为组件
