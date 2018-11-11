@@ -346,17 +346,44 @@ if __name__ == '__main__':
 
 你可以在子类中重写这个方法。标准 [run()](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.run) 方法调用传递给对象的构造函数作为目标参数的可调用对象，如果有的话，并分别从 *args* 和 *kwargs* 参数中读取顺序参数和关键字参数。
 
-start()
-Start the process’s activity.
+**start()**  
+启动进程的活性。
 
-This must be called at most once per process object. It arranges for the object’s run() method to be invoked in a separate process.
+它必须被每个进程对象至多调用一次。它安排对象的 [run()](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.run) 方法在一个单独的进程中被调用。
 
-join([timeout])
-If the optional argument timeout is None (the default), the method blocks until the process whose join() method is called terminates. If timeout is a positive number, it blocks at most timeout seconds. Note that the method returns None if its process terminates or if the method times out. Check the process’s exitcode to determine if it terminated.
+**join**([*timeout*])  
+如果可选参数 *timeout* 为 `None` (默认值)，则该方法将阻塞直到进程的 [join()](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.join) 方法被调用终止。如果 *timeout* 是一个正数，它将最多阻塞 *timeout* 秒。注意如果它的进程终止或者如果这个方法超时则这个方法返回 `None`。检查进程的[退出代码](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.exitcode)以确定它是否被终止了。
 
-A process can be joined many times.
+一个进程可以被 joined 很多次。
 
-A process cannot join itself because this would cause a deadlock. It is an error to attempt to join a process before it has been started.
+一个进程不能 join 它自己因为这将导致一个死锁。在进程启动以前试图 join 一个进程是一个错误。
+
+**name**  
+进程的名称。名称是一个字符串仅用于标识目的。它没有语义。多个进程可能被指定相同的名称。
+
+初始名称由构造函数设置。如果没有明确的名称提供给构造函数，一个名称的形式 ‘Process-N<sub>1</sub>:N<sub>2</sub>:…:N<sub>k</sub>’ 被构造，其中每个 N<sub>k</sub> 是父进程的 N-th 子进程。
+
+**is_alive()**  
+返回进程是否是活的。
+
+大体上，从 [start()](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.start) 方法返回那一刻起直到子进程终止，进程对象是活跃的。
+
+**daemon**  
+进程的 *daemon* 标志，一个布尔值。这个标志必须在 [start()](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.start) 被调用以前被设置。
+
+初始值从创建进程（creating process）继承。
+
+当一个进程退出时，它将试图终止它的所有 daemonic 子进程。
+
+注意一个 daemonic 进程不允许创建子进程。Otherwise a daemonic process would leave its children orphaned if it gets terminated when its parent process exits. 另外，这些**不是** Unix 守护进程或服务，它们是普通进程，如果 non-daemonic 进程已经退出则它们将被终止 (且不被 joined)。
+
+除了 [threading.Thread](https://docs.python.org/3/library/threading.html#threading.Thread) API，[进程](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process)对象也支持下面的属性和方法：
+
+**pid**  
+返回进程ID。在进程被繁衍以前，这个的返回值为 `None`。
+
+**exitcode**  
+子进程的退出代码。如果进程还没有被终止则返回 `None`。负值 *-N* 表明子进程被信号 *N* 终止。
 
 ### 互联网协议与支持
 #### urllib.parse — 将URLs解析为组件
