@@ -18,6 +18,7 @@
                     * [上下文和启动方法](#上下文和启动方法)
                 * [参考](#参考)
                     * [进程和异常](#进程和异常)
+                    * [其它](#其它)
         * [互联网协议与支持](#互联网协议与支持)
             * [urllib.parse — 将URLs解析为组件](#urllibparse--将urls解析为组件)
                 * [URL解析](#url解析)
@@ -384,6 +385,17 @@ if __name__ == '__main__':
 
 **exitcode**  
 子进程的退出代码。如果进程还没有被终止则返回 `None`。负值 *-N* 表明子进程被信号 *N* 终止。
+
+##### 其它
+
+multiprocessing.**cpu_count()**  
+返回系统中CPU的个数。
+
+这个数字不等同于当前进程可以使用的CPU个数。可用的CPU个数可以通过 `len(os.sched_getaffinity(0))` 获取。
+
+可能抛出 [NotImplementedError](https://docs.python.org/3/library/exceptions.html#NotImplementedError)。
+
+**另请参见：** [os.cpu_count()](https://docs.python.org/3/library/os.html#os.cpu_count)
 
 ### 互联网协议与支持
 #### urllib.parse — 将URLs解析为组件
