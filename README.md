@@ -52,6 +52,7 @@
         * [SELECT语法](#select语法)
 		* [UPDATE语法](#update语法)
         * [比较函数与运算符](#比较函数与运算符)
+        * [12.5 字符串函数](#125-字符串函数)
         * [13.2.6 INSERT语法](#1326-insert语法)
 * [vim](#vim)
 	* [vim插件](#vim插件)
@@ -998,6 +999,29 @@ SELECT val1 FROM tbl1 WHERE val1 IN (1,2,'a');
 ```sql
 SELECT val1 FROM tbl1 WHERE val1 IN ('1','2','a');
 ```
+
+### 12.5 字符串函数
+**字符串操作符**
+
+**Name**           |**Description**
+-------------------|---------------
+[CHAR_LENGTH()](https://dev.mysql.com/doc/refman/8.0/en/string-functions.html#function_char-length)      |返回参数中字符的个数
+[CHARACTER_LENGTH()](https://dev.mysql.com/doc/refman/8.0/en/string-functions.html#function_character-length) |CHAR_LENGTH() 的同义词
+
+* [CHAR_LENGTH(str)](https://dev.mysql.com/doc/refman/8.0/en/string-functions.html#function_char-length)
+
+  返回字符串 *str* 的长度，以字符度量。一个多字节字符视为一个单一的字符。这意味对于一个包含5个双字节字符的字符串，[LENGTH()](https://dev.mysql.com/doc/refman/8.0/en/string-functions.html#function_length) 返回10，然而 [CHAR_LENGTH()](https://dev.mysql.com/doc/refman/8.0/en/string-functions.html#function_char-length) 返回5。
+
+* [CHARACTER_LENGTH(str)](https://dev.mysql.com/doc/refman/8.0/en/string-functions.html#function_character-length)
+
+  [CHARACTER_LENGTH()](https://dev.mysql.com/doc/refman/8.0/en/string-functions.html#function_character-length) 是 [CHAR_LENGTH()](https://dev.mysql.com/doc/refman/8.0/en/string-functions.html#function_char-length) 的一个同义词。
+
+```sql
+SELECT count(*) FROM SMS_MESSAGE_TASK_HISTORY m,EDU_SCHOOL s where m.SCHOOL_ID=s.SCHOOL_ID and
+date_format(SEND_TIME, '%Y-%m')='2018-10' and char_length(m.content)>280 and char_length(m.content)<=350;
+```
+
+查询2018年10月份SMS_MESSAGE_TASK_HISTORY表中content字段的字符数大于280且小于等于350的记录数。
 
 ### 13.2.6 INSERT语法
 
