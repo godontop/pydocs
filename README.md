@@ -49,11 +49,12 @@
 	* [MySQL](#mysql)
 		* [MySQL Workbench](#mysql-workbench)
         * [LOAD DATA INFILE语法](#load-data-infile语法)
-        * [SELECT语法](#select语法)
 		* [UPDATE语法](#update语法)
         * [比较函数与运算符](#比较函数与运算符)
         * [12.5 字符串函数](#125-字符串函数)
         * [13.2.6 INSERT语法](#1326-insert语法)
+        * [13.2.10 SELECT语法](#13210-select语法)
+            * [13.2.10.1 SELECT ... INTO语法](#132101-select--into语法)
 * [vim](#vim)
 	* [vim插件](#vim插件)
 		* [YouCompleteMe](#youcompleteme)
@@ -71,6 +72,12 @@ MongoDB文档
 
 MongoDB Reference  
 [https://docs.mongodb.com/manual/reference/](https://docs.mongodb.com/manual/reference/)
+
+MySQL Workbench  
+[https://dev.mysql.com/downloads/workbench/](https://dev.mysql.com/downloads/workbench/)  
+
+Visual C++ Redistributable for Visual Studio 2015是安装MySQL Workbench的前置条件。  
+[Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/zh-CN/download/details.aspx?id=48145)
 
 PyMongo  
 [http://api.mongodb.com/python/current/index.html](http://api.mongodb.com/python/current/index.html)
@@ -922,35 +929,6 @@ mysql> load data local infile "/home/paxy/cardid.csv" into table ID fields termi
 
 将客户端上的cardid.csv文件以逗号（','）为字段分隔符导入到192.168.2.4上的MySQL数据库模式ocean的ID表中，该命令的导入几乎是瞬时的，比MySQL Workbench的Table Data Import快无数倍。
 
-### SELECT语法
-
-```sql
-SELECT
-    [ALL | DISTINCT | DISTINCTROW ]
-      [HIGH_PRIORITY]
-      [STRAIGHT_JOIN]
-      [SQL_SMALL_RESULT] [SQL_BIG_RESULT] [SQL_BUFFER_RESULT]
-      SQL_NO_CACHE [SQL_CALC_FOUND_ROWS]
-    select_expr [, select_expr ...]
-    [FROM table_references
-      [PARTITION partition_list]
-    [WHERE where_condition]
-    [GROUP BY {col_name | expr | position}, ... [WITH ROLLUP]]
-    [HAVING where_condition]
-    [WINDOW window_name AS (window_spec)
-        [, window_name AS (window_spec)] ...]
-    [ORDER BY {col_name | expr | position}
-      [ASC | DESC], ... [WITH ROLLUP]]
-    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
-    [INTO OUTFILE 'file_name'
-        [CHARACTER SET charset_name]
-        export_options
-      | INTO DUMPFILE 'file_name'
-      | INTO var_name [, var_name]]
-    [FOR {UPDATE | SHARE} [OF tbl_name [, tbl_name] ...] [NOWAIT | SKIP LOCKED] 
-      | LOCK IN SHARE MODE]]
-```
-
 ### UPDATE语法
 UPDATE是一个数据操纵语言语句，用于修改表格中的行。
 
@@ -1076,6 +1054,103 @@ VALUES (value1, value2, value3, ...);
 INSERT INTO table_name
 VALUES (value1, value2, value3, ...);
 ```
+
+### 13.2.10 SELECT语法
+
+```sql
+SELECT
+    [ALL | DISTINCT | DISTINCTROW ]
+      [HIGH_PRIORITY]
+      [STRAIGHT_JOIN]
+      [SQL_SMALL_RESULT] [SQL_BIG_RESULT] [SQL_BUFFER_RESULT]
+      SQL_NO_CACHE [SQL_CALC_FOUND_ROWS]
+    select_expr [, select_expr ...]
+    [FROM table_references
+      [PARTITION partition_list]
+    [WHERE where_condition]
+    [GROUP BY {col_name | expr | position}, ... [WITH ROLLUP]]
+    [HAVING where_condition]
+    [WINDOW window_name AS (window_spec)
+        [, window_name AS (window_spec)] ...]
+    [ORDER BY {col_name | expr | position}
+      [ASC | DESC], ... [WITH ROLLUP]]
+    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
+    [INTO OUTFILE 'file_name'
+        [CHARACTER SET charset_name]
+        export_options
+      | INTO DUMPFILE 'file_name'
+      | INTO var_name [, var_name]]
+    [FOR {UPDATE | SHARE} [OF tbl_name [, tbl_name] ...] [NOWAIT | SKIP LOCKED] 
+      | LOCK IN SHARE MODE]]
+```
+
+* LIMIT 子句可以用来约束 [SELECT](https://dev.mysql.com/doc/refman/8.0/en/select.html) 语句返回的行数。LIMIT 带一个或两个数字参数，且数字参数都必须是非负的整型数常量，有这些例外：
+
+    * Within prepared statements, LIMIT 参数可以用占位符标记 ? 来指定。
+
+    * Within stored programs, LIMIT 参数可以用整型数值的程序参数或本地变量来指定。
+
+带一个参数时，这个值指定从结果集的开头返回的行数：
+
+```sql
+SELECT * FROM tbl LIMIT 5;     # 检索最前面的5行
+```
+
+#### 13.2.10.1 SELECT ... INTO语法
+[SELECT](https://dev.mysql.com/doc/refman/8.0/en/select.html) 的 [SELECT ... INTO](https://dev.mysql.com/doc/refman/8.0/en/select-into.html) 形式可以将一个查询结果存储到变量中或者将其写入到一个文件中：
+
+* SELECT ... INTO *var_list* 选择列值并将它们存储到变量中。
+
+* SELECT ... INTO OUTFILE 将选择的行写入到一个文件中。列分隔符和行分隔符可以被指定以生成一个特定的输出格式。
+
+* SELECT ... INTO DUMPFILE 将一个单一的行写入到一个文件，不带任何格式。
+
+[SELECT](https://dev.mysql.com/doc/refman/8.0/en/select.html) 语法描述 (参见章节 [13.2.10, “SELECT Syntax”](https://dev.mysql.com/doc/refman/8.0/en/select.html)) 在靠近语句的末尾处展示 INTO 从句。在 *select_expr* 列表后面紧跟 INTO 从句也是可以的。
+
+[SELECT](https://dev.mysql.com/doc/refman/8.0/en/select.html) 的 [SELECT ... INTO OUTFILE '*file_name*'](https://dev.mysql.com/doc/refman/8.0/en/select-into.html) 形式将选择的行写入到一个文件中。这个文件在服务器主机上被创建，所以为了使用这个语法你必须拥有 [FILE](https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_file) 权限。*file_name* 不能是一个已存在的文件，which among other things prevents files such as /etc/passwd and database tables from being destroyed. 系统变量 [character_set_filesystem](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_character_set_filesystem) 控制这个文件名的解释。
+
+[SELECT ... INTO OUTFILE](https://dev.mysql.com/doc/refman/8.0/en/select-into.html) 语句的主要目的是让你非常快地将一个表转储到服务器上的一个文本文件中。如果你想在其他主机而不是服务器主机上创建一个结果文件，你通常不能使用 [SELECT ... INTO OUTFILE](https://dev.mysql.com/doc/refman/8.0/en/select-into.html) 因为还没有办法写一个相对于服务器主机的文件系统的文件路径。
+
+然而，如果在远程主机上安装了 MySQL 客户端软件，你可以使用一个客户端命令如 mysql -e "SELECT ..." > *file_name* 在客户端主机上生成这个文件替代。
+
+在一个除了服务器主机的不同主机上创建结果文件也是可能的，如果远程主机上的文件的位置可以在服务器的文件系统上通过一个网络映射的路径访问的话。在这种情况下，不要求目标机器上存在 [mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) (或其他 MySQL 客户端程序)。
+
+[SELECT ... INTO OUTFILE](https://dev.mysql.com/doc/refman/8.0/en/select-into.html) 是 [LOAD DATA INFILE](https://dev.mysql.com/doc/refman/8.0/en/load-data.html) 的补充。列值转换成 CHARACTER SET 从句中指定的字符集后被写入。如果不存在这样的从句，值将被使用二进制字符集转储。实际上，没有字符集转换。如果一个结果集包含的列有各自的字符集，则输出数据文件将同样如此，然后你可能不能正确地加载这个文件。
+
+这个语句的 *export_options* 部分包含的 FIELDS 和 LINES 从句的语法与 [LOAD DATA INFILE](https://dev.mysql.com/doc/refman/8.0/en/load-data.html) 语句所使用的语法是相同的。关于 FIELDS 和 LINES 从句的信息，包括它们的默认值和允许的值，参见 [Section 13.2.7, “LOAD DATA INFILE Syntax”](https://dev.mysql.com/doc/refman/8.0/en/load-data.html)。
+
+FIELDS ESCAPED BY 控制如何写特殊字符。如果 FIELDS ESCAPED BY character 是非空的，it is used when necessary to avoid ambiguity as a prefix that precedes following characters on output:
+
+* The FIELDS ESCAPED BY character
+
+* The FIELDS [OPTIONALLY] ENCLOSED BY character
+
+* The first character of the FIELDS TERMINATED BY and LINES TERMINATED BY values
+
+* ASCII NUL (the zero-valued byte; what is actually written following the escape character is ASCII 0, not a zero-valued byte)
+
+FIELDS TERMINATED BY, ENCLOSED BY, ESCAPED BY, 或 LINES TERMINATED BY 字符 *必须* 必须被转义以便你能可靠地读回这个文件。ASCII NUL is escaped to make it easier to view with some pagers.
+
+结果文件不必遵照SQL语法，所以没有别的东西需要被转义。
+
+如果 FIELDS ESCAPED BY 字符为空，没有字符被转义且 NULL 输出为 NULL，而不是 \N。指定一个空转义字符很可能不是一个好主意，particularly if field values in your data contain any of the characters in the list just given.
+
+这是一个生成一个被很多程序使用的逗号分隔值（CSV）格式的文件的例子：
+
+```sql
+SELECT a,b,a+b INTO OUTFILE '/tmp/result.txt'
+  FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+  LINES TERMINATED BY '\n'
+  FROM test_table;
+```
+
+如果你使用 INTO DUMPFILE 代替 INTO OUTFILE，MySQL 将仅写一行到文件中，不带任何列或行终止符以及不执行任何转义处理。如果你想在一个文件中存储一个 [BLOB](https://dev.mysql.com/doc/refman/8.0/en/blob.html) 值，这是有用的。
+
+**注意**
+
+由 INTO OUTFILE 或 INTO DUMPFILE 创建的任何文件对于服务器主机上的所有用户都是可写的。这个原因是 MySQL server 不能创建一个属于除了运行 MySQL server的用户以外的任何用户的文件。 (你应该永远不要使用 root 用户运行 [mysqld](https://dev.mysql.com/doc/refman/8.0/en/mysqld.html) 也是因为这个和其它原因。) 这个文件因此必须是全局可写的以便你可以操作它的内容。
+
+如果系统变量 [secure_file_priv](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_secure_file_priv) 被设置为一个非空目录名，被写入的文件必须放在那个目录。
 
 # vim
 在vim中输入下面的指令，看vim是否支持python或python3，返回1则表示支持
