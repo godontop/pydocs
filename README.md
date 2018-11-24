@@ -51,6 +51,7 @@
         * [LOAD DATA INFILE语法](#load-data-infile语法)
 		* [UPDATE语法](#update语法)
         * [比较函数与运算符](#比较函数与运算符)
+        * [4.2.5 在命令行中使用选项](#425-在命令行中使用选项)
         * [12.5 字符串函数](#125-字符串函数)
         * [13.2.6 INSERT语法](#1326-insert语法)
         * [13.2.10 SELECT语法](#13210-select语法)
@@ -977,6 +978,28 @@ SELECT val1 FROM tbl1 WHERE val1 IN (1,2,'a');
 ```sql
 SELECT val1 FROM tbl1 WHERE val1 IN ('1','2','a');
 ```
+
+### 4.2.5 在命令行中使用选项
+当命令行中指定的选项值包含空格时必须用引号括起来。例如，[--execute](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_execute) (或 -e) 选项可以和 [mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 一起使用以将 SQL 语句传递给服务器。当这个选项被使用时，[mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 用这个选项值执行这些语句然后退出。这些语句必须被引号括起来。例如，你可以用下面的命令获取一份用户账户列表：
+
+```sh
+shell> mysql -u root -p --execute="SELECT User, Host FROM mysql.user"
+Enter password: ******
++------+-----------+
+| User | Host      |
++------+-----------+
+|      | gigan     |
+| root | gigan     |
+|      | localhost |
+| jon  | localhost |
+| root | localhost |
++------+-----------+
+shell>
+```
+
+**注意**
+
+长形式 ([--execute](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_execute)) 后跟一个等号 (=)。
 
 ### 12.5 字符串函数
 **字符串操作符**
