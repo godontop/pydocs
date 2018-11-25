@@ -52,6 +52,7 @@
 		* [UPDATE语法](#update语法)
         * [比较函数与运算符](#比较函数与运算符)
         * [4.2.5 在命令行中使用选项](#425-在命令行中使用选项)
+            * [4.5.1.1 mysql选项](#4511-mysql选项)
         * [12.5 字符串函数](#125-字符串函数)
         * [13.2.6 INSERT语法](#1326-insert语法)
         * [13.2.10 SELECT语法](#13210-select语法)
@@ -1000,6 +1001,19 @@ shell>
 **注意**
 
 长形式 ([--execute](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_execute)) 后跟一个等号 (=)。
+
+### 4.5.1.1 mysql选项
+[mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 支持下面的选项，下面的选项可以在命令行中或一个选项文件的 [mysql] 和 [client] 组中指定。关于 MySQL 程序使用的选项文件的信息，请看章节 [4.2.7, “Using Option Files”](https://dev.mysql.com/doc/refman/8.0/en/option-files.html)。
+
+**mysql选项**
+
+Format     |Description         |Introduced   |Removed
+-----------|--------------------|-------------|-------
+[--execute](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_execute)  |执行指定语句然后退出  |             |      
+
+* [--execute=*statement*](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_execute), -e *statement*
+
+  执行指定语句然后退出。默认输出格式与使用 [--batch](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_batch) 选项的输出相似。对于一些例子，请看章节 [4.2.5, “Using Options on the Command Line”](https://dev.mysql.com/doc/refman/8.0/en/command-line-options.html)。和这个选项一起使用时，[mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 不使用历史文件。
 
 ### 12.5 字符串函数
 **字符串操作符**
