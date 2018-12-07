@@ -53,7 +53,9 @@
         * [比较函数与运算符](#比较函数与运算符)
         * [4.2.5 在命令行中使用选项](#425-在命令行中使用选项)
             * [4.5.1.1 mysql选项](#4511-mysql选项)
+        * [11.1.2 日期和时间类型概述](#1112-日期和时间类型概述)
         * [12.5 字符串函数](#125-字符串函数)
+        * [12.7 日期和时间函数](#127-日期和时间函数)
         * [13.2.6 INSERT语法](#1326-insert语法)
         * [13.2.10 SELECT语法](#13210-select语法)
             * [13.2.10.1 SELECT ... INTO语法](#132101-select--into语法)
@@ -1015,6 +1017,17 @@ Format     |Description         |Introduced   |Removed
 
   执行指定语句然后退出。默认输出格式与使用 [--batch](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_batch) 选项的输出相似。对于一些例子，请看章节 [4.2.5, “Using Options on the Command Line”](https://dev.mysql.com/doc/refman/8.0/en/command-line-options.html)。和这个选项一起使用时，[mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 不使用历史文件。
 
+### 11.1.2 日期和时间类型概述
+MySQL 允许 [TIME](https://dev.mysql.com/doc/refman/8.0/en/time.html)，[DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 和 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 值含有小数部分的秒，最高精确到微秒（6位）。定义一个包含一个小数秒部分的列，使用语法 *type_name*(*fsp*)，其中 *type_name* 是 [TIME](https://dev.mysql.com/doc/refman/8.0/en/time.html), [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html), 或 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html), *fsp* 是小数秒精确度。例如：
+
+```sql
+CREATE TABLE t1 (t TIME(3), dt DATETIME(6));
+```
+
+*fsp* 值，如果指定，必须在0到6的范围之内。值为0表示没有小数部分。如果忽略，则默认精度为0。(This differs from the standard SQL default of 6, for compatibility with previous MySQL versions.)
+
+一个表中的任意 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 或 [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列都可以自动的初始化和更新内容。
+
 ### 12.5 字符串函数
 **字符串操作符**
 
@@ -1037,6 +1050,135 @@ date_format(SEND_TIME, '%Y-%m')='2018-10' and char_length(m.content)>280 and cha
 ```
 
 查询2018年10月份SMS_MESSAGE_TASK_HISTORY表中content字段的字符数大于280且小于等于350的记录数。
+
+### 12.7 日期和时间函数
+**日期和时间函数**
+
+Name                                    |Description
+----------------------------------------|------------
+[CURRENT_TIMESTAMP()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp), [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp)  |NOW() 的同义词
+[NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now)  |返回当前的日期和时间
+
+* [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp), [CURRENT_TIMESTAMP([fsp])](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp)
+
+  [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp) 和 [CURRENT_TIMESTAMP()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp) 是 [NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now) 的同义词。
+
+* [NOW([fsp])](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now)
+
+  以 'YYYY-MM-DD HH:MM:SS' 或 YYYYMMDDHHMMSS 格式返回当前的日期和时间作为一个值，取决于这个函数是用于一个字符串还是数字环境。这个值用当前时区来展示。
+
+  如果 *fsp* 参数给出并从0到6指定了一个小数秒精度，则返回值包含一个指定位数的小数秒部分。
+
+MySQL 5.5.37，默认小数秒精度为6。
+
+```sql
+mysql> select NOW();
++---------------------+
+| NOW()               |
++---------------------+
+| 2018-12-05 19:55:04 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> select NOW() + 0;
++-----------------------+
+| NOW() + 0             |
++-----------------------+
+| 20181205195511.000000 |
++-----------------------+
+1 row in set (0.00 sec)
+
+mysql> select NOW(2);
++---------------------+
+| NOW(2)              |
++---------------------+
+| 2018-12-06 10:32:02 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> select NOW(2) + 0;
++-----------------------+
+| NOW(2) + 0            |
++-----------------------+
+| 20181206103215.000000 |
++-----------------------+
+1 row in set (0.00 sec)
+
+mysql> select version();
++------------+
+| version()  |
++------------+
+| 5.5.37-log |
++------------+
+1 row in set (0.00 sec)
+
+```
+
+MariaDB 5.5.60，默认小数秒精度为0。
+
+```sql
+MariaDB [mysql]> select NOW();                                                                       
++---------------------+
+| NOW()               |
++---------------------+
+| 2018-12-05 20:04:58 |
++---------------------+
+1 row in set (0.01 sec)
+
+MariaDB [mysql]> select NOW() + 0;
++----------------+
+| NOW() + 0      |
++----------------+
+| 20181205200512 |
++----------------+
+1 row in set (0.00 sec)
+
+MariaDB [mysql]> select NOW(2);
++------------------------+
+| NOW(2)                 |
++------------------------+
+| 2018-12-05 20:07:31.38 |
++------------------------+
+1 row in set (0.01 sec)
+
+MariaDB [mysql]> select NOW(2) + 0;
++-------------------+
+| NOW(2) + 0        |
++-------------------+
+| 20181205200737.46 |
++-------------------+
+1 row in set (0.01 sec)
+
+MariaDB [mysql]> select version();
++----------------+
+| version()      |
++----------------+
+| 5.5.60-MariaDB |
++----------------+
+1 row in set (0.00 sec)
+
+```
+
+[NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now) 返回一个常量时间指明语句开始执行的时间。（在一个存储函数或触发器中，[NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now) 返回函数或触发语句开始执行的时间。）这与 [SYSDATE()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_sysdate) 返回它执行时的准确时间的行为不同。
+
+```sql
+mysql> SELECT NOW(), SLEEP(2), NOW();
++---------------------+----------+---------------------+
+| NOW()               | SLEEP(2) | NOW()               |
++---------------------+----------+---------------------+
+| 2018-12-06 11:02:13 |        0 | 2018-12-06 11:02:13 |
++---------------------+----------+---------------------+
+1 row in set (2.00 sec)
+
+mysql> SELECT SYSDATE(), SLEEP(2), SYSDATE();
++---------------------+----------+---------------------+
+| SYSDATE()           | SLEEP(2) | SYSDATE()           |
++---------------------+----------+---------------------+
+| 2018-12-06 11:03:09 |        0 | 2018-12-06 11:03:11 |
++---------------------+----------+---------------------+
+1 row in set (2.00 sec)
+
+```
 
 ### 13.2.6 INSERT语法
 
@@ -1188,6 +1330,16 @@ SELECT a,b,a+b INTO OUTFILE '/tmp/result.txt'
 由 INTO OUTFILE 或 INTO DUMPFILE 创建的任何文件对于服务器主机上的所有用户都是可写的。这个原因是 MySQL server 不能创建一个属于除了运行 MySQL server的用户以外的任何用户的文件。 (你应该永远不要使用 root 用户运行 [mysqld](https://dev.mysql.com/doc/refman/8.0/en/mysqld.html) 也是因为这个和其它原因。) 这个文件因此必须是全局可写的以便你可以操作它的内容。
 
 如果系统变量 [secure_file_priv](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_secure_file_priv) 被设置为一个非空目录名，被写入的文件必须放在那个目录。
+
+```sql
+mysql> SELECT m.RECEIVE_NUM,m.SEND_TIME,m.CONTENT,s.SCHOOL_NAME 
+FROM ISCHOOLYARD.SMS_MESSAGE_TASK_HISTORY m, ISCHOOLYARD.EDU_SCHOOL s 
+where m.SCHOOL_ID=s.SCHOOL_ID and date_format(SEND_TIME, '%Y-%m')='2018-10' 
+INTO OUTFILE '/tmp/201810.csv' 
+FIELDS TERMINATED BY ',' ENCLOSED BY '"';
+```
+
+将2018年10月份的短信记录导出到服务器上的/tmp目录下，文件名为201810.csv。
 
 # vim
 在vim中输入下面的指令，看vim是否支持python或python3，返回1则表示支持
