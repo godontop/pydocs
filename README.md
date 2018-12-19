@@ -184,11 +184,13 @@ os.path.**dirname**(*path*)
 
 ```python
 >>> import os.path
->>> os.path.dirname('/root/temp.py')
+>>> os.path.dirname('/root/mystie/polls/urls.py')                                                         
+'/root/mystie/polls'
+>>> os.path.dirname(os.path.dirname('/root/mysite/polls/urls.py'))
+'/root/mysite'
+>>> os.path.dirname(os.path.dirname(os.path.dirname('/root/mysite/polls/urls.py')))
 '/root'
->>> os.path.dirname('/root/mysite/polls/urls.py')
-'/root/mysite/polls'
->>>
+>>> 
 
 ```
 
