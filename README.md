@@ -5,6 +5,8 @@
         * [内置类型](#内置类型)
             * [数值类型 — int, float, complex](#数值类型--int-float-complex)
                 * [整型数类型的按位运算](#整型数类型的按位运算)
+        * [文件和目录访问](#文件和目录访问)
+            * [os.path — 通用路径名操作](#ospath--通用路径名操作)
         * [通用操作系统服务](#通用操作系统服务)
             * [os — 各种各样的操作系统接口](#os--各种各样的操作系统接口)
                 * [进程参数](#进程参数)
@@ -28,6 +30,8 @@
                 * [3.3.1. 基本自定义](#331-基本自定义)
                 * [3.3.7. 仿真容器类型](#337-仿真容器类型)
     * [PyPI](#pypi)
+        * [Django](#django)
+            * [settings.py](#settingspy)
         * [PyMongo](#pymongo)
 * [Python2](#python2)
     * [Python 2 语言参考](#python-2-语言参考)
@@ -54,6 +58,7 @@
         * [4.2.5 在命令行中使用选项](#425-在命令行中使用选项)
             * [4.5.1.1 mysql选项](#4511-mysql选项)
         * [11.1.2 日期和时间类型概述](#1112-日期和时间类型概述)
+        * [11.3.5 为TIMESTAMP和DATETIME自动初始化和更新](#1135-为timestamp和datetime自动初始化和更新)
         * [12.5 字符串函数](#125-字符串函数)
         * [12.7 日期和时间函数](#127-日期和时间函数)
         * [13.2.6 INSERT语法](#1326-insert语法)
@@ -138,6 +143,68 @@ Operation  |Result          |Notes
 0
 >>>
 ```
+
+## 文件和目录访问
+这章描述的模块处理磁盘文件和目录。例如，有读取文件内容的模块，有以便携的方式操作路径的模块，和创建临时文件的模块。这章中完整的模块列表是：
+
+### os.path — 通用路径名操作
+**Source code:** [Lib/posixpath.py](https://github.com/python/cpython/tree/3.6/Lib/posixpath.py) (for POSIX), [Lib/ntpath.py](https://github.com/python/cpython/tree/3.6/Lib/ntpath.py) (for Windows NT), and [Lib/macpath.py](https://github.com/python/cpython/tree/3.6/Lib/macpath.py) (for Macintosh)
+
+这个模块实现了一些关于路径名的有用的函数。读或写文件请看 [open()](https://docs.python.org/3.6/library/functions.html#open)，访问文件系统请看 [os](https://docs.python.org/3.6/library/os.html#module-os) 模块。
+
+os.path.**abspath**(*path*)  
+返回路径名 *path* 的标准化绝对路径。在大多数平台，这等同于调用函数 [normpath()](https://docs.python.org/3/library/os.path.html#os.path.normpath) 如下： `normpath(join(os.getcwd(), path))`。
+
+*在版本3.6中发生变化：* 接受一个 [path-like 对象](https://docs.python.org/3/glossary.html#term-path-like-object)。
+
+```sh
+# pwd
+/root
+# cat temp.py 
+```
+
+```python
+import os
+
+
+print(__file__)
+print(os.path.abspath(__file__))
+```
+
+```sh
+# python3.7 temp.py 
+temp.py
+/root/temp.py
+```
+
+os.path.**dirname**(*path*)  
+返回路径名 *path* 的目录名。
+
+*在版本3.6中发生变化：* 接受 [path-like object](https://docs.python.org/3.6/glossary.html#term-path-like-object)。
+
+```python
+>>> import os.path
+>>> os.path.dirname('/root/temp.py')
+'/root'
+>>> os.path.dirname('/root/mysite/polls/urls.py')
+'/root/mysite/polls'
+>>>
+
+```
+
+os.path.**exists**(*path*)  
+如果 *path* 指向一个存在的路径或者一个打开的文件描述符则返回 `True`。如果指向损坏的符号链接，则返回 `False`。在一些平台，如果被请求的文件没有被授予执行 [os.stat()](https://docs.python.org/3.6/library/os.html#os.stat) 的权限，则这个函数可能返回 `False`，即使这个 *path* 物理存在。
+
+*在版本3.3中发生变化：* *path* 现在可以是一个整型数：如果它是一个打开的文件描述符则返回 `True`，否则返回 `False`。
+
+*在版本3.6中发生变化：* 接受 [path-like object](https://docs.python.org/3.6/glossary.html#term-path-like-object)。
+
+os.path.**join**(_path, *paths_)  
+智能地连接一个或多个路径组件。返回值是 *path* 和所有 _*paths_ 成员的串联，且除了最后一个部分，每一个非空的部分后面都跟着一个正确的目录分隔符 (`os.sep`)，这意味着如果最后一个部分为空则结果将必定以一个分隔符结尾。如果一个组件是一个绝对路径，则所有前面的组件都被丢弃且连接从绝对路径组件继续。
+
+在 Windows 平台，当遇到一个绝对路径组件 (如，`r'\foo'`) 时驱动器号不重置。如果一个组件包含一个驱动器号，则所有前面的组件被丢弃且驱动器号被重置。注意，因为每个驱动器都有一个当前目录，`os.path.join("c:", "foo")` represents a path relative to the current directory on drive `C:` (`c:foo`), not `c:\foo`。
+
+*在版本3.6中发生变化：* *path* 和 *paths* 接受 [path-like object](https://docs.python.org/3.6/glossary.html#term-path-like-object)。
 
 ## 通用操作系统服务
 这章描述的模块提供在（几乎）所有操作系统上都可用的操作系统特征接口，如文件和时钟。这些接口通常是根据 Unix 或 C 接口仿写的，但它们在大多数其它系统下也是可用的。这里是一个概述：
@@ -511,6 +578,22 @@ object.**\_\_setitem\_\_**(*self, key, value*)
 调用以实现赋值给 `self[key]`。注意事项同 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__)。这应该仅为映射实现如果对象支持改变键的值，或者如果可以增加新键，或者对于序列如果元素可以被替换。对于不正确的 *key* 值应该抛出和 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__) 方法相同的异常。
 
 ## PyPI
+### Django
+Django官网  
+[https://www.djangoproject.com](https://www.djangoproject.com)
+
+安装Django  
+pip3 install Django
+
+#### settings.py
+**ALLOWED_HOSTS**
+
+默认值：[]（空列表）
+
+一个表示 Django 站点可以服务的主机/域名名称的字符串列表。
+
+当 **DEBUG** 为 True 且 **ALLOWED_HOSTS** 为空时，针对列表 **['localhost', '127.0.0.1', '[::1]']** 中的主机是有效的。
+
 ### PyMongo
 使用 [find_one()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one) 获取一个单一的文档
 
@@ -1027,6 +1110,19 @@ CREATE TABLE t1 (t TIME(3), dt DATETIME(6));
 *fsp* 值，如果指定，必须在0到6的范围之内。值为0表示没有小数部分。如果忽略，则默认精度为0。(This differs from the standard SQL default of 6, for compatibility with previous MySQL versions.)
 
 一个表中的任意 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 或 [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列都可以自动的初始化和更新内容。
+
+### 11.3.5 为TIMESTAMP和DATETIME自动初始化和更新
+[TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 和 [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列可以自动初始化及更新为当前的日期和时间 (即，当前的时间戳)。
+
+对于一个表中的任意 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 或 [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列，你可以指定当前时间戳作为默认值，自动更新值，或者两者：
+
+* 对于插入的行，如果没有为自动初始化的列指定值，则该列的值被设置为当前时间戳。
+
+* 一个自动更新的列会自动地更新为当前时间戳当行中的任意其它列的值从它的当前值发生变化时。一个自动更新的列会保持不变如果所有的其它列都被设置为他们的当前值。当其它列变化时，要阻止一个自动更新列更新，需显示地将它设置为它的当前值。更新一个自动更新列即使当其它列没有变化时，需显示地设置它为它应有的值（例如，设置为 [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp)）。
+
+另外，如果 [explicit_defaults_for_timestamp](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_explicit_defaults_for_timestamp) 系统变量被禁用，你可以通过指派一个 NULL 值来初始化或更新任何 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) (but not DATETIME) 列到当前的日期和时间，除了它已经用 NULL 属性定义以允许 NULL 值外。
+
+
 
 ### 12.5 字符串函数
 **字符串操作符**
