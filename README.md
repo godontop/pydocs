@@ -103,6 +103,9 @@ w3school 在线教程
 [http://www.w3school.com.cn](http://www.w3school.com.cn)  
 中文版的w3school
 
+时区列表  
+[tz数据库时区列表](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+
 # Markdown
 要在Markdown中显示`<`和`>`，必须使用使用转义字符`&lt;`和`&gt;`。
 
@@ -595,6 +598,17 @@ pip3 install Django
 一个表示 Django 站点可以服务的主机/域名名称的字符串列表。
 
 当 **DEBUG** 为 True 且 **ALLOWED_HOSTS** 为空时，针对列表 **['localhost', '127.0.0.1', '[::1]']** 中的主机是有效的。
+<br><br>
+
+**TIME_ZONE**
+
+默认值： **'America/Chicago'**
+
+一个表示时区的字符串。看[时区列表](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)。
+
+**注解**
+
+自从 Django 第一版发布将 **TIME_ZONE** 设置为 **'America/Chicago'** 以来，全局设置 (如果你的项目的 **settings.py** 中什么都没定义则使用) 保持 **'America/Chicago'** 是为了向后兼容。新项目模板默认为 **'UTC'**。
 
 ### PyMongo
 使用 [find_one()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one) 获取一个单一的文档
@@ -1123,6 +1137,18 @@ CREATE TABLE t1 (t TIME(3), dt DATETIME(6));
 * 一个自动更新的列会自动地更新为当前时间戳当行中的任意其它列的值从它的当前值发生变化时。一个自动更新的列会保持不变如果所有的其它列都被设置为他们的当前值。当其它列变化时，要阻止一个自动更新列更新，需显示地将它设置为它的当前值。更新一个自动更新列即使当其它列没有变化时，需显示地设置它为它应有的值（例如，设置为 [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp)）。
 
 另外，如果 [explicit_defaults_for_timestamp](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_explicit_defaults_for_timestamp) 系统变量被禁用，你可以通过指派一个 NULL 值来初始化或更新任何 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) (but not DATETIME) 列到当前的日期和时间，除了它已经用 NULL 属性定义以允许 NULL 值外。
+
+指定自动化的内容，在列的定义中使用 **DEFAULT CURRENT_TIMESTAMP** 和 **ON UPDATE CURRENT_TIMESTAMP** 从句。从句的顺序没有关系。如果两个都出现在一个列的定义中，任何一个都可以先出现。任何 [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp) 的同义词都和 [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp) 拥有相同的含义。这些同义词是 [CURRENT_TIMESTAMP()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp)，[NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now)，[LOCALTIME](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_localtime)，[LOCALTIME()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_localtime)，[LOCALTIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_localtimestamp) 和 [LOCALTIMESTAMP()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_localtimestamp)。
+
+**DEFAULT CURRENT_TIMESTAMP** 和 **ON UPDATE CURRENT_TIMESTAMP** 的使用仅限于 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 和 [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html)。**DEFAULT** 从句也可以被用来指定一个常量 (非自动化的) 默认值；例如，**DEFAULT 0** 或 **DEFAULT '2000-01-01 00:00:00'**。
+
+**注意**
+
+下面使用 **DEFAULT 0** 的例子，可能会产生警告或错误，这依赖于严格 SQL 模式或 [NO_ZERO_DATE](https://dev.mysql.com/doc/refman/8.0/en/sql-mode.html#sqlmode_no_zero_date) SQL 模式是否启用。注意 [传统的](https://dev.mysql.com/doc/refman/8.0/en/sql-mode.html#sqlmode_traditional) SQL 模式包括严格模式和 [NO_ZERO_DATE](https://dev.mysql.com/doc/refman/8.0/en/sql-mode.html#sqlmode_no_zero_date)。见章节 [5.1.11, “服务器 SQL 模式”](https://dev.mysql.com/doc/refman/8.0/en/sql-mode.html)。
+
+[TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 或 [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列定义可以指定当前时间戳为默认和自动更新值，其中一个，或者两个都不指定。不同的列可以有不同的自动化内容组合。下面的规则描述这些可能性：
+
+* 同时具有 **DEFAULT CURRENT_TIMESTAMP** 和 **ON UPDATE CURRENT_TIMESTAMP**时，列用当前时间戳作为它的默认值并能够自动更新到当前时间戳。
 
 
 
