@@ -1150,7 +1150,151 @@ CREATE TABLE t1 (t TIME(3), dt DATETIME(6));
 
 * 同时具有 **DEFAULT CURRENT_TIMESTAMP** 和 **ON UPDATE CURRENT_TIMESTAMP**时，列用当前时间戳作为它的默认值并能够自动更新到当前时间戳。
 
+```sql
+mysql> CREATE TABLE t1 (
+    -> name VARCHAR(20) NOT NULL,
+    -> ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    -> dt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    -> );
+Query OK, 0 rows affected (0.02 sec)
 
+mysql> select now();
++---------------------+
+| now()               |
++---------------------+
+| 2018-12-25 14:05:13 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> INSERT INTO t1 (name)
+    -> VALUES ('GOD');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from t1;
++------+---------------------+---------------------+
+| name | ts                  | dt                  |
++------+---------------------+---------------------+
+| GOD  | 2018-12-25 14:06:10 | 2018-12-25 14:06:10 |
++------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> UPDATE t1 SET name='God' where name='GOD';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from t1;
++------+---------------------+---------------------+
+| name | ts                  | dt                  |
++------+---------------------+---------------------+
+| God  | 2018-12-25 14:07:07 | 2018-12-25 14:07:07 |
++------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> select now();
++---------------------+
+| now()               |
++---------------------+
+| 2018-12-25 14:07:35 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> 
+```
+
+* 带一个 **DEFAULT** 从句但不带 **ON UPDATE CURRENT_TIMESTAMP** 从句时，列接受指定的默认值且不会自动更新为当前时间戳。
+
+  默认值取决于 **DEFAULT** 从句是否指定 **CURRENT_TIMESTAMP** 或者一个常量值。后跟 **CURRENT_TIMESTAMP**时，默认值是当前时间戳。
+
+```sql
+mysql> CREATE TABLE t1 (
+    -> name VARCHAR(20) NOT NULL,
+    -> ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -> dt DATETIME DEFAULT CURRENT_TIMESTAMP
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> INSERT INTO t1 (name)
+    -> VALUES ('YWH');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from t1;
++------+---------------------+---------------------+
+| name | ts                  | dt                  |
++------+---------------------+---------------------+
+| YWH  | 2018-12-25 14:30:01 | 2018-12-25 14:30:01 |
++------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> select now();
++---------------------+
+| now()               |
++---------------------+
+| 2018-12-25 14:30:20 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> UPDATE t1 SET name='ywh' where name='YWH';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from t1;
++------+---------------------+---------------------+
+| name | ts                  | dt                  |
++------+---------------------+---------------------+
+| ywh  | 2018-12-25 14:30:01 | 2018-12-25 14:30:01 |
++------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> 
+```
+
+  后跟一个常量时，默认值是指定的值。在这种情况下，列没有任何自动化的内容。
+
+```sql
+mysql> CREATE TABLE t1 (
+    -> name VARCHAR(20) NOT NULL,
+    -> ts TIMESTAMP DEFAULT 0,
+    -> dt DATETIME DEFAULT 0
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> INSERT INTO t1 (name)
+    -> VALUES ('XSHELL');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from t1;
++--------+---------------------+---------------------+
+| name   | ts                  | dt                  |
++--------+---------------------+---------------------+
+| XSHELL | 0000-00-00 00:00:00 | 0000-00-00 00:00:00 |
++--------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> select now();
++---------------------+
+| now()               |
++---------------------+
+| 2018-12-25 14:54:26 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> UPDATE t1 SET name='Xshell' where name='XSHELL';
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from t1;
++--------+---------------------+---------------------+
+| name   | ts                  | dt                  |
++--------+---------------------+---------------------+
+| Xshell | 0000-00-00 00:00:00 | 0000-00-00 00:00:00 |
++--------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> 
+```
+
+
+**注意：** MySQL 5.5及以下版本仅支持为TIMESTAMP自动初始化和更新。
 
 ### 12.5 字符串函数
 **字符串操作符**
