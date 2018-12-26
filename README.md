@@ -1293,6 +1293,152 @@ mysql> select * from t1;
 mysql> 
 ```
 
+* 有一个 **ON UPDATE CURRENT_TIMESTAMP** 从句和一个常量 **DEFAULT** 从句时，列自动更新到当前时间戳并具有指定的常量默认值。
+
+```sql
+mysql> CREATE TABLE t1 (
+    -> name VARCHAR(20) NOT NULL,
+    -> ts TIMESTAMP DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP,
+    -> dt DATETIME DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> INSERT INTO t1 (name)
+    -> VALUES ('BLEECH');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from t1;
++--------+---------------------+---------------------+
+| name   | ts                  | dt                  |
++--------+---------------------+---------------------+
+| BLEECH | 0000-00-00 00:00:00 | 0000-00-00 00:00:00 |
++--------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> select now();
++---------------------+
+| now()               |
++---------------------+
+| 2018-12-26 09:32:08 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> UPDATE t1 SET name='Bleech' where name='BLEECH';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from t1;
++--------+---------------------+---------------------+
+| name   | ts                  | dt                  |
++--------+---------------------+---------------------+
+| Bleech | 2018-12-26 09:32:39 | 2018-12-26 09:32:39 |
++--------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> 
+```
+
+* 当带有一个 **ON UPDATE CURRENT_TIMESTAMP** 从句而没有 **DEFAULT** 从句时，列自动更新到当前时间戳但是没有让当前时间戳作为它的默认值。
+
+  这种情况下默认值与类型有关。[TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 有一个默认值0除了定义了 **NULL** 属性外，在这种情况下默认值是 **NULL**。
+
+```sql
+mysql> CREATE TABLE t1 (
+    -> name VARCHAR(20) NOT NULL,
+    -> ts1 TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,     -- default 0
+    -> ts2 TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP -- default NULL
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> INSERT INTO t1 (name)
+    -> VALUES ('SEIYA');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from t1;
++-------+---------------------+------+
+| name  | ts1                 | ts2  |
++-------+---------------------+------+
+| SEIYA | 0000-00-00 00:00:00 | NULL |
++-------+---------------------+------+
+1 row in set (0.00 sec)
+
+mysql> select now();
++---------------------+
+| now()               |
++---------------------+
+| 2018-12-26 09:48:19 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> UPDATE t1 SET name='Seiya' where name='SEIYA';
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from t1;
++-------+---------------------+---------------------+
+| name  | ts1                 | ts2                 |
++-------+---------------------+---------------------+
+| Seiya | 2018-12-26 09:48:51 | 2018-12-26 09:48:51 |
++-------+---------------------+---------------------+
+1 row in set (0.01 sec)
+
+mysql> 
+```
+
+* [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 有一个默认值 **NULL** 除了定义了 **NOT NULL** 属性之外，在这种情况下默认值是0。
+
+```sql
+mysql> CREATE TABLE t1 (
+    -> name VARCHAR(20) NOT NULL,
+    -> dt1 DATETIME ON UPDATE CURRENT_TIMESTAMP,         -- default NULL
+    -> dt2 DATETIME NOT NULL ON UPDATE CURRENT_TIMESTAMP -- default 0
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> INSERT INTO t1 (name, dt2)
+    -> VALUES ('JAVA', 0);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO t1 (name, dt2)
+    -> VALUES ('PYTHON', '2012-12-12 00:00:00');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from t1;
++--------+------+---------------------+
+| name   | dt1  | dt2                 |
++--------+------+---------------------+
+| JAVA   | NULL | 0000-00-00 00:00:00 |
+| PYTHON | NULL | 2012-12-12 00:00:00 |
++--------+------+---------------------+
+2 rows in set (0.00 sec)
+
+mysql> select now();
++---------------------+
+| now()               |
++---------------------+
+| 2018-12-26 10:47:59 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> UPDATE t1 SET name='Java' where name='JAVA';
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> UPDATE t1 SET name='Python' where name='PYTHON';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from t1;
++--------+---------------------+---------------------+
+| name   | dt1                 | dt2                 |
++--------+---------------------+---------------------+
+| Java   | 2018-12-26 10:49:41 | 2018-12-26 10:49:41 |
+| Python | 2018-12-26 10:50:06 | 2018-12-26 10:50:06 |
++--------+---------------------+---------------------+
+2 rows in set (0.00 sec)
+
+mysql> 
+```
 
 **注意：** MySQL 5.5及以下版本仅支持为TIMESTAMP自动初始化和更新。
 
