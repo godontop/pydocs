@@ -1385,7 +1385,7 @@ mysql> select * from t1;
 mysql> 
 ```
 
-* [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 有一个默认值 **NULL** 除了定义了 **NOT NULL** 属性之外，在这种情况下默认值是0。
+  [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 有一个默认值 **NULL** 除了定义了 **NOT NULL** 属性之外，在这种情况下默认值是0。
 
 ```sql
 mysql> CREATE TABLE t1 (
@@ -1439,6 +1439,156 @@ mysql> select * from t1;
 
 mysql> 
 ```
+
+[TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 和 [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列没有自动化的属性除非他们被显示地指定，除了这种情况：如果 [explicit_defaults_for_timestamp](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_explicit_defaults_for_timestamp) 系统变量被禁用，则 *第一个* [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列同时拥有 **DEFAULT CURRENT_TIMESTAMP** 和 **ON UPDATE CURRENT_TIMESTAMP** 如果这两者都没有被显示地指定的话。要抑制第一个 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列的自动化属性，使用这些策略中的一个：
+
+* 启用 [explicit_defaults_for_timestamp](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_explicit_defaults_for_timestamp) 系统变量。在这种情况下，指定自动初始化和更新的 **DEFAULT CURRENT_TIMESTAMP** 和 **ON UPDATE CURRENT_TIMESTAMP** 从句是可用的，但是不会被指派给任何 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列除非显示地包含在列的定义中。
+
+* 另一种选择，如果 [explicit_defaults_for_timestamp](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_explicit_defaults_for_timestamp) 被禁用，做下面的其中一个操作：
+
+    * 用一个 **DEFAULT** 从句为列定义一个常量默认值。
+
+    * 指定 **NULL** 属性。这也导致列允许 **NULL** 值，意味着你不能通过为列设置 **NULL** 来指定当前时间戳。设定 **NULL** 会设置列为 **NULL**，而不是当前时间戳。指派当前时间戳，设置列为 [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp) 或者一个同义词如 [NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now)。
+
+细想这些表的定义：
+
+```sql
+mysql> CREATE TABLE t1 (
+    -> name VARCHAR(20) NOT NULL,
+    -> ts1 TIMESTAMP DEFAULT 0,
+    -> ts2 TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
+Query OK, 0 rows affected (0.17 sec)
+
+mysql> CREATE TABLE t2 (
+    -> name VARCHAR(20) NOT NULL,
+    -> ts1 TIMESTAMP NULL,
+    -> ts2 TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> CREATE TABLE t3 (
+    -> name VARCHAR(20) NOT NULL,
+    -> ts1 TIMESTAMP NULL DEFAULT 0,
+    -> ts2 TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> select now();
++---------------------+
+| now()               |
++---------------------+
+| 2018-12-27 10:38:30 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> INSERT INTO t1 (name)
+    -> VALUES ('NOTEBOOK');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO t2 (name)
+    -> VALUES ('COMPUTER');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> INSERT INTO t3 (name)
+    -> VALUES ('MOUSE');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from t1;
++----------+---------------------+---------------------+
+| name     | ts1                 | ts2                 |
++----------+---------------------+---------------------+
+| NOTEBOOK | 0000-00-00 00:00:00 | 2018-12-27 10:39:38 |
++----------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> select * from t2;
++----------+------+---------------------+
+| name     | ts1  | ts2                 |
++----------+------+---------------------+
+| COMPUTER | NULL | 2018-12-27 10:40:15 |
++----------+------+---------------------+
+1 row in set (0.01 sec)
+
+mysql> select * from t3;
++-------+---------------------+---------------------+
+| name  | ts1                 | ts2                 |
++-------+---------------------+---------------------+
+| MOUSE | 0000-00-00 00:00:00 | 2018-12-27 10:40:53 |
++-------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> UPDATE t1 SET name='Notebook' where name='NOTEBOOK';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> UPDATE t2 SET name='Computer' where name='COMPUTER';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> UPDATE t3 SET name='Mouse' where name='MOUSE';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from t1;
++----------+---------------------+---------------------+
+| name     | ts1                 | ts2                 |
++----------+---------------------+---------------------+
+| Notebook | 0000-00-00 00:00:00 | 2018-12-27 10:42:11 |
++----------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> select * from t2;
++----------+------+---------------------+
+| name     | ts1  | ts2                 |
++----------+------+---------------------+
+| Computer | NULL | 2018-12-27 10:42:40 |
++----------+------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> select * from t3;
++-------+---------------------+---------------------+
+| name  | ts1                 | ts2                 |
++-------+---------------------+---------------------+
+| Mouse | 0000-00-00 00:00:00 | 2018-12-27 10:43:12 |
++-------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> select now();
++---------------------+
+| now()               |
++---------------------+
+| 2018-12-27 10:43:55 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> UPDATE t1 SET ts1=NULL where name='Notebook';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from t1;
++----------+---------------------+---------------------+
+| name     | ts1                 | ts2                 |
++----------+---------------------+---------------------+
+| Notebook | 2018-12-27 11:02:01 | 2018-12-27 11:02:01 |
++----------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> select now();
++---------------------+
+| now()               |
++---------------------+
+| 2018-12-27 11:02:47 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> 
+```
+
+这些表有这些属性：
+
+* 在每一个表的定义中，第一个 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列没有自动初始化或更新。
+
+* 这些表的不同在于 **ts1** 列如何处理 **NULL** 值。对于表 t1，**ts1** 是 NOT NULL 且给它指派一个 **NULL** 值会将它设置为当前时间戳。对于表 t2 和 t3，**ts1** 允许 **NULL** 且给它指派一个 **NULL** 值会将它设置为 **NULL**。
+
+* t2 和 t3 的不同在于 **ts1** 的默认值。对于表 t2，**ts1** 被定义为允许 **NULL**，所以在缺乏一个明确的 **DEFAULT** 从句时它的默认值也是 **NULL**。对于表 t3，**ts1** 允许 **NULL** 但是它有一个明确的默认值0。
 
 **注意：** MySQL 5.5及以下版本仅支持为TIMESTAMP自动初始化和更新。
 
