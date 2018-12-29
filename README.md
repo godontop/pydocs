@@ -69,9 +69,16 @@
 		* [YouCompleteMe](#youcompleteme)
 
 # 导航
+Apache Subversion  
+[https://subversion.apache.org](https://subversion.apache.org)
+
 DistroWatch  
 [https://distrowatch.com](https://distrowatch.com)  
 Linux发行版排名统计
+
+Java Decompiler  
+[http://jd.benow.ca](http://jd.benow.ca)  
+Java反编译器
 
 Markdonw在线编辑器  
 [https://jbt.github.io/markdown-editor/](https://jbt.github.io/markdown-editor/)
@@ -1591,6 +1598,138 @@ mysql>
 * t2 和 t3 的不同在于 **ts1** 的默认值。对于表 t2，**ts1** 被定义为允许 **NULL**，所以在缺乏一个明确的 **DEFAULT** 从句时它的默认值也是 **NULL**。对于表 t3，**ts1** 允许 **NULL** 但是它有一个明确的默认值0。
 
 **注意：** MySQL 5.5及以下版本仅支持为TIMESTAMP自动初始化和更新。
+
+不管在哪里如果 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 或 [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列的定义中包含了一个明确的小数秒精度值，则在整个列的定义中必须使用相同的精度值。这是允许的：
+
+```sql
+CREATE TABLE t1 (
+  ts TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
+);
+```
+
+这是不允许的：
+
+```sql
+CREATE TABLE t1 (
+  ts TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP(3)
+);
+```
+
+**TIMESTAMP 初始化及 NULL 属性**
+
+如果 [explicit_defaults_for_timestamp](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_explicit_defaults_for_timestamp) 系统变量被禁用，[TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列默认情况下是 **NOT NULL**，不能包含 **NULL** 值，且设定 **NULL** 会赋值为当前时间戳。要允许 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列包含 **NULL**，用 **NULL** 属性明确地声明它。在这种情况下，默认值也变成 **NULL** 除非用一个 **DEFAULT** 从句指定一个不同的默认值来覆盖它。**DEFAULT NULL** 可以被用来明确地指定 **NULL** 作为默认值。（对于一个没有声明 **NULL** 属性的 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列，**DEFAULT NULL** 是无效的。）如果 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列允许 **NULL** 值，指派 **NULL** 会将其设置为 **NULL**，而不是当前时间戳。
+
+下边包含了几种允许 **NULL** 值的 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列：
+
+```sql
+mysql> CREATE TABLE t (
+    -> name VARCHAR(20) NOT NULL,
+    -> ts1 TIMESTAMP NULL DEFAULT NULL,
+    -> ts2 TIMESTAMP NULL DEFAULT 0,
+    -> ts3 TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> INSERT INTO t (name)
+    -> VALUES ('BEE');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from t;
++------+------+---------------------+---------------------+
+| name | ts1  | ts2                 | ts3                 |
++------+------+---------------------+---------------------+
+| BEE  | NULL | 0000-00-00 00:00:00 | 2018-12-28 19:37:42 |
++------+------+---------------------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> 
+```
+
+一个允许 **NULL** 值的 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列在插入时间上不会取当前时间戳除非有下列情形之一：
+
+* 它的默认值被定义为 [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp) 且没有为列指定值
+
+* [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp) 或任何它的同义词如 [NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now) 被明确地插入到列中
+
+换句话说，一个定义为允许 **NULL** 值的 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列仅当它的定义包含 **DEFAULT CURRENT_TIMESTAMP** 时才能自动初始化：
+
+```sql
+mysql> CREATE TABLE t (
+    -> name VARCHAR(20) NOT NULL,
+    -> ts TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> INSERT INTO t (name)
+    -> VALUES ('TEA');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from t;
++------+---------------------+
+| name | ts                  |
++------+---------------------+
+| TEA  | 2018-12-28 19:54:04 |
++------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> 
+```
+
+如果 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列允许 **NULL** 值但是它的定义不包含 **DEFAULT CURRENT_TIMESTAMP**，你必须明确地插入一个对应当前日期和时间的值。假设表 t1 和 t2 有这些定义：
+
+```sql
+CREATE TABLE t1 (ts TIMESTAMP NULL DEFAULT '0000-00-00 00:00:00');
+CREATE TABLE t2 (ts TIMESTAMP NULL DEFAULT NULL);
+```
+
+设置两个表的 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列为插入时的当前时间戳，明确地给它赋那个值。例如：
+
+```sql
+INSERT INTO t2 VALUES (CURRENT_TIMESTAMP);
+INSERT INTO t1 VALUES (NOW());
+```
+
+```sql
+mysql> CREATE TABLE t1 (
+    -> name VARCHAR(20) NOT NULL,
+    -> ts TIMESTAMP NULL DEFAULT 0
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> CREATE TABLE t2 (
+    -> name VARCHAR(20) NOT NULL,
+    -> ts TIMESTAMP NULL DEFAULT NULL
+    -> );
+Query OK, 0 rows affected (0.11 sec)
+
+mysql> INSERT INTO t1 (name, ts)
+    -> VALUES ('MySQL', NOW());
+Query OK, 1 row affected (0.01 sec)
+
+mysql> INSERT INTO t2 (name, ts)
+    -> VALUES ('Python', CURRENT_TIMESTAMP);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from t1;
++-------+---------------------+
+| name  | ts                  |
++-------+---------------------+
+| MySQL | 2018-12-29 16:28:54 |
++-------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> select * from t2;
++--------+---------------------+
+| name   | ts                  |
++--------+---------------------+
+| Python | 2018-12-29 16:30:42 |
++--------+---------------------+
+1 row in set (0.00 sec)
+
+mysql> 
+```
+
+如果 [explicit_defaults_for_timestamp](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_explicit_defaults_for_timestamp) 系统变量被启用，仅当声明了 **NULL** 属性 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列才允许 **NULL** 值。同样，[TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列不允许指派 **NULL** 以赋值为当前时间戳，不管是声明 **NULL** 还是 **NOT NULL** 属性。要赋值当前时间戳，将列设置为 [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp) 或者一个同义词如 [NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now)。
 
 ### 12.5 字符串函数
 **字符串操作符**
