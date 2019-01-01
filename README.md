@@ -61,6 +61,7 @@
         * [11.3.5 为TIMESTAMP和DATETIME自动初始化和更新](#1135-为timestamp和datetime自动初始化和更新)
         * [12.5 字符串函数](#125-字符串函数)
         * [12.7 日期和时间函数](#127-日期和时间函数)
+        * [13.1.9 ALTER TABLE语法](#1319-alter-table语法)
         * [13.2.6 INSERT语法](#1326-insert语法)
         * [13.2.10 SELECT语法](#13210-select语法)
             * [13.2.10.1 SELECT ... INTO语法](#132101-select--into语法)
@@ -1881,6 +1882,203 @@ mysql> SELECT SYSDATE(), SLEEP(2), SYSDATE();
 +---------------------+----------+---------------------+
 1 row in set (2.00 sec)
 
+```
+
+### 13.1.9 ALTER TABLE语法
+
+```sql
+ALTER TABLE tbl_name
+    [alter_specification [, alter_specification] ...]
+    [partition_options]
+
+alter_specification:
+    table_options
+  | ADD [COLUMN] col_name column_definition
+        [FIRST | AFTER col_name]
+  | ADD [COLUMN] (col_name column_definition,...)
+  | ADD {INDEX|KEY} [index_name]
+        [index_type] (key_part,...) [index_option] ...
+  | ADD [CONSTRAINT [symbol]] PRIMARY KEY
+        [index_type] (key_part,...) [index_option] ...
+  | ADD [CONSTRAINT [symbol]]
+        UNIQUE [INDEX|KEY] [index_name]
+        [index_type] (key_part,...) [index_option] ...
+  | ADD FULLTEXT [INDEX|KEY] [index_name]
+        (key_part,...) [index_option] ...
+  | ADD SPATIAL [INDEX|KEY] [index_name]
+        (key_part,...) [index_option] ...
+  | ADD [CONSTRAINT [symbol]]
+        FOREIGN KEY [index_name] (col_name,...)
+        reference_definition
+  | ALGORITHM [=] {DEFAULT|INSTANT|INPLACE|COPY}
+  | ALTER [COLUMN] col_name {SET DEFAULT literal | DROP DEFAULT}
+  | ALTER INDEX index_name {VISIBLE | INVISIBLE}
+  | CHANGE [COLUMN] old_col_name new_col_name column_definition
+        [FIRST|AFTER col_name]
+  | [DEFAULT] CHARACTER SET [=] charset_name [COLLATE [=] collation_name]
+  | CONVERT TO CHARACTER SET charset_name [COLLATE collation_name]
+  | {DISABLE|ENABLE} KEYS
+  | {DISCARD|IMPORT} TABLESPACE
+  | DROP [COLUMN] col_name
+  | DROP {INDEX|KEY} index_name
+  | DROP PRIMARY KEY
+  | DROP FOREIGN KEY fk_symbol
+  | FORCE
+  | LOCK [=] {DEFAULT|NONE|SHARED|EXCLUSIVE}
+  | MODIFY [COLUMN] col_name column_definition
+        [FIRST | AFTER col_name]
+  | ORDER BY col_name [, col_name] ...
+  | RENAME COLUMN old_col_name TO new_col_name
+  | RENAME {INDEX|KEY} old_index_name TO new_index_name
+  | RENAME [TO|AS] new_tbl_name
+  | {WITHOUT|WITH} VALIDATION
+  | ADD PARTITION (partition_definition)
+  | DROP PARTITION partition_names
+  | DISCARD PARTITION {partition_names | ALL} TABLESPACE
+  | IMPORT PARTITION {partition_names | ALL} TABLESPACE
+  | TRUNCATE PARTITION {partition_names | ALL}
+  | COALESCE PARTITION number
+  | REORGANIZE PARTITION partition_names INTO (partition_definitions)
+  | EXCHANGE PARTITION partition_name WITH TABLE tbl_name [{WITH|WITHOUT} VALIDATION]
+  | ANALYZE PARTITION {partition_names | ALL}
+  | CHECK PARTITION {partition_names | ALL}
+  | OPTIMIZE PARTITION {partition_names | ALL}
+  | REBUILD PARTITION {partition_names | ALL}
+  | REPAIR PARTITION {partition_names | ALL}
+  | REMOVE PARTITIONING
+  | UPGRADE PARTITIONING
+
+key_part: {col_name [(length)] | (expr)} [ASC | DESC]
+
+index_type:
+    USING {BTREE | HASH}
+
+index_option:
+    KEY_BLOCK_SIZE [=] value
+  | index_type
+  | WITH PARSER parser_name
+  | COMMENT 'string'
+  | {VISIBLE | INVISIBLE}
+
+table_options:
+    table_option [[,] table_option] ...
+
+table_option:
+    AUTO_INCREMENT [=] value
+  | AVG_ROW_LENGTH [=] value
+  | [DEFAULT] CHARACTER SET [=] charset_name
+  | CHECKSUM [=] {0 | 1}
+  | [DEFAULT] COLLATE [=] collation_name
+  | COMMENT [=] 'string'
+  | COMPRESSION [=] {'ZLIB'|'LZ4'|'NONE'}
+  | CONNECTION [=] 'connect_string'
+  | {DATA|INDEX} DIRECTORY [=] 'absolute path to directory'
+  | DELAY_KEY_WRITE [=] {0 | 1}
+  | ENCRYPTION [=] {'Y' | 'N'}
+  | ENGINE [=] engine_name
+  | INSERT_METHOD [=] { NO | FIRST | LAST }
+  | KEY_BLOCK_SIZE [=] value
+  | MAX_ROWS [=] value
+  | MIN_ROWS [=] value
+  | PACK_KEYS [=] {0 | 1 | DEFAULT}
+  | PASSWORD [=] 'string'
+  | ROW_FORMAT [=] {DEFAULT|DYNAMIC|FIXED|COMPRESSED|REDUNDANT|COMPACT}
+  | STATS_AUTO_RECALC [=] {DEFAULT|0|1}
+  | STATS_PERSISTENT [=] {DEFAULT|0|1}
+  | STATS_SAMPLE_PAGES [=] value
+  | TABLESPACE tablespace_name [STORAGE {DISK|MEMORY|DEFAULT}]
+  | UNION [=] (tbl_name[,tbl_name]...)
+
+partition_options:
+    (see CREATE TABLE options)
+```
+
+[ALTER TABLE](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html) 改变一个表的结构。例如，你可以增加或删除列，创建或销毁索引，改变已存在的列的类型，或者重命名列或表本身。你也可以改变特性如用于表或表注释的存储引擎。
+
+**ALTER TABLE** 语句有几个额外的方面，在这节中按下面的主题描述：
+
+* [表选项](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-options)
+
+* [Performance and Space Requirements](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-performance)
+
+* [Concurrency Control](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-concurrency)
+
+* [Adding and Dropping Columns](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-add-drop-column)
+
+* [重命名，重定义，及重新排序列](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-redefine-column)
+
+* [Primary Keys and Indexes](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-index)
+
+* [Foreign Keys](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-foreign-key)
+
+* [Changing the Character Set](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-character-set)
+
+* [Discarding and Importing InnoDB Tablespaces](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-discard-import)
+
+* [Row Order for MyISAM Tables](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-row-order)
+
+* [Partitioning Options](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-partition-options)
+
+<br><br>
+
+**表选项**
+
+*table_options* 表示可以被用在 [CREATE TABLE](https://dev.mysql.com/doc/refman/8.0/en/create-table.html) 语句中的表选项，例如 **ENGINE**，**AUTO_INCREMENT**，**AVG_ROW_LENGTH**，**MAX_ROWS**，**ROW_FORMAT**，或 **TABLESPACE**。
+
+* 改变表的默认字符集：
+
+```sql
+ALTER TABLE t1 CHARACTER SET = utf8;
+```
+
+另请参见 [改变字符集](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-character-set)。
+
+* 增加（或改变）一个表的注释：
+
+```sql
+ALTER TABLE t1 COMMENT = 'New table comment';
+```
+
+**重命名，重定义，及重新排序列**
+
+**CHANGE**，**MODIFY**，**RENAME COLUMN**，和 **ALTER** 从句使已存在的列的名字和定义能够被修改。它们有这些比较而言的特性：
+
+* CHANGE:
+
+    * 可以重命名一个列和修改它的定义，或者两者。
+
+    * 它比 **MODIFY** 或 **RENAME COLUMN** 有更好的兼容性，但对于一些操作有便利性的代价。**CHANGE** 要求命名列两次如果不重命名它，及要求重新指定列的定义如果仅重命名它。
+
+    * 与 **FIRST** 或 **AFTER** 一起使用时，可以重新排序列。
+
+* MODIFY:
+
+    * 可以改变一个列的定义但不能改变它的名字。
+
+    * 改变一个列的定义不需要重命名它，比 **CHANGE** 更方便。
+
+    * 和 **FIRST** 或 **AFTER** 一起使用时，可以重新排序列。
+
+* RENAME COLUMN:
+
+    * 可以改变一个列的名字，但不能改变它的定义。
+
+    * 重命名一个列不需要改变它的定义，比 **CHANGE** 更方便。
+
+* ALTER: 仅用于改变一个列的默认值。
+
+**CHANGE** 是 MySQL 对标准 SQL 的一个扩展。**MODIFY** 和 **RENAME COLUMN** 是 MySQL 用于兼容 Oracle 的扩展。
+
+修改列的定义使用 **CHANGE** 或 **MODIFY**，定义必须包含数据类型和所有应该应用到新列的属性，除了索引属性如 **PRIMARY KEY** 或 **UNIQUE**。出现在原始定义中但没有在新列中指定的属性不会转入。假设一个列 **col1** 被定义为 **INT UNSIGNED DEFAULT 1 COMMENT 'my column'** 然后你按下面的语句修改列，未来改变的仅有 **INT** 到 **BIGINT**：
+
+```sql
+ALTER TABLE t1 MODIFY col1 BIGINT;
+```
+
+上面的语句将数据类型从 **INT** 改为 **BIGINIT**，但它也丢弃了 **UNSIGNED**，**DEFAULT**，和 **COMMENT** 属性。要保留它们，语句必须明确地包含它们：
+
+```sql
+ALTER TABLE t1 MODIFY col1 BIGINT UNSIGNED DEFAULT 1 COMMENT 'my column';
 ```
 
 ### 13.2.6 INSERT语法
