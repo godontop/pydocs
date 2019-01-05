@@ -57,6 +57,7 @@
         * [比较函数与运算符](#比较函数与运算符)
         * [4.2.5 在命令行中使用选项](#425-在命令行中使用选项)
             * [4.5.1.1 mysql选项](#4511-mysql选项)
+        * [4.5.4 mysqldump — 一个数据库备份程序](#454-mysqldump--一个数据库备份程序)
         * [11.1.2 日期和时间类型概述](#1112-日期和时间类型概述)
         * [11.3.5 为TIMESTAMP和DATETIME自动初始化和更新](#1135-为timestamp和datetime自动初始化和更新)
         * [12.5 字符串函数](#125-字符串函数)
@@ -1124,6 +1125,48 @@ Format     |Description         |Introduced   |Removed
 
   执行指定语句然后退出。默认输出格式与使用 [--batch](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_batch) 选项的输出相似。对于一些例子，请看章节 [4.2.5, “Using Options on the Command Line”](https://dev.mysql.com/doc/refman/8.0/en/command-line-options.html)。和这个选项一起使用时，[mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 不使用历史文件。
 
+### 4.5.4 mysqldump — 一个数据库备份程序
+[mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html) 客户端工具执行 [逻辑备份](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_logical_backup)，生产一个可以被执行以重新生成原始数据库对象定义和表数据的 SQL 语句集合。 它转储一个或多个 MySQL 数据库，用于备份或传输给另一个 SQL 服务器。[mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html) 命令也可以生成 CSV，其它分隔文本，或 XML 格式的输出。
+
+* [性能和可扩展性考虑](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-performance)
+
+* [调用语法](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-syntax)
+
+* [选项语法 - 按字母顺序汇总](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-option-summary)
+
+* [连接选项](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-connection-options)
+
+* [选项文件选项](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-option-file-options)
+
+* [DDL 选项](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-ddl-options)
+
+* [调试选项](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-debug-options)
+
+* [帮助选项](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-help-options)
+
+* [国际化选项](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-i18n-options)
+
+* [复制选项](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-replication-options)
+
+* [格式化选项](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-format-options)
+
+* [过滤选项](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-filter-options)
+
+* [性能选项](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-performance-options)
+
+* [事务性的选项](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-transaction-options)
+
+* [选项组](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-option-groups)
+
+* [例子](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-option-examples)
+
+* [限制](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#mysqldump-restrictions)
+
+**性能和可扩展性考虑**
+
+**mysqldump** 的优势包括在恢复以前可以方便且灵活地查看甚至编辑输出。你可以克隆数据库用于开发和 DBA 的工作，或者产生一个已存在的数据库的轻微变化用于测试。它没有打算作为一个快速或可扩展的备份大量数据的解决方案。对于大数据量，即使备份步骤花费一个合理的时间，恢复数据也可能非常慢因为重放 SQL 语句会调用磁盘 I/O 用于插入，创建索引，等等。
+
+
 ### 11.1.2 日期和时间类型概述
 MySQL 允许 [TIME](https://dev.mysql.com/doc/refman/8.0/en/time.html)，[DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 和 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 值含有小数部分的秒，最高精确到微秒（6位）。定义一个包含一个小数秒部分的列，使用语法 *type_name*(*fsp*)，其中 *type_name* 是 [TIME](https://dev.mysql.com/doc/refman/8.0/en/time.html), [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html), 或 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html), *fsp* 是小数秒精确度。例如：
 
@@ -2018,7 +2061,6 @@ partition_options:
 * [Row Order for MyISAM Tables](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-row-order)
 
 * [Partitioning Options](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-partition-options)
-
 <br><br>
 
 **表选项**
