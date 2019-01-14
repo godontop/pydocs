@@ -2,6 +2,7 @@
 * [Markdown](#markdown)
 * [Python](#python)
     * [Python标准库](#python标准库)
+        * [内置函数](#内置函数)
         * [内置类型](#内置类型)
             * [数值类型 — int, float, complex](#数值类型--int-float-complex)
                 * [整型数类型的按位运算](#整型数类型的按位运算)
@@ -100,6 +101,25 @@ Visual C++ Redistributable for Visual Studio 2015是安装MySQL Workbench的前�
 PyMongo  
 [http://api.mongodb.com/python/current/index.html](http://api.mongodb.com/python/current/index.html)
 
+Ruby  
+官网：[https://www.ruby-lang.org/zh_cn/](https://www.ruby-lang.org/zh_cn/)  
+发明者：松本行弘（Yukihiro “Matz” Matsumoto）
+
+Ruby 经常位于全球编程语言成长和流行度指数的前十名（比如[TIOBE](http://www.tiobe.com/index.php/content/paperinfo/tpci/index.html)）。造成 Ruby 如此快速成长的原因很大程度上是因为使用 Ruby 编写的 Web 框架 [Ruby on Rails](http://rubyonrails.org/) 非常受欢迎。
+
+**Ruby 的其他实现**  
+作为一门语言，Ruby 有不同的实现。这里讨论的是推荐的实现，社区通常称之为 **MRI**（“Matz’s Ruby Interpreter”）或 **CRuby**（因为是用 C 语言写的）。不过，还有一些别的实现。其他实现通常在特定的场合中有用，集成了其他语言或环境，或者有 MRI 不具有的特性。
+
+下面列出一些其他实现：
+
+* [JRuby](http://jruby.org/) 是基于 JVM（Java Virtual Machine）的 Ruby 实现，利用了 JVM 中优秀的 JIT 编译器、垃圾回收程序、并发线程、工具生态系统和大量的库。
+* [Rubinius](http://rubini.us/) 是用“Ruby 编写的 Ruby”。构建于 LLVM 之上，Rubinius 跑在一个很灵活的虚拟机上，别的语言也可以构建于这个虚拟机上。
+* [MacRuby](http://www.macruby.org/) 是一个与苹果 Mac OS X 上 Cocoa 库紧密集成的实现，可以让你轻易地写出桌面应用程序。
+* [mruby](http://www.mruby.org/) 是 Ruby 语言的轻量级实现，可以链接或嵌入到程序之中。mruby 由 Ruby 的创建者松本行弘（Matz）领导开发。
+* [IronRuby](http://www.ironruby.net/) 是一个“与 .NET 框架紧密集成”的实现。
+* [MagLev](http://maglev.github.io/) 是“一个快速、稳定的 Ruby 实现，支持集成对象持久化和分布式共享缓存”。
+* [Cardinal](https://github.com/parrot/cardinal) 是一个“为 [Parrot](http://parrot.org/) 虚拟机 （Perl 6）编写的 Ruby 编译器”。
+
 StackEdit  
 [https://stackedit.io/app](https://stackedit.io/app)  
 支持GFM的Markdown在线编辑器
@@ -111,6 +131,10 @@ w3schools.com
 w3school 在线教程  
 [http://www.w3school.com.cn](http://www.w3school.com.cn)  
 中文版的w3school
+
+Wireshark  
+[https://www.wireshark.org](https://www.wireshark.org)  
+简介：开源的包分析器。也被称为网络协议分析器或抓包工具。
 
 时区列表  
 [tz数据库时区列表](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
@@ -137,6 +161,38 @@ Markdown中的多个空行会被当做一个空行来处理。
 
 # Python
 ## Python标准库
+### 内置函数
+Python解释器内置了许多总是可用的函数和类型。在这里以字母顺序列出它们。
+
+|          |          |Built-in Functions|          |          |
+|----------|----------|------------------|----------|----------|
+|          |          |                  |          |super()   |
+
+**super**([*type*__[__*, object-or-type*__]]__)  
+*super* 有两种典型的用法。在一个单继承的类层次结构中，*super* 可以被用来引用父类而无需明确地指出它们，从而使代码更易于维护。这种用法与其它程序设计语言中 *super* 的用法十分相似。
+
+```python
+>>> class A:
+...     def __init__(self):
+...         print("Dunder init func in class A.")
+...
+>>> class B(A):
+...     def __init__(self):
+...         print("Dunder init func in class B.")
+...
+>>> b = B()
+Dunder init func in class B.
+>>> class B(A):
+...     def __init__(self):
+...         super().__init__()
+...         print("Dunder init func in class B.")
+...
+>>> b = B()
+Dunder init func in class A.
+Dunder init func in class B.
+>>> 
+```
+
 ### 内置类型
 #### 数值类型 — int, float, complex
 ##### 整型数类型的按位运算
@@ -1165,6 +1221,65 @@ Format     |Description         |Introduced   |Removed
 **性能和可扩展性考虑**
 
 **mysqldump** 的优势包括在恢复以前可以方便且灵活地查看甚至编辑输出。你可以克隆数据库用于开发和 DBA 的工作，或者产生一个已存在的数据库的轻微变化用于测试。它没有打算作为一个快速或可扩展的备份大量数据的解决方案。对于大数据量，即使备份步骤花费一个合理的时间，恢复数据也可能非常慢因为重放 SQL 语句会调用磁盘 I/O 用于插入，创建索引，等等。
+
+对于大型的备份和恢复，[物理](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_physical) 备份更合适，以它们的原始格式拷贝数据文件可以更快地被恢复：
+
+[mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html) 可以一行行地检索和转储表的内容，或者它可以从一个表检索全部的内容并在转储它以前将其缓存到内存中。如果你正在转储大表将其缓存到内存中可能会是一个问题。一行行地转储表，使用 [--quick](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_quick) 选项（或者 [--opt](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_opt)，该选项默认启用 [--quick](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_quick)）。[--opt](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_opt) 选项（因此 [--quick](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_quick)）默认是启用的，所以要启用内存缓存，使用 [--skip-quick](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_quick)。
+
+**调用语法**
+
+通常有三种方式使用 [mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html)—为了转储一个或多个表的集合，一个或多个完整的数据库的集合，或者整个 MySQL 服务器—如下所示：
+
+```sh
+shell> mysqldump [options] db_name [tbl_name ...]
+shell> mysqldump [options] --databases db_name ...
+shell> mysqldump [options] --all-databases
+```
+
+转储整个数据库，不要在 *db_name* 后面指定任何表，或者使用 [--databases](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_databases) 或 [--all-databases](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_all-databases) 选项。
+
+看你的 [mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html) 版本支持的选项列表，使用命令 [mysqldump --help](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html)。
+
+**选项语法 - 按字母顺序总结**
+
+[mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html) 支持下面的选项，这些选项可以在命令行或一个选项文件的 [**mysqldump**] 和 [**client**] 组中指定。关于 MySQL 程序使用的选项文件的信息，参见章节 [4.2.7, “Using Option Files”](https://dev.mysql.com/doc/refman/8.0/en/option-files.html)。
+
+**mysqldump 选项**
+
+**格式**         |**描述**        |**引入**       |**删除**
+-----------------|---------------|---------------|---------
+[--all-databases](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_all-databases)  |转储所有数据库中的所有表|        |
+[--databases](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_databases)      |将所有名称参数解释为数据库名称   |        |
+[--help](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_help)           |显示帮助信息然后退出  |        |
+[--host](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_host)           |要连接的主机（IP地址或主机名）  |     |
+[--opt](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_opt)           |代表 --add-drop-table --add-locks --create-options --disable-keys --extended-insert --lock-tables --quick --set-charset 的缩写 |       |
+[--password](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_password)      |连接服务器时所使用的密码    |       |
+[--port](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_port)         |用于连接的 TCP/IP 端口号  |        |
+[--user](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_user)         |连接到服务器时所使用的 MySQL 用户名   |    |
+[--verbose](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_verbose)      |详细模式             |     |
+[--version](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_version)         |显示版本信息然后退出    |      |
+
+**连接选项**
+
+[mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html) 命令登录进入一个 MySQL 服务器以提取信息。下面的选项指定了如何连接到 MySQL 服务器，要么在相同的机器上要么在一个远程系统上。
+
+* --host=*host_name*, -h *host_name*
+
+  从 MySQL 服务器转储数据到指定的主机上。默认主机是 localhost。
+
+* --password[=*password*], -p[*password*]
+
+  连接到服务器时使用的密码。如果你使用短选项形式（-p），选项和密码之间不能有空格。如果你在命令行的 --password 或 -p 选项后面省略了 *password* 值，[mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html) 会提示你输入一个。
+
+  在命令行中指定一个密码应该被认为是不安全的。见章节 [6.1.2.1, “End-User Guidelines for Password Security”](https://dev.mysql.com/doc/refman/8.0/en/password-security-user.html)。你可以使用一个选项文件以避免在命令行中指定密码。
+
+* --port=*port_num*, -P *port_num*
+
+  用于连接的 TCP/IP 端口号。
+
+* --user=*user_name*, -u *user_name*
+
+  连接到服务器时使用的 MySQL 用户名。
 
 
 ### 11.1.2 日期和时间类型概述
