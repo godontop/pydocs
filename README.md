@@ -72,12 +72,25 @@
 		* [YouCompleteMe](#youcompleteme)
 
 # 导航
+Apache  
+[Apache软件基金会SVN仓库](http://svn.apache.org/repos/asf/)
+
 Apache Subversion  
 [https://subversion.apache.org](https://subversion.apache.org)
 
 DistroWatch  
 [https://distrowatch.com](https://distrowatch.com)  
 Linux发行版排名统计
+
+IANA  
+[https://www.iana.org](https://www.iana.org)  
+IANA（Internet Assigned Numbers Authority）是[ICANN](https://www.icann.org)的一个职能机构，一个非营利性的美国私有公司，审核全球IP地址的分配，自治系统（AS）号的分配，DNS根域的管理，媒体类型，和其它互联网协议相关的符号及互联网地址。
+
+IANA分配的端口号列表  
+[服务名和传输协议端口号注册表](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xml) 
+
+ICANN  
+[https://www.icann.org](https://www.icann.org)
 
 Java Decompiler  
 [http://jd.benow.ca](http://jd.benow.ca)  
@@ -627,6 +640,13 @@ TypeError: __init__() should return None, not 'str'
 >>> t = Test()
 >>>
 ```
+
+object.**\_\_str\_\_**(*self*)  
+由 [str(object)](https://docs.python.org/3/library/stdtypes.html#str) 调用，然后内置函数 [format()](https://docs.python.org/3/library/functions.html#format) 及 [print()](https://docs.python.org/3/library/functions.html#print) 计算 “通俗的” 或令人满意地可打印的代表一个对象的字符串。返回值必须是一个[字符串](https://docs.python.org/3/library/stdtypes.html#textseq)对象。
+
+这个方法不同于 [object.\_\_repr\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__repr__)，它不期待 [\_\_str\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__str__) 返回一个有效的 Python 表达式：一个更方便或更简明的表示法可以被使用。
+
+默认实现由内置 [object](https://docs.python.org/3/library/functions.html#object) 调用 [object.\_\_repr\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__repr__) 定义。
 
 object.**\_\_bool\_\_**(*self*)  
 调用以实现真值测试及内置操作 `bool()`；应该返回 `False` 或 `True`。当这个方法没有被定义时，[\_\_len\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__len__) 被调用，如果它被定义了，且如果它的结果是非零的，则该对象被认为是真的。如果一个类既没有定义 [\_\_len\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__len__) 也没有定义 [\_\_bool\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__bool__)，则它所有的实例都被认为是真的。
