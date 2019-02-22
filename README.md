@@ -75,12 +75,25 @@
 Apache  
 [Apache软件基金会SVN仓库](http://svn.apache.org/repos/asf/)
 
+Apache Hadoop  
+[https://hadoop.apache.org](https://hadoop.apache.org)
+
+Apache Hadoop 文档  
+[http://hadoop.apache.org/docs/current/](http://hadoop.apache.org/docs/current/)
+
 Apache Subversion  
 [https://subversion.apache.org](https://subversion.apache.org)
+
+Apache Tomcat  
+[http://tomcat.apache.org](http://tomcat.apache.org)
 
 DistroWatch  
 [https://distrowatch.com](https://distrowatch.com)  
 Linux发行版排名统计
+
+Eclipse  
+[https://www.eclipse.org](https://www.eclipse.org)  
+开源的Java IDE
 
 IANA  
 [https://www.iana.org](https://www.iana.org)  
@@ -119,6 +132,9 @@ Ruby
 发明者：松本行弘（Yukihiro “Matz” Matsumoto）
 
 Ruby 经常位于全球编程语言成长和流行度指数的前十名（比如[TIOBE](http://www.tiobe.com/index.php/content/paperinfo/tpci/index.html)）。造成 Ruby 如此快速成长的原因很大程度上是因为使用 Ruby 编写的 Web 框架 [Ruby on Rails](http://rubyonrails.org/) 非常受欢迎。
+
+**Ruby MRI**  
+以 Ruby 的创造者 Yukihiro Matsumoto ("Matz") 命名的 **Matz's Ruby Interpreter** 或 **Ruby MRI** (也称 **CRuby**) 是 Ruby 程序设计语言的参考实现。直到2011年 Ruby 语言的技术规范，MRI 实现被认为是事实上的参考，特别是因为试图创建一个独立的技术规范 ([RubySpec](https://en.wikipedia.org/wiki/RubySpec)) 失败后。从 Ruby 1.9，及后续的 Ruby 2.x 及以上，官方的 Ruby 解释器已经变为 [YARV](https://en.wikipedia.org/wiki/YARV) ("Yet Another Ruby VM")。
 
 **Ruby 的其他实现**  
 作为一门语言，Ruby 有不同的实现。这里讨论的是推荐的实现，社区通常称之为 **MRI**（“Matz’s Ruby Interpreter”）或 **CRuby**（因为是用 C 语言写的）。不过，还有一些别的实现。其他实现通常在特定的场合中有用，集成了其他语言或环境，或者有 MRI 不具有的特性。
@@ -1074,6 +1090,13 @@ Name    |Description
 mysql> alter table ID modify column MARKET varchar(10);
 ```
 
+查询数据库 'ISCHOOLYARD' 下的所有表及相应的表注释
+
+```sql
+mysql> use information_schema;
+mysql> select TABLE_NAME, TABLE_COMMENT from TABLES where TABLE_SCHEMA='ISCHOOLYARD';
+```
+
 ### MySQL Workbench
 在整个数据库中搜索指定字符串：  
 
@@ -1301,6 +1324,48 @@ shell> mysqldump [options] --all-databases
 
   连接到服务器时使用的 MySQL 用户名。
 
+**筛选选项**
+
+下面的选项控制哪些类型的模式对象将被写入到转储文件：按分类，如触发器或事件；按名字，例如，选择转储哪些数据库及表；或甚至使用一个 WHERE 子句从表数据中筛选行。
+
+* --all-databases, -A
+
+  转储所有数据库中的所有表。这等同于使用 [--databases](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_databases) 选项及在命令行中列出所有数据库的名称。
+
+* --databases, -B
+
+  转储几个数据库。通常地，[mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html) 将命令行中的第一个名称参数作为一个数据库名而将其后的名称作为表名。使用这个选项，它将所有名称参数都作为数据库名。
+
+  这个选项可以被用来转储 `performance_schema` 数据库，这个数据库通常不会被转储即使使用 [--all-databases](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_all-databases) 选项。
+
+* --tables
+
+  覆盖 [--databases](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_databases) 或 -B 选项。[mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html) 将这个选项后面的所有名称参数都当作表名。
+
+**例子**  
+备份一个完整的数据库：
+
+```sh
+shell> mysqldump db_name > backup-file.sql
+```
+
+还原转储的文件到服务器中：
+
+```sh
+shell> mysql db_name < backup-file.sql
+```
+
+你可以用一个命令转储几个数据库：
+
+```sh
+shell> mysqldump --databases db_name1 [db_name2 ...] > my_databases.sql
+```
+
+转储所有数据库，使用 [--all-databases](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_all-databases) 选项：
+
+```sh
+shell> mysqldump --all-databases > all_databases.sql
+```
 
 ### 11.1.2 日期和时间类型概述
 MySQL 允许 [TIME](https://dev.mysql.com/doc/refman/8.0/en/time.html)，[DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 和 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 值含有小数部分的秒，最高精确到微秒（6位）。定义一个包含一个小数秒部分的列，使用语法 *type_name*(*fsp*)，其中 *type_name* 是 [TIME](https://dev.mysql.com/doc/refman/8.0/en/time.html), [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html), 或 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html), *fsp* 是小数秒精确度。例如：
@@ -2430,6 +2495,12 @@ FIELDS TERMINATED BY ',' ENCLOSED BY '"';
 
 ```vim
 :set ft?
+```
+
+查看你的 `completeopt` 的设置状态
+
+```vim
+:set completeopt?
 ```
 
 **查找**  
