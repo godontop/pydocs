@@ -33,6 +33,7 @@
     * [PyPI](#pypi)
         * [Django](#django)
             * [settings.py](#settingspy)
+        * [pip](#pip)
         * [PyMongo](#pymongo)
 * [Python2](#python2)
     * [Python 2 语言参考](#python-2-语言参考)
@@ -72,6 +73,12 @@
 		* [YouCompleteMe](#youcompleteme)
 
 # 导航
+Anaconda  
+官方网站：[https://www.anaconda.com](https://www.anaconda.com)
+
+Anaconda Distribution  
+世界上最流行的 Python/R 数据科学平台
+
 Apache  
 [Apache软件基金会SVN仓库](http://svn.apache.org/repos/asf/)
 
@@ -124,6 +131,9 @@ MySQL Workbench
 Visual C++ Redistributable for Visual Studio 2015是安装MySQL Workbench的前置条件。  
 [Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/zh-CN/download/details.aspx?id=48145)
 
+Oracle数据库文档  
+[https://docs.oracle.com/en/database/oracle/oracle-database/index.html](https://docs.oracle.com/en/database/oracle/oracle-database/index.html)
+
 PyMongo  
 [http://api.mongodb.com/python/current/index.html](http://api.mongodb.com/python/current/index.html)
 
@@ -165,11 +175,14 @@ Wireshark
 [https://www.wireshark.org](https://www.wireshark.org)  
 简介：开源的包分析器。也被称为网络协议分析器或抓包工具。
 
-时区列表  
-[tz数据库时区列表](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
-
 2018年12月中华人民共和国县以上行政区划代码  
 [http://www.mca.gov.cn/article/sj/xzqh/2018/201804-12/20181201301111.html](http://www.mca.gov.cn/article/sj/xzqh/2018/201804-12/20181201301111.html)
+
+清华大学开源软件镜像站  
+[https://mirrors.tuna.tsinghua.edu.cn](https://mirrors.tuna.tsinghua.edu.cn)
+
+时区列表  
+[tz数据库时区列表](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
 
 # Markdown
 要在Markdown中显示`<`和`>`，必须使用使用转义字符`&lt;`和`&gt;`。
@@ -742,6 +755,27 @@ pip3 install Django
 **注解**
 
 自从 Django 第一版发布将 **TIME_ZONE** 设置为 **'America/Chicago'** 以来，全局设置 (如果你的项目的 **settings.py** 中什么都没定义则使用) 保持 **'America/Chicago'** 是为了向后兼容。新项目模板默认为 **'UTC'**。
+
+### pip
+## 安装
+### 我需要安装pip吗？
+pip is already installed if you are using Python 2 >=2.7.9 or Python 3 >=3.4 downloaded from [python.org](https://www.python.org/) or if you are working in a [Virtual Environment](https://packaging.python.org/tutorials/installing-packages/#creating-and-using-virtual-environments) created by [virtualenv](https://packaging.python.org/key_projects/#virtualenv) or [pyvenv](https://packaging.python.org/key_projects/#venv). Just make sure to [upgrade pip](https://pip.pypa.io/en/latest/installing/#upgrading-pip).
+
+### 升级pip
+On Linux or macOS:  
+`pip install -U pip`
+
+On Windows:  
+`python -m pip install -U pip`
+
+## 参考指南
+### pip install
+#### 选项
+-U, --upgrade  
+升级所有指定的包到最新的可用版本。依赖的处理依赖于使用的 upgrade-strategy。
+
+--user  
+Install to the Python user install directory for your platform. Typically ~/.local/, or %APPDATA%Python on Windows. (See the Python documentation for site.USER_BASE for full details.)
 
 ### PyMongo
 使用 [find_one()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one) 获取一个单一的文档
