@@ -31,10 +31,16 @@
                 * [3.3.1. 基本自定义](#331-基本自定义)
                 * [3.3.7. 仿真容器类型](#337-仿真容器类型)
     * [PyPI](#pypi)
+        * [aiohttp](#aiohttp)
+        * [Beautiful Soup](#beautiful-soup)
         * [Django](#django)
             * [settings.py](#settingspy)
+        * [lxml](#lxml)
         * [pip](#pip)
         * [PyMongo](#pymongo)
+        * [pyquery](#pyquery)
+        * [Requests](#requests)
+        * [tesserocr](#tesserocr)
 * [Python2](#python2)
     * [Python 2 语言参考](#python-2-语言参考)
         * [3. 数据模型](#3-数据模型-1)
@@ -68,6 +74,8 @@
         * [13.2.6 INSERT语法](#1326-insert语法)
         * [13.2.10 SELECT语法](#13210-select语法)
             * [13.2.10.1 SELECT ... INTO语法](#132101-select--into语法)
+* [ChromeDriver](#chromedriver)
+* [GeckoDriver](#geckodriver)
 * [vim](#vim)
 	* [vim插件](#vim插件)
 		* [YouCompleteMe](#youcompleteme)
@@ -729,6 +737,45 @@ object.**\_\_setitem\_\_**(*self, key, value*)
 调用以实现赋值给 `self[key]`。注意事项同 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__)。这应该仅为映射实现如果对象支持改变键的值，或者如果可以增加新键，或者对于序列如果元素可以被替换。对于不正确的 *key* 值应该抛出和 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__) 方法相同的异常。
 
 ## PyPI
+### aiohttp
+用于 [asyncio](https://aiohttp.readthedocs.io/en/stable/glossary.html#term-asyncio) 和 Python 的异步 HTTP 客户端/服务器。  
+
+官方文档：[https://aiohttp.readthedocs.io/en/stable/](https://aiohttp.readthedocs.io/en/stable/)  
+GitHub：[https://github.com/aio-libs/aiohttp](https://github.com/aio-libs/aiohttp)  
+
+**库安装**
+
+```sh
+$ pip install aiohttp
+```
+
+你可能想安装可选的 [cchardet](https://aiohttp.readthedocs.io/en/stable/glossary.html#term-cchardet) 库替换 [chardet](https://aiohttp.readthedocs.io/en/stable/glossary.html#term-chardet) ，因为 [cchardet](https://aiohttp.readthedocs.io/en/stable/glossary.html#term-cchardet) 更快：
+
+```sh
+$ pip install cchardet
+```
+
+为了通过客户端 API 加速DNS解析你也可以安装 [aiodns](https://aiohttp.readthedocs.io/en/stable/glossary.html#term-aiodns)。高度推荐这个选择：
+
+```sh
+$ pip3 install aiodns
+```
+
+### Beautiful Soup
+官方文档：[https://www.crummy.com/software/BeautifulSoup/bs4/doc](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)  
+中文文档：[https://www.crummy.com/software/BeautifulSoup/bs4/doc.zh](https://www.crummy.com/software/BeautifulSoup/bs4/doc.zh/)  
+
+安装Beautiful Soup  
+
+```sh
+$ pip3 install beautifulsoup4
+```
+
+**注意**  
+这里我们虽然安装的是 beautifulsoup4 这个包，但是在引入的时候却是 bs4。这是因为这个包源代码本身的库文件夹名称就是 bs4，所以安装完成之后，这个库文件夹就被移入到本机 Python3 的 lib 库（/usr/local/lib/python3.6/site-packages）里，所以识别到的库文件名就叫作 bs4。
+
+因此，包本身的名称和我们使用时导入的包的名称并不一定是一致的。
+
 ### Django
 Django官网  
 [https://www.djangoproject.com](https://www.djangoproject.com)
@@ -755,6 +802,16 @@ pip3 install Django
 **注解**
 
 自从 Django 第一版发布将 **TIME_ZONE** 设置为 **'America/Chicago'** 以来，全局设置 (如果你的项目的 **settings.py** 中什么都没定义则使用) 保持 **'America/Chicago'** 是为了向后兼容。新项目模板默认为 **'UTC'**。
+
+### lxml
+官方网站：[https://lxml.de](https://lxml.de)  
+GitHub：[https://github.com/lxml/lxml](https://github.com/lxml/lxml)  
+
+安装lxml
+
+```sh
+$ pip3 install lxml
+```
 
 ### pip
 ## 安装
@@ -786,6 +843,171 @@ Install to the Python user install directory for your platform. Typically ~/.loc
 更新并返回一个对象。
 
 **弃用** - 使用 [find_one_and_delete()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one_and_delete), [find_one_and_replace()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one_and_replace), 或者 [find_one_and_update()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one_and_update) 代替。
+
+### pyquery
+GitHub：[https://github.com/gawel/pyquery](https://github.com/gawel/pyquery)  
+官方文档：[https://pyquery.readthedocs.io/en/latest/](https://pyquery.readthedocs.io/en/latest/)  
+
+**安装pyquery**  
+
+```sh
+$ pip3 install pyquery
+```
+
+### Requests
+GitHub地址：[https://github.com/kennethreitz/requests](https://github.com/kennethreitz/requests)  
+Pypi地址：[https://pypi.org/project/requests/](https://pypi.org/project/requests/)  
+官方文档：[http://www.python-requests.org/en/master/](http://www.python-requests.org/en/master/)  
+中文文档：[http://docs.python-requests.org/zh_CN/latest/](http://docs.python-requests.org/zh_CN/latest/)  
+
+**安装requests**  
+
+```sh
+$ pip3 install requests
+```
+
+### Selenium
+官方网站：[https://www.seleniumhq.org](https://www.seleniumhq.org)  
+GitHub地址：[https://github.com/SeleniumHQ/selenium/tree/master/py](https://github.com/SeleniumHQ/selenium/tree/master/py)  
+PyPI：[https://pypi.org/project/selenium/](https://pypi.org/project/selenium/)  
+官方文档：[https://selenium-python.readthedocs.io](https://selenium-python.readthedocs.io)  
+中文文档：[https://selenium-python-zh.readthedocs.io/en/latest/](https://selenium-python-zh.readthedocs.io/en/latest/)  
+
+**安装selenium**  
+
+```sh
+$ pip3 install selenium  
+```
+
+### tesserocr
+tesserocr 是 Python 的一个 OCR 识别库，但其实它是对 tesseract 做的一层 Python API 封装，所以它的核心是 tesseract。因此，在安装 tesserocr 之前，我们需要先安装 tesseract。
+
+tesserocr GitHub：[https://github.com/sirfz/tesserocr](https://github.com/sirfz/tesserocr)  
+tesserocr PyPI：[https://pypi.org/project/tesserocr/](#https://pypi.org/project/tesserocr/)  
+tesseract 下载地址：[https://digi.bib.uni-mannheim.de/tesseract/](https://digi.bib.uni-mannheim.de/tesseract/)  
+tesseract GitHub：[https://github.com/tesseract-ocr/tesseract](https://github.com/tesseract-ocr/tesseract)  
+tesseract 语言包：[https://github.com/tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata)  
+tesseract 文档：[https://github.com/tesseract-ocr/tesseract/wiki/Documentation](https://github.com/tesseract-ocr/tesseract/wiki/Documentation)  
+
+**Windows平台**  
+安装tesseract  
+
+1. 到 [https://digi.bib.uni-mannheim.de/tesseract/](https://digi.bib.uni-mannheim.de/tesseract/) 页面下载 tesseract-ocr-w64-setup-v4.0.0.20181030.exe 文件；
+2. 双击下载的 tesseract-ocr-w64-setup-v4.0.0.20181030.exe 文件，在安装的过程中可以勾选“Additional language data (download)”选项来安装 OCR 识别支持的语言包，这样 OCR 便可以识别多国语言。
+3. 安装完成后需要把tesseract安装目录下的tessdata目录复制到Python的安装目录下，否则调用时会出现类似下面的错误提示：
+
+```python
+RuntimeError: Failed to init API, possibly an invalid tessdata path: d:\program files\python37\/tessdata/
+```
+
+安装tesserocr  
+通过pip安装  
+从 [simonflueckiger/tesserocr-windows_build/releases](https://github.com/simonflueckiger/tesserocr-windows_build/releases) 下载对应你的Windows平台和Python版本的 wheel 文件，并通过下面的方式安装：
+
+```
+> pip install <package_name>.whl
+```
+
+tesserocr 的安装方法请参考：[tesserocr 的PyPI主页](https://pypi.org/project/tesserocr/)
+
+**Linux平台**  
+CentOS和Red Hat  
+安装tesseract  
+
+```sh
+# yum install tesseract -y
+```
+
+列出支持的语言列表  
+
+```sh
+$ tesseract --list-langs  
+List of available languages (1):
+```
+
+如果想要支持多国语言，还需要安装语言包，官方叫作 tessdata。
+
+```sh
+$ git clone https://github.com/tesseract-ocr/tessdata.git
+# mv tessdata/* /usr/share/tesseract/tessdata/
+```
+
+再次查看tesseract支持的语言列表
+
+```sh
+$ tesseract --list-langs
+List of available languages (129):
+```
+
+安装tesserocr  
+安装必要的依赖包  
+
+```sh
+# yum install python36-devel leptonica-devel tesseract-devel
+```
+
+安装tesserocr  
+
+```sh
+$ pip3 install tesserocr
+```
+
+**macOS平台**  
+系统环境：  
+macOS High Sierra (10.13.6)  
+Python 3.7.2  
+Python 2.7.10  
+
+通过Homebrew安装tesseract  
+
+```sh
+$ brew install tesseract
+$ brew install tesseract-lang
+```
+
+默认安装的是tesseract的最新版，版本是4.0.0。
+
+安装tesserocr  
+通过pip3安装tesserocr  
+
+```sh
+$ pip3 install tesserocr
+```
+
+安装tesseract 4.0.0后，在Python 3.7.2中导入tesserocr模块时会出现如下错误（Python 2.7.10中可以正常导入）：
+
+```python
+>>> import tesserocr
+!strcmp(locale, "C"):Error:Assert failed:in file baseapi.cpp, line 209
+[1]    5249 illegal hardware instruction  python3
+```
+
+解决办法一  
+导入tesserocr前，将LC_ALL的值设为'C'。
+
+```python
+>>> import locale
+>>> locale.setlocale(locale.LC_ALL,'C')
+'C'
+>>> import tesserocr
+```
+
+解决办法二  
+安装tesseract 3.05.02  
+
+1. 从 [https://raw.githubusercontent.com/Homebrew/homebrew-core/5df6eb919506a097b2efb1df34a16e3a147c8731/Formula/tesseract.rb](https://raw.githubusercontent.com/Homebrew/homebrew-core/5df6eb919506a097b2efb1df34a16e3a147c8731/Formula/tesseract.rb) 下载 tesseract.rb 文件，之后修改 tesseract.rb 文件，将文件中第65行的 “needs :cxx11” 删掉，之后保存，如果不修改 tesseract.rb 文件，安装时会报如下错误：
+
+```
+Error: tesseract: "cxx11" is not a recognized standard
+```
+
+2. 切换到刚才下载的 tesseract.rb 文件所在的目录，执行如下命令：
+
+```sh
+$ brew install tesseract.rb --with-all-languages
+$ pip3 install tesserocr
+$ pip3 install pillow
+```
 
 # Python2
 ## Python 2 语言参考
@@ -2549,6 +2771,46 @@ FIELDS TERMINATED BY ',' ENCLOSED BY '"';
 ```
 
 将2018年10月份的短信记录导出到服务器上的/tmp目录下，文件名为201810.csv。
+
+# ChromeDriver
+官方网站：[http://chromedriver.chromium.org](http://chromedriver.chromium.org)  
+下载地址：[http://chromedriver.storage.googleapis.com/index.html](http://chromedriver.storage.googleapis.com/index.html)  
+
+下载ChromeDriver时需要注意ChromeDriver版本和Chrome版本的对应关系。
+
+在Windows平台下，chromedriver.exe 文件建议复制到Python Scripts目录（即Python安装目录下的Scripts目录）。
+
+在macOS及Linux平台下，chromedriver文件建议复制到/usr/local/bin目录。
+
+**注意用户的一致性：**  
+在Linux平台下，若登录图形界面的用户为A，如果在终端中运行的程序最终会调用图形界面程序，应使用A用户运行该程序，切不可用root用户或是其他用户来运行该程序，否则会出现一些异常。
+
+# GeckoDriver
+GitHub：[https://github.com/mozilla/geckodriver](https://github.com/mozilla/geckodriver)  
+下载地址：[https://github.com/mozilla/geckodriver/releases](https://github.com/mozilla/geckodriver/releases)  
+
+在Windows平台下，建议将geckodriver.exe文件放到Python Scripts目录下。
+
+在Linux和macOS平台下，建议将geckodriver文件复制到/usr/local/bin目录下。
+
+## PhantomJS
+官方网站：[http://phantomjs.org](http://phantomjs.org)  
+官方文档：[http://phantomjs.org/quick-start.html](http://phantomjs.org/quick-start.html)  
+下载地址：[http://phantomjs.org/download.html](http://phantomjs.org/download.html)  
+API接口说明：[http://phantomjs.org/api/command-line.html](http://phantomjs.org/api/command-line.html)  
+
+**重要：** PhantomJS 的开发工作目前已暂停。
+
+PhantomJS 是一个无界面的、可以用 JavaScript 进行脚本编程的 web 浏览器。它可以运行在 Windows, macOS, Linux, 和 FreeBSD 上。
+
+**Windows平台**  
+将phantomjs-2.1.1-windows.zip解压后，建议直接将bin目录中的phantomjs.exe文件复制到Python Scripts目录。
+
+**Linux平台**  
+将phantomjs-2.1.1-linux-x86_64.tar.bz2解压后，建议直接将bin目录下的phantomjs文件复制到/usr/local/bin目录下。
+
+**macOS平台**  
+将phantomjs-2.1.1-macosx.zip解压后，建议直接将bin目录下的phantomjs文件复制到/usr/local/bin目录下。
 
 # vim
 在vim中输入下面的指令，看vim是否支持python或python3，返回1则表示支持
