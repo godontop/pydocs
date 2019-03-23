@@ -956,7 +956,7 @@ $ pip3 install pyquery
 GitHub：[https://github.com/binux/pyspider](https://github.com/binux/pyspider)  
 官方教程：[http://docs.pyspider.org/en/latest/tutorial/](http://docs.pyspider.org/en/latest/tutorial/)  
 
-pyspider需要用到PhantomJS，所以在安装pyspider前，需要先安装好PhantomJS。
+pyspider需要用到PhantomJS，所以在安装pyspider前，需要先安装好PhantomJS。  
 pyspider还依赖于pycurl、WsgiDAV以及其它第三方Python库，且不支持最新版的WsgiDAV 3.0.0，需要安装2.4.1版本的WsgiDAV（因为3.0.0版本的WsgiDAV改变了一些选项的名称，而pyspider中引用的依旧是老版本中的选项名称）。    
 
 pycurl PyPI：[https://pypi.org/project/pycurl/](https://pypi.org/project/pycurl/)  
@@ -973,11 +973,13 @@ Windows平台建议直接到 [https://pypi.org/project/pycurl/#files](https://py
 C:\Users\Administrator\Downloads>pip3 install pycurl-7.43.0.2-cp36-cp36m-win_amd64.whl
 ```
 
-如果此处使用pip3安装pycurl，通常会出现类似下面的报错信息：
+如果此处直接使用 `pip3 install pycurl` 编译安装pycurl，通常会出现类似下面的报错信息：
 
 ```
 Command "python setup.py egg_info" failed with error code 10 in C:\Users\YWH\AppData\Local\Temp\pip-install-v7jh2bj2\pycurl\
 ```
+
+安装WsgiDAV 2.4.1和pyspider
 
 ```
 C:\Users\Administrator\Downloads>pip3 install wsgidav==2.4.1
@@ -996,16 +998,16 @@ Ubuntu 18.04.1 LTS
 安装PhantomJS  
 
 ```sh
-\# apt install libfontconfig1
-\# wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2
-\# tar jxvf phantomjs-2.1.1-linux-x86_64.tar.bz2
-\# cp phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin
+# apt install libfontconfig1
+# wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2
+# tar jxvf phantomjs-2.1.1-linux-x86_64.tar.bz2
+# cp phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin
 ```
 
 安装pip3
 
 ```sh
-\# apt install python3-pip
+# apt install python3-pip
 ```
 
 安装编译pycurl需要的包  
@@ -1013,20 +1015,20 @@ libcurl4-openssl-dev包提供/usr/bin/curl-config文件
 libssl-dev包提供/usr/include/openssl/ssl.h文件
 
 ```sh
-\# apt install libcurl4-openssl-dev
-\# apt install libssl-dev
+# apt install libcurl4-openssl-dev
+# apt install libssl-dev
 ```
 
 安装pycurl
 
 ```sh
-\# pip3 install pycurl
+# pip3 install pycurl
 ```
 
 安装WsgiDAV 2.4.1  
 
 ```sh
-\# pip3 install wsgidav==2.4.1
+# pip3 install wsgidav==2.4.1
 ```
 
 如果不指定版本，会安装最新版的WsgiDAV 3.0.0，如果安装最新版的WsgiDAV，启动pyspider会报下面的错误：
@@ -1041,13 +1043,13 @@ ValueError: Invalid configuration:
 安装pyspider
 
 ```sh
-\# pip3 install pyspider
+# pip3 install pyspider
 ```
 
 运行pyspider
 
 ```sh
-\# pyspider all
+# pyspider all
 ```
 
 **CentOS Linux release 7.6.1810 (Core)**  
@@ -1055,7 +1057,7 @@ ValueError: Invalid configuration:
 1. 安装libcurl-devel  
 
 ```sh
-\# yum install libcurl-devel  
+# yum install libcurl-devel  
 ```
 
 libcurl-devel包提供/usr/bin/curl-config文件，若不安装此包，安装pycurl时会出现下面的错误提示：
@@ -1066,7 +1068,9 @@ FileNotFoundError: [Errno 2] No such file or directory: 'curl-config': 'curl-con
 
 2. 指定编译pycurl时所使用的SSL后端
 
+```sh
 export PYCURL_SSL_LIBRARY=nss
+```
 
 若不指定编译pycurl时所使用的SSL后端，则安装pycurl时会出现下面的错误提示：
 
@@ -1079,25 +1083,25 @@ y.
 3. 安装pycurl
 
 ```sh
-\# pip3 install pycurl
+# pip3 install pycurl
 ```
 
 **安装2.4.1版本的WsgiDAV**  
 
 ```sh
-\# pip3 install wsgidav==2.4.1
+# pip3 install wsgidav==2.4.1
 ```
 
 **安装pyspider**
 
 ```sh
-\# pip3 install pyspider
+# pip3 install pyspider
 ```
 
 **启动pyspider**
 
 ```sh
-\# pyspider all
+# pyspider all
 ```
 
 **注意：**  
