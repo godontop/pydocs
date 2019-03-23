@@ -35,12 +35,18 @@
         * [Beautiful Soup](#beautiful-soup)
         * [Django](#django)
             * [settings.py](#settingspy)
+        * [Flask](#flask)
         * [lxml](#lxml)
+        * [mitmproxy](#mitmproxy)
         * [pip](#pip)
         * [PyMongo](#pymongo)
+        * [PyMySQL](#pymysql)
         * [pyquery](#pyquery)
+        * [pyspider](#pyspider)
+        * [redis-py](#redis-py)
         * [Requests](#requests)
         * [tesserocr](#tesserocr)
+        * [Tornado](#tornado)
 * [Python2](#python2)
     * [Python 2 语言参考](#python-2-语言参考)
         * [3. 数据模型](#3-数据模型-1)
@@ -74,8 +80,11 @@
         * [13.2.6 INSERT语法](#1326-insert语法)
         * [13.2.10 SELECT语法](#13210-select语法)
             * [13.2.10.1 SELECT ... INTO语法](#132101-select--into语法)
+* [Appium](#appium)
+* [Charles](#charles)
 * [ChromeDriver](#chromedriver)
 * [GeckoDriver](#geckodriver)
+* [PhantomJS](#phantomjs)
 * [vim](#vim)
 	* [vim插件](#vim插件)
 		* [YouCompleteMe](#youcompleteme)
@@ -135,6 +144,11 @@ MongoDB Reference
 
 MySQL Workbench  
 [https://dev.mysql.com/downloads/workbench/](https://dev.mysql.com/downloads/workbench/)  
+
+Node.js  
+Node.js官网：[http://nodejs.org/](http://nodejs.org/)
+
+Node.js 包索引网站：[https://www.npmjs.com](https://www.npmjs.com)
 
 Visual C++ Redistributable for Visual Studio 2015是安装MySQL Workbench的前置条件。  
 [Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/zh-CN/download/details.aspx?id=48145)
@@ -803,6 +817,17 @@ pip3 install Django
 
 自从 Django 第一版发布将 **TIME_ZONE** 设置为 **'America/Chicago'** 以来，全局设置 (如果你的项目的 **settings.py** 中什么都没定义则使用) 保持 **'America/Chicago'** 是为了向后兼容。新项目模板默认为 **'UTC'**。
 
+### Flask
+GitHub：[https://github.com/pallets/flask](https://github.com/pallets/flask)  
+官方文档：[http://flask.pocoo.org](http://flask.pocoo.org)  
+中文文档：[http://docs.jinkan.org/docs/flask](http://docs.jinkan.org/docs/flask/)  
+
+安装Flash
+
+```sh
+$ pip3 install flask
+```
+
 ### lxml
 官方网站：[https://lxml.de](https://lxml.de)  
 GitHub：[https://github.com/lxml/lxml](https://github.com/lxml/lxml)  
@@ -812,6 +837,59 @@ GitHub：[https://github.com/lxml/lxml](https://github.com/lxml/lxml)
 ```sh
 $ pip3 install lxml
 ```
+
+### mitmproxy
+GitHub：[https://github.com/mitmproxy/mitmproxy](https://github.com/mitmproxy/mitmproxy)  
+官方网站：[https://mitmproxy.org](https://mitmproxy.org)  
+官方文档：[https://docs.mitmproxy.org/stable/](https://docs.mitmproxy.org/stable/)  
+mitmdump：[https://docs.mitmproxy.org/stable/tools-mitmdump/](https://docs.mitmproxy.org/stable/tools-mitmdump/)  
+下载地址：[https://github.com/mitmproxy/mitmproxy/releases](https://github.com/mitmproxy/mitmproxy/releases)  
+DockerHub：[https://hub.docker.com/r/mitmproxy/mitmproxy](https://hub.docker.com/r/mitmproxy/mitmproxy)  
+
+#### 安装mitmproxy  
+
+**Windows平台**  
+到 [https://github.com/mitmproxy/mitmproxy/releases](https://github.com/mitmproxy/mitmproxy/releases) 页面下载 mitmproxy-4.0.1-windows-installer.exe 文件，之后双击即可安装。
+
+**Linux平台**  
+CentOS 7.6.1810  
+到 [https://github.com/mitmproxy/mitmproxy/releases](https://github.com/mitmproxy/mitmproxy/releases) 页面下载 mitmproxy-3.0.3-linux.tar.gz 文件，因为 mitmproxy 3.0.3 以上的版本要求glibc的版本为2.18，而CentOS 7.6的glibc版本为2.17，所以无法使用更新版本的mitmproxy。
+
+```sh
+$ cd /usr/local/bin
+$ wget https://github.com/mitmproxy/mitmproxy/releases/download/v3.0.3/mitmproxy-3.0.3-linux.tar.gz
+$ tar zxvf mitmproxy-3.0.3-linux.tar.gz
+$ rm -f mitmproxy-3.0.3-linux.tar.gz
+```
+
+`tar zxvf mitmproxy-3.0.3-linux.tar.gz` 命令会将 mitmproxy-3.0.3-linux.tar.gz 文件中的三个可执行文件解压到当前目录，这三个可执行文件分别是mitmproxy、mitmdump和mitmweb。
+
+**macOS平台**  
+
+```sh
+$ brew install mitmproxy
+```
+
+#### 配置mitmproxy证书
+运行mitmdump命令以产生CA证书（产生的CA证书在用户的HOME目录下的.mitmproxy目录，Windows为 `%USERPROFILE%\.mitmproxy`，Linux及macOS为 `~/.mitmproxy`），并启动mitmdump；
+
+证书及其说明
+
+名称                    |描述
+-----------------------|------------------------------------
+mitmproxy-ca-cert.p12  |PKCS12 格式的证书，适用于Windows平台
+mitmproxy-ca-cert.pem  |PEM 格式证书，适用于大多数非Windows平台
+
+**Windows平台**  
+1. 双击 mitmproxy-ca-cert.p12，之后“下一步”即可，在“私钥保护”界面不用设置密码，直接“下一步”；
+2. 在“证书存储”界面选择“将所有的证书都放入下列存储”——“受信任的根证书颁发机构”；
+
+**macOS平台**  
+1. 双击 mitmproxy-ca-cert.pem 文件，之后点击“添加”；
+2. 在“钥匙串访问”窗口中找到“mitmproxy”，之后双击该证书，然后展开“信任”，在“使用此证书时”后面的下拉选项框中选择“始终信任”即可。
+
+**Android平台**  
+在移动设备上配置正确的代理设置（配置代理前要在PC上启动mitmdump），然后访问 http://mitm.it 。之后点击Android图标下载证书，下载完成后会提示安装，填好证书名称再点确定即可。
 
 ### pip
 ## 安装
@@ -835,6 +913,15 @@ On Windows:
 Install to the Python user install directory for your platform. Typically ~/.local/, or %APPDATA%Python on Windows. (See the Python documentation for site.USER_BASE for full details.)
 
 ### PyMongo
+GitHub：[https://github.com/mongodb/mongo-python-driver](https://github.com/mongodb/mongo-python-driver)  
+官方文档：[https://api.mongodb.com/python/current](https://api.mongodb.com/python/current/)  
+
+安装PyMongo  
+
+```sh
+$ pip3 install pymongo
+```
+
 使用 [find_one()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one) 获取一个单一的文档
 
 在MongoDB中可以被执行的最基本的查询类型是 [find_one()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one)。这个方法返回一个匹配查询的单一的文档 (或者 `None` 如果没有文档被匹配)。这很有用当你知道那里仅有一个匹配文档，或者仅对第一个匹配有兴趣。
@@ -844,6 +931,16 @@ Install to the Python user install directory for your platform. Typically ~/.loc
 
 **弃用** - 使用 [find_one_and_delete()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one_and_delete), [find_one_and_replace()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one_and_replace), 或者 [find_one_and_update()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one_and_update) 代替。
 
+### PyMySQL
+GitHub：[https://github.com/PyMySQL/PyMySQL](https://github.com/PyMySQL/PyMySQL)  
+官方文档：[https://pymysql.readthedocs.io/en/latest/](https://pymysql.readthedocs.io/en/latest/)  
+
+安装PyMySQL  
+
+```sh
+$ pip3 install pymysql
+```
+
 ### pyquery
 GitHub：[https://github.com/gawel/pyquery](https://github.com/gawel/pyquery)  
 官方文档：[https://pyquery.readthedocs.io/en/latest/](https://pyquery.readthedocs.io/en/latest/)  
@@ -852,6 +949,204 @@ GitHub：[https://github.com/gawel/pyquery](https://github.com/gawel/pyquery)
 
 ```sh
 $ pip3 install pyquery
+```
+
+### pyspider
+官方文档：[http://docs.pyspider.org/en/latest/](http://docs.pyspider.org/en/latest/)  
+GitHub：[https://github.com/binux/pyspider](https://github.com/binux/pyspider)  
+官方教程：[http://docs.pyspider.org/en/latest/tutorial/](http://docs.pyspider.org/en/latest/tutorial/)  
+
+pyspider需要用到PhantomJS，所以在安装pyspider前，需要先安装好PhantomJS。
+pyspider还依赖于pycurl、WsgiDAV以及其它第三方Python库，且不支持最新版的WsgiDAV 3.0.0，需要安装2.4.1版本的WsgiDAV（因为3.0.0版本的WsgiDAV改变了一些选项的名称，而pyspider中引用的依旧是老版本中的选项名称）。    
+
+pycurl PyPI：[https://pypi.org/project/pycurl/](https://pypi.org/project/pycurl/)  
+pycurl 下载地址：[https://pypi.org/project/pycurl/#files](https://pypi.org/project/pycurl/#files)  
+
+pycurl支持的Python版本：  
+Python2： 2.7  
+Python3： 3.4-3.6  
+
+**Windows平台**  
+Windows平台建议直接到 [https://pypi.org/project/pycurl/#files](https://pypi.org/project/pycurl/#files) 下载Wheel文件安装（如 pycurl-7.43.0.2-cp36-cp36m-win_amd64.whl）。  
+
+```
+C:\Users\Administrator\Downloads>pip3 install pycurl-7.43.0.2-cp36-cp36m-win_amd64.whl
+```
+
+如果此处使用pip3安装pycurl，通常会出现类似下面的报错信息：
+
+```
+Command "python setup.py egg_info" failed with error code 10 in C:\Users\YWH\AppData\Local\Temp\pip-install-v7jh2bj2\pycurl\
+```
+
+```
+C:\Users\Administrator\Downloads>pip3 install wsgidav==2.4.1
+C:\Users\Administrator\Downloads>pip3 install pyspider
+```
+
+运行pyspider
+
+```
+C:\Users\Administrator\Downloads>pyspider all
+```
+
+**Linux平台安装pyspider**  
+Ubuntu 18.04.1 LTS  
+
+安装PhantomJS  
+
+```sh
+\# apt install libfontconfig1
+\# wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2
+\# tar jxvf phantomjs-2.1.1-linux-x86_64.tar.bz2
+\# cp phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin
+```
+
+安装pip3
+
+```sh
+\# apt install python3-pip
+```
+
+安装编译pycurl需要的包  
+libcurl4-openssl-dev包提供/usr/bin/curl-config文件  
+libssl-dev包提供/usr/include/openssl/ssl.h文件
+
+```sh
+\# apt install libcurl4-openssl-dev
+\# apt install libssl-dev
+```
+
+安装pycurl
+
+```sh
+\# pip3 install pycurl
+```
+
+安装WsgiDAV 2.4.1  
+
+```sh
+\# pip3 install wsgidav==2.4.1
+```
+
+如果不指定版本，会安装最新版的WsgiDAV 3.0.0，如果安装最新版的WsgiDAV，启动pyspider会报下面的错误：
+
+```
+ValueError: Invalid configuration:
+  - Deprecated option 'domaincontroller': use 'http_authenticator.domain_controller' instead.
+```
+
+这是因为3.0.0版的WsgiDAV重命名了之前版本中的某些选项名，而pyspider中引用的仍旧是之前的选项名。
+
+安装pyspider
+
+```sh
+\# pip3 install pyspider
+```
+
+运行pyspider
+
+```sh
+\# pyspider all
+```
+
+**CentOS Linux release 7.6.1810 (Core)**  
+**安装pycurl**  
+1. 安装libcurl-devel  
+
+```sh
+\# yum install libcurl-devel  
+```
+
+libcurl-devel包提供/usr/bin/curl-config文件，若不安装此包，安装pycurl时会出现下面的错误提示：
+
+```
+FileNotFoundError: [Errno 2] No such file or directory: 'curl-config': 'curl-config'
+```
+
+2. 指定编译pycurl时所使用的SSL后端
+
+export PYCURL_SSL_LIBRARY=nss
+
+若不指定编译pycurl时所使用的SSL后端，则安装pycurl时会出现下面的错误提示：
+
+```
+__main__.ConfigurationError: Curl is configured to use SSL, but we have not been able to determine w
+hich SSL backend it is using. Please see PycURL documentation for how to specify the SSL backend manuall
+y.
+```
+
+3. 安装pycurl
+
+```sh
+\# pip3 install pycurl
+```
+
+**安装2.4.1版本的WsgiDAV**  
+
+```sh
+\# pip3 install wsgidav==2.4.1
+```
+
+**安装pyspider**
+
+```sh
+\# pip3 install pyspider
+```
+
+**启动pyspider**
+
+```sh
+\# pyspider all
+```
+
+**注意：**  
+如果为pycurl指定了错误的SSL后端（`export PYCURL_SSL_LIBRARY=openssl`），则在运行pyspider时，会出现下面的错误提示：
+
+```py
+ImportError: pycurl: libcurl link-time ssl backend (nss) is different from compile-time ssl backend (ope
+nssl)
+```
+
+**macOS平台安装pyspider**  
+安装pycurl  
+
+```sh
+export PYCURL_SSL_LIBRARY=openssl
+export LDFLAGS="-L/usr/local/opt/openssl/lib”
+export CPPFLAGS="-I/usr/local/opt/openssl/include"
+python3.6 -m pip install pycurl
+```
+
+安装WsgiDAV 2.4.1  
+
+```sh
+python3.6 -m pip install wsgidav==2.4.1
+```
+
+安装pyspider，之后启动pyspider  
+
+```sh
+python3.6 -m pip install pyspider
+pyspider
+```
+
+通过Homebrew安装openssl时，在安装完成之后会有一个类似下面的提示：
+
+```
+For compilers to find openssl you may need to set:
+  export LDFLAGS="-L/usr/local/opt/openssl/lib"
+  export CPPFLAGS="-I/usr/local/opt/openssl/include”
+```
+
+### redis-py
+GitHub：[https://github.com/andymccurdy/redis-py](https://github.com/andymccurdy/redis-py)  
+官方文档：[https://redis-py.readthedocs.io/en/latest/](https://redis-py.readthedocs.io/en/latest/)  
+
+安装redis-py  
+
+```sh
+$ pip3 install redis
 ```
 
 ### Requests
@@ -1007,6 +1302,16 @@ Error: tesseract: "cxx11" is not a recognized standard
 $ brew install tesseract.rb --with-all-languages
 $ pip3 install tesserocr
 $ pip3 install pillow
+```
+
+### Tornado
+GitHub：[https://github.com/tornadoweb/tornado](https://github.com/tornadoweb/tornado)  
+官方文档：[http://www.tornadoweb.org/en/stable/](http://www.tornadoweb.org/en/stable/)  
+
+安装Tornado
+
+```sh
+$ pip3 install tornado
 ```
 
 # Python2
@@ -2771,6 +3076,133 @@ FIELDS TERMINATED BY ',' ENCLOSED BY '"';
 ```
 
 将2018年10月份的短信记录导出到服务器上的/tmp目录下，文件名为201810.csv。
+
+# Android Studio
+下载地址：[https://developer.android.com/studio](https://developer.android.com/studio)  
+
+Linux平台安装Android Studio  
+1. 直接将 android-studio-ide-182.5314842-linux.zip 解压到要安装的目录下，推荐解压到 /opt 目录；  
+2. 进入 /opt/android-studio/bin 目录，执行 `./studio.sh` 命令；
+3. 安装好后，以后直接 `./stuido.sh` 命令即可启动 Android Studio。
+
+# Appium
+GitHub：[https://github.com/appium/appium](https://github.com/appium/appium)  
+官方网站：[http://appium.io](http://appium.io)  
+官方文档：[http://appium.io/docs/cn/about-appium/intro/](http://appium.io/docs/cn/about-appium/intro/)  
+下载链接：[https://github.com/appium/appium-desktop/releases](https://github.com/appium/appium-desktop/releases)  
+Python Client：[https://github.com/appium/python-client](https://github.com/appium/python-client)  
+
+## 安装Appium
+安装Appium有两种方式，一种是直接下载安装包 Appium Desktop 来安装，另一种是通过 Node.js 的包管理器npm来安装。
+
+### Appium Desktop
+Windows和macOS平台推荐直接到 [https://github.com/appium/appium-desktop/releases](https://github.com/appium/appium-desktop/releases) 页面下载对应的安装包（分别是 appium-desktop-setup-1.11.0.exe
+ 和 Appium-1.11.0.dmg
+）来安装。  
+
+Linux平台推荐通过 npm 来进行安装。  
+Ubuntu 18.04.2 LTS
+
+```sh
+# apt-get update
+# apt-get install npm
+# npm install -g appium
+# appium
+[Appium] Welcome to Appium v1.12.0
+[Appium] Appium REST http interface listener started on 0.0.0.0:4723
+```
+
+通过系统源中的npm命令（由npm包提供）安装appium时（`npm install -g appium`），会提示：
+
+```
+WARN engine appium@1.12.0: wanted: {"node":">=8","npm":">=6"} (current: {"node":"8.10.0","npm":"3.5.2"})
+```
+
+所以在下面的CentOS 7.6中我们通过nvm来安装新版本的Node.js，以提供appium期望的node版本和npm版本（EPEL源中的nodejs 6.16.0和npm 3.10.10的版本较旧）。
+
+CentOS 7.6  
+安装appium的过程中需要用到jar命令，所以需要事先安装相应的依赖包：
+
+```sh
+# yum install java-1.8.0-openjdk-devel
+```
+
+```sh
+$ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+$ command -v nvm
+nvm
+```sh
+
+如果没有输出nvm，执行下面的命令：
+
+```sh
+$ source ~/.bashrc
+```
+
+如果当前用户使用的Shell是zsh，则将下面的内容添加到 `~/.zshrc` 文件中：
+
+```
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+```
+
+之后再执行 `source ~/.zshrc` 命令。
+
+```sh
+$ nvm install v10.15.3
+$ npm install -g appium
+```
+
+对于root用户，通过npm安装appium时，必须加上 `--unsafe-perm` 参数：
+
+```sh
+# npm install -g appium --unsafe-perm
+```
+
+如果没有加上 `--unsafe-perm` 参数，会出现类似下面的错误提示：
+
+```
+Error: EACCES: permission denied, mkdir '/usr/local/node10/lib/node_modules/appium/node_modules/appium-c
+hromedriver/2019220-30468-q3igt0.f1o6'
+```
+
+因为安装appium时，会到 [https://chromedriver.storage.googleapis.com](https://chromedriver.storage.googleapis.com) 站点下载 `chromedri
+ver_linux64.zip`，所以如果因网络问题而无法安装的话，需要为npm设置代理
+
+```
+[14:37:01] [Chromedriver Install] Downloading https://chromedriver.storage.googleapis.com/2.46/chromedri
+ver_linux64.zip...
+```
+
+```sh
+$ npm config set proxy http://192.168.2.10:8118
+$ npm config set https-proxy http://192.168.2.10:8118
+```
+
+删除代理设置：
+
+```sh
+$ npm config delete proxy
+$ npm config delete https-proxy
+```
+
+# Charles
+官方网站：[https://www.charlesproxy.com](https://www.charlesproxy.com)  
+下载链接：[https://www.charlesproxy.com/download](https://www.charlesproxy.com/download)  
+
+安装Charles根证书  
+Windows平台  
+
+1. Help——SSL Proxying——Install Charles Root Certificate；
+2. 安装证书——本地计算机(L)——将所有的证书都放入下列存储(P)——受信任的根证书颁发机构。
+
+macOS平台  
+
+1. Help——SSL Proxying——Install Charles Root Certificate；
+2. 在弹出的对话框中选择“添加”；
+3. 在“钥匙串访问”窗口中，找到“Charles Proxy CA”，之后双击；
+4. 在弹出的对话框中展开“信任”，在“使用此证书时”右边的下拉列表框中选择“始终信任”。
 
 # ChromeDriver
 官方网站：[http://chromedriver.chromium.org](http://chromedriver.chromium.org)  
