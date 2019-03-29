@@ -36,6 +36,7 @@
         * [Django](#django)
             * [settings.py](#settingspy)
         * [Flask](#flask)
+        * [Gerapy](#gerapy)
         * [lxml](#lxml)
         * [mitmproxy](#mitmproxy)
         * [pip](#pip)
@@ -45,6 +46,14 @@
         * [pyspider](#pyspider)
         * [redis-py](#redis-py)
         * [Requests](#requests)
+        * [Scrapy](#scrapy)
+        * [Scrapy-Redis](#scrapy-redis)
+        * [Scrapy-Splash](#scrapy-splash)
+        * [Scrapyd](#scrapyd)
+        * [Scrapyd API](#scrapyd-api)
+        * [Scrapyd-Client](#scrapyd-client)
+        * [Scrapyrt](#scrapyrt)
+        * [Selenium](#selenium)
         * [tesserocr](#tesserocr)
         * [Tornado](#tornado)
 * [Python2](#python2)
@@ -80,6 +89,8 @@
         * [13.2.6 INSERT语法](#1326-insert语法)
         * [13.2.10 SELECT语法](#13210-select语法)
             * [13.2.10.1 SELECT ... INTO语法](#132101-select--into语法)
+* [Anaconda](#anaconda)
+* [Android Studio](#android-studio)
 * [Appium](#appium)
 * [Charles](#charles)
 * [ChromeDriver](#chromedriver)
@@ -144,6 +155,9 @@ MongoDB Reference
 
 MySQL Workbench  
 [https://dev.mysql.com/downloads/workbench/](https://dev.mysql.com/downloads/workbench/)  
+
+Nginx  
+Nginx官网：[https://nginx.org](https://nginx.org)  
 
 Node.js  
 Node.js官网：[http://nodejs.org/](http://nodejs.org/)
@@ -828,6 +842,16 @@ GitHub：[https://github.com/pallets/flask](https://github.com/pallets/flask)
 $ pip3 install flask
 ```
 
+### Gerapy
+GitHub：[https://github.com/Gerapy/Gerapy](https://github.com/Gerapy/Gerapy)  
+PyPI：[https://pypi.org/project/gerapy/](https://pypi.org/project/gerapy/)  
+
+**安装Gerapy**
+
+```sh
+pip3 install gerapy
+```
+
 ### lxml
 官方网站：[https://lxml.de](https://lxml.de)  
 GitHub：[https://github.com/lxml/lxml](https://github.com/lxml/lxml)  
@@ -1163,6 +1187,210 @@ Pypi地址：[https://pypi.org/project/requests/](https://pypi.org/project/reque
 
 ```sh
 $ pip3 install requests
+```
+
+### Scrapy
+官方网站：[https://scrapy.org](https://scrapy.org)  
+官方文档：[https://docs.scrapy.org/en/latest/](https://docs.scrapy.org/en/latest/)  
+PyPI：[https://pypi.org/project/Scrapy](https://pypi.org/project/Scrapy/)  
+GitHub：[https://github.com/scrapy/scrapy](https://github.com/scrapy/scrapy)  
+中文文档：[http://scrapy-chs.readthedocs.io](http://scrapy-chs.readthedocs.io)  
+
+**Windows平台**  
+1. 安装好Visual Studio Community 2017（需要安装编译器及Windows SDK组件）；
+2. 通过 `pip3 install scrapy` 命令安装。
+
+**Linux及macOS平台**  
+
+```sh
+$ pip3 install scrapy
+```
+
+### Scrapy-Redis
+GitHub：[https://github.com/rmax/scrapy-redis](https://github.com/rmax/scrapy-redis)  
+PyPI：[https://pypi.org/project/scrapy-redis](https://pypi.org/project/scrapy-redis)  
+官方文档：[https://scrapy-redis.readthedocs.io/en/stable/](https://scrapy-redis.readthedocs.io/en/stable/)  
+**安装Scrapy-Redis**  
+
+```sh
+pip3 install scrapy-redis
+```
+
+### Scrapy-Splash
+GitHub：[https://github.com/scrapy-plugins/scrapy-splash](https://github.com/scrapy-plugins/scrapy-splash)  
+PyPI：[https://pypi.org/project/scrapy-splash](https://pypi.org/project/scrapy-splash/)  
+使用说明：[https://github.com/scrapy-plugins/scrapy-splash#configuration](https://github.com/scrapy-plugins/scrapy-splash#configuration)  
+Splash官方文档：[https://splash.readthedocs.io/en/stable/](https://splash.readthedocs.io/en/stable/)  
+
+**安装Splash**  
+建议直接通过Docker安装并启动。
+
+```sh
+docker run --name splash -p 8050:8050 scrapinghub/splash
+```
+
+或者以后台运行的方式启动容器
+
+```sh
+docker run --name splash -d -p 8050:8050 scrapinghub/splash
+```
+
+**安装Scrapy-Splash**  
+
+```sh
+pip3 install scrapy-splash
+```
+
+### Scrapyd
+GitHub：[https://github.com/scrapy/scrapyd](https://github.com/scrapy/scrapyd)  
+PyPI：[https://pypi.org/project/scrapyd](https://pypi.org/project/scrapyd)  
+官方文档：[https://scrapyd.readthedocs.io/en/stable/](https://scrapyd.readthedocs.io/en/stable/)  
+
+**安装Scrapyd**  
+
+```sh
+pip3 install scrapyd
+```
+
+**配置Scrapyd**  
+配置文件  
+Scrapyd 在下列位置搜索配置文件，并按顺序分析它们，最上面的优先级最高：
+
+* `/etc/scrapyd/scrapyd.conf` (Unix)  
+* `c:\scrapyd\scrapyd.conf` (Windows)  
+* `/etc/scrapyd/conf.d/*` (按字母顺序，Unix)  
+* `scrapyd.conf`  
+* `~/.scrapyd.conf` (用户Home目录)  
+
+配置文件支持下面的选项 (默认值参见示例配置)。
+
+**示例配置文件**  
+这是一个带所有默认值的示例配置文件：
+
+```
+[scrapyd]
+eggs_dir    = eggs
+logs_dir    = logs
+items_dir   =
+jobs_to_keep = 5
+dbs_dir     = dbs
+max_proc    = 0
+max_proc_per_cpu = 4
+finished_to_keep = 100
+poll_interval = 5.0
+bind_address = 127.0.0.1
+http_port   = 6800
+debug       = off
+runner      = scrapyd.runner
+application = scrapyd.app.application
+launcher    = scrapyd.launcher.Launcher
+webroot     = scrapyd.website.Root
+
+[services]
+schedule.json     = scrapyd.webservice.Schedule
+cancel.json       = scrapyd.webservice.Cancel
+addversion.json   = scrapyd.webservice.AddVersion
+listprojects.json = scrapyd.webservice.ListProjects
+listversions.json = scrapyd.webservice.ListVersions
+listspiders.json  = scrapyd.webservice.ListSpiders
+delproject.json   = scrapyd.webservice.DeleteProject
+delversion.json   = scrapyd.webservice.DeleteVersion
+listjobs.json     = scrapyd.webservice.ListJobs
+daemonstatus.json = scrapyd.webservice.DaemonStatus
+```
+
+CentOS 7配置Scrapyd  
+
+```sh
+\# mkdir /etc/scrapyd
+\# cp /usr/local/lib/python3.6/site-packages/scrapyd/default_scrapyd.conf /etc/scrapyd/scrapyd.conf
+\# vim /etc/scrapyd/scrapyd.conf
+```
+
+修改 `/etc/scrapyd/scrapyd.conf` 文件，将 `max_proc_per_cpu` 和 `bind_address` 的值修改为如下即可：
+
+```
+max_proc_per_cpu = 10
+bind_address = 0.0.0.0
+```
+
+配置访问认证  
+
+1. 安装nginx
+
+```sh
+\# yum install nginx
+```
+
+2. 修改 `/etc/nginx/nginx.conf` 文件，在 `http` 块下面添加一个 `server` 块，内容如下：
+
+```
+    server {
+        listen 6801;
+        location / {
+            proxy_pass    http://127.0.0.1:6800/;
+            auth_basic    "Restricted";
+            auth_basic_user_file    /etc/nginx/conf.d/.htpasswd;
+        }
+    }
+```
+
+3. 为Scrapyd创建一个名为admin的认证用户，并将 `.htpasswd` 文件放在 `/etc/nginx/conf.d` 目录下；
+
+```sh
+\# cd /etc/nginx/conf.d
+\# htpasswd -c .htpasswd admin
+```
+
+4. 允许Nginx绑定到6801端口
+
+```sh
+\# semanage port -a -t http_port_t -p tcp 6801
+```
+
+5. 允许Nginx连接到网络端口6800
+
+```sh
+\# semanage port -a -t http_port_t -p tcp 6800
+```
+
+6. 启动nginx
+
+```sh
+\# systemctl start nginx
+```
+
+### Scrapyd API
+GitHub：[https://github.com/djm/python-scrapyd-api](https://github.com/djm/python-scrapyd-api)  
+PyPI：[https://pypi.org/project/python-scrapyd-api](https://pypi.org/project/python-scrapyd-api)  
+官方文档：[http://python-scrapyd-api.readthedocs.io/en/latest/usage.html](https://python-scrapyd-api.readthedocs.io/en/latest/usage.html)  
+
+**安装Scrapyd API**  
+
+```sh
+pip3 install python-scrapyd-api
+```
+
+### Scrapyd-Client
+GitHub：[https://github.com/scrapy/scrapyd-client](https://github.com/scrapy/scrapyd-client)  
+PyPI：[https://pypi.org/project/scrapyd-client](https://pypi.org/project/scrapyd-client)  
+使用说明：[https://github.com/scrapy/scrapyd-client#scrapyd-deploy](https://github.com/scrapy/scrapyd-client#scrapyd-deploy)  
+
+**安装Scrapyd-Client**  
+
+```sh
+pip3 install scrapyd-client
+```
+
+### Scrapyrt
+GitHub：[https://github.com/scrapinghub/scrapyrt](https://github.com/scrapinghub/scrapyrt)  
+PyPI：[https://pypi.org/project/scrapyrt](https://pypi.org/project/scrapyrt/)  
+官方文档：[https://scrapyrt.readthedocs.io/en/latest/](https://scrapyrt.readthedocs.io/en/latest/)  
+
+**安装Scrapyrt**  
+
+```sh
+pip3 install scrapyrt
 ```
 
 ### Selenium
@@ -3080,6 +3308,11 @@ FIELDS TERMINATED BY ',' ENCLOSED BY '"';
 ```
 
 将2018年10月份的短信记录导出到服务器上的/tmp目录下，文件名为201810.csv。
+
+# Anaconda
+**Windows平台**  
+使用conda命令时，建议通过下面的方式打开终端：  
+Anaconda Navigator——Environments——base (root)——Open Terminal
 
 # Android Studio
 下载地址：[https://developer.android.com/studio](https://developer.android.com/studio)  
