@@ -1302,9 +1302,9 @@ daemonstatus.json = scrapyd.webservice.DaemonStatus
 CentOS 7配置Scrapyd  
 
 ```sh
-\# mkdir /etc/scrapyd
-\# cp /usr/local/lib/python3.6/site-packages/scrapyd/default_scrapyd.conf /etc/scrapyd/scrapyd.conf
-\# vim /etc/scrapyd/scrapyd.conf
+# mkdir /etc/scrapyd
+# cp /usr/local/lib/python3.6/site-packages/scrapyd/default_scrapyd.conf /etc/scrapyd/scrapyd.conf
+# vim /etc/scrapyd/scrapyd.conf
 ```
 
 修改 `/etc/scrapyd/scrapyd.conf` 文件，将 `max_proc_per_cpu` 和 `bind_address` 的值修改为如下即可：
@@ -1319,7 +1319,7 @@ bind_address = 0.0.0.0
 1. 安装nginx
 
 ```sh
-\# yum install nginx
+# yum install nginx
 ```
 
 2. 修改 `/etc/nginx/nginx.conf` 文件，在 `http` 块下面添加一个 `server` 块，内容如下：
@@ -1338,26 +1338,26 @@ bind_address = 0.0.0.0
 3. 为Scrapyd创建一个名为admin的认证用户，并将 `.htpasswd` 文件放在 `/etc/nginx/conf.d` 目录下；
 
 ```sh
-\# cd /etc/nginx/conf.d
-\# htpasswd -c .htpasswd admin
+# cd /etc/nginx/conf.d
+# htpasswd -c .htpasswd admin
 ```
 
 4. 允许Nginx绑定到6801端口
 
 ```sh
-\# semanage port -a -t http_port_t -p tcp 6801
+# semanage port -a -t http_port_t -p tcp 6801
 ```
 
 5. 允许Nginx连接到网络端口6800
 
 ```sh
-\# semanage port -a -t http_port_t -p tcp 6800
+# semanage port -a -t http_port_t -p tcp 6800
 ```
 
 6. 启动nginx
 
 ```sh
-\# systemctl start nginx
+# systemctl start nginx
 ```
 
 ### Scrapyd API
