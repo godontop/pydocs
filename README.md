@@ -30,6 +30,8 @@
             * [3.3. 特殊方法名](#33-特殊方法名)
                 * [3.3.1. 基本自定义](#331-基本自定义)
                 * [3.3.7. 仿真容器类型](#337-仿真容器类型)
+    * [Python Wiki](#python-wiki)
+        * [WindowsCompilers](#windowscompilers)
     * [PyPI](#pypi)
         * [aiohttp](#aiohttp)
         * [Beautiful Soup](#beautiful-soup)
@@ -763,6 +765,67 @@ object.**\_\_getitem\_\_**(*self, key*)
 
 object.**\_\_setitem\_\_**(*self, key, value*)  
 调用以实现赋值给 `self[key]`。注意事项同 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__)。这应该仅为映射实现如果对象支持改变键的值，或者如果可以增加新键，或者对于序列如果元素可以被替换。对于不正确的 *key* 值应该抛出和 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__) 方法相同的异常。
+
+## Python Wiki
+### WindowsCompilers
+[Windows编译器](https://wiki.python.org/moin/WindowsCompilers)
+
+虽然 Python 是一种解释型语言，在一些情况下你可能需要安装 Windows C++ 编译器。不像 Linux，Windows 编译器默认没有被包含在OS中。
+
+例如，你将需要使用它们如果你想：
+
+* 通过 Pip 从源代码安装一个非纯 Python 包 (如果没有提供 Wheel 包)。
+* 编译一个 Cython 或 Pyrex 文件。
+
+微软提供的官方 C++ 编译器叫作 *Visual C++*，你可以发现它们与 *Visual Studio* 捆绑在一起或者，对于一些版本，单独发行。存在一些可替代的编译器如 [MinGW](http://mingw.org/)，但是可能会与官方通过 Microsoft Visual C++ 编译发行的 CPython出现不兼容。
+
+编译器的架构必须与Python的相同 (例如：如果你使用64位的 Python，你必须使用一个 x64 编译器)。
+
+**一个特定的Python版本应该使用哪一个 Microsoft Visual C++ 编译器呢？**
+
+每一个 Python 版本都使用一个特定的编译器版本 (例如：*CPython 2.7* 使用 *Visual C++ 9.0*，*CPython 3.3* 使用 *Visual C++ 10.0*，等等)。所以，你必须安装与你的Python版本对应的编译器版本：
+
+Visual C++  |CPython
+------------|-----------------------
+14.0        |3.5, 3.6
+10.0        |3.3, 3.4
+9.0         |2.6, 2.7, 3.0, 3.1, 3.2
+
+**Distutils笔记**  
+如果要安装的包的 *setup.py* (仍然) 使用 *distutils* 而不是推荐的 *setuptools*，你可能需要额外的设置：
+
+* *distutils* 仅支持非常少的编译器设置。这份指南中对应它们的章节明确地提及了 *distutils*。
+* 对于其它设置，你需要从对应的工具链的 "SDK 提示符" 运行编译并设置 *DISTUTILS_USE_SDK* 环境变量为一个非空值。
+
+**编译器安装和配置**
+
+每一个编译器兼容的架构在括号中指出了。
+
+在做任何事以前，安装或更新 *Setuptools* Python 包。它包含了增强的兼容性及增加了自动使用的编译器：
+
+```sh
+pip install --upgrade setuptools
+```
+
+Microsoft Visual C++ 14.0 standalone: Build Tools for Visual Studio 2017 (x86, x64, ARM, ARM64)  
+这是一个独立的 Visual C++ 14.0 编译器版本，你不需要安装 *Visual Studio 2017*。
+
+* 安装 [*Microsoft Build Tools for Visual Studio 2017*](https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017)。  
+* *setuptools* Python 包的版本必须至少为 34.4.0。
+
+Microsoft Visual C++ 14.0 with Visual Studio 2017 (x86, x64, ARM, ARM64)  
+*Visual Studio 2017* 包含 *Visual C++ 14.0* 编译器。*setuptools* Python 包的版本必须至少为 34.4.0。
+
+Microsoft Visual C++ 14.0 standalone: Visual C++ Build Tools 2015 (x86, x64, ARM)  
+这是一个独立的 Visual C++ 14.0 编译器版本，你不必安装 *Visual Studio 2015*。
+
+* 安装 *Microsoft Visual C++ Build Tools 2015*。检查 *Windows 8.1 SDK* 及 *Windows 10 SDK* 选项。  
+* *setuptools* Python 包的版本必须至少为 24.0。
+
+Visual C++ Build Tools 2015 已经被微软升级为 Build Tools for Visual Studio 2017 了。安装它请看前一段。
+
+Microsoft Visual C++ 14.0 with Visual Studio 2015 (x86, x64, ARM)  
+*Visual Studio 2015* 包含 *Visual C++ 14.0* 编译器。*Distutils* 将自动检测编译器并使用它。
 
 ## PyPI
 ### aiohttp
