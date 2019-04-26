@@ -1,5 +1,6 @@
 * [导航](#导航)
 * [Markdown](#markdown)
+* [HTML](#html)
 * [Python](#python)
     * [Python标准库](#python标准库)
         * [内置函数](#内置函数)
@@ -225,7 +226,7 @@ Wireshark
 # Markdown
 要在Markdown中显示`<`和`>`，必须使用使用转义字符`&lt;`和`&gt;`。
 
-Markdown中的多个空行会被当做一个空行来处理。
+Markdown中的多个空行会被当做一个空行来处理。如果要显示多个空行，需要使用 `<br />` 标签。
 
 如果目录中的标题同名，则在第二个同名标题的末尾加上 `-1`，在第三个同名标题的末尾加上 `-2`，如：  
 
@@ -241,6 +242,24 @@ Markdown中的多个空行会被当做一个空行来处理。
 
 ##### 测试标题  
 这是第三个同名测试标题
+
+# HTML
+HTML <ul> 标签  
+无序HTML列表：
+
+```
+<ul>
+  <li>Coffee</li>
+  <li>Tea</li>
+  <li>Milk</li>
+</ul>
+```
+
+<ul>
+  <li>Coffee</li>
+  <li>Tea</li>
+  <li>Milk</li>
+</ul>
 
 # Python
 ## Python标准库
@@ -1267,6 +1286,42 @@ GitHub：[https://github.com/scrapy/scrapy](https://github.com/scrapy/scrapy)
 
 ```sh
 $ pip3 install scrapy
+```
+
+#### scrapy命令用法
+用法：
+
+```
+  scrapy <command> [options] [args]
+```
+
+可用命令：
+
+```
+  runspider     运行一个自包含的蜘蛛 (不创建项目)
+```
+
+关于一个命令的更详细信息请使用 "scrapy <command> -h" 查看
+
+##### scrapy runspider
+用法  
+=====
+
+```
+  scrapy runspider [options] <spider_file>
+```
+
+选项  
+=======  
+
+```
+--output=FILE, -o FILE  转储爬取的元素到 FILE 中 (标准输出使用 - )
+```
+
+设置一个新的Scrapy项目  
+
+```
+scrapy startproject tutorial
 ```
 
 ### Scrapy-Redis
