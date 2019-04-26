@@ -244,8 +244,7 @@ Markdown中的多个空行会被当做一个空行来处理。如果要显示多
 这是第三个同名测试标题
 
 # HTML
-HTML <ul> 标签  
-无序HTML列表：
+HTML `<ul>` 标签  
 
 ```
 <ul>
@@ -254,6 +253,8 @@ HTML <ul> 标签
   <li>Milk</li>
 </ul>
 ```
+
+无序HTML列表：
 
 <ul>
   <li>Coffee</li>
