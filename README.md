@@ -273,7 +273,7 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 |          |          |                  |range()   |          |
 |          |getattr() |                  |          |          |
 
-**getattr**(*object, name***[***, default***]**)  
+**getattr**(*object, name*__[__*, default*__]__)  
 返回 *object* 的 *name* 属性的值。*name* 必须是一个字符串。如果这个字符串是这个对象的一个属性的名称，则结果为那个属性的值。例如，`getattr(x, 'foobar')` 等同于 `x.foobar`。如果名称属性不存在，则返回 *default* 如果有提供的话，否则抛出 [AttributeError](https://docs.python.org/3/library/exceptions.html#AttributeError)。
 
 **range**(*stop*)  
