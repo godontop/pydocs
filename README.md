@@ -7,6 +7,8 @@
         * [内置类型](#内置类型)
             * [数值类型 — int, float, complex](#数值类型--int-float-complex)
                 * [整型数类型的按位运算](#整型数类型的按位运算)
+        * [二进制数据服务](#二进制数据服务)
+            * [codecs — 编码解码器注册表和基类](#codecs--编码解码器注册表和基类)
         * [文件和目录访问](#文件和目录访问)
             * [os.path — 通用路径名操作](#ospath--通用路径名操作)
         * [通用操作系统服务](#通用操作系统服务)
@@ -24,6 +26,8 @@
                     * [进程和异常](#进程和异常)
                     * [其它](#其它)
         * [互联网协议与支持](#互联网协议与支持)
+            * [urllib.request — 打开URLs的可扩展库](#urllibrequest--打开urls的可扩展库)
+                * [OpenerDirector对象](#openerdirector对象)
             * [urllib.parse — 将URLs解析为组件](#urllibparse--将urls解析为组件)
                 * [URL解析](#url解析)
     * [Python语言参考](#python语言参考)
@@ -347,6 +351,19 @@ Operation  |Result          |Notes
 0
 >>>
 ```
+
+### 二进制数据服务
+在这章中描述的模块提供一些用于处理二进制数据的基本服务操作。关于二进制数据的其他操作，特别是与文件格式和网络协议相关的，在相关章节中描述。
+
+#### codecs — 编码解码器注册表和基类
+**源代码：** [Lib/codecs.py](https://github.com/python/cpython/tree/3.7/Lib/codecs.py)
+
+这个模块为标准Python编码解码器（编码器和解码器）定义基类以及提供访问管理编码解码器和错误处理查找程序的内部Python编码解码器注册表。大多数标准编码解码器是将文本编码成字节的[文本编码](https://docs.python.org/3/glossary.html#term-text-encoding)，但也有编码解码器提供将文本编码为文本，及将字节编码为字节。自定义的编码解码器可以在任意类型之间进行编码和解码，但一些模块特点要求使用特定的[文本编码](https://docs.python.org/3/glossary.html#term-text-encoding)，或编码成[字节](https://docs.python.org/3/library/stdtypes.html#bytes)的编码解码器。
+
+##### 编码和Unicode
+字符串在内部作为代码点序列被存储，代码点的范围为 `0x0`–`0x10FFFF`。 (关于实现的详细信息请看 [PEP 393](https://www.python.org/dev/peps/pep-0393)。) 一旦一个字符串对象在CPU和内存之外被使用，字节顺序以及这些数组如何存储为字节将成为一个问题。与其它编码解码器一样，序列化一个字符串为一个字节序列被称为*编码*，而从这个字节序列重新创建这个字符串被称为*解码*。各种各样的不同的文本序列化编码解码器，被集体称为[文本编码](https://docs.python.org/3/glossary.html#term-text-encoding)。
+
+
 
 ## 文件和目录访问
 这章描述的模块处理磁盘文件和目录。例如，有读取文件内容的模块，有以便携的方式操作路径的模块，和创建临时文件的模块。这章中完整的模块列表是：
@@ -683,6 +700,78 @@ multiprocessing.**cpu_count()**
 **另请参见：** [os.cpu_count()](https://docs.python.org/3/library/os.html#os.cpu_count)
 
 ### 互联网协议与支持
+#### urllib.request — 打开URLs的可扩展库
+**源代码：** [Lib/urllib/request.py](https://github.com/python/cpython/tree/3.7/Lib/urllib/request.py)
+
+The [urllib.request](https://docs.python.org/3/library/urllib.request.html#module-urllib.request) module defines functions and classes which help in opening URLs (mostly HTTP) in a complex world — 基本的和摘要认证，重定向，cookies等等。
+
+__另请参阅：__ 更高层次的HTTP客户端接口推荐 [Requests package](http://docs.python-requests.org/)。
+
+[urllib.request](https://docs.python.org/3/library/urllib.request.html#module-urllib.request) 模块定义了下面的函数：
+
+urllib.request.**urlopen**(_url, data=None,_ **[**_timeout,_ __]__*, _cafile=None, capath=None, cadefault=False, context=None_)  
+打开URL _url_，_url_ 可以是一个字符串或者一个 [Request](https://docs.python.org/3/library/urllib.request.html#urllib.request.Request) 对象。
+
+*data* must be an object specifying additional data to be sent to the server, or `None` if no such data is needed. 详见 [Request](https://docs.python.org/3/library/urllib.request.html#urllib.request.Request) 。
+
+This function always returns an object which can work as a [context manager](https://docs.python.org/3/glossary.html#term-context-manager) and has methods such as
+
+* geturl() — return the URL of the resource retrieved, commonly used to determine if a redirect was followed  
+* info() — 返回页面的元信息，例如头信息， in the form of an [email.message_from_string()](https://docs.python.org/3/library/email.parser.html#email.message_from_string) instance (see [Quick Reference to HTTP Headers](http://jkorpela.fi/http.html))  
+* getcode() – 返回响应的HTTP状态代码。
+
+urllib.request.**build_opener**(\[*handler, ...*\])  
+返回一个 [OpenerDirector](https://docs.python.org/3/library/urllib.request.html#urllib.request.OpenerDirector) 实例，which chains the handlers in the order given. *handlers* 可以是 [BaseHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.BaseHandler) 的实例，或者 [BaseHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.BaseHandler) 的子类 (在这种情况下它必须能够不带任何参数调用构造函数)。下面这些类的实例将出现在 *handlers* 的前面，除非 *handlers* 包含它们，它们的实例或者它们的子类：[ProxyHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.ProxyHandler) (如果检测到了代理设置), [UnknownHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.UnknownHandler), [HTTPHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.HTTPHandler), [HTTPDefaultErrorHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.HTTPDefaultErrorHandler), [HTTPRedirectHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.HTTPRedirectHandler), [FTPHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.FTPHandler), [FileHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.FileHandler), [HTTPErrorProcessor](https://docs.python.org/3/library/urllib.request.html#urllib.request.HTTPErrorProcessor).
+
+如果安装的Python支持SSL (例如，如果 [ssl](https://docs.python.org/3/library/ssl.html#module-ssl) 模块可以被导入), [HTTPSHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.HTTPSHandler) 也将被加入。
+
+一个 [BaseHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.BaseHandler) 子类也可能改变它的 `handler_order` 属性以修改它在处理程序列表中的位置。
+
+提供下面的类：
+
+class urllib.request.**Request**(*url, data=None, headers={}, origin_req_host=None, unverifiable=False, method=None*)  
+This class is an abstraction of a URL request.
+
+*url* 应该是一个包含一个有效的URL的字符串。
+
+*data* 必须是一个指定额外的数据发送给服务器的对象，或者 `None` 如果不需要这样的数据。当前只有 HTTP 请求使用 *data*。支持的对象类型包括字节，file-like 对象，以及可迭代对象。如果没有提供 `Content-Length` 或 `Transfer-Encoding` 信息头字段，[HTTPHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.HTTPHandler) 将根据 *data* 的类型设置这些信息头。发送字节对象将使用 `Content-Length`，发送文件及其它可迭代对象将使用 [RFC 7230](https://tools.ietf.org/html/rfc7230.html) 3.3.1节中定义的 `Transfer-Encoding: chunked`。
+
+对于一个 HTTP POST 请求方法，*data* 应该是一个标准的 *application/x-www-form-urlencoded* 格式缓冲区。[urllib.parse.urlencode()](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlencode) 函数接受一个映射或2-元组序列然后返回一个这种格式的 ASCII 字符串。在作为 *data* 参数使用以前它必须被编码为字节。
+
+*headers* 应该是一个字典， and will be treated as if [add_header()](https://docs.python.org/3/library/urllib.request.html#urllib.request.Request.add_header) was called with each key and value as arguments. This is often used to “spoof” the `User-Agent` header value, which is used by a browser to identify itself – 一些HTTP服务器仅允许来自普通浏览器的请求而阻止来自脚本的请求。例如，Mozilla Firefox 可能标识自己为 `"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:58.0) Gecko/20100101 Firefox/58.0"`, 而 [urllib](https://docs.python.org/3/library/urllib.html#module-urllib) 的默认用户代理字符串是 `"Python-urllib/3.6"` (on Python 3.6)。
+
+如果 *data* 参数出现，一个适当的 `Content-Type` 信息头应该被包含。如果这个信息头没有提供且 *data* 不是 `None`，则 `Content-Type: application/x-www-form-urlencoded` 将作为一个默认值被添加。
+
+*class* urllib.request.**OpenerDirector**  
+[OpenerDirector](https://docs.python.org/3/library/urllib.request.html#urllib.request.OpenerDirector) 类通过链接起来的 [BaseHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.BaseHandler)s 打开URLs。它管理处理程序链以及从错误中恢复。
+
+*class* urllib.request.**BaseHandler**  
+这是所有注册处理程序的基类——且仅处理简单的注册机制。
+
+*class* urllib.request.**ProxyHandler**(*proxies=None*)  
+使请求通过一个代理。如果给定 *proxies*，它必须是一个映射协议名称到代理URLs的字典。默认是从环境变量 `<protocol>_proxy` 中读取代理列表。如果没有设置代理环境变量，则在 Windows 环境下代理设置从注册表的Internet设置部分获取，而在 macOS 环境下代理信息从macOS系统配置框架中获取。
+
+禁用自动检测代理可以通过传递一个空字典实现。
+
+`no_proxy` 环境变量可以用于指定不应通过代理到达的主机；如果设置，它应该是一个逗号分隔的主机名后缀列表，可以选择附加 `:port`，例如 `cern.ch,ncsa.uiuc.edu,some.host:8080`。
+
+**注意：** 如果设置了 `REQUEST_METHOD` 变量 `HTTP_PROXY` 将被忽略；请看关于 [getproxies()](https://docs.python.org/3/library/urllib.request.html#urllib.request.getproxies) 的文档。
+
+#### OpenerDirector对象
+[OpenerDirector](https://docs.python.org/3.6/library/urllib.request.html#urllib.request.OpenerDirector) 实例拥有以下方法：
+
+OpenerDirector.**add_handler**(*handler*)  
+*handler* 必须是 [BaseHandler](https://docs.python.org/3.6/library/urllib.request.html#urllib.request.BaseHandler) 的一个实例。搜索下面的方法，并将其添加到可能的链中 (注意 HTTP errors 是一个特例)。
+
+* protocol_open() — signal that the handler knows how to open *protocol* URLs.
+* http_error_type() — signal that the handler knows how to handle HTTP errors with HTTP error code *type*.
+* protocol_error() — signal that the handler knows how to handle errors from (non-`http`) protocol.
+* protocol_request() — signal that the handler knows how to pre-process *protocol* requests.
+* protocol_response() — signal that the handler knows how to post-process *protocol* responses.
+
+OpenerDirector.**open**(*url, data=None*\[*, timeout*\])  
+打开指定 *url* (可以是一个请求对象或者一个字符串), 可选择传递指定 *data*。Arguments, return values and exceptions raised are the same as those of [urlopen()](https://docs.python.org/3/library/urllib.request.html#urllib.request.urlopen) (which simply calls the [open()](https://docs.python.org/3/library/functions.html#open) method on the currently installed global [OpenerDirector](https://docs.python.org/3/library/urllib.request.html#urllib.request.OpenerDirector)). 可选参数 *timeout* 以秒为单位指定了一个超时时间用于阻断操作，如连接尝试 (如果没有指定，将使用全局的默认超时设置)。实际上超时特性只能用于 HTTP, HTTPS 和 FTP 连接)。
+
 #### urllib.parse — 将URLs解析为组件
 ##### URL解析
 urllib.parse.**urljoin**(*base, url, allow_fragments=True*)  
@@ -1310,7 +1399,6 @@ $ pip3 install scrapy
 
 ##### scrapy crawl
 用法  
-=====
 
 ```
   scrapy crawl [options] <spider>
@@ -1319,7 +1407,6 @@ $ pip3 install scrapy
 运行一个蜘蛛
 
 选项  
-=======
 
 ```
 -a NAME=VALUE           设置蜘蛛参数 (可以重复)
@@ -1327,14 +1414,12 @@ $ pip3 install scrapy
 
 ##### scrapy runspider
 用法  
-=====
 
 ```
   scrapy runspider [options] <spider_file>
 ```
 
-选项  
-=======  
+选项    
 
 ```
 --output=FILE, -o FILE  转储爬取的元素到 FILE 中 (标准输出使用 - )
@@ -2969,7 +3054,10 @@ date_format(SEND_TIME, '%Y-%m')='2018-10' and char_length(m.content)>280 and cha
 Name                                    |Description
 ----------------------------------------|------------
 [CURRENT_TIMESTAMP()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp), [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp)  |NOW() 的同义词
+[DATE_FORMAT()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_date-format)  |将date格式化为指定的形式
 [NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now)  |返回当前的日期和时间
+
+每个查询中每个返回当前日期和时间的函数仅在查询开始执行时计算一次。这意味着在一个单一查询中多次引用一个函数如 [NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now) 总是产生相同的结果。
 
 * [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp), [CURRENT_TIMESTAMP([fsp])](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp)
 
