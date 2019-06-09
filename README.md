@@ -31,6 +31,7 @@
             * [urllib.parse — 将URLs解析为组件](#urllibparse--将urls解析为组件)
                 * [URL解析](#url解析)
             * [urllib.error — urllib.request抛出的异常类](#urlliberror--urllibrequest抛出的异常类)
+            * [urllib.robotparser — 解析robots.txt](#urllibrobotparser--解析robotstxt)
     * [Python语言参考](#python语言参考)
         * [3. 数据模型](#3-数据模型)
             * [3.3. 特殊方法名](#33-特殊方法名)
@@ -906,6 +907,23 @@ True
 ```
 
 从Python 3.3开始，[IOError](https://docs.python.org/3.6/library/exceptions.html#IOError) 是 [OSError](https://docs.python.org/3.6/library/exceptions.html#OSError) 的别名。
+
+### urllib.robotparser — 解析robots.txt
+**源代码：** [Lib/urllib/robotparser.py](https://github.com/python/cpython/tree/3.6/Lib/urllib/robotparser.py)
+
+这个模块提供一个单一的类，[RobotFileParser](https://docs.python.org/3.6/library/urllib.robotparser.html#urllib.robotparser.RobotFileParser), 这个类回答关于一个具体的用户代理是否能在一个发布了 `robots.txt` 的网站上提取一个URL的问题。关于 `robots.txt` 文件结构的详细信息，请参考 [http://www.robotstxt.org/orig.html](http://www.robotstxt.org/orig.html).
+
+*class* urllib.robotparser.**RobotFileParser**(*url=''*)  
+This class provides methods to read, parse and answer questions about the `robots.txt` file at *url*.
+
+**set_url**(*url*)  
+设置 `robots.txt` 文件的URL
+
+**read()**  
+读取 `robots.txt` URL 并将其提供给解析器。
+
+**can_fetch**(*useragent, url*)  
+根据解析的 `robots.txt` 文件中的规则，如果 *useragent* 允许获取 *url* ，则返回 `True`，否则返回 `False`。
 
 ## Python语言参考
 ### 3. 数据模型
