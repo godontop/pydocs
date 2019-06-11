@@ -740,9 +740,28 @@ This class is an abstraction of a URL request.
 
 对于一个 HTTP POST 请求方法，*data* 应该是一个标准的 *application/x-www-form-urlencoded* 格式缓冲区。[urllib.parse.urlencode()](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlencode) 函数接受一个映射或2-元组序列然后返回一个这种格式的 ASCII 字符串。在作为 *data* 参数使用以前它必须被编码为字节。
 
-*headers* 应该是一个字典， and will be treated as if [add_header()](https://docs.python.org/3/library/urllib.request.html#urllib.request.Request.add_header) was called with each key and value as arguments. This is often used to “spoof” the `User-Agent` header value, which is used by a browser to identify itself – 一些HTTP服务器仅允许来自普通浏览器的请求而阻止来自脚本的请求。例如，Mozilla Firefox 可能标识自己为 `"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:58.0) Gecko/20100101 Firefox/58.0"`, 而 [urllib](https://docs.python.org/3/library/urllib.html#module-urllib) 的默认用户代理字符串是 `"Python-urllib/3.6"` (on Python 3.6)。
+*headers* 应该是一个字典， and will be treated as if [add_header()](https://docs.python.org/3/library/urllib.request.html#urllib.request.Request.add_header) was called with each key and value as arguments. This is often used to “spoof” the `User-Agent` header value, which is used by a browser to identify itself – 一些HTTP服务器仅允许来自普通浏览器的请求而阻止来自脚本的请求。例如，Mozilla Firefox 可能标识自己为 `"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:58.0) Gecko/20100101 Firefox/58.0"`, 而 [urllib](https://docs.python.org/3/library/urllib.html#module-urllib) 的默认用户代理字符串是 `"Python-urllib/3.7"` (on Python 3.6)。
 
 如果 *data* 参数出现，一个适当的 `Content-Type` 信息头应该被包含。如果这个信息头没有提供且 *data* 不是 `None`，则 `Content-Type: application/x-www-form-urlencoded` 将作为一个默认值被添加。
+
+最简单的Python下载代码
+
+```python
+>>> from urllib.request import urlopen
+>>> print(urlopen('https://www.jianshu.com/robots.txt'))
+```
+
+`www.jianshu.com` 默认不允许Python爬虫爬取，需设置User-Agent。
+
+**支持自定义User-Agent的Python下载代码**  
+使用urllib.request模块时，最好是指定User-Agent，因为默认的User-Agent（"Python-urllib/3.7"）限制太多。
+
+```python
+>>> from urllib.request import urlopen, Request                                                                                                                                          [0/377]
+>>> headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.158 Safari/537.36 Viv/2.5.1525.43'}
+>>> req = Request('https://www.jianshu.com/robots.txt', headers=headers)                    
+>>> print(urlopen(req).read().decode('utf-8'))
+```
 
 *class* urllib.request.**OpenerDirector**  
 [OpenerDirector](https://docs.python.org/3/library/urllib.request.html#urllib.request.OpenerDirector) 类通过链接起来的 [BaseHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.BaseHandler)s 打开URLs。它管理处理程序链以及从错误中恢复。
@@ -1475,6 +1494,28 @@ Pypi地址：[https://pypi.org/project/requests/](https://pypi.org/project/reque
 ```sh
 $ pip3 install requests
 ```
+
+#### SOCKS
+版本 2.10.0 中新增。
+
+除了基本的 HTTP 代理，Requests 也支持使用 SOCKS 协议的代理。这是一个可选的特性，在使用以前它要求已安装额外的第三方库。
+
+这个特性的相关依赖你可以通过 `pip` 获取：
+
+```sh
+$ pip install requests[socks]
+```
+
+一旦你安装好那些依赖，使用一个 SOCKS 代理和使用一个 HTTP 代理一样简单：
+
+```python
+proxies = {
+    'http': 'socks5://user:pass@host:port',
+    'https': 'socks5://user:pass@host:port'
+}
+```
+
+使用 `socks5` 方案会导致 DNS 解析发生在客户端，而不是在代理服务器上。这和 curl 是一致的，curl 使用协议方案来决定是在客户端还是在代理上做 DNS 解析。如果你想在代理服务器上做域名解析，使用 `socks5h` 作为协议方案。
 
 ### Scrapy
 官方网站：[https://scrapy.org](https://scrapy.org)  
