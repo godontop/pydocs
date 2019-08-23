@@ -2,11 +2,20 @@
 * [Markdown](#markdown)
 * [HTML](#html)
 * [Python](#python)
-    * [Python标准库](#python标准库)
+    * [Python 3 标准库](#python-3-标准库)
         * [内置函数](#内置函数)
         * [内置类型](#内置类型)
             * [数值类型 — int, float, complex](#数值类型--int-float-complex)
                 * [整型数类型的按位运算](#整型数类型的按位运算)
+        * [文本处理服务](#文本处理服务)
+            * [string — 通用字符串操作](#string--通用字符串操作)
+                * [格式化字符串语法](#格式化字符串语法)
+            * [re — 正则表达式运算](#re--正则表达式运算)
+                * [正则表达式语法](#正则表达式语法)
+                * [模块内容](#模块内容)
+                * [正则表达式对象](#正则表达式对象)
+                * [匹配对象](#匹配对象)
+                * [正则表达式例子](#正则表达式例子)
         * [二进制数据服务](#二进制数据服务)
             * [codecs — 编码解码器注册表和基类](#codecs--编码解码器注册表和基类)
         * [文件和目录访问](#文件和目录访问)
@@ -269,7 +278,13 @@ HTML `<ul>` 标签
 </ul>
 
 # Python
-## Python标准库
+## Python 3 标准库
+Python 3 版本：3.6.4——3.7
+
+[Python 语言参考](https://docs.python.org/3/reference/index.html#reference-index)描述的是 Python 语言精确的语法及语义，这个库参考手册描述的是和 Python 一起发布的标准库。它也描述一些通常包含在 Python 发行版中的可选组件。
+
+Python 标准库包含提供访问系统功能如文件 I/O 的内置模块（C 语言所写），这些功能是 Python 程序员原本无法访问的，也包含用 Python 写的为日常编程中出现的许多问题提供标准解决方案的模块。这些模块中的一些的设计通过将特定平台的 APIs 抽象为平台无关的 APIs 明显地鼓励及增强了 Python 程序的可移植性。 
+
 ### 内置函数
 Python解释器内置了许多总是可用的函数和类型。在这里以字母顺序列出它们。
 
@@ -351,6 +366,446 @@ Operation  |Result          |Notes
 0
 >>> 1 ^ 1
 0
+>>>
+```
+
+## 文本处理服务
+这章描述的模块提供了广泛的字符串操作运算和其它的文本处理服务。
+
+### string — 通用字符串操作
+**源代码：** [Lib/string.py](https://github.com/python/cpython/tree/3.7/Lib/string.py)
+
+**另请参阅：** [Text Sequence Type — str](https://docs.python.org/3/library/stdtypes.html#textseq)
+
+[字符串方法](https://docs.python.org/3/library/stdtypes.html#string-methods)
+
+#### 格式化字符串语法
+[str.format()](https://docs.python.org/3/library/stdtypes.html#str.format) 方法和 [Formatter](https://docs.python.org/3/library/string.html#string.Formatter) 类共享相同的格式化字符串语法 (尽管在 [Formatter](https://docs.python.org/3/library/string.html#string.Formatter) 的情况下，子类可以定义它们自己的格式化字符串语法)。The syntax is related to that of [formatted string literals](https://docs.python.org/3.6/reference/lexical_analysis.html#f-strings), 但有不同。
+
+*在版本3.1中发生变化：* [str.format()](https://docs.python.org/3/library/stdtypes.html#str.format) 的位置参数说明符可以被省略，所以 `'{} {}'.format(a, b)` 相当于 `'{0} {1}'.format(a, b)`。
+
+*在版本3.4中发送变化：* [Formatter](https://docs.python.org/3/library/string.html#string.Formatter) 位置参数说明符可以被省略。
+
+一些简单的格式化字符串例子：
+
+```python
+"First, thou shalt count to {0}"  # 引用第一个位置参数
+"Bring me a {}"                   # 含蓄地引用第一个位置参数
+"From {} to {}"                   # 等同于 "From {0} to {1}"
+```
+
+### re — 正则表达式运算
+**源代码：** [Lib/re.py](https://github.com/python/cpython/tree/3.7/Lib/re.py)
+
+这个模块提供与Perl中相似的正则表达式匹配运算。
+
+被搜索的模式和字符串可以都是 Unicode 字符串 ([str](https://docs.python.org/3/library/stdtypes.html#str)) 也可以都是 8-bit 字符串 ([bytes](https://docs.python.org/3/library/stdtypes.html#bytes))。然而，Unicode 字符串和 8-bit 字符串不能被混用：即，你不能用一个字节模式去匹配一个 Unicode 字符串或者反之亦然；类似地，当请求一个替换时，替换字符串必须和模式及搜索字符串是相同的类型。
+
+#### 正则表达式语法
+特殊字符是：
+
+`.`  
+(点.) 默认模式下，这匹配除了一个换行符以外的任何字符。如果指定了 [DOTALL](https://docs.python.org/3.6/library/re.html#re.DOTALL) 标志，这将匹配任何字符，包括一个换行符。
+
+`?`  
+Causes the resulting RE to match 0 or 1 repetitions of the preceding RE. `ab?` 将匹配 `‘a’` 或者 `‘ab’`。
+
+`*?`, `+?`, `??`  
+限定符 `'*'`, `'+'`, 和 `'?'` 都是*贪婪的*；它们匹配尽可能多的文本。有时这种行为不是被期望的；如果正则表达式 `<.*>` 与 `'<a> b <c>'` 进行匹配，它将匹配整个字符串，而不仅仅是 `'<a>'`。在限定符的后面添加 `?` 使它执行非贪婪匹配或最小匹配的方式；匹配尽可能少的字符。使用正则表达式 `<.*?>` 将仅匹配 `'<a>'`。
+
+```python
+>>> import re
+>>> re.findall(r'a(.*)a', 'abcbaabcaabca')
+['bcbaabcaabc']
+>>> re.findall(r'a(.*?)a', 'abcbaabcaabca')
+['bcb', 'bc', 'bc']
+>>>
+```
+
+`\`  
+要么转义特殊字符 (允许你匹配字符像 `'*'`，`'?'`，等等)，要么表示一个特殊序列；特殊序列在下面讨论。
+
+如果你没有使用原始字符串来表达模式，记住在字符串中Python也使用反斜杠作为一个转义序列；如果转义序列没有被Python解析器识别，则反斜杠和随后的字符将被包含在结果字符串中。然而，如果Python将识别结果序列，则反斜杠应该被重复两次。这是复杂且难懂的，所以强烈推荐你使用原始字符串，除了最简单的表达式。
+
+`[]`  
+用来表明一个字符集合。在集合中：
+
+* 字符可以被单独列出，如 `[amk]` 将匹配 `'a'`, `'m'`, 或者 `'k'`。  
+* 可以通过给定两个字符并用一个 `-` 分隔它们来表示字符范围，例如 `[a-z]` 将匹配任意的小写ASCII字母，`[0-5][0-9]` 将匹配从 `00` 到 `59` 的所有两位数，`[0-9A-Fa-f]` 将匹配任意十六进制数字。如果 `-` 被转义了(如 `[a\-z]`) 或者 如果它被放在第一个或最后一个字符(如 `[-a]` 或者 `[a-]`)，它将匹配一个文字 `'-'`。  
+* 在集合中特殊字符将失去他们的特殊含义。如，`[(+*)]` 将匹配任意文字字符 `'('`, `'+'`, `'*'`, 或者 `')'`。  
+* 在一个集合中字符类如 `\w` 或者 `\S` (在下面定义) 也被接受，虽然它们匹配的字符依赖于 [ASCII](https://docs.python.org/3/library/re.html#re.ASCII) 或者 [LOCALE](https://docs.python.org/3/library/re.html#re.LOCALE) 模式是否生效。  
+* 不在一个范围内的字符可以通过补全集合来匹配。如果集合的第一个字符是 `'^'`，则所有不在集合中的字符将被匹配。例如，`[^5]` 将匹配除了 `5` 以外的任意字符，而 `[^^]` 将匹配除了 `^` 以外的所有字符。如果 `^` 不是集合中的第一个字符则它没有特殊含义。  
+* 要在集合中匹配文字 `']'` ，可以在它前面放一个反斜杠，或者将它放在集合的开始位置。例如，`[()[\]{}]` 和 `[]()[{}]` 都将匹配一个括号。
+
+* 像 [Unicode Technical Standard #18](https://unicode.org/reports/tr18/) 中对嵌套集合和集合操作的支持未来应该会被增加。这将改变语法，所以目前为了促进这个改变在两义情况（ambiguous cases）中将抛出一个 [FutureWarning](https://docs.python.org/3/library/exceptions.html#FutureWarning)。那包括以一个文字 `'['` 开头的集合或者包含文字字符序列 `'--'`, `'&&'`, `'~~'`, 和 `'||'` 的集合。为了避免警告请用一个反斜杠转义它们。
+
+*在版本3.7中发送变化：* 如果一个字符集合包含在未来将会改变语义的结构成分则抛出 [FutureWarning](https://docs.python.org/3/library/exceptions.html#FutureWarning)。
+
+特殊序列由 `'\'` 和一个下面列出的字符构成。如果普通字符不是一个 ASCII 数字或一个 ASCII 字母，则结果是正则表达式将匹配第二个字符。例如，`\$` 匹配字符 `'$'`。
+
+`\number`  
+匹配相同数字的组的内容。组从 1 开始编号。例如，`(.+) \1` 匹配 `'the the'` 或 `'55 55'`，但是不匹配 `'thethe'` (注意组后面的空格)。这个特殊的序列只能用来匹配前 99 个组中的一个。如果 *number* 的第一个数字是 0，或者 `number` 是一个 3 位八进制数，它将不会被解释为一个组匹配，而是作为字符 `number` 的八进制值。在一个字符类 `'['` 和 `']'` 里面，所有数字被转义为字符。
+
+`\s`  
+For Unicode (str) patterns:  
+匹配 Unicode 空白字符 (包括 `[ \t\n\r\f\v]`，及一些其它字符，例如在许多语言的排版规则中所要求的 non-breaking spaces)。如果 ASCII 标志被使用，则仅匹配 `[ \t\n\r\f\v]`。
+
+For 8-bit (bytes) patterns:  
+匹配 ASCII 字符集中被认为是空白的字符；这等同于 `[ \t\n\r\f\v]`。
+
+`\w`  
+For Unicode (str) patterns:  
+匹配 Unicode 单词字符；这包括在任意语言中可以成为一个单词的一部分的大多数字符，也包括数字和下划线。如果 [ASCII](https://docs.python.org/3/library/re.html#re.ASCII) 标志被使用，则仅匹配 `[a-zA-Z0-9_]` (但标志影响整个正则表达式，所以在这种情况下使用一个明确的 `[a-zA-Z0-9_]` 可能是一个更好的选择)。
+
+For 8-bit (bytes) patterns:  
+匹配ASCII字符集中被认为是字母数字的字符；这相当于 `[a-zA-Z0-9_]`。如果 [LOCALE](https://docs.python.org/3/library/re.html#re.LOCALE) 标志被使用，则匹配当前区域设置中被认为是字母数字的字符及下划线。
+
+`\W`  
+匹配任意一个不是一个单词字符的字符。这是 `\w` 的反义词。如果 [ASCII](https://docs.python.org/3/library/re.html#re.ASCII) 标志被使用这将等同于 `[^a-zA-Z0-9_]`。如果 [LOCALE](https://docs.python.org/3/library/re.html#re.LOCALE) 标志被使用，则匹配当前区域中被认为是字母数字的字符及下划线。
+
+#### 模块内容
+这个模块定义了数个函数，常量和一个异常。一些函数是编译的正则表达式的全功能方法的简化版。大多数重大的应用总是使用编译后的形式。
+
+*在版本3.6中发生变化：* 标志常量现在是 RegexFlag 的实例，RegexFlag 是 [enum.IntFlag](https://docs.python.org/3/library/enum.html#enum.IntFlag) 的一个子类。
+
+re.**compile**(*pattern, flags=0*)  
+将一个正则表达式模式编译进一个[正则表达式对象](https://docs.python.org/3/library/re.html#re-objects)，正则表达式对象可以使用它的 [match()](https://docs.python.org/3/library/re.html#re.Pattern.match)，[search()](https://docs.python.org/3/library/re.html#re.Pattern.search) 和其它方法来进行匹配，详情如下。
+
+表达式的行为可以通过指定一个 *flags* 值来进行修改。标志值可以是下面任意一个变量，组合使用按位或(即 `|` 操作符)。
+
+The sequence  
+
+```python
+prog = re.compile(pattern)
+result = prog.match(string)
+```
+
+等同于
+
+```python
+result = re.match(pattern, string)
+```
+
+但当表达式在一个单一程序中将要被使用几次时，重复使用 [re.compile()](https://docs.python.org/3.6/library/re.html#re.compile) 及保存的结果正则表达式对象是更高效的。
+
+**注意：** 传递给 [re.compile()](https://docs.python.org/3/library/re.html#re.compile) 及模块级别的匹配函数的最新的模式的编译版本被缓存了，所以每次仅使用几个（a few）正则表达式的程序不必担心编译正则表达式。
+
+re.**I**  
+re.**IGNORECASE**  
+执行不区分大小写的匹配；表达式像 `[A-Z]` 将也匹配小写字母。Full Unicode matching (例如 `Ü` 匹配 `ü`) also works unless the [re.ASCII](https://docs.python.org/3/library/re.html#re.ASCII) flag is used to disable non-ASCII matches. 当前区域设置不会改变这个标志的效果除非 [re.LOCALE](https://docs.python.org/3/library/re.html#re.LOCALE) 标志也被使用。相当于行内标志 `(?i)`。
+
+注意当 Unicode 模式 `[a-z]` 或者 `[A-Z]` 与 [IGNORECASE](https://docs.python.org/3/library/re.html#re.IGNORECASE) 标志组合使用时，它们将匹配52个 ASCII 字母及 4 个额外的非ASCII字母：`‘İ’` (U+0130, 大写拉丁字母I上面带一个点), `‘ı’` (U+0131, 小写拉丁字母i不带点), `‘ſ’` (U+017F, Latin small letter long s) 和 `‘K’` (U+212A, 开尔文符号)。如果 [ASCII](https://docs.python.org/3/library/re.html#re.ASCII) 标志被使用，则仅字母 `‘a’` 到 `‘z’` 和 `‘A’` 到 `‘Z’` 被匹配 (但标志影响整个正则表达式，所以在这种情况下使用一个明确的 `(?-i:[a-zA-Z])` 可能是一个更好的选择)。
+
+re.**search**(*pattern, string, flags=0*)  
+扫描 *string* 查找第一个正则表达式 *pattern* 产生一个匹配的位置，并返回一个对应的[匹配对象](https://docs.python.org/3/library/re.html#match-objects)。如果字符串中没有位置匹配模式则返回 `None`；注意这不同于在字符串中的某点查找一个零长度的匹配。
+
+re.**match**(*pattern, string, flags=0*)  
+如果 *string* 的开始位置有0个或多个字符匹配正则表达式 *pattern*，则返回一个对应的[匹配对象](https://docs.python.org/3/library/re.html#match-objects)。如果字符串不匹配模式，则返回 `None`；注意，这不同于 zero-length match。
+
+注意，即使在[多行](https://docs.python.org/3/library/re.html#re.MULTILINE)模式下，[re.match()](https://docs.python.org/3/library/re.html#re.match) 将仅匹配字符串的开始位置而不是每一行的开始位置。
+
+如果你想在 *string* 的任意位置定位一个匹配，使用 [search()](https://docs.python.org/3/library/re.html#re.search) 替代 (另请参考 [search() vs. match()](https://docs.python.org/3/library/re.html#search-vs-match))。
+
+```python
+>>> import re
+>>> re.match('c', 'abcdef')   # No match
+>>> re.search('c', 'abcdef')  # Match
+<_sre.SRE_Match object; span=(2, 3), match='c'>
+```
+
+**匹配中文**    
+[\u4e00-\u9fd5]虽然不是所有中文的Unicode代码点范围，但它几乎已经包含了所有常用的汉字的Unicode代码点。在Unicode标准版本10.0.0中包含汉字代码点的块共有9个，具体可以查询Unicode官网。Python 3.6.4支持的Unicode标准版本为9.0.0，[\u4e00-\u9fd5]是Unicode标准版本8.0的CJK Unified Ideographs块的代码点范围。
+
+匹配一个或多个中文
+
+```python
+>>> import re
+>>> s = 'Python is a programming language.'
+>>> re.search(u'[\u4e00-\u9fd5]+', s)
+>>> s = 'Python不是大蟒蛇。'
+>>> re.search(u'[\u4e00-\u9fd5]+', s)
+<_sre.SRE_Match object; span=(6, 11), match='不是大蟒蛇'>
+```
+
+re.**findall**(*pattern, string, flags=0*)  
+返回 *string* 中所有非重叠的 *模式* 匹配，作为一个字符串列表。*string* 被从左到右搜索，匹配按被找到的顺序返回。If one or more groups are present in the pattern, return a list of groups; this will be a list of tuples if the pattern has more than one group. 空匹配被包含在结果中。
+
+**注意：** 因为当前实现的限制一个空匹配后面的字符没有被包含在下一个匹配中，所以 `findall(r'^|\w+', 'two words')` 返回 `['', 'wo', 'words']` (注意丢失的 “t”)。这在Python 3.7中将发送变化。【Python 3.6】
+
+*在版本 3.7 中发送变化：* 现在非空匹配可以从前一个空匹配后面开始。
+
+Python 3.6
+
+```python
+>>> import sys
+>>> sys.version_info
+sys.version_info(major=3, minor=6, micro=8, releaselevel='final', serial=0)
+>>> import re
+>>> re.findall(r'^|\w+', 'two words')
+['', 'wo', 'words']
+>>> 
+```
+
+Python 3.7
+
+```python
+>>> import sys
+>>> sys.version_info
+sys.version_info(major=3, minor=7, micro=4, releaselevel='final', serial=0)
+>>> import re
+>>> re.findall(r'^|\w+', 'two words')
+['', 'two', 'words']
+>>> 
+```
+
+匹配 sitemap 文件中的所有链接
+
+```python
+import re
+import urllib.request
+
+
+sitemap = urllib.request.urlopen('https://example.com/sitemap.xml').read()
+links = re.findall('<loc>(.*?)</loc>', sitemap.decode())
+
+```
+
+re.**sub**(*pattern, repl, string, count=0, flags=0*)  
+Return the string obtained by replacing the leftmost non-overlapping occurrences of pattern in *string* by the replacement *repl*. 如果没有找到模式，返回未改变的 *string*。 *repl* 可以是一个字符串或者一个函数；如果它是一个字符串，它里面的任何反斜杠转义都将被处理。即， `\n` 被转换成一个单一的新行字符，`\r` 被转换成一个回车，等等。未知的 ASCII 字母转义被保留给将来使用并被当做错误来看。其它未知的转义例如 `\&` 被单独留下。反向引用，如 `\6`，被模式中的组 6 匹配的子串替换。例如：
+
+```python
+>>> import re
+>>> re.sub(r'def\s+([a-zA-Z_][a-zA-Z_0-9]*)\s*\(\s*\):',
+...        r'static PyObject*\npy_\1(void)\n{',
+...        'def myfunc():')
+'static PyObject*\npy_myfunc(void)\n{'
+>>> 
+```
+
+```python
+>>> import re
+>>> url = 'http://example.webscraping.com/places/default/view/Australia-1'
+>>> re.sub('[^/0-9a-zA-Z\-. _]', '_', url)
+'http_//example.webscraping.com/places/default/view/Australia-1'
+>>>
+```
+
+模式可以是一个字符串或者一个[模式对象](https://docs.python.org/3/library/re.html#re-objects)。
+
+可选参数 *count* 是发现的模式将被替换的最大数；*count* 必须是一个非负整数。如果忽略或者为 0 ，所有出现的模式都将被替换。 
+
+re.**purge()**  
+清除正则表达式缓存。
+
+#### 正则表达式对象
+编译的正则表达式对象支持下面的方法和属性：
+
+Pattern.**search**__(__*string*__[__, *pos*__[__, *endpos*__]])__  
+扫描 *string* 查找这个正则表达式产生一个匹配的第一个位置，并返回一个对应的[匹配对象](https://docs.python.org/3/library/re.html#match-objects)。如果字符串中没有位置匹配模式则返回 `None` ；注意这不同于在字符串中的某点查找一个零长匹配。
+
+Pattern.**match**__(__*string*__[__, *pos*__[__, *endpos*__]])__  
+如果 *string* 的*起始位置*（beginning）有零个或多个字符匹配这个正则表达式，则返回一个对应的[匹配对象](https://docs.python.org/3/library/re.html#match-objects)。如果字符串不匹配模式则返回 `None`；注意这不同于一个零长匹配。
+
+```python
+>>> import re
+>>> pattern = re.compile("o")
+>>> pattern.match("dog")      # No match as "o" is not at the start of "dog".
+>>> pattern.match("dog", 1)   # Match as "o" is the 2nd character of "dog".
+<re.Match object; span=(1, 2), match='o'>
+>>>
+```
+
+#### 匹配对象
+匹配对象总是有一个值为 `True` 的布尔值。因为当没有匹配时 [match()](https://docs.python.org/3/library/re.html#re.Pattern.match) 和 [search()](https://docs.python.org/3/library/re.html#re.Pattern.search) 返回 `None`，你可以用一个简单的 `if` 语句测试是否有一个匹配：
+
+```python
+match = re.search(pattern, string)
+if match:
+    process(match)
+```
+
+匹配对象支持下面的方法和属性：
+
+Match.**group**(**[**_group1_, ...**]**)  
+返回一个或多个匹配的子组。如果是一个单一的参数，则结果是一个单一的字符串；如果有多个参数，则结果是一个元组且每个元素对应一个参数。没有参数时，*group1* 默认为 0 (返回完整匹配)。如果某个 *groupN* 参数是 0，则对应的返回值是整个匹配的字符串；如果它是在范围 [1..99] 内，则它是对应的括号内的组匹配的字符串。如果一个组的数值是负数或者比模式中定义的组的数值大，则抛出一个 [IndexError](https://docs.python.org/3/library/exceptions.html#IndexError) 异常。如果一个包含于模式的一部分的组没有匹配，则对应的结果是 `None`。如果一个包含于模式的一部分的组匹配多次，则仅最后的匹配被返回。
+
+```python
+>>> import re
+>>> m = re.match(r"(\w+) (\w+)", "Isaac Newton, physicist")
+>>> m.group(0)       # The entire match
+'Isaac Newton'
+>>> m.group(1)       # The first parenthesized subgroup.
+'Isaac'
+>>> m.group(2)       # The second parenthesized subgroup.
+'Newton'
+>>> m.group(1, 2)    # Multiple arguments give us a tuple.
+('Isaac', 'Newton')
+>>>
+```
+
+如果正则表达式使用 `(?P<name>...)` 语法，*groupN* 参数也可以是通过组名标识组的字符串。如果一个字符串参数没有在模式中用作一个组名，则抛出一个 [IndexError](https://docs.python.org/3/library/exceptions.html#IndexError) 异常。
+
+一个适当复杂的例子：
+
+```python
+>>> import re
+>>> m = re.match(r"(?P<first_name>\w+) (?P<last_name>\w+)", "Malcolm Reynolds")
+>>> m.group('first_name')
+'Malcolm'
+>>> m.group('last_name')
+'Reynolds'
+>>>
+```
+
+命名的组也可以通过它们的索引来引用：
+
+```python
+>>> m.group(1)
+'Malcolm'
+>>> m.group(2)
+'Reynolds'
+>>>
+```
+
+如果一个组匹配多次，仅最后一个匹配可以被访问：
+
+```python
+>>> m = re.match(r"(..)+", "a1b2c3")  # Matches 3 times.
+>>> m.group(0)
+'a1b2c3'
+>>> m.group(1)                        # Returns only the last match.
+'c3'
+>>>
+```
+
+Match.**\_\_getitem\_\_**__(__*g*__)__  
+这与 `m.group(g)` 是相同的。这允许更容易地从一个匹配中访问一个单独的组：
+
+```python
+>>> m = re.match(r"(\w+) (\w+)", "Isaac Newton, physicist")
+>>> m[0]       # The entire match
+'Isaac Newton'
+>>> m[1]       # The first parenthesized subgroup.
+'Isaac'
+>>> m[2]       # The second parenthesized subgropu.
+'Newton'
+>>>
+```
+
+*版本 3.6 中新增。*
+
+Match.**groups**(*default=None*)  
+返回一个包含所有匹配的子组的元组，从 1 到模式中的所有组。*default* 参数用于不参与匹配的组；它默认为 `None`。
+
+例如：
+
+```python
+>>> import re
+>>> m = re.match(r"(\d+)\.(\d+)", "24.1632")
+>>> m.groups()
+('24', '1632')
+>>>
+```
+
+如果我们使小数位及其后面的所有数成为可选，则不是所有组都可以参与匹配。这些组将默认为 `None` 除非指定 *default* 参数：
+
+```python
+>>> import re
+>>> m = re.match(r"(\d+)\.?(\d+)?", "24")
+>>> m.groups()      # Second group defaults to None.
+('24', None)
+>>> m.groups('0')   # Now, the second group defaults to '0'.
+('24', '0')
+>>> m.groups('1')   # Now, the second group defaults to '1'. 
+('24', '1')
+>>> m.groups('X')   # Now, the second group defaults to 'X'. 
+('24', 'X')
+>>>
+```
+
+Match.**start([**_group_**])**  
+Match.**end([**_group_**])**  
+返回 *group* 匹配的子串的起始索引和结束索引；*group* 默认为 0 (意为整个匹配的子串)。
+
+注意如果 *group* 匹配一个空串，`m.start(group)` 将等于 `m.end(group)`。例如，在 `m = re.search('b(c?)', 'cba')` 之后，`m.start(0)` 是 1，`m.end(0)` 是 2，`m.start(1)` 和 `m.end(1)` 都是 2，而 `m.start(2)` 抛出一个 [IndexError](https://docs.python.org/3/library/exceptions.html#IndexError) 异常。
+
+```python
+>>> import re
+>>> m = re.search('b(c?)', 'cba')
+>>> m
+<re.Match object; span=(1, 2), match='b'>
+>>> m.start(0)
+1
+>>> m.end(0)
+2
+>>> m.group(1)  # Group 1 match a null string.
+''
+>>> m.start(1)
+2
+>>> m.end(1)
+2
+>>>
+```
+
+一个将从邮件地址中删除 *remove_this* 的例子：
+
+```python
+>>> import re
+>>> email = "tony@tiremove_thisger.net"
+>>> m = re.search("remove_this", email)
+>>> m
+<re.Match object; span=(7, 18), match='remove_this'>
+>>> m.start()
+7
+>>> m.end()
+18
+>>> email[:m.start()] + email[m.end():]
+'tony@tiger.net'
+>>>
+```
+#### 正则表达式例子
+##### search() vs. match()
+Python 提供了两种不同的基于正则表达式的简单操作： [re.match()](https://docs.python.org/3/library/re.html#re.match) 仅在字符串的起始位置检查一个匹配，而 [re.search()](https://docs.python.org/3/library/re.html#re.search) 在字符串的任何位置检查一个匹配 (这也是 Perl 的默认操作)。
+
+但是要注意在 [MULTILINE](https://docs.python.org/3/library/re.html#re.MULTILINE) 模式下 [match()](https://docs.python.org/3/library/re.html#re.match) 仅匹配字符串的起始位置，然后使用 [search()](https://docs.python.org/3/library/re.html#re.search) 与一个以 `'^'` 开头的正则表达式将匹配每一行的起始位置。
+
+```python
+>>> re.match('X', 'A\nB\nX', re.MULTILINE)  # No match
+>>> re.search('^X', 'A\nB\nX', re.MULTILINE)  # Match
+<re.Match object; span=(4, 5), match='X'>
+>>>
+```
+
+##### 文本转换
+[sub()](https://docs.python.org/3/library/re.html#re.sub) 用一个字符串或者一个函数的结果替换每一个出现的模式。这个例子演示使用 [sub()](https://docs.python.org/3/library/re.html#re.sub) 及一个函数转换（“munge”）文本，或者使一个序列的每一个单词里的所有字符的顺序随机化除了每个单词的第一个和最后一个字符：
+
+```python
+>>> import re
+>>> import random
+>>> def repl(m):
+...     inner_word = list(m.group(2))
+...     random.shuffle(inner_word)
+...     return m.group(1) + "".join(inner_word) + m.group(3)
+... 
+>>> text = "Professor Abdolmalek, please report your absences promptly."
+>>> re.sub(r"(\w)(\w+)(\w)", repl, text)
+'Poesorfsr Albedolamk, paelse rropet your aencbses prtomply.'
+>>> re.findall(r"(\w)(\w+)(\w)", text)
+[('P', 'rofesso', 'r'), ('A', 'bdolmale', 'k'), ('p', 'leas', 'e'), ('r', 'epor', 't'), ('y', 'ou', 'r'), ('a', 'bsence', 's'), ('p', 'romptl', 'y')]
+>>> re.sub(r"(\w)(\w+)(\w)", repl, text)
+'Pfrsseoor Amlalbeodk, pselae reorpt your asbneecs pltormpy.'
+>>> re.sub(r"(\w)(\w+)(\w)", repl, text)
+'Persofosr Abeladomlk, plsaee roeprt yuor abenecss prpolmty.'
+>>>
+```
+
+##### 查找所有副词
+[findall()](https://docs.python.org/3/library/re.html#re.findall) 匹配*所有*出现的模式，而不仅仅是第一个就像 [search()](https://docs.python.org/3/library/re.html#re.search) 所做的那样。例如，如果一个作家想在一些文本中查找所有副词，他们可能以下面这种方式使用 [findall()](https://docs.python.org/3/library/re.html#re.findall) ：
+
+```python
+>>> text = "He was carefully disguised but captured quickly by police."
+>>> re.findall(r"\w+ly", text)
+['carefully', 'quickly']
 >>>
 ```
 
