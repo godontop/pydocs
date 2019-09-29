@@ -17,7 +17,7 @@
                 * [匹配对象](#匹配对象)
                 * [正则表达式例子](#正则表达式例子)
         * [二进制数据服务](#二进制数据服务)
-            * [codecs — 编码解码器注册表和基类](#codecs--编码解码器注册表和基类)
+            * [codecs — 编解码器注册和相关基类](#codecs--编解码器注册和相关基类)
         * [文件和目录访问](#文件和目录访问)
             * [os.path — 通用路径名操作](#ospath--通用路径名操作)
         * [通用操作系统服务](#通用操作系统服务)
@@ -812,15 +812,119 @@ Python 提供了两种不同的基于正则表达式的简单操作： [re.match
 ### 二进制数据服务
 在这章中描述的模块提供一些用于处理二进制数据的基本服务操作。关于二进制数据的其他操作，特别是与文件格式和网络协议相关的，在相关章节中描述。
 
-#### codecs — 编码解码器注册表和基类
+#### codecs — 编解码器注册和相关基类
 **源代码：** [Lib/codecs.py](https://github.com/python/cpython/tree/3.7/Lib/codecs.py)
 
-这个模块为标准Python编码解码器（编码器和解码器）定义基类以及提供访问管理编码解码器和错误处理查找程序的内部Python编码解码器注册表。大多数标准编码解码器是将文本编码成字节的[文本编码](https://docs.python.org/3/glossary.html#term-text-encoding)，但也有编码解码器提供将文本编码为文本，及将字节编码为字节。自定义的编码解码器可以在任意类型之间进行编码和解码，但一些模块特点要求使用特定的[文本编码](https://docs.python.org/3/glossary.html#term-text-encoding)，或编码成[字节](https://docs.python.org/3/library/stdtypes.html#bytes)的编码解码器。
+这个模块定义了标准 Python 编解码器（编码器和解码器）的基类，并提供接口用来访问内部的 Python 编解码器注册表，该注册表负责管理编解码器和错误处理的查找过程。 大多数标准编解码器都属于 [文本编码](https://docs.python.org/zh-cn/3/glossary.html#term-text-encoding)，它们可将文本编码为字节串，但也提供了一些编解码器可将文本编码为文本，以及字节串编码为字节串。 自定义编解码器可以在任意类型间进行编码和解码，但某些模块特性仅适用于 [文本编码](https://docs.python.org/zh-cn/3/glossary.html#term-text-encoding) 或将数据编码为 **字节串** 的编解码器。
 
-##### 编码和Unicode
-字符串在内部作为代码点序列被存储，代码点的范围为 `0x0`–`0x10FFFF`。 (关于实现的详细信息请看 [PEP 393](https://www.python.org/dev/peps/pep-0393)。) 一旦一个字符串对象在CPU和内存之外被使用，字节顺序以及这些数组如何存储为字节将成为一个问题。与其它编码解码器一样，序列化一个字符串为一个字节序列被称为*编码*，而从这个字节序列重新创建这个字符串被称为*解码*。各种各样的不同的文本序列化编码解码器，被集体称为[文本编码](https://docs.python.org/3/glossary.html#term-text-encoding)。
+该模块定义了以下用于使用任何编解码器进行编码和解码的函数：
 
+codecs.**encode**(*obj, encoding='utf-8', errors='strict'*)  
+使用为 *encoding* 注册的编解码器对 *obj* 进行编码。
 
+可以给定 *Errors* 以设置所需要的错误处理方案。 默认的错误处理方案 `'strict'` 表示编码错误将引发 [ValueError](https://docs.python.org/zh-cn/3/library/exceptions.html#ValueError) (或更特定编解码器相关的子类，例如 [UnicodeEncodeError](https://docs.python.org/zh-cn/3/library/exceptions.html#UnicodeEncodeError))。 请参阅 [编解码器基类](https://docs.python.org/zh-cn/3/library/codecs.html#codec-base-classes) 了解有关编解码器错误处理的更多信息。
+
+codecs.**decode**(*obj, encoding='utf-8', errors='strict'*)  
+使用为 *encoding* 注册的编解码器对 *obj* 进行解码。
+
+可以给定 *Errors* 以设置所需要的错误处理方案。 默认的错误处理方案 `'strict'` 表示编码错误将引发 [ValueError](https://docs.python.org/zh-cn/3/library/exceptions.html#ValueError) (或更特定编解码器相关的子类，例如 [UnicodeDecodeError](https://docs.python.org/zh-cn/3/library/exceptions.html#UnicodeDecodeError))。 请参阅 [编解码器基类](https://docs.python.org/zh-cn/3/library/codecs.html#codec-base-classes) 了解有关编解码器错误处理的更多信息。
+
+##### 无状态的编码和解码
+基本 Codec 类定义了这些方法，同时还定义了无状态编码器和解码器的函数接口：
+
+Codec.**encode**(*input*__[__, *errors*__]__)  
+编码 *input* 对象并返回一个元组 (输出对象, 消耗长度)。 例如，[文本编码](https://docs.python.org/zh-cn/3/glossary.html#term-text-encoding) 会使用特定的字符集编码格式 (例如 `cp1252` 或 `iso-8859-1`) 将字符串转换为字节串对象。
+
+*errors* 参数定义了要应用的错误处理方案。 默认为 `'strict'` 处理方案。
+
+此方法不一定会在 Codec 实例中保存状态。 可使用必须保存状态的 [StreamWriter](https://docs.python.org/zh-cn/3/library/codecs.html#codecs.StreamWriter) 作为编解码器以便高效地进行编码。
+
+编码器必须能够处理零长度的输入并在此情况下返回输出对象类型的空对象。
+
+Codec.**decode**(*input*__[__, *errors*__]__)  
+解码 *input* 对象并返回一个元组 (输出对象, 消耗长度)。 例如，[文本编码](https://docs.python.org/zh-cn/3/glossary.html#term-text-encoding) 的解码操作会使用特定的字符集编码格式将字节串对象转换为字符串对象。
+
+对于文本编码格式和字节到字节编解码器，*input* 必须为一个字节串对象或提供了只读缓冲区接口的对象 -- 例如，缓冲区对象和映射到内存的文件。
+
+*errors* 参数定义了要应用的错误处理方案。 默认为 `'strict'` 处理方案。
+
+此方法不一定会在 Codec 实例中保存状态。 可使用必须保存状态的 [StreamReader](https://docs.python.org/zh-cn/3/library/codecs.html#codecs.StreamReader) 作为编解码器以便高效地进行解码。
+
+解码器必须能够处理零长度的输入并在此情况下返回输出对象类型的空对象。
+
+##### 编码格式与 Unicode
+字符串在系统内部存储为 `0x0`--`0x10FFFF` 范围内的码位序列。 （请参阅 [PEP 393](https://www.python.org/dev/peps/pep-0393) 了解有关实现的详情。） 一旦字符串对象要在 CPU 和内存以外使用，字节的大小端顺序和字节数组的存储方式就成为一个关键问题。 如同使用其他编解码器一样，将字符串序列化为字节序列被称为 *编码*，而从字节序列重建字符串被称为 *解码*。 存在许多不同的文本序列化编解码器，它们被统称为 [文本编码](https://docs.python.org/zh-cn/3/glossary.html#term-text-encoding)。
+
+最简单的文本编码格式 (称为 `'latin-1'` 或 `'iso-8859-1'`) 将码位 0--255 映射为字节值 `0x0`--`0xff`，这意味着包含 `U+00FF` 以上码位的字符串对象无法使用此编解码器进行编码。 这样做将引发 [UnicodeEncodeError](https://docs.python.org/zh-cn/3/library/exceptions.html#UnicodeEncodeError)，其形式类似下面这样（不过详细的错误信息可能会有所不同）: `UnicodeEncodeError: 'latin-1' codec can't encode character '\u1234' in position 3: ordinal not in range(256)`。
+
+还有另外一组编码格式（所谓的字符映射编码）会选择全部 Unicode 码位的不同子集并设定如何将这些码位映射为字节值 `0x0`--`0xff`。 要查看这是如何实现的，只需简单地打开相应源码例如 `encodings/cp1252.py` (这是一个主要在 Windows 上使用的编码格式)。 其中会有一个包含 256 个字符的字符串常量，指明每个字符所映射的字节值。
+
+所有这些编码格式只能对 Unicode 所定义的 1114112 个码位中的 256 个进行编码。 一种能够存储每个 Unicode 码位的简单而直接的办法就是将每个码位存储为四个连续的字节。 存在两种不同的可能性：以大端序存储或以小端序存储。 这两种编码格式分别被称为 `UTF-32-BE` 和 `UTF-32-LE`。 它们的缺点可以举例说明：如果你在一台小端序的机器上使用 `UTF-32-BE` 则你将必须在编码和解码时翻转字节。 `UTF-32` 避免了这个问题：字节的排列将总是使用自然顺序。 当这些字节被具有不同字节顺序的 CPU 读取时，则必须进行字节翻转。 为了能够检测 `UTF-16` 或 `UTF-32` 字节序列的大小端序，可以使用所谓的 BOM ("字节顺序标记")。 这对应于 Unicode 字符 `U+FEFF`。 此字符可添加到每个 `UTF-16` 或 `UTF-32` 字节序列的开头。 此字符的字节翻转版本 (`0xFFFE`) 是一个不可出现于 Unicode 文本中的非法字符。 因此当发现一个 `UTF-16` 或 `UTF-32` 字节序列的首个字符是 `U+FFFE` 时，就必须在解码时进行字节翻转。 不幸的是字符 `U+FEFF` 还有第二个含义 `ZERO WIDTH NO-BREAK SPACE`: 即宽度为零并且不允许用来拆分单词的字符。 它可以被用来为语言分析算法提供提示。 在 Unicode 4.0 中用 `U+FEFF` 表示 `ZERO WIDTH NO-BREAK SPACE` 已被弃用（改用 `U+2060` (`WORD JOINER`) 负责此任务）。 然而 Unicode 软件仍然必须能够处理 `U+FEFF` 的两个含义：作为 BOM 它被用来确定已编码字节的存储布局，并在字节序列被解码为字符串后将其去除；作为 `ZERO WIDTH NO-BREAK SPACE` 它是一个普通字符，将像其他字符一样被解码。
+
+还有另一种编码格式能够对所有的 Unicode 字符进行编码：UTF-8。 UTF-8 是一种 8 位编码，这意味着在 UTF-8 中没有字节顺序问题。 UTF-8 字节序列中的每个字节由两部分组成：标志位（最重要的位）和内容位。 标志位是由零至四个值为 `1` 的二进制位加一个值为 `0` 的二进制位构成的序列。 Unicode 字符会按以下形式进行编码（其中 x 为内容位，当拼接为一体时将给出对应的 Unicode 字符）：
+
+范围                           |编码
+-------------------------------|------
+`U-00000000` ... `U-0000007F`  |0xxxxxxx
+`U-00000080` ... `U-000007FF`  |110xxxxx 10xxxxxx
+`U-00000800` ... `U-0000FFFF`  |1110xxxx 10xxxxxx 10xxxxxx
+`U-00010000` ... `U-0010FFFF`  |11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+
+Unicode 字符最不重要的一个位就是最右侧的二进制位 x。
+
+由于 UTF-8 是一种 8 位编码格式，因此 BOM 是不必要的，并且已编码字符串中的任何 `U+FEFF` 字符（即使是作为第一个字符）都会被视为是 `ZERO WIDTH NO-BREAK SPACE`。
+
+在没有外部信息的情况下，就不可能毫无疑义地确定一个字符串使用了何种编码格式。 每种字符映射编码格式都可以解码任意的随机字节序列。 然而对 UTF-8 来说这却是不可能的，因为 UTF-8 字节序列具有不允许任意字节序列的特别结构。 为了提升 UTF-8 编码检测的可靠性，Microsoft 发明了一种 UTF-8 变体形式 (Python 2.5 称之为 `"utf-8-sig"`) 专门用于其 Notepad 程序：在任何 Unicode 字符在被写入文件之前，会先写入一个 UTF-8 编码的 BOM (它看起来是这样一个字节序列: `0xef`, `0xbb`, `0xbf`)。 由于任何字符映射编码后的文件都不大可能以这些字节值开头（例如它们会映射为
+
+LATIN SMALL LETTER I WITH DIAERESIS
+RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
+INVERTED QUESTION MARK
+
+对于 iso-8859-1 编码格式来说），这提升了根据字节序列来正确猜测 `utf-8-sig` 编码格式的成功率。 所以在这里 BOM 的作用并不是帮助确定生成字节序列所使用的字节顺序，而是作为帮助猜测编码格式的记号。 在进行编码时 utf-8-sig 编解码器将把 `0xef`, `0xbb`, `0xbf` 作为头三个字节写入文件。 在进行解码时 `utf-8-sig` 将跳过这三个字节，如果它们作为文件的头三个字节出现的话。 在 UTF-8 中并不推荐使用 BOM，通常应当避免它们的出现。
+
+##### 标准编码
+Python 自带了许多内置的编解码器，它们的实现或者是通过 C 函数，或者是通过映射表。 以下表格是按名称排序的编解码器列表，并提供了一些常见别名以及编码格式通常针对的语言。 别名和语言列表都不是详尽无遗的。 请注意仅有大小写区别或使用连字符替代下划线的拼写形式也都是有效的别名；因此，'utf-8' 是 'utf_8' 编解码器的有效别名。
+
+**CPython implementation detail:** 有些常见编码格式可以绕过编解码器查找机制来提升性能。 这些优化机会对于 CPython 来说仅能通过一组有限的别名（大小写不敏感）来识别：utf-8, utf8, latin-1, latin1, iso-8859-1, iso8859-1, mbcs (Windows 专属), ascii, us-ascii, utf-16, utf16, utf-32, utf32, 也包括使用下划线替代连字符的的形式。 使用这些编码格式的其他别名可能会导致更慢的执行速度。
+
+*在 3.6 版更改:* 可识别针对 us-ascii 的优化机会。
+
+许多字符集都支持相同的语言。 它们在个别字符（例如是否支持 EURO SIGN 等）以及给字符所分配的码位方面存在差异。 特别是对于欧洲语言来说，通常存在以下几种变体：
+
+* 某个 ISO 8859 编码集
+* 某个 Microsoft Windows 编码页，通常是派生自某个 8859 编码集，但会用附加的图形字符来替换控制字符。
+* 某个 IBM EBCDIC 编码页
+* 某个 IBM PC 编码页，通常会兼容 ASCII
+
+编码  |别名         |语言
+-----|-------------|-----
+ascii|646, us-ascii|英语
+gb2312 |chinese, csiso58gb231280, euc-cn, euccn, eucgb2312-cn, gb2312-1980, gb2312-80, iso-ir-58 |简体中文
+gbk    |936, cp936, ms936 |统一汉语
+gb18030 |gb18030-2000 |统一汉语
+hz     |hzgb, hz-gb, hz-gb-2312 |简体中文
+latin_1 |iso-8859-1, iso8859-1, 8859, cp819, latin, latin1, L1 |西欧
+utf_8  |U8, UTF, utf8 |所有语言
+
+##### Python 专属的编码格式
+有一些预定义编解码器是 Python 专属的，因此它们在 Python 之外没有意义。 这些编解码器按其所预期的输入和输出类型在下表中列出（请注意虽然文本编码是编解码器最常见的使用场景，但下层的编解码器架构支持任意数据转换而不仅是文本编码）。 对于非对称编解码器，所列目的描述的是编码方向。
+
+**文字编码**
+
+以下编解码器提供了 [str](https://docs.python.org/zh-cn/3/library/stdtypes.html#str) 到 [bytes](https://docs.python.org/zh-cn/3/library/stdtypes.html#bytes) 的编码和 [bytes-like object](https://docs.python.org/zh-cn/3/glossary.html#term-bytes-like-object) 到 [str](https://docs.python.org/zh-cn/3/library/stdtypes.html#str) 的解码，类似于 Unicode 文本编码。
+
+编码 |别名|目的
+-----|---|--------
+mbcs |ansi, dbcs |Windows 专属：根据 ANSI 代码页（CP_ACP）对操作数进行编码。
+oem  |   |Windows 专属：根据 OEM 代码页（CP_OEMCP）对操作数进行编码。 *3.6 新版功能.*
+
+**二进制转换**
+
+以下编解码器提供了二进制转换: [bytes-like object](https://docs.python.org/zh-cn/3/glossary.html#term-bytes-like-object) 到 [bytes](https://docs.python.org/zh-cn/3/library/stdtypes.html#bytes) 的映射。 它们不被 [bytes.decode()](https://docs.python.org/zh-cn/3/library/stdtypes.html#bytes.decode) 所支持（该方法只生成 [str](https://docs.python.org/zh-cn/3/library/stdtypes.html#str) 类型的输出）。
+
+编码       |别名     |目的      |编码器/解码器
+-----------|--------|----------|-------------
+hex_codec  |hex     |将操作数转换为十六进制表示，每个字节有两位数 |[binascii.b2a_hex()](https://docs.python.org/zh-cn/3/library/binascii.html#binascii.b2a_hex) / [binascii.a2b_hex()](https://docs.python.org/zh-cn/3/library/binascii.html#binascii.a2b_hex)
 
 ## 文件和目录访问
 这章描述的模块处理磁盘文件和目录。例如，有读取文件内容的模块，有以便携的方式操作路径的模块，和创建临时文件的模块。这章中完整的模块列表是：
@@ -2845,6 +2949,18 @@ SELECT val1 FROM tbl1 WHERE val1 IN (1,2,'a');
 ```sql
 SELECT val1 FROM tbl1 WHERE val1 IN ('1','2','a');
 ```
+
+```sql
+select * from ID where CARDID in (1766800630,2841917174,0154495212);
+```
+
+等同于
+
+```sql
+select * from ID where CARDID=1766800630 or CARDID=2841917174 or CARDID=0154495212;
+```
+
+IN 查询相当于多个 OR 条件的叠加。
 
 ### 4.2.5 在命令行中使用选项
 当命令行中指定的选项值包含空格时必须用引号括起来。例如，[--execute](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_execute) (或 -e) 选项可以和 [mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 一起使用以将 SQL 语句传递给服务器。当这个选项被使用时，[mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 用这个选项值执行这些语句然后退出。这些语句必须被引号括起来。例如，你可以用下面的命令获取一份用户账户列表：
