@@ -21,7 +21,7 @@
         * [文件和目录访问](#文件和目录访问)
             * [os.path — 通用路径名操作](#ospath--通用路径名操作)
         * [通用操作系统服务](#通用操作系统服务)
-            * [os — 各种各样的操作系统接口](#os--各种各样的操作系统接口)
+            * [os — 操作系统接口模块](#os--操作系统接口模块)
                 * [进程参数](#进程参数)
                 * [各种各样的系统信息](#各种各样的系统信息)
         * [并行执行](#并行执行)
@@ -48,6 +48,11 @@
                 * [3.3.7. 仿真容器类型](#337-仿真容器类型)
     * [Python Wiki](#python-wiki)
         * [WindowsCompilers](#windowscompilers)
+    * [Python 有什么新变化？](#python-有什么新变化)
+        * [What’s New In Python 3.0](#whats-new-in-python-30)
+            * [常见绊脚石](#常见绊脚石)
+                * [文本 Vs. 数据代替 Unicode Vs. 8-bit](#文本-vs-数据代替-unicode-vs-8-bit)
+            * [库变化](#库变化)
     * [PyPI](#pypi)
         * [aiohttp](#aiohttp)
         * [Beautiful Soup](#beautiful-soup)
@@ -290,12 +295,22 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 
 |          |          |Built-in Functions|          |          |
 |----------|----------|------------------|----------|----------|
-|          |          |                  |          |super()   |
+|          |          |issubclass()      |          |super()   |
 |          |          |                  |range()   |          |
 |          |getattr() |                  |          |          |
 
 **getattr**(*object, name*__[__*, default*__]__)  
 返回 *object* 的 *name* 属性的值。*name* 必须是一个字符串。如果这个字符串是这个对象的一个属性的名称，则结果为那个属性的值。例如，`getattr(x, 'foobar')` 等同于 `x.foobar`。如果名称属性不存在，则返回 *default* 如果有提供的话，否则抛出 [AttributeError](https://docs.python.org/3/library/exceptions.html#AttributeError)。
+
+**issubclass**(*class, classinfo*)  
+如果 *class* 是 *classinfo* 的子类（直接、间接或 [虚拟](https://docs.python.org/zh-cn/3/glossary.html#term-abstract-base-class) 的），则返回 true。*classinfo* 可以是类对象的元组，此时 *classinfo* 中的每个元素都会被检查。其他情况，会触发 [TypeError](https://docs.python.org/zh-cn/3/library/exceptions.html#TypeError) 异常。
+
+```python
+>>> import io
+>>> issubclass(io.FileIO, io.RawIOBase)
+True
+>>> 
+```
 
 **range**(*stop*)  
 **range**(*start, stop*[*, step*])  
@@ -876,9 +891,9 @@ Unicode 字符最不重要的一个位就是最右侧的二进制位 x。
 
 在没有外部信息的情况下，就不可能毫无疑义地确定一个字符串使用了何种编码格式。 每种字符映射编码格式都可以解码任意的随机字节序列。 然而对 UTF-8 来说这却是不可能的，因为 UTF-8 字节序列具有不允许任意字节序列的特别结构。 为了提升 UTF-8 编码检测的可靠性，Microsoft 发明了一种 UTF-8 变体形式 (Python 2.5 称之为 `"utf-8-sig"`) 专门用于其 Notepad 程序：在任何 Unicode 字符在被写入文件之前，会先写入一个 UTF-8 编码的 BOM (它看起来是这样一个字节序列: `0xef`, `0xbb`, `0xbf`)。 由于任何字符映射编码后的文件都不大可能以这些字节值开头（例如它们会映射为
 
-LATIN SMALL LETTER I WITH DIAERESIS
-RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
-INVERTED QUESTION MARK
+LATIN SMALL LETTER I WITH DIAERESIS  
+RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK  
+INVERTED QUESTION MARK  
 
 对于 iso-8859-1 编码格式来说），这提升了根据字节序列来正确猜测 `utf-8-sig` 编码格式的成功率。 所以在这里 BOM 的作用并不是帮助确定生成字节序列所使用的字节顺序，而是作为帮助猜测编码格式的记号。 在进行编码时 utf-8-sig 编解码器将把 `0xef`, `0xbb`, `0xbf` 作为头三个字节写入文件。 在进行解码时 `utf-8-sig` 将跳过这三个字节，如果它们作为文件的头三个字节出现的话。 在 UTF-8 中并不推荐使用 BOM，通常应当避免它们的出现。
 
@@ -899,6 +914,7 @@ Python 自带了许多内置的编解码器，它们的实现或者是通过 C �
 编码  |别名         |语言
 -----|-------------|-----
 ascii|646, us-ascii|英语
+cp1252 |windows-1252 |西欧
 gb2312 |chinese, csiso58gb231280, euc-cn, euccn, eucgb2312-cn, gb2312-1980, gb2312-80, iso-ir-58 |简体中文
 gbk    |936, cp936, ms936 |统一汉语
 gb18030 |gb18030-2000 |统一汉语
@@ -993,13 +1009,13 @@ os.path.**join**(_path, *paths_)
 ## 通用操作系统服务
 这章描述的模块提供在（几乎）所有操作系统上都可用的操作系统特征接口，如文件和时钟。这些接口通常是根据 Unix 或 C 接口仿写的，但它们在大多数其它系统下也是可用的。这里是一个概述：
 
-### os — 各种各样的操作系统接口
+### os — 操作系统接口模块
 **源代码：** [Lib/os.py](https://github.com/python/cpython/tree/3.7/Lib/os.py)
 
 这个模块提供了一种便携的方式使用依赖于操作系统的功能。如果你仅仅只想读或写一个文件请看 [open()](https://docs.python.org/3/library/functions.html#open)，如果你想操作路径，请看 [os.path](https://docs.python.org/3/library/os.path.html#module-os.path) 模块，如果你想在命令行下读取所有文件中的所有行请看 [fileinput](https://docs.python.org/3/library/fileinput.html#module-fileinput) 模块。创建临时文件和目录请看 [tempfile](https://docs.python.org/3/library/tempfile.html#module-tempfile) 模块，高级文件和目录处理请看 [shutil](https://docs.python.org/3/library/shutil.html#module-shutil) 模块。
 
 #### 进程参数
-这些函数和数据条目提供当前进程和用户的信息及操作。
+这些函数和数据项提供了操作当前进程和用户的信息。
 
 os.**getpid()**  
 返回当前的进程id。
@@ -1010,6 +1026,55 @@ os.**getppid()**
 **可用性：** Unix，Windows。
 
 *在版本3.2中发生变化：* 增加对Windows的支持。
+
+#### 文件和目录
+在一些 Unix 平台，这些函数中的很多支持这些特性中的一个或多个：
+
+* **指定一个文件描述符：** 对于一些函数，*path* 参数不仅可以是一个指定路径名的字符串，也可以是一个文件描述符。The function will then operate on the file referred to by the descriptor. (For POSIX systems, Python will call the `f...` version of the function.)
+
+  你可以在你的平台上使用 [os.supports_fd](https://docs.python.org/zh-cn/3/library/os.html?highlight=listdir#os.supports_fd) 来检查是否可以将 *path* 指定为一个文件描述符。如果它不可用，使用它将抛出一个 [NotImplementedError](https://docs.python.org/zh-cn/3/library/exceptions.html#NotImplementedError)。
+
+  If the function also supports *dir_fd* or *follow_symlinks* arguments, it is an error to specify one of those when supplying *path* as a file descriptor.
+
+* **paths relative to directory descriptors:** If *dir_fd* is not `None`, it should be a file descriptor referring to a directory, and the path to operate on should be relative; path will then be relative to that directory. 如果路径是绝对的，`dir_fd` 将被忽略。 (For POSIX systems, Python will call the `...at` or `f...at` version of the function.)
+
+  你可以使用 [os.supports_dir_fd](https://docs.python.org/zh-cn/3/library/os.html?highlight=listdir#os.supports_dir_fd) 检查你的平台是否支持 *dir_fd*。如果它是不可用的，使用它将抛出一个 [NotImplementedError](https://docs.python.org/zh-cn/3/library/exceptions.html#NotImplementedError)。
+
+* **not following symlinks:** If *follow_symlinks* is `False`, and the last element of the path to operate on is a symbolic link, the function will operate on the symbolic link itself instead of the file the link points to. (For POSIX systems, Python will call the `l...` version of the function.)
+
+  你可以使用 [os.supports_follow_symlinks](https://docs.python.org/zh-cn/3/library/os.html?highlight=listdir#os.supports_follow_symlinks) 检查在你的平台上是否支持 *follow_symlinks*。如果它是不可用的，使用它将抛出一个 [NotImplementedError](https://docs.python.org/zh-cn/3/library/exceptions.html#NotImplementedError)。
+
+os.**listdir**(*path='.'*)  
+返回一个包含 *path* 指定的目录中的条目名称的列表。列表是任意顺序的，且不包括特殊条目 `'.'` 和 `'..'` 即使它们出现在目录中。
+
+*path* 可以是一个 [path-like object](https://docs.python.org/zh-cn/3/glossary.html#term-path-like-object)。如果 *path* 是 *bytes* 类型 (直接或间接地通过 [PathLike](https://docs.python.org/zh-cn/3/library/os.html?highlight=listdir#os.PathLike) 接口)，则返回的文件名也将是 *bytes* 类型；在所有其它情形下，它们将是 *str* 类型。
+
+这个函数也支持指 [指定一个文件描述符](https://docs.python.org/zh-cn/3/library/os.html?highlight=listdir#path-fd)；文件描述符必须指向一个目录。
+
+**注解：** 要将 `str` 文件名编码为 `bytes`，使用 [fsencode()](https://docs.python.org/zh-cn/3/library/os.html?highlight=listdir#os.fsencode)。
+
+**参见：** The [scandir()](https://docs.python.org/zh-cn/3/library/os.html?highlight=listdir#os.scandir) function returns directory entries along with file attribute information, giving better performance for many common use cases.
+
+*在 3.2 版更改:* *path* 参数变成了可选的。
+
+*3.3 新版功能:* Added support for specifying an open file descriptor for *path*.
+
+*在 3.6 版更改:* 接受一个 [类路径对象](https://docs.python.org/zh-cn/3/glossary.html#term-path-like-object)。
+
+os.**rename**(*src, dst, \*, src\_dir\_fd=None, dst\_dir\_fd=None*)  
+将文件或目录 *src* 重命名为 *dst*。如果 *dst* 已存在，the operation will fail with an [OSError](https://docs.python.org/zh-cn/3/library/exceptions.html#OSError) subclass in a number of cases:
+
+在 Windows 平台，如果 *dst* 已存在则总是抛出一个 [FileExistsError](https://docs.python.org/zh-cn/3/library/exceptions.html#FileExistsError) 。
+
+On Unix, if *src* is a file and *dst* is a directory or vice-versa, an [IsADirectoryError](https://docs.python.org/zh-cn/3/library/exceptions.html#IsADirectoryError) or a [NotADirectoryError](https://docs.python.org/zh-cn/3/library/exceptions.html#NotADirectoryError) will be raised respectively. 如果 *src* 和 *dst* 都是目录且 *dst* 是空的，则 *dst* 将被安静地替换。如果 *dst* 是一个非空的目录，则抛出一个 [OSError](https://docs.python.org/zh-cn/3/library/exceptions.html#OSError) 。如果两者都是文件，*dst* 将会被安静地替换如果用户有权限的话。 The operation may fail on some Unix flavors if *src* and *dst* are on different filesystems. If successful, the renaming will be an atomic operation (this is a POSIX requirement).
+
+This function can support specifying *src_dir_fd* and/or *dst_dir_fd* to supply [paths relative to directory descriptors](https://docs.python.org/zh-cn/3/library/os.html#dir-fd).
+
+If you want cross-platform overwriting of the destination, use [replace()](https://docs.python.org/zh-cn/3/library/os.html#os.replace).
+
+*3.3 新版功能:* *src_dir_fd* 和 *dst_dir_fd* 参数。
+
+*在 3.6 版更改:* Accepts a [path-like object](https://docs.python.org/zh-cn/3/glossary.html#term-path-like-object) for *src* and *dst*.
 
 #### 各种各样的系统信息
 
@@ -1628,6 +1693,31 @@ Visual C++ Build Tools 2015 已经被微软升级为 Build Tools for Visual Stud
 
 Microsoft Visual C++ 14.0 with Visual Studio 2015 (x86, x64, ARM)  
 *Visual Studio 2015* 包含 *Visual C++ 14.0* 编译器。*Distutils* 将自动检测编译器并使用它。
+
+# Python 有什么新变化？
+“What’s New in Python” 系列短文将带你了解Python主版本间最重要的变化。当发布一个新版本后对任何想保持更新的人来说它们是 “必读” 的。
+
+## What’s New In Python 3.0
+**作者：** Guido van Rossum
+
+这篇文章解释了Python 3.0中的新特性，与2.6比较。Python 3.0，也被称为 “Python 3000” 或 “Py3K”，它是第一个有意向后不兼容的Python发行版。
+
+一如既往，对于一个新版本，源发行版中的 `Misc/NEWS` 文件包含很多关于每一个发生变化的小事的详细信息。
+
+### 常见绊脚石
+这节列出了那些最可能使你犯错误的一些变化，如果你正在使用Python 2.5的话。
+
+#### 文本 Vs. 数据代替 Unicode Vs. 8-bit
+你认为你知道的关于二进制数据和 Unicode 的所有事情都已经改变了。
+
+* Python 3.0 使用 *文本* 和 (二进制) *数据* 的概念代替 Unicode 字符串和 8-bit 字符串。所有文本都是 Unicode；然而 *编码的* Unicode 被表示为二进制数据。用于控制文本的类型是 [str](https://docs.python.org/3/library/stdtypes.html#str)，用于控制数据的类型是 [bytes](https://docs.python.org/3/library/stdtypes.html#bytes)。与 2.x 情境最大的不同是在Python 3.0中任何试图混合文本和数据的操作都将抛出 [TypeError](https://docs.python.org/3/library/exceptions.html#TypeError)，然而如果你在Python 2.x 中混合 Unicode 和 8-bit 字符串，它将工作如果 8-bit 字符串仅包含 7-bit (ASCII) 字节，但是如果它包含非ASCII值你将得到 [UnicodeDecodeError](https://docs.python.org/3/library/exceptions.html#UnicodeDecodeError)。这种因值而异的行为这些年来已经导致了许多愁容。  
+* 对于 Unicode 文本你可以不再使用 `u"..."` 字母。然而，对于二进制数据你必须使用 `b"..."` 字母。  
+* `StringIO` 和 `cStringIO` 模块已经消失了。改为，导入 [io](https://docs.python.org/3/library/io.html#module-io) 模块及为文本和数据分别使用 [io.StringIO](https://docs.python.org/3/library/io.html#io.StringIO) 或 [io.BytesIO](https://docs.python.org/3/library/io.html#io.BytesIO)。
+
+### 库变化
+因为时间的限制，这个文档没有详尽地介绍标准库中非常广泛的变化。[PEP 3108](https://www.python.org/dev/peps/pep-3108) 是库的主要变化的参考文献。这是一个简述的回顾：
+
+* Python 2.x 中一个常见的模式是有一个用纯Python实现的模块版本，与一个可选的实现为一个C扩展的加速版本；例如，[pickle](https://docs.python.org/3/library/pickle.html#module-pickle) 和 `cPickle`。这承担每次使用这些模块时导入加速版本及退回到纯Python版本的责任。在 Python 3.0中，加速版本被认为实现了纯Python的细节。用户应该总是导入标准版本，试图导入加速版本会退回到纯Python版本。[pickle](https://docs.python.org/3/library/pickle.html#module-pickle) / `cPickle` 对受到这种待遇。[profile](https://docs.python.org/3/library/profile.html#module-profile) 模块在3.1的清单上。`StringIO` 模块已经变成了 [io](https://docs.python.org/3/library/io.html#module-io) 模块的一个类。
 
 ## PyPI
 ### aiohttp
