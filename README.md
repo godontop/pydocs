@@ -24,6 +24,8 @@
             * [os — 操作系统接口模块](#os--操作系统接口模块)
                 * [进程参数](#进程参数)
                 * [各种各样的系统信息](#各种各样的系统信息)
+            * [time — 时间的访问和转化](#time--时间的访问和转化)
+                * [函数](#函数)
         * [并行执行](#并行执行)
             * [threading — 基于线程的并行](#threading--基于线程的并行)
                 * [线程对象](#线程对象)
@@ -997,7 +999,14 @@ os.path.**exists**(*path*)
 
 *在版本3.3中发生变化：* *path* 现在可以是一个整型数：如果它是一个打开的文件描述符则返回 `True`，否则返回 `False`。
 
-*在版本3.6中发生变化：* 接受 [path-like object](https://docs.python.org/3.6/glossary.html#term-path-like-object)。
+*在版本3.6中发生变化：* 接受 [path-like object](https://docs.python.org/3.6/glossary.html#term-path-like-object)。  
+<br />
+
+os.path.**getctime**(*path*)  
+Return the system's ctime which, on some systems (like Unix) is the time of the last metadata change, and, 在另一些系统上 (像 Windows), 则是 *path* 的创建时间。 The return value is a number giving the number of seconds since the epoch (see the [time](https://docs.python.org/zh-cn/3/library/time.html#module-time) module). 如果文件不存在或者无法访问则抛出 [OSError](https://docs.python.org/zh-cn/3/library/exceptions.html#OSError) 。
+
+*在 3.6 版更改:* 接受一个 [path-like object](https://docs.python.org/zh-cn/3/glossary.html#term-path-like-object)。  
+<br />
 
 os.path.**join**(_path, *paths_)  
 智能地连接一个或多个路径组件。返回值是 *path* 和所有 _*paths_ 成员的串联，且除了最后一个部分，每一个非空的部分后面都跟着一个正确的目录分隔符 (`os.sep`)，这意味着如果最后一个部分为空则结果将必定以一个分隔符结尾。如果一个组件是一个绝对路径，则所有前面的组件都被丢弃且连接从绝对路径组件继续。
@@ -1084,6 +1093,143 @@ If you want cross-platform overwriting of the destination, use [replace()](https
 
 os.**sep**  
 操作系统用来分隔路径名组件的字符。POSIX 为 `'/'` 而 Windows 为 `'\\'`。Note that knowing this is not sufficient to be able to parse or concatenate pathnames — 使用 [os.path.split()](https://docs.python.org/3.6/library/os.path.html#os.path.split) 和 [os.path.join()](https://docs.python.org/3.6/library/os.path.html#os.path.join) — 但它偶尔是有用的。Also available via [os.path](https://docs.python.org/3.6/library/os.path.html#module-os.path)。
+
+### time — 时间的访问和转化
+这个模块提供了各种各样的时间相关的函数。相关的功能 (functionality)，请参见 [datetime](https://docs.python.org/3/library/datetime.html#module-datetime) 和 [calendar](https://docs.python.org/3/library/calendar.html#module-calendar) 模块。
+
+尽管此模块始终可用，但并非所有平台上都提供所有功能。 此模块中定义的大多数函数调用都具有相同名称的平台C库函数。 因为这些函数的语义因平台而异,所以使用时最好查阅平台相关文档。
+
+按顺序解释一些术语和惯例。
+
+* *epoch* 是时间的起始点，且取决于平台。对于 Unix, epoch 是 1970-1-1, 00:00:00 (UTC). 要找出指定平台的 epoch 是什么，请查看 `time.gmtime(0)`。
+
+* 术语 *Unix 纪元秒数 (seconds since the epoch)* 是指自国际标准时间 1970 年 1 月 1 日零时以来经过的总秒数，通常不包括 [闰秒](https://en.wikipedia.org/wiki/Leap_second)。 在所有符合 POSIX 标准的平台上，闰秒都会从总秒数中被扣除。
+
+* 此模块中的功能可能无法处理纪元之前或将来的远期日期和时间。未来的截止点由C库决定；对于32位系统，它通常在2038年。
+
+* **2000年（Y2K）问题 ：**Python依赖于平台的C库，它通常没有2000年问题，因为所有日期和时间都在内部表示为自纪元以来的秒数。函数 [strptime()](https://docs.python.org/zh-cn/3/library/time.html#time.strptime) 在给出 `%y` 格式代码时可以解析2位数年份。当解析2位数年份时，它们将根据 POSIX 和 ISO C 标准进行转换：值 69--99 映射到 1969--1999，值 0--68 映射到2000--2068。
+
+* UTC 是 Coordinated Universal Time (以前叫 Greenwich Mean Time, 或 GMT). 首字母缩略词 UTC 不是一个错误而是英语与法语间的一个折衷。
+
+* DST是夏令时，在一年中的一部分时间（通常）调整时区一小时。 DST规则很神奇（由当地法律确定），并且每年都会发生变化。 C 库有一个包含本地规则的表（通常是从系统文件中读取以获得灵活性），并且在这方面是True Wisdom的唯一来源。
+
+* 时间值由 [gmtime()](https://docs.python.org/zh-cn/3/library/time.html#time.gmtime)，[localtime()](https://docs.python.org/zh-cn/3/library/time.html#time.localtime) 和 [strptime()](https://docs.python.org/zh-cn/3/library/time.html#time.strptime) 返回，并被 [asctime()](https://docs.python.org/zh-cn/3/library/time.html#time.asctime)， [mktime()](https://docs.python.org/zh-cn/3/library/time.html#time.mktime) 和 [strftime()](https://docs.python.org/zh-cn/3/library/time.html#time.strftime) 接受，是一个 9 个整数的序列。 [gmtime()](https://docs.python.org/zh-cn/3/library/time.html#time.gmtime)， [localtime()](https://docs.python.org/zh-cn/3/library/time.html#time.localtime) 和 [strptime()](https://docs.python.org/zh-cn/3/library/time.html#time.strptime) 的返回值还提供各个字段的属性名称。
+
+  请参阅 [struct_time](https://docs.python.org/zh-cn/3/library/time.html#time.struct_time) 以获取这些对象的描述。
+
+  *在 3.3 版更改:* 在平台支持相应的 `struct tm` 成员时，[struct_time](https://docs.python.org/zh-cn/3/library/time.html#time.struct_time) 类型被扩展提供 tm_gmtoff 和 tm_zone 属性。
+
+  *在 3.6 版更改:* [struct_time](https://docs.python.org/zh-cn/3/library/time.html#time.struct_time) 的属性 tm_gmtoff 和 tm_zone 现在可在所有平台上使用。
+
+* 使用以下函数在时间表示之间进行转换：  
+  
+  从                 |到                   |使用
+  -------------------|---------------------|----------------
+  seconds since the epoch |UTC 的 [struct_time](https://docs.python.org/zh-cn/3/library/time.html#time.struct_time) |[gmtime()](https://docs.python.org/zh-cn/3/library/time.html#time.gmtime)
+  seconds since the epoch |本地时间的 [struct_time](https://docs.python.org/zh-cn/3/library/time.html#time.struct_time) |[localtime()](https://docs.python.org/zh-cn/3/library/time.html#time.localtime)
+  UTC 的 [struct_time](https://docs.python.org/zh-cn/3/library/time.html#time.struct_time) |seconds since the epoch |[calendar.timegm()](https://docs.python.org/zh-cn/3/library/calendar.html#calendar.timegm)
+  本地时间的 [struct_time](https://docs.python.org/zh-cn/3/library/time.html#time.struct_time) |seconds since the epoch |[mktime()](https://docs.python.org/zh-cn/3/library/time.html#time.mktime)
+
+#### 函数
+time.**gmtime**(\[*secs*\])  
+将一个以 epoch 为起始点以秒为单位的时间表达式转换成一个 UTC 格式的 [struct_time](https://docs.python.org/3/library/time.html#time.struct_time) 且 dst 标志总是为0。如果 *secs* 没有提供或者为 [None](https://docs.python.org/3/library/constants.html#None)，则使用 [time()](https://docs.python.org/3/library/time.html#time.time) 返回的当前时间。小数部分的秒被忽略。[struct_time](https://docs.python.org/3/library/time.html#time.struct_time) 对象的描述请看上面。这个函数的反转请看 [calendar.timegm()](https://docs.python.org/3/library/calendar.html#calendar.timegm)。
+
+time.**localtime**(**[**_secs_**]**)  
+与 [gmtime()](https://docs.python.org/zh-cn/3/library/time.html#time.gmtime) 相似但转换为当地时间。如果未提供 *secs* 或为 [None](https://docs.python.org/zh-cn/3/library/constants.html#None) ，则使用由 [time()](https://docs.python.org/zh-cn/3/library/time.html#time.time) 返回的当前时间。当 DST 适用于给定时间时，dst标志设置为 `1` 。
+
+time.**sleep**(*secs*)  
+将当前线程按指定的秒数推迟执行。参数可以是一个浮点数以指定一个更精确的睡眠时间。The actual suspension time may be less than that requested because any caught signal will terminate the [sleep()](https://docs.python.org/zh-cn/3/library/time.html#time.sleep) following execution of that signal’s catching routine. 此外，由于系统中其他活动的安排，暂停时间可能比请求的时间长任意量。
+
+*在版本3.5中发生变化：* 即使睡眠被信号中断，该函数现在至少睡眠 *secs* ，除非信号处理程序引发异常 (原理请看 [PEP 475](https://www.python.org/dev/peps/pep-0475))。  
+<br />
+
+time.**strftime**(*format*__[__*, t*__]__)  
+转换一个元组或 [struct_time](https://docs.python.org/zh-cn/3/library/time.html#time.struct_time) 表示的由 [gmtime()](https://docs.python.org/zh-cn/3/library/time.html#time.gmtime) 或 [localtime()](https://docs.python.org/zh-cn/3/library/time.html#time.localtime) 返回的时间到由 *format* 参数指定的字符串。如果未提供 *t* ，则使用由 [localtime()](https://docs.python.org/zh-cn/3/library/time.html#time.localtime) 返回的当前时间。 *format* 必须是一个字符串。如果 *t* 中的任何字段超出允许范围，则引发 [ValueError](https://docs.python.org/zh-cn/3/library/exceptions.html#ValueError) 。
+
+0是时间元组中任何位置的合法参数；如果它通常是非法的，则该值被强制改为正确的值。
+
+以下指令可以嵌入 *format* 字符串中。它们显示时没有可选的字段宽度和精度规范，并被 [strftime()](https://docs.python.org/zh-cn/3/library/time.html#time.strftime) 结果中的指示字符替换：
+
+指令 |意义                                         |注释
+-----|---------------------------------------------|-----
+`%a` |本地化的缩写星期中每日的名称。                  |
+`%A` |本地化的星期中每日的完整名称。                  |
+`%b` |本地化的月缩写名称。                           |
+`%B` |本地化的月完整名称。                           |
+`%c` |本地化的适当日期和时间表示。                    |
+`%d` |十进制数 [01,31] 表示的月中日。                |
+`%H` |十进制数 [00,23] 表示的小时（24小时制）。       |
+`%I` |十进制数 [01,12] 表示的小时（12小时制）。       |
+`%j` |十进制数 [001,366] 表示的年中日。               |
+`%m` |十进制数 [01,12] 表示的月。                    |
+`%M` |十进制数 [00,59] 表示的分钟。                  |
+`%p` |本地化的 AM 或 PM 。                          |(1)
+`%S` |十进制数 [00,61] 表示的秒。                    |(2)
+`%U` |十进制数 [00,53] 表示的一年中的周数（星期日作为一周的第一天）作为。在第一个星期日之前的新年中的所有日子都被认为是在第0周。 |(3)
+`%w` |十进制数 [0(星期日),6] 表示的周中日。           |
+`%W` |十进制数 [00,53] 表示的一年中的周数（星期一作为一周的第一天）作为。在第一个星期一之前的新年中的所有日子被认为是在第0周。 |(3)
+`%x` |本地化的适当日期表示。                          |
+`%X` |本地化的适当时间表示。                          |
+`%y` |十进制数 [00,99] 表示的没有世纪的年份。          |
+`%Y` |十进制数表示的带世纪的年份。                     |
+`%z` |时区偏移以格式 +HHMM 或 -HHMM 形式的 UTC/GMT 的正或负时差指示，其中H表示十进制小时数字，M表示小数分钟数字 [-23:59, +23:59] 。 |
+`%Z` |时区名称（如果不存在时区，则不包含字符）。        |
+`%%` |字面的 `'%'` 字符。                            |
+
+**注释:**
+
+(1). 当与 [strptime()](https://docs.python.org/zh-cn/3/library/time.html#time.strptime) 函数一起使用时，如果使用 `%I` 指令来解析小时， `%p` 指令只影响输出小时字段。
+
+(2). 范围真的是 `0` 到 `61` ；值 `60` 在表示 [leap seconds](https://en.wikipedia.org/wiki/Leap_second) 的时间戳中有效，并且由于历史原因支持值 `61` 。
+
+(3). 当与 [strptime()](https://docs.python.org/zh-cn/3/library/time.html#time.strptime) 函数一起使用时， `%U` 和 `%W` 仅用于指定星期几和年份的计算。
+
+下面是一个示例，一个与 [RFC 2822](https://tools.ietf.org/html/rfc2822.html) Internet电子邮件标准以兼容的日期格式。
+
+```python
+>>> from time import gmtime, strftime
+>>> strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
+'Sat, 12 Oct 2019 06:33:53 +0000'
+>>>
+```
+
+现在不推荐使用 `%Z` ，但是所有 ANSI C 库都不支持扩展为首选小时/分钟偏移量的```%z```转义符。 此外，严格的 1982 年原始 [RFC 822](https://tools.ietf.org/html/rfc822.html) 标准要求两位数的年份（%y而不是%Y），但是实际在2000年之前很久就转移到了4位数年。之后， [RFC 822](https://tools.ietf.org/html/rfc822.html) 已经废弃了，4位数的年份首先被推荐 [RFC 1123](https://tools.ietf.org/html/rfc1123.html) ，然后被 [RFC 2822](https://tools.ietf.org/html/rfc2822.html) 强制执行。
+
+某些平台可能支持其他指令，但只有此处列出的指令具有 ANSI C 标准化的含义。要查看平台支持的完整格式代码集，请参阅 *strftime(3)* 文档。
+
+在某些平台上，可选的字段宽度和精度规范可以按照以下顺序紧跟在指令的初始 `'%'` 之后；这也不可移植。字段宽度通常为2，除了 `%j` ，它是3。  
+<br />
+
+*class* time.**struct_time**  
+返回的时间值序列的类型为 [gmtime()](https://docs.python.org/zh-cn/3/library/time.html#time.gmtime) 、 [localtime()](https://docs.python.org/zh-cn/3/library/time.html#time.localtime) 和 [strptime()](https://docs.python.org/zh-cn/3/library/time.html#time.strptime) 。它是一个带有 [named tuple](https://docs.python.org/zh-cn/3/glossary.html#term-named-tuple) 接口的对象：可以通过索引和属性名访问值。 存在以下值：
+
+索引 |属性       |值
+----|-----------|------------
+0   |tm_year    |（例如，1993）
+1   |tm_mon     |range [1, 12]
+2   |tm_mday    |range [1, 31]
+3   |tm_hour    |range [0, 23]
+4   |tm_min     |range [0, 59]
+5   |tm_sec     |range [0, 61]； 见 [strftime()](https://docs.python.org/zh-cn/3/library/time.html#time.strftime) 介绍中的 **(2)**
+6   |tm_wday    |range [0, 6] ，周一为 0
+7   |tm_yday    |range [1, 366]
+8   |tm_isdst   |0, 1 或 -1；如下所示
+N/A |tm_zone    |时区名称的缩写
+N/A |tm_gmtoff  |以秒为单位的UTC以东偏离
+
+请注意，与C结构不同，月份值是 [1,12] 的范围，而不是 [0,11] 。
+
+在调用 [mktime()](https://docs.python.org/zh-cn/3/library/time.html#time.mktime) 时， tm_isdst 可以在夏令时生效时设置为1，而在夏令时不生效时设置为0。 值-1表示这是未知的，并且通常会导致填写正确的状态。
+
+当一个长度不正确的元组被传递给期望 [struct_time](https://docs.python.org/zh-cn/3/library/time.html#time.struct_time) 的函数，或者具有错误类型的元素时，会引发 [TypeError](https://docs.python.org/zh-cn/3/library/exceptions.html#TypeError) 。  
+<br />
+
+time.**time()** → float  
+以 [epoch](https://docs.python.org/3/library/time.html#epoch) 为起始点以秒为单位返回当前时间作为一个浮点数。epoch 明确的日期及 [leap seconds](https://en.wikipedia.org/wiki/Leap_second) 的处理依赖于平台。在 Windows 和 大多数 Unix 系统中，epoch 是 1970-1-1, 00:00:00 (UTC) and leap seconds are not counted towards the time in seconds since the epoch. 这通常被称为 [Unix time](https://en.wikipedia.org/wiki/Unix_time). 要找出指定平台的 epoch 是什么，请查看 `time.gmtime(0)`。
+
+请注意，即使时间总是作为浮点数返回，但并非所有系统都提供高于1秒的精度。虽然此函数通常返回非递减值，但如果在两次调用之间设置了系统时钟，则它可以返回比先前调用更低的值。
+
+返回的数字 [time()](https://docs.python.org/zh-cn/3/library/time.html#time.time) 可以通过将其传递给 [gmtime()](https://docs.python.org/zh-cn/3/library/time.html#time.gmtime) 函数或转换为UTC中更常见的时间格式（即年、月、日、小时等）或通过将它传递给 [localtime()](https://docs.python.org/zh-cn/3/library/time.html#time.localtime) 函数获得本地时间。在这两种情况下都返回一个 [struct_time](https://docs.python.org/zh-cn/3/library/time.html#time.struct_time) 对象，日历日期组件可以从中作为属性访问。
 
 ## 并行执行
 ### threading — 基于线程的并行
