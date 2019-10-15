@@ -48,6 +48,8 @@
             * [3.3. 特殊方法名](#33-特殊方法名)
                 * [3.3.1. 基本自定义](#331-基本自定义)
                 * [3.3.7. 仿真容器类型](#337-仿真容器类型)
+    * [Python安装和使用](#python安装和使用)
+        * [1. 命令行与环境](#1-命令行与环境)
     * [Python Wiki](#python-wiki)
         * [WindowsCompilers](#windowscompilers)
     * [Python 有什么新变化？](#python-有什么新变化)
@@ -1778,6 +1780,127 @@ object.**\_\_getitem\_\_**(*self, key*)
 
 object.**\_\_setitem\_\_**(*self, key, value*)  
 调用以实现赋值给 `self[key]`。注意事项同 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__)。这应该仅为映射实现如果对象支持改变键的值，或者如果可以增加新键，或者对于序列如果元素可以被替换。对于不正确的 *key* 值应该抛出和 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__) 方法相同的异常。
+
+# Python安装和使用
+## 1. 命令行与环境
+CPython 解析器会扫描命令行与环境用于获取各种设置信息。
+
+**CPython implementation detail:** 其他实现的命令行方案可能有所不同。 更多相关资源请参阅 [其他实现](https://docs.python.org/zh-cn/3.7/reference/introduction.html#implementations)。
+
+### 1.1. 命令行
+对 Python 发起调用时，你可以指定以下的任意选项:
+
+`
+python [-bBdEhiIOqsSuvVWx?] [-c command | -m module-name | script | - ] [args]
+`
+
+当然最常见的用例就是简单地启动执行一个脚本:
+
+`
+python myscript.py
+`
+
+#### 1.1.1. 接口选项
+解释器接口类似于 UNIX shell，但提供了一些额外的发起调用方法:
+
+* 当调用时附带连接到某个 tty 设备的标准输入时，它会提示输入命令并执行它们，直到读入一个 EOF（文件结束字符，其产生方式是在 UNIX 中按 Ctrl-D 或在 Windows 中按 Ctrl-Z, Enter。）
+* 当调用时附带一个文件名参数或以一个文件作为标准输入时，它会从该文件读取并执行脚本程序。
+* 当调用时附带一个目录名参数时，它会从该目录读取并执行具有适当名称的脚本程序。
+* 当调用时附带 `-c command` 时，它会执行 *command* 所给出的 Python 语句。 在这里 *command* 可以包含以换行符分隔的多条语句。 请注意前导空格在 Python 语句中是有重要作用的！
+* 当调用时附带 `-m module-name` 时，会在 Python 模块路径中查找指定的模块，并将其作为脚本程序执行。
+
+在非交互模式下，会对全部输入先解析再执行。
+
+一个接口选项会终结解释器所读入的选项列表，后续的所有参数将被放入 [sys.argv](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.argv) -- 请注意其中首个元素即第零项 (`sys.argv[0]`) 会是一个表示程序源的字符串。
+
+**-m** <module-name>  
+在 [sys.path](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.path) 中搜索指定名称的模块并将其内容作为 [__main__](https://docs.python.org/zh-cn/3.7/library/__main__.html#module-__main__) 模块来执行。
+
+由于该参数为 *module* 名称，你不应给出文件扩展名 (`.py`)。 模块名称应为绝对有效的 Python 模块名称，但具体实现可能并不总是强制要求这一点（例如它可能允许你使用包含连字符的名称）。
+
+包名称（包括命名空间包）也允许使用。 当所提供的是包名称而非普通模块名称时，解释器将把 `<pkg>.__main__` 作为主模块来执行。 此行为特意被设计为与作为脚本参数传递给解释器的目录和 zip 文件的处理方式类似。
+
+**注解：** 此选项不适用于内置模块和以 C 编写的扩展模块，因为它们并没有对应的 Python 模块文件。 但是它仍然适用于预编译的模块，即使没有可用的初始源文件。
+
+如果给出此选项，[sys.argv](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.argv) 的首个元素将为模块文件的完整路径 (在定位模块文件期间，首个元素将设为 `"-m"`)。 与 [-c](https://docs.python.org/zh-cn/3.7/using/cmdline.html#cmdoption-c) 选项一样，当前目录将被加入 [sys.path](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.path) 的开头。
+
+[-I](https://docs.python.org/zh-cn/3.7/using/cmdline.html#id2) 选项可用来在隔离模式下运行脚本，此模式中 [sys.path](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.path) 既不包含当前目录也不包含用户的 site-packages 目录。 所有 PYTHON* 环境变量也会被忽略。
+
+**参见：**  
+[PEP 338](https://www.python.org/dev/peps/pep-0338) -- 将模块作为脚本执行
+
+*在 3.1 版更改:* 提供包名称来运行 `__main__` 子模块。
+
+*在 3.4 版更改:* 同样支持命名空间包  
+<br />
+
+**-**  
+从标准输入 ([sys.stdin](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.stdin)) 读取命令。 如果标准输入为一个终端，则使用 [-i](https://docs.python.org/zh-cn/3.7/using/cmdline.html#cmdoption-i)。
+
+如果给出此选项，[sys.argv](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.argv) 的首个元素将为 `"-"` 并且当前目录将被加入 [sys.path](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.path) 的开头。  
+<br />
+
+<**script**>  
+执行 *script* 中的 Python 代码，该参数应为一个（绝对或相对）文件系统路径，指向某个 Python 文件、包含 `__main__.py` 文件的目录，或包含 `__main__.py` 文件的 zip 文件。
+
+如果给出此选项，[sys.argv](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.argv) 的首个元素将为在命令行中指定的脚本名称。
+
+如果脚本名称直接指向一个 Python 文件，则包含该文件的目录将被加入 [sys.path](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.path) 的开头，并且该文件会被作为 [\_\_main\_\_](https://docs.python.org/zh-cn/3.7/library/__main__.html#module-__main__) 模块来执行。
+
+如果脚本名称指向一个目录或 zip 文件，则脚本名称将被加入 [sys.path](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.path) 的开头，并且该位置中的 `__main__.py` 文件会被作为 [\_\_main\_\_](https://docs.python.org/zh-cn/3.7/library/__main__.html#module-__main__) 模块来执行。
+
+[-I](https://docs.python.org/zh-cn/3.7/using/cmdline.html#id2) 选项可用来在隔离模式下运行脚本，此模式中 [sys.path](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.path) 既不包含脚本所在目录也不包含用户的 site-packages 目录。 所有 PYTHON* 环境变量也会被忽略。  
+<br />
+
+如果没有给出接口选项，则使用 [-i](https://docs.python.org/zh-cn/3.7/using/cmdline.html#cmdoption-i)，`sys.argv[0]` 将为空字符串 (`""`)，并且当前目录会被加入 [sys.path](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.path) 的开头。 此外，tab 补全和历史编辑会自动启用，如果你的系统平台支持此功能的话 (参见 [Readline configuration](https://docs.python.org/zh-cn/3.7/library/site.html#rlcompleter-config))。
+
+**参见：** [调用解释器](https://docs.python.org/zh-cn/3.7/tutorial/interpreter.html#tut-invoking)
+
+*在 3.4 版更改:* 自动启用 tab 补全和历史编辑。
+
+#### 1.1.2. 通用选项
+**-?**  
+**-h**  
+**--help**  
+打印全部命令行选项的简短描述。
+
+-V
+--version
+打印 Python 版本号并退出。 
+
+如果重复给出，则打印有关构建的更多信息，例如:
+
+```sh
+$ python -VV
+Python 3.7.4 (default, Jul 16 2019, 07:12:58) 
+[GCC 9.1.0]
+$ 
+```
+
+*3.6 新版功能:* `-VV` 选项。
+
+#### 1.1.3. 其他选项
+
+**-E**  
+忽略所有 PYTHON* 环境变量，例如可能已设置的 [PYTHONPATH](https://docs.python.org/zh-cn/3.7/using/cmdline.html#envvar-PYTHONPATH) 和 [PYTHONHOME](https://docs.python.org/zh-cn/3.7/using/cmdline.html#envvar-PYTHONHOME)。
+
+**-i**  
+当有脚本被作为首个参数传入或使用了 [-c](https://docs.python.org/zh-cn/3.7/using/cmdline.html#cmdoption-c) 选项时，在执行脚本或命令之后进入交互模式，即使是在 [sys.stdin](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.stdin) 并不是一个终端的时候。 [PYTHONSTARTUP](https://docs.python.org/zh-cn/3.7/using/cmdline.html#envvar-PYTHONSTARTUP) 文件不会被读取。
+
+这一选项的用处是在脚本引发异常时检查全局变量或者栈跟踪。 另请参阅 [PYTHONINSPECT](https://docs.python.org/zh-cn/3.7/using/cmdline.html#envvar-PYTHONINSPECT)。
+
+**-I**  
+在隔离模式下运行 Python。 这将同时应用 -E 和 -s。 在隔离模式下 [sys.path](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.path) 既不包含脚本所在目录也不包含用户的 site-packages 目录。 所有 PYTHON* 环境变量也会被忽略。 还可以施加更进一步的限制以防止用户注入恶意代码。
+
+*3.4 新版功能.*
+
+**-s**  
+不要将 [用户 site-packages 目录](https://docs.python.org/zh-cn/3.7/library/site.html#site.USER_SITE) 添加到 [sys.path](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.path)。
+
+**参见：** [PEP 370](https://www.python.org/dev/peps/pep-0370) -- 分用户的 site-packages 目录
+
+### 1.2. 环境变量
+这些环境变量会影响 Python 的行为，它们是在命令行开关之前被处理的，但 -E 或 -I 除外。 根据约定，当存在冲突时命令行开关会覆盖环境变量的设置。
 
 ## Python Wiki
 ### WindowsCompilers
