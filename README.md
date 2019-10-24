@@ -48,6 +48,9 @@
             * [3.3. 特殊方法名](#33-特殊方法名)
                 * [3.3.1. 基本自定义](#331-基本自定义)
                 * [3.3.7. 仿真容器类型](#337-仿真容器类型)
+        * [5. 导入系统](#5-导入系统)
+            * [5.1. importlib](#51-importlib)
+            * [5.2. 包](#52-包)
     * [Python安装和使用](#python安装和使用)
         * [1. 命令行与环境](#1-命令行与环境)
     * [Python Wiki](#python-wiki)
@@ -1780,6 +1783,332 @@ object.**\_\_getitem\_\_**(*self, key*)
 
 object.**\_\_setitem\_\_**(*self, key, value*)  
 调用以实现赋值给 `self[key]`。注意事项同 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__)。这应该仅为映射实现如果对象支持改变键的值，或者如果可以增加新键，或者对于序列如果元素可以被替换。对于不正确的 *key* 值应该抛出和 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__) 方法相同的异常。
+
+## 5. 导入系统
+一个 [module](https://docs.python.org/zh-cn/3/glossary.html#term-module) 内的 Python 代码通过 [importing](https://docs.python.org/zh-cn/3/glossary.html#term-importing) 操作就能够访问另一个模块内的代码。 [import](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#import) 语句是发起调用导入机制的最常用方式，但不是唯一的方式。 [importlib.import_module()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.import_module) 以及内置的 [\_\_import\_\_()](https://docs.python.org/zh-cn/3/library/functions.html#__import__) 等函数也可以被用来发起调用导入机制。
+
+[import](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#import) 语句结合了两个操作；它先搜索指定名称的模块，然后将搜索结果绑定到当前作用域中的名称。 import 语句的搜索操作定义为对 [\_\_import\_\_()](https://docs.python.org/zh-cn/3/library/functions.html#__import__) 函数的调用并带有适当的参数。 [\_\_import\_\_()](https://docs.python.org/zh-cn/3/library/functions.html#__import__) 的返回值会被用于执行 import 语句的名称绑定操作。 请参阅 import 语句了解名称绑定操作的更多细节。
+
+对 [\_\_import\_\_()](https://docs.python.org/zh-cn/3/library/functions.html#__import__) 的直接调用将仅执行模块搜索以及在找到时的模块创建操作。 不过也可能产生某些副作用，例如导入父包和更新各种缓存 (包括 [sys.modules](https://docs.python.org/zh-cn/3/library/sys.html#sys.modules))，只有 [import](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#import) 语句会执行名称绑定操作。
+
+当 [import](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#import) 语句被执行时，标准的内置 [\_\_import\_\_()](https://docs.python.org/zh-cn/3/library/functions.html#__import__) 函数会被调用。 其他发起调用导入系统的机制 (例如 [importlib.import_module()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.import_module)) 可能会选择绕过 [\_\_import\_\_()](https://docs.python.org/zh-cn/3/library/functions.html#__import__) 并使用它们自己的解决方案来实现导入机制。
+
+当一个模块首次被导入时，Python 会搜索该模块，如果找到就创建一个 module 对象 (参见 [types.ModuleType](https://docs.python.org/zh-cn/3/library/types.html#types.ModuleType)) 并初始化它。 如果指定名称的模块未找到，则会引发 [ModuleNotFoundError](https://docs.python.org/zh-cn/3/library/exceptions.html#ModuleNotFoundError)。 当发起调用导入机制时，Python 会实现多种策略来搜索指定名称的模块。 这些策略可以通过使用使用下文所描述的多种钩子来加以修改和扩展。
+
+*在 3.3 版更改:* 导入系统已被更新以完全实现 [PEP 302](https://www.python.org/dev/peps/pep-0302) 中的第二阶段要求。 不会再有任何隐式的导入机制 —— 整个导入系统都通过 [sys.meta_path](https://docs.python.org/zh-cn/3/library/sys.html#sys.meta_path) 暴露出来。 此外，对原生命名空间包的支持也已被实现 (参见 [PEP 420](https://www.python.org/dev/peps/pep-0420))。
+
+### 5.1. importlib
+[importlib](https://docs.python.org/zh-cn/3/library/importlib.html#module-importlib) 模块提供了一个丰富的 API 用来与导入系统进行交互。 例如 [importlib.import_module()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.import_module) 提供了相比内置的 [\_\_import\_\_()](https://docs.python.org/zh-cn/3/library/functions.html#__import__) 更推荐、更简单的 API 用来发起调用导入机制。 更多细节请参看 [importlib](https://docs.python.org/zh-cn/3/library/importlib.html#module-importlib) 库文档。
+
+### 5.2. 包
+Python 只有一种模块对象类型，所有模块都属于该类型，无论模块是用 Python、C 还是别的语言实现。 为了帮助组织模块并提供名称层次结构，Python 还引入了 [包](https://docs.python.org/zh-cn/3/glossary.html#term-package) 的概念。
+
+你可以把包看成是文件系统中的目录，并把模块看成是目录中的文件，但请不要对这个类似做过于字面的理解，因为包和模块不是必须来自于文件系统。 为了方便理解本文档，我们将继续使用这种目录和文件的类比。 与文件系统一样，包通过层次结构进行组织，在包之内除了一般的模块，还可以有子包。
+
+要注意的一个重点概念是所有包都是模块，但并非所有模块都是包。 或者换句话说，包只是一种特殊的模块。 特别地，任何具有 `__path__` 属性的模块都会被当作是包。
+
+所有模块都有自己的名字。 子包名与其父包名以点号分隔，与 Python 的标准属性访问语法一致。 例如你可能看到一个名为 [sys](https://docs.python.org/zh-cn/3/library/sys.html#module-sys) 的模块，以及一个名为 [email](https://docs.python.org/zh-cn/3/library/email.html#module-email) 的包，这个包又有一个名为 [email.mime](https://docs.python.org/zh-cn/3/library/email.mime.html#module-email.mime) 的子包和该子包中的名为 email.mime.text 的子包。
+
+#### 5.2.1. 常规包
+Python 定义了两种类型的包，[常规包](https://docs.python.org/zh-cn/3/glossary.html#term-regular-package) 和 [命名空间包](https://docs.python.org/zh-cn/3/glossary.html#term-namespace-package)。 常规包是传统的包类型，它们在 Python 3.2 及之前就已存在。 常规包通常以一个包含 `__init__.py` 文件的目录形式实现。 当一个常规包被导入时，这个 `__init__.py` 文件会隐式地被执行，它所定义的对象会被绑定到该包命名空间中的名称。`__init__.py` 文件可以包含与任何其他模块中所包含的 Python 代码相似的代码，Python 将在模块被导入时为其添加额外的属性。
+
+例如，以下文件系统布局定义了一个最高层级的 `parent` 包和三个子包:
+
+```
+parent/
+    __init__.py
+    one/
+        __init__.py
+    two/
+        __init__.py
+    three/
+        __init__.py
+```
+
+导入 `parent.one` 将隐式地执行 `parent/__init__.py` 和 `parent/one/__init__.py`。 后续导入 `parent.two` 或 `parent.three` 则将分别执行 `parent/two/__init__.py` 和 `parent/three/__init__.py`。
+
+#### 5.2.2. 命名空间包
+命名空间包是由多个 [部分](https://docs.python.org/zh-cn/3/glossary.html#term-portion) 构成的，每个部分为父包增加一个子包。 各个部分可能处于文件系统的不同位置。 部分也可能处于 zip 文件中、网络上，或者 Python 在导入期间可以搜索的其他地方。 命名空间包并不一定会直接对应到文件系统中的对象；它们有可能是无实体表示的虚拟模块。
+
+命名空间包的 `__path__` 属性不使用普通的列表。 而是使用定制的可迭代类型，如果其父包的路径 (或者最高层级包的 [sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path)) 发生改变，这种对象会在该包内的下一次导入尝试时自动执行新的对包部分的搜索。
+
+命名空间包没有 `parent/__init__.py` 文件。 实际上，在导入搜索期间可能找到多个 `parent` 目录，每个都由不同的部分所提供。 因此 `parent/one` 的物理位置不一定与 `parent/two` 相邻。 在这种情况下，Python 将为顶级的 `parent` 包创建一个命名空间包，无论是它本身还是它的某个子包被导入。
+
+另请参阅 [PEP 420](https://www.python.org/dev/peps/pep-0420) 了解对命名空间包的规格描述。
+
+### 5.3. 搜索
+为了开始搜索，Python 需要被导入模块（或者包，对于当前讨论来说两者没有差别）的完整 [限定名称](https://docs.python.org/zh-cn/3/glossary.html#term-qualified-name)。 此名称可以来自 [import](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#import) 语句所带的各种参数，或者来自传给 [importlib.import_module()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.import_module) 或 [\_\_import\_\_()](https://docs.python.org/zh-cn/3/library/functions.html#__import__) 函数的形参。
+
+此名称会在导入搜索的各个阶段被使用，它也可以是指向一个子模块的带点号路径，例如 `foo.bar.baz`。 在这种情况下，Python 会先尝试导入 `foo`，然后是 `foo.bar`，最后是 `foo.bar.baz`。 如果这些导入中的任何一个失败，都会引发 [ModuleNotFoundError](https://docs.python.org/zh-cn/3/library/exceptions.html#ModuleNotFoundError)。
+
+#### 5.3.1. 模块缓存
+在导入搜索期间首先会被检查的地方是 [sys.modules](https://docs.python.org/zh-cn/3/library/sys.html#sys.modules)。 这个映射起到缓存之前导入的所有模块的作用（包括其中间路径）。 因此如果之前导入过 `foo.bar.baz`，则 [sys.modules](https://docs.python.org/zh-cn/3/library/sys.html#sys.modules) 将包含 `foo`, `foo.bar` 和 `foo.bar.baz` 条目。 每个键的值就是相应的模块对象。
+
+在导入期间，会在 [sys.modules](https://docs.python.org/zh-cn/3/library/sys.html#sys.modules) 查找模块名称，如存在则其关联的值就是需要导入的模块，导入过程完成。 然而，如果值为 `None`，则会引发 [ModuleNotFoundError](https://docs.python.org/zh-cn/3/library/exceptions.html#ModuleNotFoundError)。 如果找不到指定模块名称，Python 将继续搜索该模块。
+
+[sys.modules](https://docs.python.org/zh-cn/3/library/sys.html#sys.modules) 是可写的。删除键可能不会破坏关联的模块（因为其他模块可能会保留对它的引用），但它会使命名模块的缓存条目无效，导致 Python 在下次导入时重新搜索命名模块。键也可以赋值为 `None` ，强制下一次导入模块导致 [ModuleNotFoundError](https://docs.python.org/zh-cn/3/library/exceptions.html#ModuleNotFoundError) 。
+
+但是要小心，因为如果你还保有对某个模块对象的引用，同时停用其在 [sys.modules](https://docs.python.org/zh-cn/3/library/sys.html#sys.modules) 中的缓存条目，然后又再次导入该名称的模块，则前后两个模块对象将 *不是* 同一个。 相反地，[importlib.reload()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.reload) 将重用 *同一个* 模块对象，并简单地通过重新运行模块的代码来重新初始化模块内容。
+
+#### 5.3.2. 查找器和加载器
+如果指定名称的模块在 [sys.modules](https://docs.python.org/zh-cn/3/library/sys.html#sys.modules) 找不到，则将发起调用 Python 的导入协议以查找和加载该模块。 此协议由两个概念性模块构成，即 [查找器](https://docs.python.org/zh-cn/3/glossary.html#term-finder) 和 [加载器](https://docs.python.org/zh-cn/3/glossary.html#term-loader)。 查找器的任务是确定是否能使用其所知的策略找到该名称的模块。 同时实现这两种接口的对象称为 [导入器](https://docs.python.org/zh-cn/3/glossary.html#term-importer) —— 它们在确定能加载所需的模块时会返回其自身。
+
+Python 包含了多个默认查找器和导入器。 第一个知道如何定位内置模块，第二个知道如何定位冻结模块。 第三个默认查找器会在 [import path](https://docs.python.org/zh-cn/3/glossary.html#term-import-path) 中搜索模块。 [import path](https://docs.python.org/zh-cn/3/glossary.html#term-import-path) 是一个由文件系统路径或 zip 文件组成的位置列表。 它还可以扩展为搜索任意可定位资源，例如由 URL 指定的资源。
+
+导入机制是可扩展的，因此可以加入新的查找器以扩展模块搜索的范围和作用域。
+
+查找器并不真正加载模块。 如果它们能找到指定名称的模块，会返回一个 *模块规格说明*，这是对模块导入相关信息的封装，供后续导入机制用于在加载模块时使用。
+
+以下各节描述了有关查找器和加载器协议的更多细节，包括你应该如何创建并注册新的此类对象来扩展导入机制。
+
+*在 3.4 版更改:* 在之前的 Python 版本中，查找器会直接返回 [加载器](https://docs.python.org/zh-cn/3/glossary.html#term-loader)，现在它们则返回模块规格说明，其中 *包含* 加载器。 加载器仍然在导入期间被使用，但负担的任务有所减少。
+
+#### 5.3.3. 导入钩子
+导入机制被设计为可扩展；其中的基本机制是 *导入钩子*。 导入钩子有两种类型: *元钩子* 和 *导入路径钩子*。
+
+元钩子在导入过程开始时被调用，此时任何其他导入过程尚未发生，但 [sys.modules](https://docs.python.org/zh-cn/3/library/sys.html#sys.modules) 缓存查找除外。 这允许元钩子重载 [sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path) 过程、冻结模块甚至内置模块。 元钩子的注册是通过向 [sys.meta_path](https://docs.python.org/zh-cn/3/library/sys.html#sys.meta_path) 添加新的查找器对象，具体如下所述。
+
+导入路径钩子是作为 [sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path) (或 `package.__path__`) 过程的一部分，在遇到它们所关联的路径项的时候被调用。 导入路径钩子的注册是通过向 [sys.path_hooks](https://docs.python.org/zh-cn/3/library/sys.html#sys.path_hooks) 添加新的可调用对象，具体如下所述。
+
+#### 5.3.4. 元路径
+当指定名称的模块在 [sys.modules](https://docs.python.org/zh-cn/3/library/sys.html#sys.modules) 中找不到时，Python 会接着搜索 [sys.meta_path](https://docs.python.org/zh-cn/3/library/sys.html#sys.meta_path)，其中包含元路径查找器对象列表。 这些查找器按顺序被查询以确定它们是否知道如何处理该名称的模块。 元路径查找器必须实现名为 [find_spec()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.abc.MetaPathFinder.find_spec) 的方法，该方法接受三个参数：名称、导入路径和目标模块（可选）。 元路径查找器可使用任何策略来确定它是否能处理指定名称的模块。
+
+如果元路径查找器知道如何处理指定名称的模块，它将返回一个说明对象。 如果它不能处理该名称的模块，则会返回 `None`。 如果 [sys.meta_path](https://docs.python.org/zh-cn/3/library/sys.html#sys.meta_path) 处理过程到达列表末尾仍未返回说明对象，则将引发 [ModuleNotFoundError](https://docs.python.org/zh-cn/3/library/exceptions.html#ModuleNotFoundError)。 任何其他被引发异常将直接向上传播，并放弃导入过程。
+
+元路径查找器的 [find_spec()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.abc.MetaPathFinder.find_spec) 方法调用带有两到三个参数。 第一个是被导入模块的完整限定名称，例如 `foo.bar.baz`。 第二个参数是供模块搜索使用的路径条目。 对于最高层级模块，第二个参数为 None，但对于子模块或子包，第二个参数为父包 `__path__` 属性的值。 如果相应的 `__path__` 属性无法访问，将引发 [ModuleNotFoundError](https://docs.python.org/zh-cn/3/library/exceptions.html#ModuleNotFoundError)。 第三个参数是一个将被作为稍后加载目标的现有模块对象。 导入系统仅会在重加载期间传入一个目标模块。
+
+对于单个导入请求可以多次遍历元路径。 例如，假设所涉及的模块都尚未被缓存，则导入 `foo.bar.baz` 将首先执行顶级的导入，在每个元路径查找器 (`mpf`) 上调用 `mpf.find_spec("foo", None, None)`。 在导入 `foo` 之后，`foo.bar` 将通过第二次遍历元路径来导入，调用 `mpf.find_spec("foo.bar", foo.__path__, None)`。 一旦 `foo.bar` 完成导入，最后一次遍历将调用 `mpf.find_spec("foo.bar.baz", foo.bar.__path__, None)`。
+
+有些元路径查找器只支持顶级导入。 当把 `None` 以外的对象作为第三个参数传入时，这些导入器将总是返回 `None`。
+
+Python 的默认 [sys.meta_path](https://docs.python.org/zh-cn/3/library/sys.html#sys.meta_path) 具有三种元路径查找器，一种知道如何导入内置模块，一种知道如何导入冻结模块，还有一种知道如何导入来自 [import path](https://docs.python.org/zh-cn/3/glossary.html#term-import-path) 的模块 (即 [path based finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-based-finder))。
+
+*在 3.4 版更改:* 元路径查找器的 [find_spec()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.abc.MetaPathFinder.find_spec) 方法替代了 [find_module()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.abc.MetaPathFinder.find_module)，后者现已弃用，它将继续可用但不会再做改变，导入机制仅会在查找器未实现 `find_spec()` 时尝试使用它。
+
+#### 5.4.2. 子模块
+当使用任意机制 (例如 `importlib` API, `import` 及 `import-from` 语句或者内置的 `__import__()`) 加载一个子模块时，父模块的命名空间中会添加一个对子模块对象的绑定。 例如，如果包 `spam` 有一个子模块 `foo`，则在导入 `spam.foo` 之后，`spam` 将具有一个 绑定到相应子模块的 `foo` 属性。 假如现在有如下的目录结构:
+
+```
+spam/
+    __init__.py
+    foo.py
+    bar.py
+```
+
+并且 `spam/__init__.py` 中有如下几行内容:
+
+```python
+from .foo import Foo
+from .bar import Bar
+```
+
+`foo.py` 文件中有如下内容：
+
+```python
+def Foo():
+    pass
+```
+
+`bar.py` 文件中有如下内容：
+
+```python
+def Bar():
+    pass
+```
+
+则执行如下代码将在 `spam` 模块中添加对 `foo` 和 `bar` 的名称绑定:
+
+```python
+>>> import spam
+>>> spam.foo
+<module 'spam.foo' from '/home/ywh/tmp/spam/foo.py'>
+>>> spam.bar
+<module 'spam.bar' from '/home/ywh/tmp/spam/bar.py'>
+```
+
+按照通常的 Python 名称绑定规则，这看起来可能会令人惊讶，但它实际上是导入系统的一个基本特性。 保持不变的一点是如果你有 `sys.modules['spam']` 和 `sys.modules['spam.foo']` (例如在上述导入之后就是如此)，则后者必须显示为前者的 `foo` 属性。
+
+```python
+>>> import sys
+>>> sys.modules['spam']
+<module 'spam' from '/home/ywh/tmp/spam/__init__.py'>
+>>> sys.modules['spam'].foo
+<module 'spam.foo' from '/home/ywh/tmp/spam/foo.py'>
+>>> sys.modules['spam.foo']
+<module 'spam.foo' from '/home/ywh/tmp/spam/foo.py'>
+>>>
+```
+
+#### 5.4.3. 模块规格说明
+导入机制在导入期间会使用有关每个模块的多种信息，特别是加载之前。 大多数信息都是所有模块通用的。 模块规格说明的目的是基于每个模块来封装这些导入相关信息。
+
+在导入期间使用规格说明可允许状态在导入系统各组件之间传递，例如在创建模块规格说明的查找器和执行模块的加载器之间。 最重要的一点是，它允许导入机制执行加载的样板操作，在没有模块规格说明的情况下这是加载器的责任。
+
+模块的规格说明会作为模块对象的 `__spec__` 属性对外公开。 有关模块规格的详细内容请参阅 [ModuleSpec](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.machinery.ModuleSpec)。
+
+*3.4 新版功能.*
+
+#### 5.4.4. 导入相关的模块属性
+导入机制会在加载期间会根据模块的规格说明填充每个模块对象的这些属性，并在加载器执行模块之前完成。
+
+**\_\_name\_\_**  
+`__name__` 属性必须被设为模块的完整限定名称。 此名称被用来在导入系统中唯一地标识模块。
+
+**\_\_package\_\_**  
+模块的 `__package__` 属性必须设定。 其取值必须为一个字符串，但可以与 `__name__` 取相同的值。 当模块是包时，其 `__package__` 值应该设为其 `__name__` 值。 当模块不是包时，对于最高层级模块 `__package__` 应该设为空字符串，对于子模块则应该设为其父包名。 更多详情可参阅 [PEP 366](https://www.python.org/dev/peps/pep-0366)。
+
+该属性取代 `__name__` 被用来为主模块计算显式相对导入，相关定义见 [PEP 366](https://www.python.org/dev/peps/pep-0366)。 预期它与 `__spec__.parent` 具有相同的值。
+
+*在 3.6 版更改:* `__package__` 预期与 `__spec__.parent` 具有相同的值。
+
+**\_\_spec\_\_**  
+`__spec__` 属性必须设为在导入模块时要使用的模块规格说明。 对 `__spec__` 的正确设定将同时作用于 [解释器启动期间初始化的模块](https://docs.python.org/zh-cn/3/reference/toplevel_components.html#programs)。 唯一的例外是 `__main__`，其中的 `__spec__` 会 [在某些情况下设为 None](https://docs.python.org/zh-cn/3/reference/import.html#main-spec).
+
+当 `__package__` 未定义时， `__spec__.parent` 会被用作回退项。
+
+*3.4 新版功能.*
+
+*在 3.6 版更改:* 当 `__package__` 未定义时，`__spec__.parent` 会被用作回退项。
+
+**\_\_path\_\_**  
+如果模块为包（不论是正规包还是命名空间包），则必须设置模块对象的 `__path__` 属性。 属性值必须为可迭代对象，但如果 `__path__` 没有进一步的用处则可以为空。 如果 `__path__` 不为空，则在迭代时它应该产生字符串。 有关 `__path__` 语义的更多细节将在 [下文](https://docs.python.org/zh-cn/3/reference/import.html#package-path-rules) 中给出。
+
+不是包的模块不应该具有 `__path__` 属性。
+
+**\_\_file\_\_**  
+**\_\_cached\_\_**  
+`__file__` 是可选项。 如果设置，此属性的值必须为字符串。 导入系统可以选择在其没有语法意义时不设置 `__file__` (例如从数据库加载的模块)。
+
+如果设置了 `__file__`，则也可以再设置 `__cached__` 属性，后者取值为编译版本代码（例如字节码文件）所在的路径。 设置此属性不要求文件已存在；该路径可以简单地指向应该存放编译文件的位置 (参见 [PEP 3147](https://www.python.org/dev/peps/pep-3147))。
+
+当未设置 `__file__` 时也可以设置 `__cached__`。 但是，那样的场景很不典型。 最终，加载器会使用 `__file__` 和/或 `__cached__`。 因此如果一个加载器可以从缓存加载模块但是不能从文件加载，那种非典型场景就是适当的。
+
+#### 5.4.5. module.__path__
+根据定义，如果一个模块具有 `__path__` 属性，它就是包。
+
+包的 `__path__` 属性会在导入其子包期间被使用。 在导入机制内部，它的功能与 [sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path) 基本相同，即在导入期间提供一个模块搜索位置列表。 但是，`__path__` 通常会比 [sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path) 受到更多限制。
+
+`__path__` 必须是由字符串组成的可迭代对象，但它也可以为空。 作用于 [sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path) 的规则同样适用于包的 `__path__`，并且 [sys.path_hooks](https://docs.python.org/zh-cn/3/library/sys.html#sys.path_hooks) (见下文) 会在遍历包的 `__path__` 时被查询。
+
+包的 `__init__.py` 文件可以设置或更改包的 `__path__` 属性，而且这是在 [PEP 420](https://www.python.org/dev/peps/pep-0420) 之前实现命名空间包的典型方式。 随着 [PEP 420](https://www.python.org/dev/peps/pep-0420) 的引入，命名空间包不再需要提供仅包含 `__path__` 操控代码的 `__init__.py` 文件；导入机制会自动为命名空间包正确地设置 `__path__`。
+
+#### 5.4.7. 已缓存字节码的失效
+在 Python 从 `.pyc` 文件加载已缓存字节码之前，它会检查缓存是否由最新的 `.py` 源文件生成。 默认情况下，Python 通过在所写入缓存文件中保存源文件的最近修改时间戳和大小来实现这一点。 在运行时，导入系统会通过比对缓存文件中保存的元数据和源文件的元数据确定该缓存的有效性。
+
+Python 也支持“基于哈希的”缓存文件，即保存源文件内容的哈希值而不是其元数据。 存在两种基于哈希的 `.pyc` 文件：检查型和非检查型。 对于检查型基于哈希的 `.pyc` 文件，Python 会通过求哈希源文件并将结果哈希值与缓存文件中的哈希值比对来确定缓存有效性。 如果检查型基于哈希的缓存文件被确定为失效，Python 会重新生成并写入一个新的检查型基于哈希的缓存文件。 对于非检查型 `.pyc` 文件，只要其存在 Python 就会直接认定缓存文件有效。 确定基于哈希的 `.pyc` 文件有效性的行为可通过 [--check-hash-based-pycs](https://docs.python.org/zh-cn/3/using/cmdline.html#cmdoption-check-hash-based-pycs) 旗标来重载。
+
+*在 3.7 版更改:* 增加了基于哈希的 `.pyc` 文件。在此之前，Python 只支持基于时间戳来确定字节码缓存的有效性。
+
+### 5.5. 基于路径的查找器
+在之前已经提及，Python 带有几种默认的元路径查找器。 其中之一是 [path based finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-based-finder) ([PathFinder](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.machinery.PathFinder))，它会搜索包含一个 [路径条目](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry) 列表的 [import path](https://docs.python.org/zh-cn/3/glossary.html#term-import-path)。 每个路径条目指定一个用于搜索模块的位置。
+
+基于路径的查找器自身并不知道如何进行导入。 它只是遍历单独的路径条目，将它们各自关联到某个知道如何处理特定类型路径的路径条目查找器。
+
+默认的路径条目查找器集合实现了在文件系统中查找模块的所有语义，可处理多种特殊文件类型例如 Python 源码 (`.py` 文件)，Python 字节码 (`.pyc` 文件) 以及共享库 (例如 `.so` 文件)。 在标准库中 [zipimport](https://docs.python.org/zh-cn/3/library/zipimport.html#module-zipimport) 模块的支持下，默认路径条目查找器还能处理所有来自 zip 文件的上述文件类型。
+
+路径条目不必仅限于文件系统位置。 它们可以指向 URL、数据库查询或可以用字符串指定的任何其他位置。
+
+基于路径的查找器还提供了额外的钩子和协议以便能扩展和定制可搜索路径条目的类型。 例如，如果你想要支持网络 URL 形式的路径条目，你可以编写一个实现 HTTP 语义在网络上查找模块的钩子。 这个钩子（可调用对象）应当返回一个支持下述协议的 [path entry finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry-finder)，以被用来获取一个专门针对来自网络的模块的加载器。
+
+预先的警告：本节和上节都使用了 *查找器* 这一术语，并通过 [meta path finder](https://docs.python.org/zh-cn/3/glossary.html#term-meta-path-finder) 和 [path entry finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry-finder) 两个术语来明确区分它们。 这两种类型的查找器非常相似，支持相似的协议，且在导入过程中以相似的方式运作，但关键的一点是要记住它们是有微妙差异的。 特别地，元路径查找器作用于导入过程的开始，主要是启动 [sys.meta_path](https://docs.python.org/zh-cn/3/library/sys.html#sys.meta_path) 遍历。
+
+相比之下，路径条目查找器在某种意义上说是基于路径的查找器的实现细节，实际上，如果需要从 [sys.meta_path](https://docs.python.org/zh-cn/3/library/sys.html#sys.meta_path) 移除基于路径的查找器，并不会有任何路径条目查找器被发起调用。
+
+#### 5.5.1. 路径条目查找器
+[path based finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-based-finder) 会负责查找和加载通过 [path entry](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry) 字符串来指定位置的 Python 模块和包。 多数路径条目所指定的是文件系统中的位置，但它们并不必受限于此。
+
+作为一种元路径查找器，[path based finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-based-finder) 实现了上文描述的 [find_spec()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.abc.MetaPathFinder.find_spec) 协议，但是它还对外公开了一些附加钩子，可被用来定制模块如何从 [import path](https://docs.python.org/zh-cn/3/glossary.html#term-import-path) 查找和加载。
+
+有三个变量由 [path based finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-based-finder), [sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path), [sys.path_hooks](https://docs.python.org/zh-cn/3/library/sys.html#sys.path_hooks) 和 [sys.path_importer_cache](https://docs.python.org/zh-cn/3/library/sys.html#sys.path_importer_cache) 所使用。 包对象的 `__path__` 属性也会被使用。 它们提供了可用于定制导入机制的额外方式。
+
+[sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path) 包含一个提供模块和包搜索位置的字符串列表。 它初始化自 PYTHONPATH 环境变量以及多种其他特定安装和实现的默认设置。 [sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path) 条目可指定的名称有文件系统中的目录、zip 文件和其他可用于搜索模块的潜在“位置”（参见 [site](https://docs.python.org/zh-cn/3/library/site.html#module-site) 模块），例如 URL 或数据库查询等。 在 [sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path) 中只能出现字符串和字节串；所有其他数据类型都会被忽略。 字节串条目使用的编码由单独的 [路径条目查找器](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry-finder) 来确定。
+
+[path based finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-based-finder) 是一种 [meta path finder](https://docs.python.org/zh-cn/3/glossary.html#term-meta-path-finder)，因此导入机制会通过调用上文描述的基于路径的查找器的 [find_spec()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.machinery.PathFinder.find_spec) 方法来启动 [import path](https://docs.python.org/zh-cn/3/glossary.html#term-import-path) 搜索。 当要向 [find_spec()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.machinery.PathFinder.find_spec) 传入 `path` 参数时，它将是一个可遍历的字符串列表 —— 通常为用来在其内部进行导入的包的 `__path__` 属性。 如果 `path` 参数为 `None`，这表示最高层级的导入，将会使用 [sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path)。
+
+基于路径的查找器会迭代搜索路径中的每个条目，并且每次都查找与路径条目对应的 [path entry finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry-finder) ([PathEntryFinder](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.abc.PathEntryFinder))。 因为这种操作可能很耗费资源（例如搜索会有 *stat()* 调用的开销），基于路径的查找器会维持一个缓存来将路径条目映射到路径条目查找器。 这个缓存放于 [sys.path_importer_cache](https://docs.python.org/zh-cn/3/library/sys.html#sys.path_importer_cache) (尽管如此命名，但这个缓存实际存放的是查找器对象而非仅限于 [importer](https://docs.python.org/zh-cn/3/glossary.html#term-importer) 对象)。 通过这种方式，对特定 [path entry](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry) 位置的 [path entry finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry-finder) 的高耗费搜索只需进行一次。 用户代码可以自由地从 [sys.path_importer_cache](https://docs.python.org/zh-cn/3/library/sys.html#sys.path_importer_cache) 移除缓存条目，以强制基于路径的查找器再次执行路径条目搜索[3]。
+
+[3] 在遗留代码中，有可能在 [sys.path_importer_cache](https://docs.python.org/zh-cn/3/library/sys.html#sys.path_importer_cache) 中找到 [imp.NullImporter](https://docs.python.org/zh-cn/3/library/imp.html#imp.NullImporter) 的实例。 建议将这些代码修改为使用 `None` 代替。 详情参见 [Porting Python code](https://docs.python.org/zh-cn/3/whatsnew/3.3.html#portingpythoncode)。
+
+如果路径条目不存在于缓存中，基于路径的查找器会迭代 [sys.path_hooks](https://docs.python.org/zh-cn/3/library/sys.html#sys.path_hooks) 中的每个可调用对象。 对此列表中的每个 [路径条目钩子](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry-hook) 的调用会带有一个参数，即要搜索的路径条目。 每个可调用对象或是返回可处理路径条目的 [path entry finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry-finder)，或是引发 [ImportError](https://docs.python.org/zh-cn/3/library/exceptions.html#ImportError)。 基于路径的查找器使用 [ImportError](https://docs.python.org/zh-cn/3/library/exceptions.html#ImportError) 来表示钩子无法找到与 [path entry](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry) 相对应的 [path entry finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry-finder)。 该异常会被忽略并继续进行 [import path](https://docs.python.org/zh-cn/3/glossary.html#term-import-path) 的迭代。 每个钩子应该期待接收一个字符串或字节串对象；字节串对象的编码由钩子决定（例如可以是文件系统使用的编码 UTF-8 或其它编码），如果钩子无法解码参数，它应该引发 [ImportError](https://docs.python.org/zh-cn/3/library/exceptions.html#ImportError)。
+
+如果 [sys.path_hooks](https://docs.python.org/zh-cn/3/library/sys.html#sys.path_hooks) 迭代结束时没有返回 [path entry finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry-finder)，则基于路径的查找器 [find_spec()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.machinery.PathFinder.find_spec) 方法将在 [sys.path_importer_cache](https://docs.python.org/zh-cn/3/library/sys.html#sys.path_importer_cache) 中存入 `None` (表示此路径条目没有对应的查找器) 并返回 `None`，表示此 [meta path finder](https://docs.python.org/zh-cn/3/glossary.html#term-meta-path-finder) 无法找到该模块。
+
+如果 [sys.path_hooks](https://docs.python.org/zh-cn/3/library/sys.html#sys.path_hooks) 中的某个 [path entry hook](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry-hook) 可调用对象的返回值 *是* 一个 [path entry finder](https://docs.python.org/zh-cn/3/glossary.html#term-path-entry-finder)，则以下协议会被用来向查找器请求一个模块的规格说明，并在加载该模块时被使用。
+
+当前工作目录 -- 由一个空字符串表示 -- 的处理方式与 [sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path) 中的其他条目略有不同。 首先，如果发现当前工作目录不存在，则 [sys.path_importer_cache](https://docs.python.org/zh-cn/3/library/sys.html#sys.path_importer_cache) 中不会存放任何值。 其次，每个模块查找会对当前工作目录的值进行全新查找。 第三，由 [sys.path_importer_cache](https://docs.python.org/zh-cn/3/library/sys.html#sys.path_importer_cache) 所使用并由 [importlib.machinery.PathFinder.find_spec()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.machinery.PathFinder.find_spec) 所返回的路径将是实际的当前工作目录而非空字符串。
+
+#### 5.5.2. 路径条目查找器协议
+为了支持模块和已初始化包的导入，也为了给命名空间包提供组成部分，路径条目查找器必须实现 [find_spec()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.abc.PathEntryFinder.find_spec) 方法。
+
+[find_spec()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.abc.PathEntryFinder.find_spec) 接受两个参数，即要导入模块的完整限定名称，以及（可选的）目标模块。 `find_spec()` 返回模块的完全填充好的规格说明。 这个规格说明总是包含“加载器”集合（但有一个例外）。
+
+为了向导入机制提示该规格说明代表一个命名空间的 [portion](https://docs.python.org/zh-cn/3/glossary.html#term-portion)。 路径条目查找器会将规格说明中的 "loader" 设为 `None` 并将 "submodule_search_locations" 设为一个包含该部分的列表。
+
+*在 3.4 版更改:* [find_spec()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.abc.PathEntryFinder.find_spec) 替代了 [find_loader()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.abc.PathEntryFinder.find_loader) 和 [find_module()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.abc.PathEntryFinder.find_module)，后两者现在都已弃用，但会在 `find_spec()` 未定义时被使用。
+
+较旧的路径条目查找器可能会实现这两个已弃用的方法中的一个而没有实现 `find_spec()`。 为保持向后兼容，这两个方法仍会被接受。 但是，如果在路径条目查找器上实现了 `find_spec()`，这两个遗留方法就会被忽略。
+
+[find_loader()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.abc.PathEntryFinder.find_loader) 接受一个参数，即被导入模块的完整限定名称。 `find_loader()` 会返回一个二元组，其中第一项为加载器，第二项为一个命名空间 [portion](https://docs.python.org/zh-cn/3/glossary.html#term-portion)。 当第一项（即加载器）为 `None` 时，这意味着路径条目查找器虽然没有指定名称模块的加载器，但它知道该路径条目为指定名称模块提供了一个命名空间部分。 这几乎总是表明一种情况，即 Python 被要求导入一个并不以文件系统中的实体形式存在的命名空间包。 当一个路径条目查找器返回的加载器为 `None` 时，该二元组返回值的第二项必须为一个序列，不过它也可以为空。
+
+如果 `find_loader()` 所返回加载器的值不为 `None`，则该部分会被忽略，而该加载器会自基于路径的查找器返回，终止对路径条目的搜索。
+
+为了向后兼容其他导入协议的实现，许多路径条目查找器也同样支持元路径查找器所支持的传统 `find_module()` 方法。 但是路径条目查找器 `find_module()` 方法的调用绝不会带有 `path` 参数（它们被期望记录来自对路径钩子初始调用的恰当路径信息）。
+
+路径条目查找器的 `find_module()` 方法已弃用，因为它不允许路径条目查找器为命名空间包提供部分。 如果 `find_loader()` 和 `find_module()` 同时存在于一个路径条目查找器中，导入系统将总是调用 `find_loader()` 而不选择 `find_module()`。
+
+### 5.7. 包相对导入
+相对导入使用前缀点号。 一个前缀点号表示相对导入从当前包开始。 两个或更多前缀点号表示对当前包的上级包的相对导入，第一个点号之后的每个点号代表一级。 例如，给定以下的包布局结构:
+
+```
+package/
+    __init__.py
+    subpackage1/
+        __init__.py
+        moduleX.py
+        moduleY.py
+    subpackage2/
+        __init__.py
+        moduleZ.py
+    moduleA.py
+```
+
+不论是在 `subpackage1/moduleX.py` 还是 `subpackage1/__init__.py` 中，以下导入都是有效的:
+
+```python
+from .moduleY import spam
+from .moduleY import spam as ham 
+from . import moduleY
+from ..subpackage1 import moduleY
+from ..subpackage2.moduleZ import eggs
+from ..moduleA import foo 
+```
+
+绝对导入可以使用 `import <>` 或 `from <> import <>` 语法，但相对导入只能使用第二种形式；其中的原因在于:
+
+```python
+import XXX.YYY.ZZZ
+```
+
+应当提供 `XXX.YYY.ZZZ` 作为可用表达式，但 `.moduleY` 不是一个有效的表达式。
+
+### 5.8. 有关 __main__ 的特殊事项
+对于 Python 的导入系统来说 [\_\_main\_\_](https://docs.python.org/zh-cn/3/library/__main__.html#module-__main__) 模块是一个特殊情况。 正如在 [另一节](https://docs.python.org/zh-cn/3/reference/toplevel_components.html#programs) 中所述，`__main__` 模块是在解释器启动时直接初始化的，与 [sys](https://docs.python.org/zh-cn/3/library/sys.html#module-sys) 和 [builtins](https://docs.python.org/zh-cn/3/library/builtins.html#module-builtins) 很类似。 但是，与那两者不同，它并不被严格归类为内置模块。 这是因为 `__main__` 被初始化的方式依赖于发起调用解释器所附带的旗标和其他选项。
+
+#### 5.8.1. __main__.__spec__
+根据 [\_\_main\_\_](https://docs.python.org/zh-cn/3/library/__main__.html#module-__main__) 被初始化的方式，`__main__.__spec__` 会被设置相应值或是 `None`。
+
+当 Python 附加 [-m](https://docs.python.org/zh-cn/3/using/cmdline.html#cmdoption-m) 选项启动时，`__spec__` 会被设为相应模块或包的模块规格说明。 `__spec__` 也会在 `__main__` 模块作为执行某个目录，zip 文件或其它 [sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path) 条目的一部分加载时被填充。
+
+在 [其余的情况](https://docs.python.org/zh-cn/3/using/cmdline.html#using-on-interface-options) 下 `__main__.__spec__` 会被设为 `None`，因为用于填充 [\_\_main\_\_](https://docs.python.org/zh-cn/3/library/__main__.html#module-__main__) 的代码不直接与可导入的模块相对应:
+
+* 交互型提示
+* [-c](https://docs.python.org/zh-cn/3/using/cmdline.html#cmdoption-c) 选项
+* 从 stdin 运行
+* 直接从源码或字节码文件运行
+
+请注意在最后一种情况中 `__main__.__spec__` 总是为 `None`，*即使* 文件从技术上说可以作为一个模块被导入。 如果想要让 [\_\_main\_\_](https://docs.python.org/zh-cn/3/library/__main__.html#module-__main__) 中的元数据生效，请使用 [-m](https://docs.python.org/zh-cn/3/using/cmdline.html#cmdoption-m) 开关。
+
+还要注意即使是在 `__main__` 对应于一个可导入模块且 `__main__.__spec__` 被相应地设定时，它们仍会被视为 *不同的* 模块。 这是由于以下事实：使用 `if __name__ == "__main__":` 检测来保护的代码块仅会在模块被用来填充 `__main__` 命名空间时而非普通的导入时被执行。
 
 # Python安装和使用
 ## 1. 命令行与环境
