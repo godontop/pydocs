@@ -51,6 +51,10 @@
         * [5. 导入系统](#5-导入系统)
             * [5.1. importlib](#51-importlib)
             * [5.2. 包](#52-包)
+            * [5.3. 搜索](#53-搜索)
+            * [5.5. 基于路径的查找器](#55-基于路径的查找器)
+            * [5.7. 包相对导入](#57-包相对导入)
+            * [5.8. 有关 \_\_main\_\_ 的特殊事项](#58-有关-__main__-的特殊事项)
     * [Python安装和使用](#python安装和使用)
         * [1. 命令行与环境](#1-命令行与环境)
     * [Python Wiki](#python-wiki)
@@ -2091,10 +2095,10 @@ import XXX.YYY.ZZZ
 
 应当提供 `XXX.YYY.ZZZ` 作为可用表达式，但 `.moduleY` 不是一个有效的表达式。
 
-### 5.8. 有关 __main__ 的特殊事项
+### 5.8. 有关 \_\_main\_\_ 的特殊事项
 对于 Python 的导入系统来说 [\_\_main\_\_](https://docs.python.org/zh-cn/3/library/__main__.html#module-__main__) 模块是一个特殊情况。 正如在 [另一节](https://docs.python.org/zh-cn/3/reference/toplevel_components.html#programs) 中所述，`__main__` 模块是在解释器启动时直接初始化的，与 [sys](https://docs.python.org/zh-cn/3/library/sys.html#module-sys) 和 [builtins](https://docs.python.org/zh-cn/3/library/builtins.html#module-builtins) 很类似。 但是，与那两者不同，它并不被严格归类为内置模块。 这是因为 `__main__` 被初始化的方式依赖于发起调用解释器所附带的旗标和其他选项。
 
-#### 5.8.1. __main__.__spec__
+#### 5.8.1. \_\_main\_\_.\_\_spec\_\_
 根据 [\_\_main\_\_](https://docs.python.org/zh-cn/3/library/__main__.html#module-__main__) 被初始化的方式，`__main__.__spec__` 会被设置相应值或是 `None`。
 
 当 Python 附加 [-m](https://docs.python.org/zh-cn/3/using/cmdline.html#cmdoption-m) 选项启动时，`__spec__` 会被设为相应模块或包的模块规格说明。 `__spec__` 也会在 `__main__` 模块作为执行某个目录，zip 文件或其它 [sys.path](https://docs.python.org/zh-cn/3/library/sys.html#sys.path) 条目的一部分加载时被填充。
