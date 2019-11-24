@@ -62,13 +62,16 @@
             * [6.3. dir() 函数](#63-dir-函数)
             * [6.4. 包](#64-包)
         * [9. 类](#9-类)
-            [9.1. 名称和对象](#91-名称和对象)
-            [9.2. Python 作用域和命名空间](#92-python-作用域和命名空间)
-            [9.3. 初探类](#93-初探类)
-            [9.4. 补充说明](#94-补充说明)
-            [9.5. 继承](#95-继承)
-            [9.6. 私有变量](#96-私有变量)
-            [9.7. 杂项说明](#97-杂项说明)
+            * [9.1. 名称和对象](#91-名称和对象)
+            * [9.2. Python 作用域和命名空间](#92-python-作用域和命名空间)
+            * [9.3. 初探类](#93-初探类)
+            * [9.4. 补充说明](#94-补充说明)
+            * [9.5. 继承](#95-继承)
+            * [9.6. 私有变量](#96-私有变量)
+            * [9.7. 杂项说明](#97-杂项说明)
+            * [9.8. 迭代器](#98-迭代器)
+            * [9.9. 生成器](#99-生成器)
+            * [9.10. 生成器表达式](#910-生成器表达式)
     * [Python安装和使用](#python安装和使用)
         * [1. 命令行与环境](#1-命令行与环境)
     * [Python Wiki](#python-wiki)
@@ -3018,7 +3021,139 @@ __le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex
 请注意传递给 `exec()` 或 `eval()` 的代码不会将发起调用类的类名视作当前类；这类似于 `global` 语句的效果，因此这种效果仅限于同时经过字节码编译的代码。 同样的限制也适用于 `getattr()`, `setattr()` 和 `delattr()`，以及对于 `__dict__` 的直接引用。
 
 ### 9.7. 杂项说明
+有时会需要使用类似于 Pascal 的“record”或 C 的“struct”这样的数据类型，将一些命名数据项捆绑在一起。 这种情况适合定义一个空类:
 
+```python
+class Employee:
+    pass
+
+john = Employee()  # Create an empty employee record
+
+# Fill the fields of the record
+john.name = 'John Doe'
+john.dept = 'computer lab'
+john.salary = 1000
+```
+
+一段需要特定抽象数据类型的 Python 代码往往可以被传入一个模拟了该数据类型的方法的类作为替代。 例如，如果你有一个基于文件对象来格式化某些数据的函数，你可以定义一个带有 read() 和 readline() 方法从字符串缓存获取数据的类，并将其作为参数传入。
+
+实例方法对象也具有属性: `m.__self__` 就是带有 m() 方法的实例对象，而 `m.__func__` 则是该方法所对应的函数对象。
+
+### 9.8. 迭代器
+到目前为止，您可能已经注意到大多数容器对象都可以使用 [for](https://docs.python.org/zh-cn/3/reference/compound_stmts.html#for) 语句:
+
+```python
+for element in [1, 2, 3]:
+    print(element)
+for element in (1, 2, 3):
+    print(element)
+for key in {'one':1, 'two':2}:
+    print(key)
+for char in "123":
+    print(char)
+for line in open("myfile.txt"):
+    print(line, end='')
+```
+
+这种访问风格清晰、简洁又方便。 迭代器的使用非常普遍并使得 Python 成为一个统一的整体。 在幕后，[for](https://docs.python.org/zh-cn/3/reference/compound_stmts.html#for) 语句会调用容器对象中的 [iter()](https://docs.python.org/zh-cn/3/library/functions.html#iter)。 该函数返回一个定义了 [\_\_next\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__next__) 方法的迭代器对象，该方法将逐一访问容器中的元素。 当元素用尽时，[\_\_next\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__next__) 将引发 [StopIteration](https://docs.python.org/zh-cn/3/library/exceptions.html#StopIteration) 异常来通知终止 for 循环。 你可以使用 [next()](https://docs.python.org/zh-cn/3/library/functions.html#next) 内置函数来调用 [\_\_next\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__next__) 方法；这个例子显示了它的运作方式:
+
+```python
+>>> s = 'abc'
+>>> it = iter(s)
+>>> it
+<str_iterator object at 0x7f9aa02d5150>
+>>> next(it)
+'a'
+>>> next(it)
+'b'
+>>> next(it)
+'c'
+>>> next(it)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+StopIteration
+>>>
+```
+
+看过迭代器协议的幕后机制，给你的类添加迭代器行为就很容易了。 定义一个 [\_\_iter\_\_()](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__iter__) 方法来返回一个带有 [\_\_next\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__next__) 方法的对象。 如果类已定义了 \_\_next\_\_()，则 [\_\_iter\_\_()](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__iter__) 可以简单地返回 `self`:
+
+```python
+class Reverse:
+    """Iterator for looping over a sequence backwards."""
+    def __init__(self, data):
+        self.data = data
+        self.index = len(data)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.index == 0:
+            raise StopIteration
+        self.index = self.index - 1
+        return self.data[self.index]
+```
+
+```python
+>>> rev = Reverse('spam')
+>>> iter(rev)
+<__main__.Reverse object at 0x00A1DB50>
+>>> for char in rev:
+...     print(char)
+...
+m
+a
+p
+s
+```
+
+### 9.9. 生成器
+[Generator](https://docs.python.org/zh-cn/3/glossary.html#term-generator) 是一个用于创建迭代器的简单而强大的工具。 它们的写法类似标准的函数，但当它们要返回数据时会使用 [yield](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#yield) 语句。 每次对生成器调用 [next()](https://docs.python.org/zh-cn/3/library/functions.html#next) 时，它会从上次离开位置恢复执行（它会记住上次执行语句时的所有数据值）。 显示如何非常容易地创建生成器的示例如下:
+
+```python
+def reverse(data):
+    for index in range(len(data)-1, -1, -1):
+        yield data[index]
+```
+
+```python
+>>> for char in reverse('golf'):
+...     print(char)
+...
+f
+l
+o
+g
+```
+
+可以用生成器来完成的操作同样可以用前一节所描述的基于类的迭代器来完成。 但生成器的写法更为紧凑，因为它会自动创建 [\_\_iter\_\_()](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__iter__) 和 [\_\_next\_\_()](https://docs.python.org/zh-cn/3/reference/expressions.html#generator.__next__) 方法。
+
+另一个关键特性在于局部变量和执行状态会在每次调用之间自动保存。 这使得该函数相比使用 `self.index` 和 `self.data` 这种实例变量的方式更易编写且更为清晰。
+
+除了会自动创建方法和保存程序状态，当生成器终结时，它们还会自动引发 [StopIteration](https://docs.python.org/zh-cn/3/library/exceptions.html#StopIteration)。 这些特性结合在一起，使得创建迭代器能与编写常规函数一样容易。
+
+### 9.10. 生成器表达式
+某些简单的生成器可以写成简洁的表达式代码，所用语法类似列表推导式，但外层为圆括号而非方括号。 这种表达式被设计用于生成器将立即被外层函数所使用的情况。 生成器表达式相比完整的生成器更紧凑但较不灵活，相比等效的列表推导式则更为节省内存。
+
+例如:
+
+```python
+>>> sum(i*i for i in range(10))                 # sum of squares
+285
+
+>>> xvec = [10, 20, 30]
+>>> yvec = [7, 5, 3]
+>>> sum(x*y for x,y in zip(xvec, yvec))         # dot product
+260
+
+>>> unique_words = set(word for line in page  for word in line.split())
+
+>>> valedictorian = max((student.gpa, student.name) for student in graduates)
+
+>>> data = 'golf'
+>>> list(data[i] for i in range(len(data)-1, -1, -1))
+['f', 'l', 'o', 'g']
+```
 
 # Python安装和使用
 ## 1. 命令行与环境
