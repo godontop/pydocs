@@ -76,6 +76,13 @@
         * [1. 命令行与环境](#1-命令行与环境)
     * [Python Wiki](#python-wiki)
         * [WindowsCompilers](#windowscompilers)
+* [Python 打包用户指南](#python-打包用户指南)
+    * [教程](#教程)
+        * [安装包](#安装包)
+            * [Source Distributions vs Wheels](#source-distributions-vs-wheels)
+            * [Requirements files](#requirements-files)
+    * [指南](#指南)
+        * [打包二进制扩展](#打包二进制扩展)
     * [Python 有什么新变化？](#python-有什么新变化)
         * [What’s New In Python 3.0](#whats-new-in-python-30)
             * [常见绊脚石](#常见绊脚石)
@@ -3336,6 +3343,46 @@ Visual C++ Build Tools 2015 已经被微软升级为 Build Tools for Visual Stud
 
 Microsoft Visual C++ 14.0 with Visual Studio 2015 (x86, x64, ARM)  
 *Visual Studio 2015* 包含 *Visual C++ 14.0* 编译器。*Distutils* 将自动检测编译器并使用它。
+
+# Python 打包用户指南 
+## 教程
+### 安装包
+#### Source Distributions vs Wheels
+[pip](https://packaging.python.org/key_projects/#pip) 可以从 [Source Distributions (sdist)](https://packaging.python.org/glossary/#term-source-distribution-or-sdist) 或者 [Wheels](https://packaging.python.org/glossary/#term-wheel) 安装，但如果两者都存在于 PyPI，则pip将优先安装一个兼容的 [wheel](https://packaging.python.org/glossary/#term-wheel)。
+
+[Wheels](https://packaging.python.org/glossary/#term-wheel) are a pre-built [distribution](https://packaging.python.org/glossary/#term-distribution-package) format that provides faster installation compared to [Source Distributions (sdist)](https://packaging.python.org/glossary/#term-source-distribution-or-sdist), 特别是当一个项目包含编译的扩展时。
+
+If [pip](https://packaging.python.org/key_projects/#pip) does not find a wheel to install, it will locally build a wheel and cache it for future installs, instead of rebuilding the source distribution in the future.
+
+#### Requirements files
+Install a list of requirements specified in a [Requirements File](https://pip.pypa.io/en/latest/user_guide/#requirements-files).
+
+`pip install -r requirements.txt`
+
+## 指南
+### 打包二进制扩展
+#### 构建二进制扩展
+##### Windows 平台的二进制扩展
+在有可能编译一个二进制扩展之前，确认你有一个适当的编译器可用是有必要的。在 Windows 平台上，Visual C 通常用于构建官方的 CPython 解释器，也应该被用来构建兼容的二进制扩展。
+
+Python 2.7 使用 Visual Studio 2008，Python 3.3 和 3.4 使用 Visual Studio 2010，而 Python 3.5+ 使用 Visual Studio 2015 或者更新版本。不幸的是，旧版的 Visual Studio 不再容易通过 Microsoft 获得，所以对于 Python 3.5 以前的版本，必须获取不同的编译器如果你还没有一个相关的版本。
+
+为二进制扩展设置一个构建环境，步骤如下：
+
+**For Python 2.7**
+
+* 安装 “Visual C++ Compiler Package for Python 2.7”, 可以从微软官网 [下载](https://www.microsoft.com/en-gb/download/details.aspx?id=44266)。
+* 在你的 setup.py 中使用 (一个最新版本的) setuptools (任何情况下，pip 都将为你做这个)。
+* 完成。
+
+**For Python 3.5**
+
+* 安装 [Visual Studio 2015 Community Edition](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) (或者任意的更新版本)。
+* 完成。
+
+注意从 Python 3.5 起，Visual Studio 以一种向后兼容的方式工作，这意味着任何未来的 Visual Studio 版本都将有能力为所有 Python 3.5 以后的版本构建 Python 扩展。
+
+在 Windows 平台上用推荐的编译器构建确保了一个兼容的 C 库至始至终都可以被 Python 进程使用。
 
 # Python 有什么新变化？
 “What’s New in Python” 系列短文将带你了解Python主版本间最重要的变化。当发布一个新版本后对任何想保持更新的人来说它们是 “必读” 的。
