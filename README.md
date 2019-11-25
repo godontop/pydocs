@@ -88,32 +88,35 @@
             * [常见绊脚石](#常见绊脚石)
                 * [文本 Vs. 数据代替 Unicode Vs. 8-bit](#文本-vs-数据代替-unicode-vs-8-bit)
             * [库变化](#库变化)
-    * [PyPI](#pypi)
-        * [aiohttp](#aiohttp)
-        * [Beautiful Soup](#beautiful-soup)
-        * [Django](#django)
-            * [settings.py](#settingspy)
-        * [Flask](#flask)
-        * [Gerapy](#gerapy)
-        * [lxml](#lxml)
-        * [mitmproxy](#mitmproxy)
-        * [pip](#pip)
-        * [PyMongo](#pymongo)
-        * [PyMySQL](#pymysql)
-        * [pyquery](#pyquery)
-        * [pyspider](#pyspider)
-        * [redis-py](#redis-py)
-        * [Requests](#requests)
-        * [Scrapy](#scrapy)
-        * [Scrapy-Redis](#scrapy-redis)
-        * [Scrapy-Splash](#scrapy-splash)
-        * [Scrapyd](#scrapyd)
-        * [Scrapyd API](#scrapyd-api)
-        * [Scrapyd-Client](#scrapyd-client)
-        * [Scrapyrt](#scrapyrt)
-        * [Selenium](#selenium)
-        * [tesserocr](#tesserocr)
-        * [Tornado](#tornado)
+* [PyPI](#pypi)
+    * [aiohttp](#aiohttp)
+    * [Beautiful Soup](#beautiful-soup)
+    * [chardet](#chardet)
+    * [Django](#django)
+        * [settings.py](#settingspy)
+    * [Flask](#flask)
+    * [Gerapy](#gerapy)
+    * [lxml](#lxml)
+    * [mitmproxy](#mitmproxy)
+    * [pip](#pip)
+    * [PyMongo](#pymongo)
+    * [PyMySQL](#pymysql)
+    * [pyquery](#pyquery)
+    * [pyspider](#pyspider)
+    * [redis-py](#redis-py)
+    * [Requests](#requests)
+    * [Scrapy](#scrapy)
+    * [Scrapy-Redis](#scrapy-redis)
+    * [Scrapy-Splash](#scrapy-splash)
+    * [Scrapyd](#scrapyd)
+    * [Scrapyd API](#scrapyd-api)
+    * [Scrapyd-Client](#scrapyd-client)
+    * [Scrapyrt](#scrapyrt)
+    * [Selenium](#selenium)
+    * [tesserocr](#tesserocr)
+    * [Tornado](#tornado)
+* [Python Snippets](#python-snippets)
+    * [proxy.py](#proxypy)
 * [Python2](#python2)
     * [Python 2 语言参考](#python-2-语言参考)
         * [3. 数据模型](#3-数据模型-1)
@@ -1512,9 +1515,9 @@ The [urllib.request](https://docs.python.org/3/library/urllib.request.html#modul
 
 __另请参阅：__ 更高层次的HTTP客户端接口推荐 [Requests package](http://docs.python-requests.org/)。
 
-[urllib.request](https://docs.python.org/3/library/urllib.request.html#module-urllib.request) 模块定义了下面的函数：
+**[urllib.request](https://docs.python.org/3/library/urllib.request.html#module-urllib.request) 模块定义了下面的函数：**
 
-urllib.request.**urlopen**(_url, data=None,_ **[**_timeout,_ __]__*, _cafile=None, capath=None, cadefault=False, context=None_)  
+urllib.request.**urlopen**(_url, data=None,_ **[**_timeout,_ __]__\*, _cafile=None, capath=None, cadefault=False, context=None_)  
 打开URL _url_，_url_ 可以是一个字符串或者一个 [Request](https://docs.python.org/3/library/urllib.request.html#urllib.request.Request) 对象。
 
 *data* must be an object specifying additional data to be sent to the server, or `None` if no such data is needed. 详见 [Request](https://docs.python.org/3/library/urllib.request.html#urllib.request.Request) 。
@@ -1530,9 +1533,10 @@ urllib.request.**build_opener**(\[*handler, ...*\])
 
 如果安装的Python支持SSL (例如，如果 [ssl](https://docs.python.org/3/library/ssl.html#module-ssl) 模块可以被导入), [HTTPSHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.HTTPSHandler) 也将被加入。
 
-一个 [BaseHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.BaseHandler) 子类也可能改变它的 `handler_order` 属性以修改它在处理程序列表中的位置。
+一个 [BaseHandler](https://docs.python.org/3/library/urllib.request.html#urllib.request.BaseHandler) 子类也可能改变它的 `handler_order` 属性以修改它在处理程序列表中的位置。  
+<br />  
 
-提供下面的类：
+**提供下面的类：**
 
 class urllib.request.**Request**(*url, data=None, headers={}, origin_req_host=None, unverifiable=False, method=None*)  
 This class is an abstraction of a URL request.
@@ -3449,6 +3453,34 @@ $ pip3 install beautifulsoup4
 
 因此，包本身的名称和我们使用时导入的包的名称并不一定是一致的。
 
+## chardet
+官方文档：[https://chardet.readthedocs.io/en/latest/index.html](https://chardet.readthedocs.io/en/latest/index.html)
+
+```python
+>>> import urllib
+>>> rawdata = urllib.urlopen('http://yahoo.co.jp/').read()
+>>> import chardet
+>>> chardet.detect(rawdata)
+{'encoding': 'EUC-JP', 'confidence': 0.99}
+```
+
+```python
+import urllib.request
+import chardet
+
+
+proxy_handler = urllib.request.ProxyHandler(proxies={'https': 'https://127.0.0.1:11824'})
+opener = urllib.request.build_opener(proxy_handler)
+page = opener.open('https://www.google.com')
+print(chardet.detect(page.read()))
+```
+
+上面代码的运行结果为：
+
+```
+{'encoding': 'ISO-8859-1', 'confidence': 0.73, 'language': ''}
+```
+
 ### Django
 Django官网  
 [https://www.djangoproject.com](https://www.djangoproject.com)
@@ -4260,6 +4292,20 @@ GitHub：[https://github.com/tornadoweb/tornado](https://github.com/tornadoweb/t
 
 ```sh
 $ pip3 install tornado
+```
+
+# Python Snippets
+## proxy.py
+Python HTTPS 代理代码
+
+```python
+import urllib.request
+
+
+proxy_handler = urllib.request.ProxyHandler(proxies={'https': 'https://127.0.0.1:11824'})
+opener = urllib.request.build_opener(proxy_handler)
+response = opener.open('https://www.google.com')
+print(response.read())
 ```
 
 # Python2
