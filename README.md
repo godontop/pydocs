@@ -96,6 +96,10 @@
         * [settings.py](#settingspy)
     * [Flask](#flask)
     * [Gerapy](#gerapy)
+    * [IPython](#ipython)
+        * [Installation](#installation)
+            * [安装IPython内核](#安装ipython内核)
+                * [Kernels for Python 2 and 3](#kernels-for-python-2-and-3)
     * [lxml](#lxml)
     * [mitmproxy](#mitmproxy)
     * [pip](#pip)
@@ -3529,6 +3533,50 @@ PyPI：[https://pypi.org/project/gerapy/](https://pypi.org/project/gerapy/)
 pip3 install gerapy
 ```
 
+## IPython
+官方文档：[https://ipython.readthedocs.io/en/stable/index.html](https://ipython.readthedocs.io/en/stable/index.html)
+
+### Installation
+#### 安装IPython内核
+##### Kernels for Python 2 and 3
+If you’re running Jupyter on Python 3, you can set up a Python 2 kernel like this:
+
+```
+python2 -m pip install ipykernel
+python2 -m ipykernel install --user
+```
+
+**On Windows:**  
+
+```
+py -2 -m pip install ipykernel
+py -2 -m ipykernel install --user
+```
+
+If you’re running Jupyter on Python 2 and want to set up a Python 3 kernel, follow the same steps, replacing `2` with `3`.
+
+The last command installs a [kernel spec](https://jupyter-client.readthedocs.io/en/latest/kernels.html#kernelspecs) file for the current python installation. Kernel spec 文件是JSON文件，可以被普通文本编辑器浏览和修改。
+
+### 教程
+#### 内置魔法命令
+**注意**
+
+To Jupyter users: Magics are specific to and provided by the IPython kernel. Whether Magics are available on a kernel is a decision that is made by the kernel developer on a per-kernel basis. 为了正确地工作，Magics 必须使用一个在底层语言中无效的语法元素。例如，the IPython kernel uses the `%` syntax element for Magics as `%` is not a valid unary operator in Python. 然而，`%` 可能在其它语言中有意义。
+
+**%load**  
+加载代码到当前的前端。
+
+用法：  
+%load [options] source
+
+其中 source 可以是一个文件名，URL，输入历史范围，宏，或者用户命名空间中的元素
+
+用法举例：  
+
+```
+%load myfile.txt
+```
+
 ### lxml
 官方网站：[https://lxml.de](https://lxml.de)  
 GitHub：[https://github.com/lxml/lxml](https://github.com/lxml/lxml)  
@@ -3857,7 +3905,7 @@ $ pip3 install redis
 ### Requests
 GitHub地址：[https://github.com/kennethreitz/requests](https://github.com/kennethreitz/requests)  
 Pypi地址：[https://pypi.org/project/requests/](https://pypi.org/project/requests/)  
-官方文档：[http://www.python-requests.org/en/master/](http://www.python-requests.org/en/master/)  
+官方文档：[https://2.python-requests.org/en/master/](https://2.python-requests.org/en/master/)  
 中文文档：[http://docs.python-requests.org/zh_CN/latest/](http://docs.python-requests.org/zh_CN/latest/)  
 
 **安装requests**  
