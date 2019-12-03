@@ -4132,6 +4132,17 @@ Pypi地址：[https://pypi.org/project/requests/](https://pypi.org/project/reque
 $ pip3 install requests
 ```
 
+#### 快速上手
+##### 定制请求头
+如果你想为请求添加 HTTP 头部，只要简单地传递一个 `dict` 给 `headers` 参数就可以了。
+
+```python
+>>> url = 'https://api.github.com/some/endpoint'
+>>> headers = {'user-agent': 'my-app/0.0.1'}
+>>> r = requests.get(url, headers=headers)
+>>>
+```
+
 #### SOCKS
 版本 2.10.0 中新增。
 
