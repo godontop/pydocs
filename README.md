@@ -10,7 +10,7 @@
         * [文本处理服务](#文本处理服务)
             * [string — 通用字符串操作](#string--通用字符串操作)
                 * [格式化字符串语法](#格式化字符串语法)
-            * [re — 正则表达式运算](#re--正则表达式运算)
+            * [re — 正则表达式操作](#re--正则表达式操作)
                 * [正则表达式语法](#正则表达式语法)
                 * [模块内容](#模块内容)
                 * [正则表达式对象](#正则表达式对象)
@@ -18,6 +18,9 @@
                 * [正则表达式例子](#正则表达式例子)
         * [二进制数据服务](#二进制数据服务)
             * [codecs — 编解码器注册和相关基类](#codecs--编解码器注册和相关基类)
+    * [数据类型](#数据类型)
+        * [collections --- 容器数据类型](#collections-----容器数据类型)
+        * [collections.abc --- 容器的抽象基类](#collectionsabc-----容器的抽象基类)
         * [文件和目录访问](#文件和目录访问)
             * [os.path — 通用路径名操作](#ospath--通用路径名操作)
         * [通用操作系统服务](#通用操作系统服务)
@@ -451,12 +454,20 @@ Operation  |Result          |Notes
 "From {} to {}"                   # 等同于 "From {0} to {1}"
 ```
 
-### re — 正则表达式运算
-**源代码：** [Lib/re.py](https://github.com/python/cpython/tree/3.7/Lib/re.py)
+### re — 正则表达式操作
+**源代码：** [Lib/re.py](https://github.com/python/cpython/tree/3.8/Lib/re.py)
 
-这个模块提供与Perl中相似的正则表达式匹配运算。
+这个模块提供了与 Perl 语言类似的正则表达式匹配操作。
 
 被搜索的模式和字符串可以都是 Unicode 字符串 ([str](https://docs.python.org/3/library/stdtypes.html#str)) 也可以都是 8-bit 字符串 ([bytes](https://docs.python.org/3/library/stdtypes.html#bytes))。然而，Unicode 字符串和 8-bit 字符串不能被混用：即，你不能用一个字节模式去匹配一个 Unicode 字符串或者反之亦然；类似地，当请求一个替换时，替换字符串必须和模式及搜索字符串是相同的类型。
+
+正则表达式使用反斜杠字符 (`'\'`) 来表示特殊形式或是允许在使用特殊字符时不引发它们的特殊含义。 这会与 Python 的字符串字面值中对相同字符出于相同目的的用法产生冲突；例如，要匹配一个反斜杠字面值，用户可能必须写成 `'\\\\'` 来作为模式字符串，因为正则表达式必须为 `\\`，而每个反斜杠在普通 Python 字符串字面值中又必须表示为 `\\`。 而且还要注意，在 Python 的字符串字面值中使用的反斜杠如果有任何无效的转义序列，现在将会产生 [DeprecationWarning](https://docs.python.org/zh-cn/3/library/exceptions.html#DeprecationWarning) 并将在未来改为 [SyntaxError](https://docs.python.org/zh-cn/3/library/exceptions.html#SyntaxError)。 此行为即使对于正则表达式来说有效的转义字符同样会发生。
+
+解决办法是对于正则表达式模式使用 Python 的原始字符串表示法；在带有 `'r'` 前缀的字符串字面值中，反斜杠不必做任何特殊处理。 因此 `r"\n"` 表示包含 `'\'` 和 `'n'` 两个字符的字符串，而 `"\n"` 则表示只包含一个换行符的字符串。 模式在 Python 代码中通常都会使用这种原始字符串表示法来表示。
+
+绝大部分正则表达式操作都提供为模块函数和方法，在 [编译正则表达式](https://docs.python.org/zh-cn/3/library/re.html#re-objects). 这些函数是一个捷径，不需要先编译一个正则对象，但是损失了一些优化参数。
+
+**参见:** 第三方模块 [regex](https://pypi.org/project/regex/) , 提供了与标准库 [re](https://docs.python.org/zh-cn/3/library/re.html#module-re) 模块兼容的API接口, 同时还提供了额外的功能和更全面的Unicode支持。
 
 #### 正则表达式语法
 特殊字符是：
@@ -508,6 +519,20 @@ Causes the resulting RE to match 0 or 1 repetitions of the preceding RE. `ab?` �
 
 `\number`  
 匹配相同数字的组的内容。组从 1 开始编号。例如，`(.+) \1` 匹配 `'the the'` 或 `'55 55'`，但是不匹配 `'thethe'` (注意组后面的空格)。这个特殊的序列只能用来匹配前 99 个组中的一个。如果 *number* 的第一个数字是 0，或者 `number` 是一个 3 位八进制数，它将不会被解释为一个组匹配，而是作为字符 `number` 的八进制值。在一个字符类 `'['` 和 `']'` 里面，所有数字被转义为字符。
+
+```python
+>>> import re
+>>> strings = 'the the'
+>>> result = re.search('(\w+) \1', strings)
+>>> print(result)
+None
+>>> result = re.search(r'(\w+) \1', strings)
+>>> print(result)
+<re.Match object; span=(0, 7), match='the the'>
+>>>
+```
+
+如果模式中包含 `\number` ，则模式必须使用 Python 原始字符串表示法，即在正则表达式模式前面加上 `r` 前缀。
 
 `\s`  
 For Unicode (str) patterns:  
@@ -1029,6 +1054,74 @@ oem  |   |Windows 专属：根据 OEM 代码页（CP_OEMCP）对操作数进行�
 编码       |别名     |目的      |编码器/解码器
 -----------|--------|----------|-------------
 hex_codec  |hex     |将操作数转换为十六进制表示，每个字节有两位数 |[binascii.b2a_hex()](https://docs.python.org/zh-cn/3/library/binascii.html#binascii.b2a_hex) / [binascii.a2b_hex()](https://docs.python.org/zh-cn/3/library/binascii.html#binascii.a2b_hex)
+
+## 数据类型
+### collections --- 容器数据类型
+**源代码：** [Lib/collections/\_\_init\_\_.py](https://github.com/python/cpython/tree/3.8/Lib/collections/__init__.py)
+
+这个模块实现了特定目标的容器，以提供Python标准内建容器 [dict](https://docs.python.org/zh-cn/3/library/stdtypes.html#dict) , [list](https://docs.python.org/zh-cn/3/library/stdtypes.html#list) , [set](https://docs.python.org/zh-cn/3/library/stdtypes.html#set) , 和 [tuple](https://docs.python.org/zh-cn/3/library/stdtypes.html#tuple) 的替代选择。
+
+|       |       |  
+--------|--------  
+[namedtuple()](https://docs.python.org/zh-cn/3/library/collections.html#collections.namedtuple)  |创建命名元组子类的工厂函数  
+[deque](https://docs.python.org/zh-cn/3/library/collections.html#collections.deque)      |类似列表(list)的容器，实现了在两端快速添加(append)和弹出(pop)  
+[ChainMap](https://docs.python.org/zh-cn/3/library/collections.html#collections.ChainMap)  |类似字典(dict)的容器类，将多个映射集合到一个视图里面  
+[Counter](https://docs.python.org/zh-cn/3/library/collections.html#collections.Counter)   |字典的子类，提供了可哈希对象的计数功能  
+[OrderedDict](https://docs.python.org/zh-cn/3/library/collections.html#collections.OrderedDict)  |字典的子类，保存了他们被添加的顺序  
+[defaultdict](https://docs.python.org/zh-cn/3/library/collections.html#collections.defaultdict)  |字典的子类，提供了一个工厂函数，为字典查询提供一个默认值  
+[UserDict](https://docs.python.org/zh-cn/3/library/collections.html#collections.UserDict)  |封装了字典对象，简化了字典子类化  
+[UserList](https://docs.python.org/zh-cn/3/library/collections.html#collections.UserList)  |封装了列表对象，简化了列表子类化  
+[UserString](https://docs.python.org/zh-cn/3/library/collections.html#collections.UserString)  |封装了列表对象，简化了字符串子类化  
+
+*从版本 3.3 开始弃用，将在版本 3.9 中被移除：* 已将 [容器抽象基类](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections-abstract-base-classes) 移至 [collections.abc](https://docs.python.org/zh-cn/3/library/collections.abc.html#module-collections.abc) 模块。 为了保持向下兼容性，它们在 Python 3.8 版的这个模块中仍然存在。
+
+### collections.abc --- 容器的抽象基类
+*3.3 新版功能:* 该模块曾是 [collections](https://docs.python.org/zh-cn/3/library/collections.html#module-collections) 模块的组成部分。
+
+**源代码：** [Lib/\_collections\_abc.py](https://github.com/python/cpython/tree/3.8/Lib/_collections_abc.py)
+
+该模块定义了一些 [抽象基类](https://docs.python.org/zh-cn/3/glossary.html#term-abstract-base-class)，它们可用于判断一个具体类是否具有某一特定的接口；例如，这个类是否可哈希，或其是否为映射类。
+
+#### 容器抽象基类
+
+这个容器模块提供了以下 [ABCs](https://docs.python.org/zh-cn/3/glossary.html#term-abstract-base-class):
+
+抽象基类  |继承自   |抽象方法   |Mixin 方法
+---------|---------|----------|----------
+[Container](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Container)  |  |`__contains__`  |  
+[Hashable](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Hashable)    |  |`__hash__`  |  
+[Iterable](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Iterable)    |  |`__iter__`  |  
+[Iterator](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Iterator)    |[Iterable](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Iterable)  |`__next__`  |`__iter__`
+[Reversible](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Reversible) |[Iterable](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Iterable)  |`__reversed__`  |  
+[Generator](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Generator)  |[Iterator](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Iterator)  |`send`, `throw`  |`close`, `__iter__`, `__next__`
+[Sized](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Sized)  |  |`__len__`  |  
+[Callable](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Callable)  |  |`__call__`  |  
+[Collection](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Collection)  |[Sized](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Sized), [Iterable](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Iterable), [Container](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Container)  |`__contains__`, `__iter__`, `__len__`  |  
+[Sequence](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Sequence)  |[Reversible](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Reversible), [Collection](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Collection)  |`__getitem__`, `__len__`  |`__contains__`, `__iter__`, `__reversed__`, `index`, 和 `count`  
+[MutableSequence](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.MutableSequence)  |[Sequence](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Sequence)  |`__getitem__`, `__setitem__`, `__delitem__`, `__len__`, `insert`  |继承自 [Sequence](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Sequence) 的方法，以及 `append`, `reverse`, `extend`, `pop`, `remove`，和 `__iadd__`  
+[ByteString](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.ByteString)  |[Sequence](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Sequence)  |`__getitem__`, `__len__`  |继承自 [Sequence](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Sequence) 的方法  
+[Set](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Set)  |[Collection](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Collection)  |`__contains__`, `__iter__`, `__len__`  |`__le__`, `__lt__`, `__eq__`, `__ne__`, `__gt__`, `__ge__`, `__and__`, `__or__`, `__sub__`, `__xor__`, 和 `isdisjoint`  
+[MutableSet](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.MutableSet)  |[Set](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Set)  |`__contains__`, `__iter__`, `__len__`, `add`, `discard`  |继承自 [Set](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Set) 的方法以及 `clear`, `pop`, `remove`, `__ior__`, `__iand__`, `__ixor__`，和 `__isub__`  
+[Mapping](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Mapping)  |[Collection](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Collection)  |`__getitem__`, `__iter__`, `__len__`  |`__contains__`, `keys`, `items`, `values`, `get`, `__eq__`, 和 `__ne__`  
+[MutableMapping](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.MutableMapping)  |[Mapping](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Mapping)  |`__getitem__`, `__setitem__`, `__delitem__`, `__iter__`, `__len__`  |继承自 [Mapping](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Mapping) 的方法以及 `pop`, `popitem`, `clear`, `update`，和 `setdefault`  
+[MappingView](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.MappingView)  |[Sized](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Sized)  |  |`__len__`  
+[ItemsView](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.ItemsView)  |[MappingView](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.MappingView), [Set](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Set)  |  |`__contains__`, `__iter__`  
+[KeysView](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.KeysView)  |[MappingView](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.MappingView), [Set](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Set)  |  |`__contains__`, `__iter__`  
+[ValuesView](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.ValuesView)  |[MappingView](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.MappingView), [Collection](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Collection)  |  |`__contains__`, `__iter__`  
+[Awaitable](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Awaitable)  |  |`__await__`  |  
+[Coroutine](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Coroutine)  |[Awaitable](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Awaitable)  |`send`, `throw`  |`close`  
+[AsyncIterable](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.AsyncIterable)  |  |`__aiter__`  |  
+[AsyncIterator](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.AsyncIterator)  |[AsyncIterable](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.AsyncIterable)  |`__anext__`  |`__aiter__`  
+[AsyncGenerator](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.AsyncGenerator)  |[AsyncIterator](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.AsyncIterator)  |`asend`, `athrow`  |`aclose`, `__aiter__`, `__anext__`  
+
+*class* collections.abc.**Iterable**  
+提供了 [\_\_iter\_\_()](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__iter__) 方法的抽象基类。
+
+使用 `isinstance(obj, Iterable)` 可以检测一个类是否已经注册到了 [Iterable](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections.abc.Iterable) 或者实现了 [\_\_iter\_\_()](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__iter__) 函数，但是无法检测这个类是否能够使用 [\_\_getitem\_\_()](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__getitem__) 方法进行迭代。检测一个对象是否是 [iterable](https://docs.python.org/zh-cn/3/glossary.html#term-iterable) 的唯一可信赖的方法是调用 `iter(obj)`。  
+</br>
+
+*class* collections.abc.**Iterator**  
+提供了 [\_\_iter\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__iter__) 和 [\_\_next\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__next__) 方法的抽象基类。参见 [iterator](https://docs.python.org/zh-cn/3/glossary.html#term-iterator) 的定义。
 
 ## 文件和目录访问
 这章描述的模块处理磁盘文件和目录。例如，有读取文件内容的模块，有以便携的方式操作路径的模块，和创建临时文件的模块。这章中完整的模块列表是：
