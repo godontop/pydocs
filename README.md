@@ -23,12 +23,13 @@
         * [collections.abc --- 容器的抽象基类](#collectionsabc-----容器的抽象基类)
         * [文件和目录访问](#文件和目录访问)
             * [os.path — 通用路径名操作](#ospath--通用路径名操作)
-        * [通用操作系统服务](#通用操作系统服务)
-            * [os — 操作系统接口模块](#os--操作系统接口模块)
-                * [进程参数](#进程参数)
-                * [各种各样的系统信息](#各种各样的系统信息)
-            * [time — 时间的访问和转化](#time--时间的访问和转化)
-                * [函数](#函数)
+    * [通用操作系统服务](#通用操作系统服务)
+        * [os — 操作系统接口模块](#os--操作系统接口模块)
+            * [进程参数](#进程参数)
+            * [各种各样的系统信息](#各种各样的系统信息)
+        * [time — 时间的访问和转化](#time--时间的访问和转化)
+            * [函数](#函数)
+        * [platform --- 获取底层平台的标识数据](#platform-----获取底层平台的标识数据)
         * [并行执行](#并行执行)
             * [threading — 基于线程的并行](#threading--基于线程的并行)
                 * [线程对象](#线程对象)
@@ -1409,6 +1410,83 @@ time.**time()** → float
 请注意，即使时间总是作为浮点数返回，但并非所有系统都提供高于1秒的精度。虽然此函数通常返回非递减值，但如果在两次调用之间设置了系统时钟，则它可以返回比先前调用更低的值。
 
 返回的数字 [time()](https://docs.python.org/zh-cn/3/library/time.html#time.time) 可以通过将其传递给 [gmtime()](https://docs.python.org/zh-cn/3/library/time.html#time.gmtime) 函数或转换为UTC中更常见的时间格式（即年、月、日、小时等）或通过将它传递给 [localtime()](https://docs.python.org/zh-cn/3/library/time.html#time.localtime) 函数获得本地时间。在这两种情况下都返回一个 [struct_time](https://docs.python.org/zh-cn/3/library/time.html#time.struct_time) 对象，日历日期组件可以从中作为属性访问。
+
+### platform --- 获取底层平台的标识数据
+**源代码：** [Lib/platform.py](https://github.com/python/cpython/tree/3.8/Lib/platform.py)
+
+**注解：** 具体的平台按字母顺序列出，其中 Linux 包含在 Unix 章节中。
+
+#### 跨平台
+
+platform.**architecture**(*executable=sys.executable, bits='', linkage=''*)  
+Queries the given executable (defaults to the Python interpreter binary) for various architecture information.
+
+Returns a tuple `(bits, linkage)` which contain information about the bit architecture and the linkage format used for the executable. 两个值都是作为字符串返回。
+
+Values that cannot be determined are returned as given by the parameter presets. If bits is given as `''`, the `sizeof(pointer)` (or `sizeof(long)` on Python version < 1.5.2) is used as indicator for the supported pointer size.
+
+The function relies on the system's `file` command to do the actual work. This is available on most if not all Unix platforms and some non-Unix platforms and then only if the executable points to the Python interpreter. 当上面的需求不满足时，将使用合理的默认值。
+
+**注解：** On Mac OS X (and perhaps other platforms), executable files may be universal files containing multiple architectures.
+
+To get at the "64-bitness" of the current interpreter, it is more reliable to query the [sys.maxsize](https://docs.python.org/zh-cn/3/library/sys.html#sys.maxsize) attribute:
+
+```python
+is_64bits = sys.maxsize > 2**32
+```
+
+```python
+>>> import platform
+>>> platform.architecture()
+('64bit', 'ELF')
+>>>
+```
+
+platform.**platform**(*aliased=0, terse=0*)  
+Returns a single string identifying the underlying platform with as much useful information as possible.
+
+The output is intended to be *human readable* rather than machine parseable. It may look different on different platforms and this is intended.
+
+If *aliased* is true, the function will use aliases for various platforms that report system names which differ from their common names, for example SunOS will be reported as Solaris. The [system_alias()](https://docs.python.org/zh-cn/3/library/platform.html#platform.system_alias) function is used to implement this.
+
+Setting *terse* to true causes the function to return only the absolute minimum information needed to identify the platform.
+
+*在 3.8 版更改:* 在 macOS 中, the function now uses [mac_ver()](https://docs.python.org/zh-cn/3/library/platform.html#platform.mac_ver), if it returns a non-empty release string, to get the macOS version rather than the darwin version.
+
+```python
+>>> import platform
+>>> platform.platform()
+'Linux-5.1.15-arch1-1-ARCH-x86_64-with-arch-Arch-Linux'
+>>>
+```
+
+platform.**python_compiler()**  
+返回一个用于编译 Python 的编译器的标识字符串。
+
+```python
+>>> import platform
+>>> platform.python_compiler()
+'GCC 9.1.0'
+>>>
+```
+
+platform.**python_implementation()**  
+返回一个标识 Python 实现的字符串。可能的返回值是：`'CPython'`, `'IronPython'`, `'Jython'`, `'PyPy'`.
+
+```python
+>>> platform.python_implementation()
+'CPython'
+>>>
+```
+
+platform.**system()**  
+返回系统/OS的名字，例如：`'Linux'`, `'Windows'`, 或者 `'Java'`。如果这个值不能被确定则会返回一个空字符串。
+
+```python
+>>> platform.system()
+'Linux'
+>>>
+```
 
 ## 并行执行
 ### threading — 基于线程的并行
