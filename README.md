@@ -30,16 +30,18 @@
         * [time — 时间的访问和转化](#time--时间的访问和转化)
             * [函数](#函数)
         * [platform --- 获取底层平台的标识数据](#platform-----获取底层平台的标识数据)
-        * [并行执行](#并行执行)
-            * [threading — 基于线程的并行](#threading--基于线程的并行)
-                * [线程对象](#线程对象)
-            * [multiprocessing — 基于进程的并行](#multiprocessing--基于进程的并行)
-                * [介绍](#介绍)
-                    * [进程类](#进程类)
-                    * [上下文和启动方法](#上下文和启动方法)
-                * [参考](#参考)
-                    * [进程和异常](#进程和异常)
-                    * [其它](#其它)
+    * [并行执行](#并行执行)
+        * [threading — 基于线程的并行](#threading--基于线程的并行)
+            * [线程对象](#线程对象)
+        * [multiprocessing — 基于进程的并行](#multiprocessing--基于进程的并行)
+            * [介绍](#介绍)
+                * [进程类](#进程类)
+                * [上下文和启动方法](#上下文和启动方法)
+            * [参考](#参考)
+                * [进程和异常](#进程和异常)
+                * [其它](#其它)
+    * [互联网数据处理](#互联网数据处理)
+        * [json --- JSON 编码和解码器](#json-----json-编码和解码器)
         * [互联网协议与支持](#互联网协议与支持)
             * [urllib.request — 打开URLs的可扩展库](#urllibrequest--打开urls的可扩展库)
                 * [OpenerDirector对象](#openerdirector对象)
@@ -1727,6 +1729,333 @@ multiprocessing.**cpu_count()**
 可能抛出 [NotImplementedError](https://docs.python.org/3/library/exceptions.html#NotImplementedError)。
 
 **另请参见：** [os.cpu_count()](https://docs.python.org/3/library/os.html#os.cpu_count)
+
+## 互联网数据处理
+### json --- JSON 编码和解码器
+**源代码:** [Lib/json/\_\_init\_\_.py](https://github.com/python/cpython/tree/3.8/Lib/json/__init__.py)
+
+[JSON (JavaScript Object Notation)](http://json.org/)，由 [RFC 7159](https://tools.ietf.org/html/rfc7159.html) (淘汰 [RFC 4627](https://tools.ietf.org/html/rfc4627.html)) 和 [ECMA-404](http://www.ecma-international.org/publications/standards/Ecma-404.htm) 指定，是一个受 [JavaScript](https://en.wikipedia.org/wiki/JavaScript) 对象字面量语法启发的轻量级数据交换格式（然而它不是一个严格意义上的 JavaScript 的字集 [1]）。
+
+[1] 正如 [RFC 7159 的勘误表](https://www.rfc-editor.org/errata_search.php?rfc=7159) 中所提到的, JSON 允许文字 U+2028 (行分隔符) 和 U+2029 (段分隔符) 字符出现在字符串中，而 JavaScript (自 ECMAScript 版本 5.1 起) 不允许。
+
+[json](https://docs.python.org/zh-cn/3.8/library/json.html#module-json) 提供了与标准库 [marshal](https://docs.python.org/zh-cn/3.8/library/marshal.html#module-marshal) 和 [pickle](https://docs.python.org/zh-cn/3.8/library/pickle.html#module-pickle) 相似的API接口。
+
+对基本的 Python 对象层次结构进行编码：
+
+```python
+>>> import json
+>>> json.dumps(['foo', {'bar': ('baz', None, 1.0, 2)}])
+'["foo", {"bar": ["baz", null, 1.0, 2]}]'
+>>> print(json.dumps("\"foo\bar"))
+"\"foo\bar"
+>>> print(json.dumps('\u1234'))
+"\u1234"
+>>> print(json.dumps('\\'))
+"\\"
+>>> print(json.dumps({"c": 0, "b": 0, "a": 0}, sort_keys=True))
+{"a": 0, "b": 0, "c": 0}
+>>> from io import StringIO
+>>> io = StringIO()
+>>> json.dump(['streaming API'], io)
+>>> io.getvalue()
+'["streaming API"]'
+```
+
+紧凑编码：
+
+```python
+>>> import json
+>>> json.dumps([1, 2, 3, {'4': 5, '6': 7}], separators=(',', ':'))
+'[1,2,3,{"4":5,"6":7}]'
+```
+
+美化输出：
+
+```python
+>>> import json
+>>> print(json.dumps({'4': 5, '6': 7}, sort_keys=True, indent=4))
+{
+    "4": 5,
+    "6": 7
+}
+```
+
+JSON解码:
+
+```python
+>>> import json
+>>> json.loads('["foo", {"bar":["baz", null, 1.0, 2]}]')
+['foo', {'bar': ['baz', None, 1.0, 2]}]
+>>> json.loads('"\\"foo\\bar"')
+'"foo\x08ar'
+>>> json.loads('"\\b"')
+'\x08'
+>>> from io import StringIO
+>>> io = StringIO('["streaming API"]')
+>>> json.load(io)
+['streaming API']
+```
+
+特殊JSON对象解码:
+
+```python
+>>> import json
+>>> def as_complex(dct):
+...     if '__complex__' in dct:
+...         return complex(dct['real'], dct['imag'])
+...     return dct
+...
+>>> json.loads('{"__complex__": true, "real": 1, "imag": 2}',
+...     object_hook=as_complex)
+(1+2j)
+>>> import decimal
+>>> json.loads('1.1', parse_float=decimal.Decimal)
+Decimal('1.1')
+```
+
+扩展 [JSONEncoder](https://docs.python.org/zh-cn/3.8/library/json.html#json.JSONEncoder):
+
+```python
+>>> import json
+>>> class ComplexEncoder(json.JSONEncoder):
+...     def default(self, obj):
+...         if isinstance(obj, complex):
+...             return [obj.real, obj.imag]
+...         # Let the base class default method raise the TypeError
+...         return json.JSONEncoder.default(self, obj)
+...
+>>> json.dumps(2 + 1j, cls=ComplexEncoder)
+'[2.0, 1.0]'
+>>> ComplexEncoder().encode(2 + 1j)
+'[2.0, 1.0]'
+>>> list(ComplexEncoder().iterencode(2 + 1j))
+['[2.0', ', 1.0', ']']
+```
+
+从命令行使用 [json.tool](https://docs.python.org/zh-cn/3.8/library/json.html#module-json.tool) 来验证并美化输出：
+
+```sh
+➜  ~ echo '{"json":"obj"}' |python -m json.tool
+{
+    "json": "obj"
+}
+➜  ~ echo '{1.2:3.4}' |python -m json.tool
+Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+```
+
+详细文档请参见 [命令行接口](https://docs.python.org/zh-cn/3.8/library/json.html#json-commandline)。
+
+**注解：** JSON 是 [YAML](http://yaml.org/) 1.2 的一个子集。由该模块的默认设置生成的 JSON （尤其是默认的 “分隔符” 设置值）也是 YAML 1.0 and 1.1 的一个子集。因此该模块也能够用于序列化为 YAML。
+
+**注解：** 默认情况下这个模块的编码器和解码器保存输入和输出的顺序。仅当底层容器是无序的的时候，顺序才会丢失。
+
+在 Python 3.7 以前， [dict](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#dict) was not guaranteed to be ordered, so inputs and outputs were typically scrambled unless [collections.OrderedDict](https://docs.python.org/zh-cn/3.8/library/collections.html#collections.OrderedDict) was specifically requested. 从 Python 3.7 开始，普通的 [dict](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#dict) 变成保存顺序的了，所以生成和分析 JSON 不必再指定 [collections.OrderedDict](https://docs.python.org/zh-cn/3.8/library/collections.html#collections.OrderedDict) 了。
+
+#### 基本使用
+json.**dump**(*obj, fp, \*, skipkeys=False, ensure_ascii=True, check_circular=True, allow_nan=True, cls=None, indent=None, separators=None, default=None, sort_keys=False, \*\*kw*)  
+使用这个 [转换表](https://docs.python.org/zh-cn/3.8/library/json.html#py-to-json-table) 来序列化 *obj* 为一个 JSON 格式的流并输出到 *fp* （一个支持 `.write()` 的 [类文件对象](https://docs.python.org/zh-cn/3.8/glossary.html#term-file-like-object)）。
+
+如果 *skipkeys* 是 true （默认为 `False`），那么那些不是基本对象（包括 [str](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#str), [int](https://docs.python.org/zh-cn/3.8/library/functions.html#int)、[float](https://docs.python.org/zh-cn/3.8/library/functions.html#float)、[bool](https://docs.python.org/zh-cn/3.8/library/functions.html#bool)、`None`）的字典的键会被跳过；否则引发一个 [TypeError](https://docs.python.org/zh-cn/3.8/library/exceptions.html#TypeError)。
+
+[json](https://docs.python.org/zh-cn/3.8/library/json.html#module-json) 模块始终产生 [str](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#str) 对象而非 [bytes](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#bytes) 对象。因此，`fp.write()` 必须支持 [str](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#str) 输入。
+
+如果 *ensure_ascii* 是 true （即默认值），输出保证将所有输入的非 ASCII 字符转义。如果 *ensure_ascii* 是 false，这些字符会原样输出。
+
+如果 *check_circular* 是为假值 (默认为 `True`)，那么容器类型的循环引用检验会被跳过并且循环引用会引发一个 [OverflowError](https://docs.python.org/zh-cn/3.8/library/exceptions.html#OverflowError) (或者更糟的情况)。
+
+如果 *allow_nan* 是 false（默认为 `True`），那么在对严格 JSON 规格范围外的 [float](https://docs.python.org/zh-cn/3.8/library/functions.html#float) 类型值（`nan`、`inf` 和 `-inf`）进行序列化时会引发一个 [ValueError](https://docs.python.org/zh-cn/3.8/library/exceptions.html#ValueError)。如果 *allow_nan* 是 true，则使用它们的 JavaScript 等价形式（`NaN`、`Infinity` 和 `-Infinity`）。
+
+如果 *indent* 是一个非负整数或者字符串，那么 JSON 数组元素和对象成员会被美化输出为该值指定的缩进等级。如果缩进等级为零、负数或者 `""`，则只会添加换行符。`None`（默认值）选择最紧凑的表达。使用一个正整数会让每一层缩进同样数量的空格。如果 *indent* 是一个字符串（比如 `"\t"`），那个字符串会被用于缩进每一层。
+
+*在 3.2 版更改:* 允许使用字符串作为 *indent* 而不再仅仅是整数。
+
+当指定时，*separators* 应当是一个 `(item_separator, key_separator)` 元组。当 *indent* 为 `None` 时，默认值取 `(', ', ': ')`，否则取 `(',', ': ')`。为了得到最紧凑的 JSON 表达式，你应该指定其为 `(',', ':')` 以消除空白字符。
+
+*在 3.4 版更改:* 现当 *indent* 不是 `None` 时，采用 `(',', ': ')` 作为默认值。
+
+当 *default* 被指定时，其应该是一个函数，每当某个对象无法被序列化时它会被调用。它应该返回该对象的一个可以被 JSON 编码的版本或者引发一个 [TypeError](https://docs.python.org/zh-cn/3.8/library/exceptions.html#TypeError)。如果没有被指定，则会直接引发 [TypeError](https://docs.python.org/zh-cn/3.8/library/exceptions.html#TypeError)。
+
+如果 *sort_keys* 是 true（默认为 `False`），那么字典的输出会以键的顺序排序。
+
+为了使用一个自定义的 [JSONEncoder](https://docs.python.org/zh-cn/3.8/library/json.html#json.JSONEncoder) 子类（比如：覆盖了 default() 方法来序列化额外的类型）， 通过 *cls* 关键字参数来指定；否则将使用 [JSONEncoder](https://docs.python.org/zh-cn/3.8/library/json.html#json.JSONEncoder)。
+
+*在 3.6 版更改:* 所有的可选参数现在是 [keyword-only](https://docs.python.org/zh-cn/3.8/glossary.html#keyword-only-parameter) 的了。
+
+**注解：** 与 [pickle](https://docs.python.org/zh-cn/3.8/library/pickle.html#module-pickle) 和 [marshal](https://docs.python.org/zh-cn/3.8/library/marshal.html#module-marshal) 不同，JSON 不是一个具有框架的协议，所以尝试多次使用同一个 *fp* 调用 [dump()](https://docs.python.org/zh-cn/3.8/library/json.html#json.dump) 来序列化多个对象会产生一个不合规的 JSON 文件。
+
+json.**dumps**(*obj, \*, skipkeys=False, ensure_ascii=True, check_circular=True, allow_nan=True, cls=None, indent=None, separators=None, default=None, sort_keys=False, \*\*kw*)  
+使用这个 [转换表](https://docs.python.org/zh-cn/3.8/library/json.html#py-to-json-table) 将 *obj* 序列化为 JSON 格式的 [str](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#str)。 其参数的含义与 [dump()](https://docs.python.org/zh-cn/3.8/library/json.html#json.dump) 中的相同。
+
+**注解：** JSON 中的键-值对中的键永远是 [str](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#str) 类型的。当一个对象被转化为 JSON 时，字典中所有的键都会被强制转换为字符串。这所造成的结果是字典被转换为 JSON 然后转换回字典时可能和原来的不相等。换句话说，如果 x 具有非字符串的键，则有 `loads(dumps(x)) != x`。
+
+```python
+>>> x = {1: 'a', 2: 'b', 3: 'c'}
+>>> json.dumps(x)
+'{"1": "a", "2": "b", "3": "c"}'
+>>> json.loads(json.dumps(x))
+{'1': 'a', '2': 'b', '3': 'c'}
+>>> json.loads(json.dumps(x)) != x
+True
+>>> 
+```
+
+json.**load**(*fp, \*, cls=None, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, object_pairs_hook=None, \*\*kw*)  
+使用这个 [转换表](https://docs.python.org/zh-cn/3.8/library/json.html#json-to-py-table) 将 *fp* (一个支持 `.read()` 并包含一个 JSON 文档的 [text file](https://docs.python.org/zh-cn/3.8/glossary.html#term-text-file) 或者 [binary file](https://docs.python.org/zh-cn/3.8/glossary.html#term-binary-file)) 反序列化为一个 Python 对象。
+
+*object_hook* 是一个可选的函数，它会被调用于每一个解码出的对象字面量（即一个 [dict](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#dict)）。*object_hook* 的返回值会取代原本的 [dict](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#dict)。这一特性能够被用于实现自定义解码器（如 [JSON-RPC](http://www.jsonrpc.org/) 的类型提示)。
+
+*object_pairs_hook* is an optional function that will be called with the result of any object literal decoded with an ordered list of pairs. *object_pairs_hook* 的返回值将被用来替换 [dict](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#dict)。这一特性能够被用于实现自定义解码器。如果也定义了 *object_hook*，应优先考虑 *object_pairs_hook*。
+
+*在 3.1 版更改:* 增加 *object_pairs_hook* 的支持。
+
+*parse_float*, 如果指定了，will be called with the string of every JSON float to be decoded. 默认情况下，这等同于 `float(num_str)`。这可以被用于为 JSON 浮点数 (例如 [decimal.Decimal](https://docs.python.org/zh-cn/3.8/library/decimal.html#decimal.Decimal)) 使用另一种数据类型或者解析器 。
+
+*parse_int*, 如果指定了，will be called with the string of every JSON int to be decoded. 默认情况下，这等同于 `int(num_str)`。这可以被用于为 JSON 整型数（例如 [float](https://docs.python.org/zh-cn/3.8/library/functions.html#float)）使用另一种数据类型或者解析器。
+
+*parse_constant*, 如果指定了，will be called with one of the following strings: `'-Infinity'`, `'Infinity'`, `'NaN'`. 如果遇到了无效的 JSON 数字，这可以被用来抛出一个异常。
+
+*在 3.1 版更改:* *parse_constant* doesn't get called on 'null', 'true', 'false' anymore.
+
+若要使用一个自定义的 [JSONDecoder](https://docs.python.org/zh-cn/3.8/library/json.html#json.JSONDecoder) 子类，请指定 `cls` 关键字参数；否则将使用 [JSONDecoder](https://docs.python.org/zh-cn/3.8/library/json.html#json.JSONDecoder)。额外的关键字参数将被传递给类的构造函数。
+
+如果正在反序列化的数据不是一个有效的 JSON 文档，将抛出一个 [JSONDecodeError](https://docs.python.org/zh-cn/3.8/library/json.html#json.JSONDecodeError)。
+
+*在 3.6 版更改:* 所有的可选参数现在是 [keyword-only](https://docs.python.org/zh-cn/3.8/glossary.html#keyword-only-parameter) 的了。
+
+*在 3.6 版更改:* *fp* 现在可以是一个 [二进制文件](https://docs.python.org/zh-cn/3.8/glossary.html#term-binary-file)。输入编码必须是 UTF-8, UTF-16 或者 UTF-32.
+
+json.**loads**(*s, \*, cls=None, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, object_pairs_hook=None, \*\*kw*)  
+使用这个 [转换表](https://docs.python.org/zh-cn/3.8/library/json.html#json-to-py-table) 将 *s* (一个包含一个 JSON 文档的 [str](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#str), [bytes](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#bytes) 或 [bytearray](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#bytearray) 实例) 反序列化为一个 Python 对象。
+
+其它参数与 [load()](https://docs.python.org/zh-cn/3.8/library/json.html#json.load) 中的含义相同, 除了从 Python 3.1 起被忽略和弃用的 *encoding*。
+
+如果正在被反序列化的数据不是一个有效的 JSON 文档，将抛出一个 [JSONDecodeError](https://docs.python.org/zh-cn/3.8/library/json.html#json.JSONDecodeError)。
+
+*从版本 3.1 开始被弃用，将在版本 3.9 中被移除：* *encoding* 关键字参数。
+
+*在 3.6 版更改:* *s* 现在可以为 [bytes](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#bytes) 或 [bytearray](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#bytearray) 类型。 输入编码应为 UTF-8, UTF-16 或 UTF-32。
+
+#### 编码器和解码器
+*class* json.**JSONDecoder**(*\*, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, strict=True, object_pairs_hook=None*)  
+简单的JSON解码器。
+
+默认情况下，解码执行以下翻译:
+
+JSON          |Python
+--------------|-------
+object        |dict
+array         |list
+string        |str
+number (int)  |int
+number (real) |float
+true          |True
+false         |False
+null          |None
+
+它还将“NaN”、“Infinity”和“-Infinity”理解为它们对应的“float”值，这超出了JSON规范。
+
+*object_hook*, 如果指定了，will be called with the result of every JSON object decoded and its return value will be used in place of the given [dict](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#dict). 这可以被用来提供自定义反序列化 (例如：支持 JSON-RPC 类提示)。
+
+*object_pairs_hook*, if specified will be called with the result of every JSON object decoded with an ordered list of pairs. *object_pairs_hook* 的返回值将被用来替换 [dict](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#dict). 这个特性可以被用来实现自定义解码器。如果 *object_hook* 也定义了，则优先执行 *object_pairs_hook* 。
+
+*在 3.1 版更改:* 增加了 *object_pairs_hook* 的支持。
+
+*parse_float*, 如果指定了，will be called with the string of every JSON float to be decoded.默认情况下，这等同于 `float(num_str)`。对于 JSON 浮点数 (例如 [decimal.Decimal](https://docs.python.org/zh-cn/3.8/library/decimal.html#decimal.Decimal)) 来说，这可以被用于使用另一种数据类型或者解析器。
+
+*parse_int*, 如果指定了，will be called with the string of every JSON int to be decoded. 默认情况下，这等同于 `int(num_str)`。这可以被用于为 JSON 整型数使用另一种数据类型(例如 [float](https://docs.python.org/zh-cn/3.8/library/functions.html#float))或者解析器。
+
+*parse_constant*, 如果指定了，will be called with one of the following strings: `'-Infinity'`, `'Infinity'`, `'NaN'`. 如果遇到了无效的 JSON 数字这可以被用来抛出一个异常。
+
+如果 *strict* 是 false (默认为 `True`), 则字符串中将允许包含控制字符。在这个上下文中控制字符是那些字符编码在 0--31 范围内的字符，包括 `'\t'` (tab), `'\n'`, `'\r'` 和 `'\0'`。
+
+如果正在被反序列化的数据不是一个有效的 JSON 文档，将抛出一个 [JSONDecodeError](https://docs.python.org/zh-cn/3.8/library/json.html#json.JSONDecodeError)。
+
+*在 3.6 版更改:* 现在所有参赛都是 [keyword-only](https://docs.python.org/zh-cn/3.8/glossary.html#keyword-only-parameter) 的了。
+
+**decode**(*s*)  
+返回 *s* 的 Python 表示形式（包含一个 JSON 文档的 [str](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#str) 实例）。
+
+如果给定的 JSON 文档无效则将引发 [JSONDecodeError](https://docs.python.org/zh-cn/3.8/library/json.html#json.JSONDecodeError)。
+
+**raw_decode**(*s*)  
+从 *s* 中解码出 JSON 文档（以 JSON 文档开头的一个 [str](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#str) 对象）并返回一个 Python 表示形式为 2 元组以及指明该文档在 *s* 中结束位置的序号。
+
+这可以用于从一个字符串解码JSON文档，该字符串的末尾可能有无关的数据。
+
+*class* json.**JSONEncoder**(*\*, skipkeys=False, ensure_ascii=True, check_circular=True, allow_nan=True, sort_keys=False, indent=None, separators=None, default=None*)  
+用于Python数据结构的可扩展JSON编码器。
+
+默认情况下支持下面的对象和类型：
+
+Python                                  |JSON
+----------------------------------------|--------
+dict                                    |object
+list, tuple                             |array
+str                                     |string
+int, float, int- & float-derived Enums  |number
+True                                    |true
+False                                   |false
+None                                    |null
+
+*在 3.4 版更改:* 增加了 int- 和 float-derived Enum 类型的支持。
+
+To extend this to recognize other objects, subclass and implement a [default()](https://docs.python.org/zh-cn/3.8/library/json.html#json.JSONEncoder.default) method with another method that returns a serializable object for `o` if possible, otherwise it should call the superclass implementation (to raise [TypeError](https://docs.python.org/zh-cn/3.8/library/exceptions.html#TypeError)).
+
+如果 *skipkeys* 是 false (默认值), 当试图编码的键不是 [str](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#str), [int](https://docs.python.org/zh-cn/3.8/library/functions.html#int), [float](https://docs.python.org/zh-cn/3.8/library/functions.html#float) 或者 `None` 时则抛出一个 [TypeError](https://docs.python.org/zh-cn/3.8/library/exceptions.html#TypeError)。如果 *skipkeys* 是 true，则那些键将被简单地跳过。
+
+如果 *ensure_ascii* 是 true （即默认值），输出保证将所有输入的非 ASCII 字符转义。如果 *ensure_ascii* 是 false，这些字符会原样输出。
+
+如果 *check_circular* 是 true (默认值), then lists, dicts, and custom encoded objects will be checked for circular references during encoding to prevent an infinite recursion (which would cause an [OverflowError](https://docs.python.org/zh-cn/3.8/library/exceptions.html#OverflowError)). 否则，不进行这样的检查。
+
+如果 *allow_nan* 是 true (默认值), 则 `NaN`, `Infinity`, 和 `-Infinity` will be encoded as such. This behavior is not JSON specification compliant, but is consistent with most JavaScript based encoders and decoders. 否则，编码这样的浮点数将抛出一个 [ValueError](https://docs.python.org/zh-cn/3.8/library/exceptions.html#ValueError)。
+
+如果 *sort_keys* 是 true (默认值: `False`), 则字典的输出将按键排序；this is useful for regression tests to ensure that JSON serializations can be compared on a day-to-day basis.
+
+如果 *indent* 是一个非负整数或者字符串，那么 JSON 数组元素和对象成员会被美化输出为该值指定的缩进等级。如果缩进等级为零、负数或者 `""`，则只会添加换行符。`None` （默认值）选择最紧凑的表达。使用一个正整数会让每一层缩进同样数量的空格。如果 *indent* 是一个字符串（比如 `"\t"`），那个字符串会被用于缩进每一层。
+
+*在 3.2 版更改:* 允许使用字符串作为 *indent* 而不再仅仅是整数。
+
+当指定时，*separators* 应当是一个 `(item_separator, key_separator)` 元组。当 *indent* 为 `None` 时，默认值取 `(', ', ': ')`，否则取 `(',', ': ')`。为了得到最紧凑的 JSON 表达式，你应该指定其为 `(',', ':')` 以消除空白字符。
+
+*在 3.4 版更改:* 现当 *indent* 不是 `None` 时，采用 `(',', ': ')` 作为默认值。
+
+当 *default* 被指定时，其应该是一个函数，每当某个对象无法被序列化时它会被调用。它应该返回该对象的一个可以被 JSON 编码的版本或者引发一个 [TypeError](https://docs.python.org/zh-cn/3.8/library/exceptions.html#TypeError)。如果没有被指定，则会直接引发 [TypeError](https://docs.python.org/zh-cn/3.8/library/exceptions.html#TypeError)。
+
+*在 3.6 版更改:* 现在所有参赛都是 [keyword-only](https://docs.python.org/zh-cn/3.8/glossary.html#keyword-only-parameter) 的了。
+
+**default**(*o*)  
+Implement this method in a subclass such that it returns a serializable object for *o*, or calls the base implementation (to raise a [TypeError](https://docs.python.org/zh-cn/3.8/library/exceptions.html#TypeError)).
+
+例如，为了支持任意的迭代器，你应该像这样实现 default :
+
+```python
+def default(self, o):
+    try:
+        iterable = iter(o)
+    except TypeError:
+        pass
+    else:
+        return list(iterable)
+    # Let the base class default method raise the TypeError
+    return json.JSONEncoder.default(self, o)
+```
+
+**encode**(*o*)  
+返回一个代表一个 Python 数据结构的 JSON 字符串，*o*。例如：
+
+```python
+>>> json.JSONEncoder().encode({"foo": ["bar", "baz"]})
+'{"foo": ["bar", "baz"]}'
+>>>
+```
+
+**iterencode**(*o*)  
+编码指定的对象，*o*, and yield each string representation as available. 例如：
+
+```python
+for chunk in json.JSONEncoder().iterencode(bigobject):
+    mysocket.write(chunk)
+```
 
 ### 互联网协议与支持
 #### urllib.request — 打开URLs的可扩展库
