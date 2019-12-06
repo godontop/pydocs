@@ -343,9 +343,24 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 
 |          |          |Built-in Functions|          |          |
 |----------|----------|------------------|----------|----------|
+|          |          |                  |object()  |          |
 |          |          |issubclass()      |          |super()   |
 |          |          |                  |range()   |          |
 |          |getattr() |                  |          |          |
+|complex() |          |                  |          |          |
+
+*class* **complex([**_real_**[**, _imag_**]])**  
+返回值为 *real* + _imag_\*1j 的复数，或将字符串或数字转换为复数。如果第一个形参是字符串，则它被解释为一个复数，并且函数调用时必须没有第二个形参。第二个形参不能是字符串。每个实参都可以是任意的数值类型（包括复数）。如果省略了 *imag*，则默认值为零，构造函数会像 [int](https://docs.python.org/zh-cn/3/library/functions.html#int) 和 [float](https://docs.python.org/zh-cn/3/library/functions.html#float) 一样进行数值转换。如果两个实参都省略，则返回 `0j`。
+
+对于一个普通 Python 对象 `x`，`complex(x)` 会委托给 `x.__complex__()`。 如果 `__complex__()` 未定义则将回退至 `__float__()`。 如果 `__float__()` 未定义则将回退至 [\_\_index\_\_()](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__index__)。
+
+**注解:** 当从字符串转换时，字符串在 `+` 或 `-` 的周围必须不能有空格。例如 `complex('1+2j')` 是合法的，但 `complex('1 + 2j')` 会触发 [ValueError](https://docs.python.org/zh-cn/3/library/exceptions.html#ValueError) 异常。
+
+[数字类型 --- int, float, complex](https://docs.python.org/zh-cn/3/library/stdtypes.html#typesnumeric) 描述了复数类型。
+
+*在 3.6 版更改:* 您可以使用下划线将代码文字中的数字进行分组。
+
+*在 3.8 版更改:* 如果 [\_\_complex\_\_()](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__complex__) 和 [\_\_float\_\_()](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__float__) 未定义则回退至 [\_\_index\_\_()](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__index__)。
 
 **getattr**(*object, name*__[__*, default*__]__)  
 返回 *object* 的 *name* 属性的值。*name* 必须是一个字符串。如果这个字符串是这个对象的一个属性的名称，则结果为那个属性的值。例如，`getattr(x, 'foobar')` 等同于 `x.foobar`。如果名称属性不存在，则返回 *default* 如果有提供的话，否则抛出 [AttributeError](https://docs.python.org/3/library/exceptions.html#AttributeError)。
@@ -359,6 +374,11 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 True
 >>> 
 ```
+
+*class* **object**  
+返回一个没有特征的新对象。[object](https://docs.python.org/zh-cn/3/library/functions.html#object) 是所有类的基类。它具有所有 Python 类实例的通用方法。这个函数不接受任何实参。
+
+**注解:** 由于 [object](https://docs.python.org/zh-cn/3/library/functions.html#object) 没有 [\_\_dict\_\_](https://docs.python.org/zh-cn/3/library/stdtypes.html#object.__dict__)，因此无法将任意属性赋给 [object](https://docs.python.org/zh-cn/3/library/functions.html#object) 的实例。
 
 **range**(*stop*)  
 **range**(*start, stop*[*, step*])  
