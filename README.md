@@ -24,8 +24,10 @@
         * [文件和目录访问](#文件和目录访问)
             * [os.path — 通用路径名操作](#ospath--通用路径名操作)
     * [通用操作系统服务](#通用操作系统服务)
-        * [os — 操作系统接口模块](#os--操作系统接口模块)
+        * [os --- 各种各样的操作系统接口](#os-----各种各样的操作系统接口)
             * [进程参数](#进程参数)
+            * [文件和目录](#文件和目录)
+            * [进程管理](#进程管理)
             * [各种各样的系统信息](#各种各样的系统信息)
         * [time — 时间的访问和转化](#time--时间的访问和转化)
             * [函数](#函数)
@@ -1220,8 +1222,8 @@ os.path.**join**(_path, *paths_)
 ## 通用操作系统服务
 这章描述的模块提供在（几乎）所有操作系统上都可用的操作系统特征接口，如文件和时钟。这些接口通常是根据 Unix 或 C 接口仿写的，但它们在大多数其它系统下也是可用的。这里是一个概述：
 
-### os — 操作系统接口模块
-**源代码：** [Lib/os.py](https://github.com/python/cpython/tree/3.7/Lib/os.py)
+### os --- 各种各样的操作系统接口
+**源代码：** [Lib/os.py](https://github.com/python/cpython/tree/3.8/Lib/os.py)
 
 这个模块提供了一种便携的方式使用依赖于操作系统的功能。如果你仅仅只想读或写一个文件请看 [open()](https://docs.python.org/3/library/functions.html#open)，如果你想操作路径，请看 [os.path](https://docs.python.org/3/library/os.path.html#module-os.path) 模块，如果你想在命令行下读取所有文件中的所有行请看 [fileinput](https://docs.python.org/3/library/fileinput.html#module-fileinput) 模块。创建临时文件和目录请看 [tempfile](https://docs.python.org/3/library/tempfile.html#module-tempfile) 模块，高级文件和目录处理请看 [shutil](https://docs.python.org/3/library/shutil.html#module-shutil) 模块。
 
@@ -1286,6 +1288,30 @@ If you want cross-platform overwriting of the destination, use [replace()](https
 *3.3 新版功能:* *src_dir_fd* 和 *dst_dir_fd* 参数。
 
 *在 3.6 版更改:* Accepts a [path-like object](https://docs.python.org/zh-cn/3/glossary.html#term-path-like-object) for *src* and *dst*.
+
+#### 进程管理
+这些函数可能被用于创建和管理进程。
+
+os.**system**(*command*)  
+在一个子 Shell 中执行 *command* (一个字符串)。这是通过调用标准 C 函数 system() 实现的，并且有相同的限制。Changes to [sys.stdin](https://docs.python.org/zh-cn/3/library/sys.html#sys.stdin), etc. are not reflected in the environment of the executed command. 如果 *command* 产生了任何输出，它将被发送到解释器的标准输出流。
+
+在 Unix 平台，the return value is the exit status of the process encoded in the format specified for [wait()](https://docs.python.org/zh-cn/3/library/os.html#os.wait). 注意 POSIX 没有指定 C system() 函数的返回值的含义，所以 Python 函数的返回值依赖于系统。
+
+```python
+>>> import os
+>>> os.system('hostname')
+archlinux
+0        # 除了 shell 命令的输出，还输出了 system() 函数的退出状态码
+>>>
+```
+
+在 Windows 平台，the return value is that returned by the system shell after running *command*. shell 是由 Windows 环境变量 COMSPEC 指定的：它通常是 **cmd.exe**，which returns the exit status of the command run; on systems using a non-native shell, consult your shell documentation.
+
+The [subprocess](https://docs.python.org/zh-cn/3/library/subprocess.html#module-subprocess) module provides more powerful facilities for spawning new processes and retrieving their results; 使用那个模块比使用这个函数更好。See the [Replacing Older Functions with the subprocess Module](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess-replacements) section in the [subprocess](https://docs.python.org/zh-cn/3/library/subprocess.html#module-subprocess) documentation for some helpful recipes.
+
+Raises an [auditing event](https://docs.python.org/zh-cn/3/library/sys.html#auditing) `os.system` with argument `command`.
+
+可用性: Unix, Windows。
 
 #### 各种各样的系统信息
 
