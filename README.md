@@ -32,7 +32,7 @@
         * [time — 时间的访问和转化](#time--时间的访问和转化)
             * [函数](#函数)
         * [platform --- 获取底层平台的标识数据](#platform-----获取底层平台的标识数据)
-    * [并行执行](#并行执行)
+    * [并发执行](#并发执行)
         * [threading — 基于线程的并行](#threading--基于线程的并行)
             * [线程对象](#线程对象)
         * [multiprocessing — 基于进程的并行](#multiprocessing--基于进程的并行)
@@ -42,6 +42,7 @@
             * [参考](#参考)
                 * [进程和异常](#进程和异常)
                 * [其它](#其它)
+        * [subprocess --- 子进程管理](#subprocess-----子进程管理)
     * [互联网数据处理](#互联网数据处理)
         * [json --- JSON 编码和解码器](#json-----json-编码和解码器)
         * [互联网协议与支持](#互联网协议与支持)
@@ -1536,7 +1537,7 @@ platform.**system()**
 >>>
 ```
 
-## 并行执行
+## 并发执行
 ### threading — 基于线程的并行
 **源代码：** [Lib/threading.py](https://github.com/python/cpython/tree/3.7/Lib/threading.py)
 
@@ -1775,6 +1776,102 @@ multiprocessing.**cpu_count()**
 可能抛出 [NotImplementedError](https://docs.python.org/3/library/exceptions.html#NotImplementedError)。
 
 **另请参见：** [os.cpu_count()](https://docs.python.org/3/library/os.html#os.cpu_count)
+
+### subprocess --- 子进程管理
+**源代码:** [Lib/subprocess.py](https://github.com/python/cpython/tree/3.8/Lib/subprocess.py)
+
+[subprocess](https://docs.python.org/zh-cn/3/library/subprocess.html#module-subprocess) 模块允许你生成新的进程，连接它们的输入、输出、错误管道，并且获取它们的返回码。此模块打算代替一些老旧的模块与功能：
+
+```
+os.system
+os.spawn*
+```
+
+在下面的段落中，你可以找到关于 [subprocess](https://docs.python.org/zh-cn/3/library/subprocess.html#module-subprocess) 模块如何代替这些模块和功能的相关信息。
+
+**参见:** [PEP 324](https://www.python.org/dev/peps/pep-0324) -- 提出 subprocess 模块的 PEP
+
+#### 使用 subprocess 模块
+推荐的调用子进程的方式是在任何它支持的用例中使用 [run()](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.run) 函数。对于更进阶的用例，也可以使用底层的 [Popen](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.Popen) 接口。
+
+[run()](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.run) 函数是在 Python 3.5 被添加的；如果你需要与旧版本保持兼容，查看 [Older high-level API](https://docs.python.org/zh-cn/3/library/subprocess.html#call-function-trio) 段落。
+
+subprocess.**run**(*args, \*, stdin=None, input=None, stdout=None, stderr=None, capture_output=False, shell=False, cwd=None, timeout=None, check=False, encoding=None, errors=None, text=None, env=None, universal_newlines=None*)  
+运行被 *arg* 描述的指令。等待指令完成，然后返回一个 [CompletedProcess](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.CompletedProcess) 实例。
+
+```python
+>>> subprocess.run('hostname')
+archlinux
+CompletedProcess(args='hostname', returncode=0)
+>>>
+```
+
+以上显示的参数仅仅是最常见的一些，[常用参数](https://docs.python.org/zh-cn/3/library/subprocess.html#frequently-used-arguments) 在下面描述（因此在缩写签名中仅使用关键字标示）。完整的函数签名基本和 [Popen](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.Popen) 的构造函数一样，此函数接受的大多数参数都被传递给该接口。（*timeout*, *input*, *check* 和 *capture_output* 除外）。
+
+如果 *capture_output* 设为 true，stdout 和 stderr 将会被捕获。在使用时，内置的 [Popen](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.Popen) 对象将自动用 `stdout=PIPE` 和 `stderr=PIPE` 创建。*stdout* 和 *stderr* 参数不应当与 *capture_output* 同时提供。如果你希望捕获并将两个流合并在一起，使用 `stdout=PIPE` 和 `stderr=STDOUT` 来代替 *capture_output*。
+
+*timeout* 参数将被传递给 [Popen.communicate()](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.Popen.communicate)。如果发生超时，子进程将被杀死并等待。 [TimeoutExpired](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.TimeoutExpired) 异常将在子进程中断后被抛出。
+
+*input* 参数将被传递给 [Popen.communicate()](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.Popen.communicate) 以及子进程的标准输入. 如果使用此参数, 它必须是一个字节序列. 如果指定了 *encoding* 或 *errors* 或者将 *text* 设置为 `True`, 那么也可以是一个字符串. 当使用此参数时, 内部的 [Popen](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.Popen) 对象将自动被创建, 伴随着设置 `stdin=PIPE`, 并且 *stdin* 可能不被使用.
+
+如果 *check* 设为 True, 并且进程以非零状态码退出, 一个 [CalledProcessError](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.CalledProcessError) 异常将被抛出. 这个异常的属性将设置为参数, 退出码, 以及标准输出和标准错误, 如果被捕获到.
+
+如果 *encoding* 或者 *error* 被指定, 或者 *text* 被设为 True, 标准输入, 标准输出和标准错误的文件对象将通过指定的 *encoding* 和 *errors* 以文本模式打开, 否则以默认的 [io.TextIOWrapper](https://docs.python.org/zh-cn/3/library/io.html#io.TextIOWrapper) 打开. *universal_newline* 参数等同于 *text* 并且提供了向后兼容性. 默认情况下, 文件对象是以二进制模式打开的.
+
+如果 *env* 不是 `None`, 它必须是一个字典, 为新的进程设置环境变量; 它用于替换继承的当前进程的环境的默认行为. 它将直接被传递给 [Popen](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.Popen).
+
+例如:
+
+```python
+>>> subprocess.run(["ls", "-l"])  # doesn't capture output
+CompletedProcess(args=['ls', '-l'], returncode=0)
+
+>>> subprocess.run("exit 1", shell=True, check=True)
+Traceback (most recent call last):
+  ...
+subprocess.CalledProcessError: Command 'exit 1' returned non-zero exit status 1
+
+>>> subprocess.run(["ls", "-l", "/dev/null"], capture_output=True)
+CompletedProcess(args=['ls', '-l', '/dev/null'], returncode=0,
+stdout=b'crw-rw-rw- 1 root root 1, 3 Jan 23 16:23 /dev/null\n', stderr=b'')
+```
+
+*3.5 新版功能.*
+
+*在 3.6 版更改:* 添加了 *encoding* 和 *errors* 形参.
+
+*在 3.7 版更改:* 添加了 *text* 形参, 作为 *universal_newlines* 的一个更好理解的别名. 添加了 *capture_output* 形参.  
+</br>
+
+*class* subprocess.**CompletedProcess**  
+[run()](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.run) 的返回值, 代表一个进程已经结束.
+
+   **args**  
+   被用作启动进程的参数. 可能是一个列表或字符串.
+
+   **returncode**  
+   子进程的退出状态码. 通常来说, 一个为 0 的退出码表示进程运行正常.
+
+一个负值 `-N` 表示子进程被信号 `N` 中断 (仅 POSIX).
+
+   **stdout**  
+从子进程捕获到的标准输出. 一个字节序列, 或一个字符串, 如果 [run()](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.run) 是设置了 *encoding*, *errors* 或者 `text=True` 来运行的. 如果未有捕获, 则为 `None`.
+
+如果你通过 `stderr=subprocess.STDOUT` 运行, 标准输入和标准错误将被组合在一起, 并且 stderr 将为 `None`.
+
+```python
+>>> subprocess.run('hostname').stdout
+archlinux
+>>>
+```
+
+   **stderr**  
+捕获到的子进程的标准错误. 一个字节序列, 或者一个字符串, 如果 [run()](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.run) 是设置了参数 *encoding*, *errors* 或者 `text=True` 运行的. 如果未有捕获, 则为 `None`.
+
+   **check_returncode()**  
+如果 [returncode](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.CompletedProcess.returncode) 非零, 抛出 [CalledProcessError](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.CalledProcessError).
+
+*3.5 新版功能.*
 
 ## 互联网数据处理
 ### json --- JSON 编码和解码器
