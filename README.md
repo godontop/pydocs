@@ -111,6 +111,7 @@
                 * [Kernels for Python 2 and 3](#kernels-for-python-2-and-3)
     * [lxml](#lxml)
     * [mitmproxy](#mitmproxy)
+    * [MySQL-python](#mysql-python)
     * [pip](#pip)
     * [PyMongo](#pymongo)
     * [PyMySQL](#pymysql)
@@ -153,9 +154,11 @@
 		* [UPDATE语法](#update语法)
         * [比较函数与运算符](#比较函数与运算符)
         * [4.2.5 在命令行中使用选项](#425-在命令行中使用选项)
-            * [4.5.1.1 mysql选项](#4511-mysql选项)
+            * [4.5.1.1 mysql 客户端选项](#4511-mysql-客户端选项)
+            * [4.5.1.2 mysql 客户端命令](#4512-mysql-客户端命令)
         * [4.5.4 mysqldump — 一个数据库备份程序](#454-mysqldump--一个数据库备份程序)
         * [11.1.2 日期和时间类型概述](#1112-日期和时间类型概述)
+        * [11.3.2 CHAR 和 VARCHAR 类型](#1132-char-和-varchar-类型)
         * [11.3.5 为TIMESTAMP和DATETIME自动初始化和更新](#1135-为timestamp和datetime自动初始化和更新)
         * [12.5 字符串函数](#125-字符串函数)
         * [12.7 日期和时间函数](#127-日期和时间函数)
@@ -280,6 +283,22 @@ w3schools.com
 w3school 在线教程  
 [http://www.w3school.com.cn](http://www.w3school.com.cn)  
 中文版的w3school
+
+# Windows  
+计算机系统硬件类  
+[https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/computer-system-hardware-classes](https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/computer-system-hardware-classes)
+
+## PowerShell
+### PowerShell 模块
+#### Microsoft.PowerShell.Core
+The Core module contains cmdlets and providers that manage the basic features of PowerShell.
+
+[Microsoft.PowerShell.Core](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/?view=powershell-6)
+
+#### Microsoft.PowerShell.Utility
+这个模块包含用于管理 PowerShell 基本特性的命令。
+
+[Microsoft.PowerShell.Utility](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/?view=powershell-6)
 
 Wireshark  
 [https://www.wireshark.org](https://www.wireshark.org)  
@@ -1846,15 +1865,15 @@ stdout=b'crw-rw-rw- 1 root root 1, 3 Jan 23 16:23 /dev/null\n', stderr=b'')
 *class* subprocess.**CompletedProcess**  
 [run()](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.run) 的返回值, 代表一个进程已经结束.
 
-   **args**  
-   被用作启动进程的参数. 可能是一个列表或字符串.
+**args**  
+被用作启动进程的参数. 可能是一个列表或字符串.
 
-   **returncode**  
-   子进程的退出状态码. 通常来说, 一个为 0 的退出码表示进程运行正常.
+**returncode**  
+子进程的退出状态码. 通常来说, 一个为 0 的退出码表示进程运行正常.
 
 一个负值 `-N` 表示子进程被信号 `N` 中断 (仅 POSIX).
 
-   **stdout**  
+**stdout**  
 从子进程捕获到的标准输出. 一个字节序列, 或一个字符串, 如果 [run()](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.run) 是设置了 *encoding*, *errors* 或者 `text=True` 来运行的. 如果未有捕获, 则为 `None`.
 
 如果你通过 `stderr=subprocess.STDOUT` 运行, 标准输入和标准错误将被组合在一起, 并且 stderr 将为 `None`.
@@ -1865,10 +1884,10 @@ archlinux
 >>>
 ```
 
-   **stderr**  
+**stderr**  
 捕获到的子进程的标准错误. 一个字节序列, 或者一个字符串, 如果 [run()](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.run) 是设置了参数 *encoding*, *errors* 或者 `text=True` 运行的. 如果未有捕获, 则为 `None`.
 
-   **check_returncode()**  
+**check_returncode()**  
 如果 [returncode](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.CompletedProcess.returncode) 非零, 抛出 [CalledProcessError](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.CalledProcessError).
 
 *3.5 新版功能.*
@@ -4330,6 +4349,34 @@ mitmproxy-ca-cert.pem  |PEM 格式证书，适用于大多数非Windows平台
 **Android平台**  
 在移动设备上配置正确的代理设置（配置代理前要在PC上启动mitmdump），然后访问 http://mitm.it 。之后点击Android图标下载证书，下载完成后会提示安装，填好证书名称再点确定即可。
 
+
+## MySQL-python
+简介：Python interface to MySQL  
+官方主页：[https://pypi.org/project/MySQL-python/](https://pypi.org/project/MySQL-python/)  
+这个包（最新的发布日期是2014-01-03）至今都不支持 Python 3，且这个库需要编译安装，安装前需要安装 MySQL 和 Python 的开发包，MySQL 的 Python 接口不建议使用这个库。  
+
+### 项目描述
+
+MySQLdb is an interface to the popular [MySQL](http://www.mysql.com/) database server for Python. 设计目标是：
+
+* Compliance with Python database API version 2.0 [[PEP-0249](http://www.python.org/peps/pep-0249.html)]  
+* Thread-safety  
+* Thread-friendliness (threads will not block each other)  
+
+当前支持 MySQL-3.23 到 5.5 以及 Python-2.4 到 2.7 。未来的版本将支持 Python-3.0 。支持 PyPy 。
+
+安装 MySQL-python  
+`pip install MySQL-python`  
+
+**用法**  
+
+```python
+>>> import MySQLdb
+>>>
+```
+
+**注意：** 安装 MySQL-python 库以后，导入的模块名是 **MySQLdb**。
+
 ### pip
 ## 安装
 ### 我需要安装pip吗？
@@ -4349,7 +4396,7 @@ On Windows:
 升级所有指定的包到最新的可用版本。依赖的处理依赖于使用的 upgrade-strategy。
 
 --user  
-Install to the Python user install directory for your platform. Typically ~/.local/, or %APPDATA%Python on Windows. (See the Python documentation for site.USER_BASE for full details.)
+Install to the Python user install directory for your platform. Typically ~/.local/, or %APPDATA%Python on Windows. (See the Python documentation for site.USER\_BASE for full details.)
 
 ### PyMongo
 GitHub：[https://github.com/mongodb/mongo-python-driver](https://github.com/mongodb/mongo-python-driver)  
@@ -5559,18 +5606,98 @@ shell>
 
 长形式 ([--execute](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_execute)) 后跟一个等号 (=)。
 
-### 4.5.1.1 mysql选项
-[mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 支持下面的选项，下面的选项可以在命令行中或一个选项文件的 [mysql] 和 [client] 组中指定。关于 MySQL 程序使用的选项文件的信息，请看章节 [4.2.7, “Using Option Files”](https://dev.mysql.com/doc/refman/8.0/en/option-files.html)。
+### 4.5.1.1 mysql 客户端选项
+[mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 支持下面的选项，下面的选项可以在命令行中或一个选项文件的 [mysql] 和 [client] 组中指定。关于 MySQL 程序使用的选项文件的信息，请看章节 [4.2.2.2, “Using Option Files”](https://dev.mysql.com/doc/refman/8.0/en/option-files.html)。
 
-**mysql选项**
+**mysql 客户端选项**
 
-Format     |Description         |Introduced   |Removed
------------|--------------------|-------------|-------
-[--execute](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_execute)  |执行指定语句然后退出  |             |      
+Option Name     |Description         |Introduced    |Deprecated   |Removed
+----------------|--------------------|--------------|-------------|-------
+[--execute](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_execute)  |执行指定语句然后退出  |             |            |     
+[--named-commands](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_named-commands)  |启用命名的 mysql 命令  |     |     |          
 
 * [--execute=*statement*](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_execute), -e *statement*
 
   执行指定语句然后退出。默认输出格式与使用 [--batch](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_batch) 选项的输出相似。对于一些例子，请看章节 [4.2.5, “Using Options on the Command Line”](https://dev.mysql.com/doc/refman/8.0/en/command-line-options.html)。和这个选项一起使用时，[mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 不使用历史文件。
+
+* [--named-commands](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_named-commands), -G  
+  
+  启用命名的 [mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 命令。允许长格式的命令，而不只是短格式的命令。例如，`quit` 和 `\q` 都能被识别。禁用命名的命令请使用 [--skip-named-commands](https://dev.mysql.com/doc/refman/8.0/en/mysql-command-options.html#option_mysql_named-commands)。另请参见 [章节 4.5.1.2, “mysql Client Commands”](https://dev.mysql.com/doc/refman/8.0/en/mysql-commands.html)。
+
+#### 4.5.1.2 mysql 客户端命令
+[mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 将你发出的每一个 SQL 语句发送到服务器去执行。也有一个 [mysql](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) 自己解释的命令集合。为得到这些命令的清单，请在 `mysql>` 提示符后键入 `help` 或者 `\h`：
+
+```sql
+mysql> help
+
+List of all MySQL commands:
+Note that all text commands must be first on line and end with ';'
+?         (\?) Synonym for `help'.
+clear     (\c) Clear the current input statement.
+connect   (\r) Reconnect to the server. Optional arguments are db and host.
+delimiter (\d) Set statement delimiter.
+edit      (\e) Edit command with $EDITOR.
+ego       (\G) Send command to mysql server, display result vertically.
+exit      (\q) Exit mysql. Same as quit.
+go        (\g) Send command to mysql server.
+help      (\h) Display this help.
+nopager   (\n) Disable pager, print to stdout.
+notee     (\t) Don't write into outfile.
+pager     (\P) Set PAGER [to_pager]. Print the query results via PAGER.
+print     (\p) Print current command.
+prompt    (\R) Change your mysql prompt.
+quit      (\q) Quit mysql.
+rehash    (\#) Rebuild completion hash.
+source    (\.) Execute an SQL script file. Takes a file name as an argument.
+status    (\s) Get status information from the server.
+system    (\!) Execute a system shell command.
+tee       (\T) Set outfile [to_outfile]. Append everything into given
+               outfile.
+use       (\u) Use another database. Takes database name as argument.
+charset   (\C) Switch to another charset. Might be needed for processing
+               binlog with multi-byte charsets.
+warnings  (\W) Show warnings after every statement.
+nowarning (\w) Don't show warnings after every statement.
+resetconnection(\x) Clean session context.
+
+For server side help, type 'help contents'
+```
+
+* ego, \G
+
+  将当前的语句发送到服务器去执行并使用垂直的格式显示结果。
+
+```sql
+mysql> select now() \G
+*************************** 1. row ***************************
+now(): 2019-12-19 16:08:50
+1 row in set (0.00 sec)
+
+mysql> select now()
+    -> ego
+*************************** 1. row ***************************
+now(): 2019-12-19 16:08:55
+1 row in set (0.00 sec)
+```
+
+* nopager, \n
+
+  禁用输出分页。请看 `pager` 的描述。
+
+  `nopager` 命令仅在 Unix 平台有效。
+
+* pager [**command**], \P [**command**]
+
+  启用输出分页。  
+<br>  
+
+这里有一些关于 `pager` 命令的小技巧：
+
+* `-F` 和 `-X` 选项有可能和 **less** 一起使用以使 less 退出，如果输出合适在一个屏幕上显示的话，当不需要滚动时这很方便：
+
+```sql
+mysql> pager less -F -X
+```
 
 ### 4.5.4 mysqldump — 一个数据库备份程序
 [mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html) 客户端工具执行 [逻辑备份](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_logical_backup)，生产一个可以被执行以重新生成原始数据库对象定义和表数据的 SQL 语句集合。 它转储一个或多个 MySQL 数据库，用于备份或传输给另一个 SQL 服务器。[mysqldump](https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html) 命令也可以生成 CSV，其它分隔文本，或 XML 格式的输出。
@@ -5725,6 +5852,13 @@ CREATE TABLE t1 (t TIME(3), dt DATETIME(6));
 *fsp* 值，如果指定，必须在0到6的范围之内。值为0表示没有小数部分。如果忽略，则默认精度为0。(This differs from the standard SQL default of 6, for compatibility with previous MySQL versions.)
 
 一个表中的任意 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 或 [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列都可以自动的初始化和更新内容。
+
+### 11.3.2 CHAR 和 VARCHAR 类型
+`CHAR` 和 `VARCHAR` 类型是相似的，但在存储及检索的方式上又是不同的。它们在最大长度及是否保留结尾的空格方面也是不同的。
+
+当你创建表时，一个 `CHAR` 列的长度是你申明的固定的的长度。允许的长度是 0 到 255 之间的任意值。
+
+`VARCHAR` 列中的值是变长字符串。可以被指定的长度值是 0 到 65,535。一个 `VARCHAR` 最大的有效长度受制于最大的行大小 (65,535 字节，由所有列共享) 以及所使用的字符集。请参见 [章节 8.4.7, “Limits on Table Column Count and Row Size”](https://dev.mysql.com/doc/refman/8.0/en/column-count-limit.html)。
 
 ### 11.3.5 为TIMESTAMP和DATETIME自动初始化和更新
 [TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 和 [DATETIME](https://dev.mysql.com/doc/refman/8.0/en/datetime.html) 列可以自动初始化及更新为当前的日期和时间 (即，当前的时间戳)。
