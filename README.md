@@ -43,6 +43,8 @@
                 * [进程和异常](#进程和异常)
                 * [其它](#其它)
         * [subprocess --- 子进程管理](#subprocess-----子进程管理)
+    * [网络和进程间通信](#网络和进程间通信)
+        * [socket --- 底层网络接口](#socket-----底层网络接口)
     * [互联网数据处理](#互联网数据处理)
         * [json --- JSON 编码和解码器](#json-----json-编码和解码器)
         * [互联网协议与支持](#互联网协议与支持)
@@ -1891,6 +1893,152 @@ archlinux
 如果 [returncode](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.CompletedProcess.returncode) 非零, 抛出 [CalledProcessError](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.CalledProcessError).
 
 *3.5 新版功能.*
+
+## 网络和进程间通信
+### socket --- 底层网络接口
+**源代码:** [Lib/socket.py](https://github.com/python/cpython/tree/3.8/Lib/socket.py)
+
+这个模块提供了访问BSD *套接字* 的接口。在所有现代Unix系统、Windows、macOS和其他一些平台上可用。
+
+**注解：** 一些行为可能因平台不同而异，因为调用的是操作系统的套接字API。
+
+这个 Python 接口是用 Python 的面向对象风格对 Unix 系统调用和套接字库接口的直译：函数 [socket()](https://docs.python.org/3/library/socket.html#socket.socket) 返回一个 *套接字对象* ，其方法是对各种套接字系统调用的实现。形参类型一般与 C 接口相比更高级：例如在 Python 文件 `read()` 和 `write()` 操作中，接收操作的缓冲区分配是自动的，发送操作的缓冲区长度是隐式的。
+
+**参见：**
+
+**模块** [socketserver](https://docs.python.org/zh-cn/3/library/socketserver.html#module-socketserver)  
+用于简化网络服务端编写的类。
+
+**模块** [ssl](https://docs.python.org/zh-cn/3/library/ssl.html#module-ssl)  
+套接字对象的TLS/SSL封装。
+
+#### 套接字协议族
+根据系统以及构建选项，此模块提供了各种套接字协议簇。
+
+特定的套接字对象需要的地址格式将根据此套接字对象被创建时指定的地址族被自动选择。套接字地址表示如下：
+
+* 一对 `(host, port)` 被用于 [AF_INET](https://docs.python.org/zh-cn/3/library/socket.html#socket.AF_INET) 地址族，*host* 是一个表示为互联网域名表示法之内的主机名或者一个 IPv4 地址的字符串，例如 `'daring.cwi.nl'` 或 `'100.50.200.5'`，*port* 是一个整数。
+
+    * 对于 IPv4 地址，有两种可接受的特殊形式被用来代替一个主机地址： `''` 代表 INADDR_ANY，用来绑定到所有接口；字符串 `'<broadcast>'` 代表 INADDR_BROADCAST。此行为不兼容 IPv6，因此，如果你的 Python 程序打算支持 IPv6，则可能需要避开这些。
+
+如果你在 IPv4/v6 套接字地址的 *host* 部分中使用了一个主机名，此程序可能会表现不确定行为，因为 Python 使用 DNS 解析返回的第一个地址。套接字地址将被解析为一个不同的 IPv4/v6 地址，依赖于 DNS 解析的结果和/或 host 配置。为了确定的行为，在 *host* 部分中使用一个数字的地址。
+
+#### 模块内容
+[socket](https://docs.python.org/zh-cn/3/library/socket.html#module-socket) 模块导出以下元素。
+
+##### 常数
+The AF_* and SOCK_* constants are now AddressFamily and SocketKind [IntEnum](https://docs.python.org/zh-cn/3/library/enum.html#enum.IntEnum) collections.
+
+*3.4 新版功能.*
+
+socket.**AF_UNIX**  
+socket.**AF_INET**  
+socket.**AF_INET6**  
+这些常量代表地址 (和协议) 族，被用于 [socket()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket) 的第一个参数。如果 [AF_UNIX](https://docs.python.org/zh-cn/3/library/socket.html#socket.AF_UNIX) 常量没有被定义则这个协议是不被支持的。更多可能可用的常量依赖于系统。
+
+socket.**SOCK_STREAM**  
+socket.**SOCK_DGRAM**  
+socket.**SOCK_RAW**  
+socket.**SOCK_RDM**  
+socket.**SOCK_SEQPACKET**  
+这些常量代表套接字类型，被用于 [socket()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket) 的第二个参数。更多可能可用的常量依赖于系统。 (通常似乎只有 [SOCK_STREAM](https://docs.python.org/zh-cn/3/library/socket.html#socket.SOCK_STREAM) 和 [SOCK_DGRAM](https://docs.python.org/zh-cn/3/library/socket.html#socket.SOCK_DGRAM) 是有用的。)
+
+##### 函数
+**创建套接字**  
+下面所有的函数都创建 [套接字对象](https://docs.python.org/zh-cn/3/library/socket.html#socket-objects)。
+
+socket.**socket**(*family=AF_INET, type=SOCK_STREAM, proto=0, fileno=None*)  
+使用指定的地址族，套接字类型以及协议号创建一个新的套接字。地址族应为 [AF_INET](https://docs.python.org/zh-cn/3/library/socket.html#socket.AF_INET) (默认值)，[AF_INET6](https://docs.python.org/zh-cn/3/library/socket.html#socket.AF_UNIX)，[AF_UNIX](https://docs.python.org/zh-cn/3/library/socket.html#socket.AF_UNIX)，[AF_CAN](https://docs.python.org/zh-cn/3/library/socket.html#socket.AF_CAN)，[AF_PACKET](https://docs.python.org/zh-cn/3/library/socket.html#socket.AF_PACKET)，或者 [AF_RDS](https://docs.python.org/zh-cn/3/library/socket.html#socket.AF_RDS)。套接字类型应为 [SOCK_STREAM](https://docs.python.org/zh-cn/3/library/socket.html#socket.SOCK_STREAM) (默认值)，[SOCK_DGRAM](https://docs.python.org/zh-cn/3/library/socket.html#socket.SOCK_DGRAM)， [SOCK_RAW](https://docs.python.org/zh-cn/3/library/socket.html#socket.SOCK_RAW) 或者另一个可能的 `SOCK_` 常量。协议号通常为 0 并且可能被忽略，或者在地址族为 [AF_CAN](https://docs.python.org/zh-cn/3/library/socket.html#socket.AF_CAN) 的情况下，协议必须为 CAN_RAW, [CAN_BCM](https://docs.python.org/zh-cn/3/library/socket.html#socket.CAN_BCM) 或 [CAN_ISOTP](https://docs.python.org/zh-cn/3/library/socket.html#socket.CAN_ISOTP) 中的一个。
+
+如果 *fileno* 被指定了，*family*, *type*, 和 *proto* 的值将从指定的文件描述符中自动检测。 Auto-detection can be overruled by calling the function with explicit *family*, *type*, or *proto* arguments. 这只影响 Python 如何表示例如 [socket.getpeername()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.getpeername) 而不会影响实际的 OS 资源。不像 [socket.fromfd()](https://docs.python.org/zh-cn/3/library/socket.html#socket.fromfd)，*fileno* 将返回同一个套接字而不是一个副本。This may help close a detached socket using [socket.close()](https://docs.python.org/zh-cn/3/library/socket.html#socket.close)。
+
+新创建的套接字是 [不可继承的](https://docs.python.org/zh-cn/3/library/os.html#fd-inheritance)。
+
+`socket.__new__` 带有参数 `self`, `family`, `type`, `protocol` 将抛出一个 [审计事件](https://docs.python.org/zh-cn/3/library/sys.html#auditing)。
+
+*在 3.3 版更改:* 增加了 AF_CAN 和 AF_RDS 地址族。
+
+*在 3.4 版更改:* 增加了 CAN_BCM 协议。
+
+*在 3.4 版更改:* 返回的套接字现在是不可继承的。
+
+*在 3.7 版更改:* 增加了 CAN_ISOTP 协议。
+
+*在 3.7 版更改:* 当 [SOCK_NONBLOCK](https://docs.python.org/zh-cn/3/library/socket.html#socket.SOCK_NONBLOCK) 或 [SOCK_CLOEXEC](https://docs.python.org/zh-cn/3/library/socket.html#socket.SOCK_CLOEXEC) 位标识被应用于 *type* 时，它们被清除了，并且 [socket.type](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.type) 将不会反映它们。它们仍然被传递给底层的系统 *socket()* 调用。因此::
+
+```python
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM | socket.SOCK_NONBLOCK)
+```
+
+将仍然在支持 `SOCK_NONBLOCK` 的操作系统上创建一个非阻塞的套接字，但 `sock.type` 将被设置为 `socket.SOCK_STREAM`。  
+<br>
+
+**其他功能**  
+
+[socket](https://docs.python.org/zh-cn/3/library/socket.html#module-socket) 模块也提供各种网络相关的服务： 
+
+socket.**close**(*fd*)  
+关闭一个套接字文件描述符。这就像 [os.close()](https://docs.python.org/zh-cn/3/library/os.html#os.close)，但只用于套接字。在一些平台 (最值得注意的 Windows) [os.close()](https://docs.python.org/zh-cn/3/library/os.html#os.close) 对于套接字文件描述符无效。
+
+*3.7 新版功能.*
+
+#### 套接字对象
+套接字对象拥有下面的方法。除了 [makefile()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.makefile)，这些方法对应于适用于套接字的 Unix 系统调用。
+
+*在 3.2 版更改:* 增加了对[上下文管理器](https://docs.python.org/zh-cn/3/glossary.html#term-context-manager)协议的支持。退出上下文管理器等同于调用 [close()](https://docs.python.org/zh-cn/3/library/socket.html#socket.close)。
+
+socket.**close()**  
+Mark the socket closed. The underlying system resource (例如：一个文件描述符) is also closed when all file objects from [makefile()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.makefile) are closed. 一旦发生这种情况，后面所有针对套接字对象的操作都将失败。远端将不会再收到数据 (当队列的数据被清除之后)。
+
+Sockets are automatically closed when they are garbage-collected, 但是推荐明确地 [close()](https://docs.python.org/zh-cn/3/library/socket.html#socket.close) 它们，或者使用一个 [with](https://docs.python.org/zh-cn/3/reference/compound_stmts.html#with) 语句包围它们。
+
+*在 3.6 版更改:* 现在，当调用底层的 close() 时，如果出现错误将抛出一个 [OSError](https://docs.python.org/zh-cn/3/library/exceptions.html#OSError)。
+
+**注解：** [close()](https://docs.python.org/zh-cn/3/library/socket.html#socket.close) 释放分配给一个连接的资源但不一定立即关闭这个连接。如果你想及时地关闭这个连接，在调用 [close()](https://docs.python.org/zh-cn/3/library/socket.html#socket.close) 前先调用 [shutdown()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.shutdown)。
+
+socket.**connect**(*address*)  
+按 *address* 连接到一个远程套接字。 (*address* 的格式依赖于地址族 --- 见上面。)
+
+如果连接被一个信号中断，这个方法将等待直到连接完成，或者抛出一个超时的 [socket.timeout](https://docs.python.org/zh-cn/3/library/socket.html#socket.timeout)，如果信号处理程序没有抛出一个异常且套接字是阻塞的或者有一个超时。对于非阻塞的套接字，这个方法将抛出一个 [InterruptedError](https://docs.python.org/zh-cn/3/library/exceptions.html#InterruptedError) 异常如果连接被一个信号中断的话 (或者由信号处理程序抛出这个异常)。
+
+Raises an [auditing event](https://docs.python.org/zh-cn/3/library/sys.html#auditing) `socket.connect` with arguments `self`, `address`.
+
+*在 3.5 版更改:* 这个方法现在将等待直到连接完成而不是抛出一个 [InterruptedError](https://docs.python.org/zh-cn/3/library/exceptions.html#InterruptedError) 异常如果连接被一个信号中断，信号处理程序没有抛出一个异常且套接字是阻塞的或者有一个超时 (原理请参见 [PEP 475](https://www.python.org/dev/peps/pep-0475)。
+
+socket.**fileno()**  
+返回套接字的文件描述符 (一个小的整型数)，或者 -1 如果失败的话。This is useful with [select.select()](https://docs.python.org/zh-cn/3/library/select.html#select.select).
+
+在 Windows 下这个方法返回的小的整型数不能被用于一个文件描述符可以被使用的地方 (例如 [os.fdopen()](https://docs.python.org/zh-cn/3/library/os.html#os.fdopen))。Unix 没有这个限制。
+
+socket.**getpeername()**  
+返回套接字连接的远程地址。对于找出一个远程 IPv4/v6 套接字的端口号这是有用的，例如。 (返回的地址格式依赖于地址族 --- 见上面。) 在一些系统上这个函数是不支持的。
+
+socket.**getsockname()**  
+返回套接字自己的地址。这对于找出一个 IPv4/v6 套接字的端口号是有用的。 (返回地址的格式依赖于地址族 --- 见上面。)
+
+socket.**getblocking()**  
+如果套接字处于阻塞模式则返回 `True`，如果处于非阻塞模式则返回 `False`。
+
+这等同于检查 `socket.gettimeout() == 0`。
+
+*3.7 新版功能.*
+
+socket.**shutdown**(*how*)  
+Shut down one or both halves of the connection. 如果 *how* 是 SHUT_RD, 则不允许后面的接收。如果 *how* 是 SHUT_WR, 则不允许后面的发送。如果 *how* 是 SHUT_RDWR, 则后面的发送和接收都不被允许。  
+<br>
+
+注意套接字没有 read() 或者 write() 方法；使用不带 *flags* 参数的 [recv()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.recv) 和 [send()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.send) 替代。
+
+套接字对象也有这些 (只读) 属性，它们对应于 [socket](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket) 构造函数中指定的值。
+
+socket.**family**  
+套接字族。
+
+socket.**type**  
+套接字类型。
+
+socket.**proto**  
+套接字协议。
 
 ## 互联网数据处理
 ### json --- JSON 编码和解码器
@@ -5693,7 +5841,7 @@ now(): 2019-12-19 16:08:55
 
 这里有一些关于 `pager` 命令的小技巧：
 
-* `-F` 和 `-X` 选项有可能和 **less** 一起使用以使 less 退出，如果输出合适在一个屏幕上显示的话，当不需要滚动时这很方便：
+* `-F` 和 `-X` 选项有可能和 **less** 一起使用以使 less 退出，如果输出适合在一个屏幕上显示的话，当不需要滚动时这很方便：
 
 ```sql
 mysql> pager less -F -X
