@@ -360,7 +360,7 @@ HTML `<ul>` 标签
 
 # Python
 ## Python 3 标准库
-Python 3 版本：3.6.4——3.7
+Python 3 版本：3.6.4——3.8
 
 [Python 语言参考](https://docs.python.org/3/reference/index.html#reference-index)描述的是 Python 语言精确的语法及语义，这个库参考手册描述的是和 Python 一起发布的标准库。它也描述一些通常包含在 Python 发行版中的可选组件。
 
@@ -478,8 +478,21 @@ Dunder init func in class B.
 >>> 
 ```
 
-### 内置类型
-#### 数值类型 — int, float, complex
+## 内置类型
+### 数值类型 — int, float, complex
+存在三种不同的数字类型: *整数*, *浮点数* 和 *复数*。 此外，布尔值属于整数的子类型。 整数具有无限的精度。
+
+所有数字类型（复数除外）都支持下列运算（有关运算优先级，请参阅：[运算符优先级](https://docs.python.org/zh-cn/3/reference/expressions.html#operator-summary)）:
+
+运算        |结果            |注释  |完整文档  
+------------|---------------|------|-------  
+`pow(x, y)` |*x* 的 *y* 次幂 |(5)  |[pow()](https://docs.python.org/zh-cn/3/library/functions.html#pow)  
+`x ** y`    |*x* 的 *y* 次幂 |(5)  |    
+
+注释：
+
+5. Python 将 `pow(0, 0)` 和 `0 ** 0` 定义为 `1`，这是编程语言的普遍做法。
+
 ##### 整型数类型的按位运算
 这个表格列出的按位运算按优先级升序排列：
 
