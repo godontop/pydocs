@@ -85,8 +85,12 @@
             * [9.10. 生成器表达式](#910-生成器表达式)
     * [Python安装和使用](#python安装和使用)
         * [1. 命令行与环境](#1-命令行与环境)
-    * [Python Wiki](#python-wiki)
-        * [WindowsCompilers](#windowscompilers)
+* [Python Wiki](#python-wiki)
+    * [WindowsCompilers](#windowscompilers)
+* [Python HOWTOs](#python-howtos)
+    * [套接字编程指南](#套接字编程指南)
+    * [如何使用urllib包获取互联网资源](#如何使用urllib包获取互联网资源)
+        * [头信息](#头信息)
 * [Python 打包用户指南](#python-打包用户指南)
     * [教程](#教程)
         * [安装包](#安装包)
@@ -4208,6 +4212,67 @@ Visual C++ Build Tools 2015 已经被微软升级为 Build Tools for Visual Stud
 Microsoft Visual C++ 14.0 with Visual Studio 2015 (x86, x64, ARM)  
 *Visual Studio 2015* 包含 *Visual C++ 14.0* 编译器。*Distutils* 将自动检测编译器并使用它。
 
+# Python HOWTOs
+## 套接字编程指南
+**作者：** Gordon McMillan
+
+### 套接字
+我将只讨论关于 INET（比如：IPv4 地址族）的套接字，但是它将覆盖几乎 99% 的套接字使用场景。并且我将仅讨论 STREAM（比如：TCP）类型的套接字 - 除非你真的知道你在做什么（否则这篇 HOWTO 可能并不适合你），使用 STREAM 类型的套接字将会得到比其它类型更好的表现与性能。我将尝试揭开套接字的神秘面纱，也会讲到一些阻塞与非阻塞套接字的使用。但是我将以阻塞套接字为起点开始讨论。只有你了解它是如何工作的以后才能处理非阻塞套接字。
+
+理解这些东西的难点之一在于「套接字」可以表示很多微妙差异的东西，这取决于上下文。所以首先，让我们先分清楚「客户端」套接字和「服务端」套接字之间的不同，客户端套接字表示对话的一端，服务端套接字更像是总机接线员。客户端程序只能（比如：你的浏览器）使用「客户端」套接字；网页服务器则可以使用「服务端」套接字和「客户端」套接字来会话。
+
+#### 历史
+目前为止，在各种形式的 IPC（进程间通信）中，套接字是最流行的。在任何指定的平台上，可能会有其它更快的 IPC 形式，但是就跨平台通信来说，套接字大概是唯一的玩法。
+
+套接字做为 BSD Unix 操作系统的一部分在伯克利诞生，像野火一样在因特网传播。有一个很好的原因 —— 套接字与 INET 的结合使得与世界各地的任意机器间通信变得令人难以置信的简单（至少与其他方案对比来说）。
+
+### 创建套接字
+简略地说，当你点击带你来到这个页面的链接时，你的浏览器就已经做了下面这几件事情:
+
+```python
+# create an INET, STREAMing socket
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# now connect to the web server on port 80 - the normal http port
+s.connect(("www.python.org", 80))
+```
+
+当连接完成，套接字可以用来发送请求来接收页面上显示的文字。同样是这个套接字也会用来读取响应，最后再被销毁。是的，被销毁了。客户端套接字通常用来做一次交换（或者说一小组序列的交换）。
+
+网络服务器发生了什么这个问题就有点复杂了。首页，服务器创建一个「服务端套接字」:
+
+```python
+
+```
+
+## 如何使用urllib包获取互联网资源
+### 头信息
+我们将在这讨论一个具体的HTTP头信息，详细解释如何为你的HTTP请求增加头信息。
+
+一些网站不喜欢被程序浏览，或者给不同的浏览器发送不同的版本。默认情况下urllib以Python-urllib/x.y (x和y分别为Python发行版的主版本号和次版本号，如 Python-urllib/3.6)标识自己，这可能使网站迷惑，或者无法正常工作。一个浏览器标识自己的方式是通过User-Agent(用户代理)头信息。当你创建一个Request对象时，你可以传递一个头信息字典进去。
+
+```python
+from urllib.request import urlopen, Request
+from bs4 import BeautifulSoup
+
+url = 'https://www.whatismybrowser.com/'
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:58.0) \
+Gecko/20100101 Firefox/58.0'
+}
+
+req = Request(url, headers=headers)
+page = urlopen(req).read()
+soup = BeautifulSoup(page, 'lxml')
+myuseragent = soup.find_all('div', class_="user-agent")[0].a.get_text()
+print(myuseragent)
+```
+
+上面代码的执行结果是：  
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:58.0) Gecko/20100101 Firefox/58.0
+
+当Request对象没有传递headers参数时，执行结果是：  
+Python-urllib/3.6
+
 # Python 打包用户指南 
 ## 教程
 ### 安装包
@@ -4539,12 +4604,80 @@ On Windows:
 
 ## 参考指南
 ### pip install
-#### 选项
--U, --upgrade  
-升级所有指定的包到最新的可用版本。依赖的处理依赖于使用的 upgrade-strategy。
+#### 描述
+Install packages from:
 
+* PyPI (and other indexes) using requirement specifiers.
+* VCS project urls.
+* Local project directories.
+* Local or remote source archives.
+
+pip also supports installing from “requirements files”, which provide an easy way to specify a whole environment to be installed.
+
+##### 概述
+Pip 安装有几个阶段：
+
+1. Identify the base requirements. The user supplied arguments are processed here.
+2. 解决依赖。什么将被安装是在这里决定的。
+3. 构建 wheels. All the dependencies that can be are built into wheels.
+4. 安装指定的包 (and uninstall anything being upgraded/replaced).
+
+##### VCS 支持
+pip 支持从 Git, Mercurial, Subversion 和 Bazaar 安装，并使用 URL 前缀：`git+`, `hg+`, `svn+`, 和 `bzr+` 来检测 VCS 的类型。
+
+pip 要求你的路径中存在一个有效的 VCS 命令： `git`, `hg`, `svn`, 或 `bzr`。
+
+VCS 项目可以在 [可编辑模式](https://pip.pypa.io/en/stable/reference/pip_install/#editable-installs) (使用 [--editable](https://pip.pypa.io/en/stable/reference/pip_install/#install-editable) 选项) 下被安装，也可以不使用可编辑模式。
+
+* 对于可编辑模式安装，在虚拟环境下默认的克隆位置是 `<venv path>/src/SomeProject`，而全局安装的默认克隆位置是 `<cwd>/src/SomeProject`。[--src](https://pip.pypa.io/en/stable/reference/pip_install/#install-src) 选项可以被用来修改这个位置。  
+* 对于非可编辑模式安装，项目在本地的一个临时目录中构建，然后被正常地安装。注意如果一个符合要求的包的版本已经被安装了，没有一个 `--upgrade` 标志 VCS 源将不会覆盖它。VCS requirements pin the package version (specified in the `setup.py` file) of the target commit, not necessarily the commit itself.  
+* 当且仅当使用可编辑选项安装完成时，[pip freeze](https://pip.pypa.io/en/stable/reference/pip_freeze/#pip-freeze) 子命令将记录 VCS 要求说明符 (引用一个特定的提交)。
+
+URL 后缀的 “project name” 组件 `egg=<project name>` 被 pip 用于它的依赖逻辑以在 pip 下载及分析元数据前确认项目。对于 `setup.py` 不在项目根目录的项目，“subdirectory” 组件被使用。“subdirectory” 组件的值应该是一个从项目的根目录开始到 `setup.py` 所在位置的一个路径。
+
+所以如果你的仓库布局是：
+
+* pkg_dir/  
+    * setup.py # 包 `pkg` 的 setup.py  
+    * some_module.py  
+* other_dir/  
+    * some_file  
+* some_other_file  
+
+你必须使用 `pip install -e vcs+protocol://repo_url/#egg=pkg&subdirectory=pkg_dir`.
+
+**Git**  
+pip 现在支持通过 `git`, `git+http`, `git+https`, `git+ssh`, `git+git` 和 `git+file` 进行克隆：
+
+下面是支持的形式：
+
+```sh
+[-e] git://git.example.com/MyProject#egg=MyProject  
+[-e] git+http://git.example.com/MyProject#egg=MyProject  
+[-e] git+https://git.example.com/MyProject#egg=MyProject  
+[-e] git+ssh://git.example.com/MyProject#egg=MyProject  
+[-e] git+git://git.example.com/MyProject#egg=MyProject  
+[-e] git+file:///home/user/projects/MyProject#egg=MyProject  
+-e git+git@git.example.com:MyProject#egg=MyProject  
+```
+
+传递一个分支名称，一个提交哈希值，a tag name or a git ref is possible like so:
+
+```sh
+[-e] git://git.example.com/MyProject.git@master#egg=MyProject  
+[-e] git://git.example.com/MyProject.git@da39a3ee5e6b4b0d3255bfef95601890afd80709#egg=MyProject  
+[-e] git://git.example.com/MyProject.git@v1.0#egg=MyProject  
+[-e] git://git.example.com/MyProject.git@refs/pull/123/head#egg=MyProject  
+```
+
+当传递一个提交哈希值时，指定一个完整的哈希值比一个部分的哈希值更好，因为一个完整的哈希值允许 pip 更高效地操作 (例如： 通过创建更少的网络调用)。
+
+#### 选项
 --user  
-Install to the Python user install directory for your platform. Typically ~/.local/, or %APPDATA%Python on Windows. (See the Python documentation for site.USER\_BASE for full details.)
+Install to the Python user install directory for your platform. 通常是 `~/.local/`，或者 Windows 平台的 %APPDATA%\Python 。 (See the Python documentation for site.USER\_BASE for full details.)
+
+-U, --upgrade  
+升级所有指定的包到最新的可用版本。依赖的处理依赖于使用的升级策略。
 
 ### PyMongo
 GitHub：[https://github.com/mongodb/mongo-python-driver](https://github.com/mongodb/mongo-python-driver)  
