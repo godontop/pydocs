@@ -118,6 +118,7 @@
     * [lxml](#lxml)
     * [mitmproxy](#mitmproxy)
     * [MySQL-python](#mysql-python)
+    * [openpyxl](#openpyxl)
     * [pip](#pip)
     * [PyMongo](#pymongo)
     * [PyMySQL](#pymysql)
@@ -135,6 +136,7 @@
     * [Selenium](#selenium)
     * [tesserocr](#tesserocr)
     * [Tornado](#tornado)
+    * [tushare](#tushare)
 * [Python Snippets](#python-snippets)
     * [proxy.py](#proxypy)
 * [Python2](#python2)
@@ -2016,10 +2018,33 @@ socket.**close**(*fd*)
 
 *3.7 新版功能.*
 
+socket.**gethostname()**  
+返回一个包含当前正在执行的Python解释器所在的机器的主机名的字符串。
+
+```python
+>>> import socket
+>>> socket.gethostname()
+'archlinux'
+```
+
 #### 套接字对象
 套接字对象拥有下面的方法。除了 [makefile()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.makefile)，这些方法对应于适用于套接字的 Unix 系统调用。
 
 *在 3.2 版更改:* 增加了对[上下文管理器](https://docs.python.org/zh-cn/3/glossary.html#term-context-manager)协议的支持。退出上下文管理器等同于调用 [close()](https://docs.python.org/zh-cn/3/library/socket.html#socket.close)。
+
+socket.**accept()**  
+接受一个连接。套接字必须绑定到一个地址并监听连接。返回值是一对 `(conn, address)`，其中 *conn* 是一个 *新的* 套接字对象，用于在连接上发送和接收数据，而 *address* 是绑定到连接的另一端的套接字上的地址。
+
+新创建的套接字是 [不可继承的](https://docs.python.org/zh-cn/3/library/os.html#fd-inheritance)。
+
+*在 3.4 版更改:* 套接字现在是不可继承的。
+
+*在 3.5 版更改:* 如果系统调用被中断且信号处理程序没有抛出一个异常，这个方法现在将重试系统调用而不是抛出一个 [InterruptedError](https://docs.python.org/zh-cn/3/library/exceptions.html#InterruptedError) 异常 (基本原理参见 [PEP 475](https://www.python.org/dev/peps/pep-0475)。
+
+socket.**bind**(*address*)  
+将套接字绑定到 *address*。套接字必须还没有被绑定。 (*address* 的格式依赖于地址簇 --- 参见上面。)
+
+Raises an [auditing event](https://docs.python.org/zh-cn/3/library/sys.html#auditing) `socket.bind` with arguments `self, address`.
 
 socket.**close()**  
 Mark the socket closed. The underlying system resource (例如：一个文件描述符) is also closed when all file objects from [makefile()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.makefile) are closed. 一旦发生这种情况，后面所有针对套接字对象的操作都将失败。远端将不会再收到数据 (当队列的数据被清除之后)。
@@ -2057,6 +2082,23 @@ socket.**getblocking()**
 
 *3.7 新版功能.*
 
+socket.**listen**([*backlog*])  
+启用一个服务器来接受连接。如果指定了 *backlog*，它必须至少为 0 (如果它小于 0，则它将被设置为 0)；它指定在系统拒绝新的连接以前将允许未接受的连接的个数。如果没有指定，将选择一个合理的默认值。
+
+*在 3.5 版更改:* *backlog* 参数现在是可选的。
+
+socket.**recv**(*bufsize*[, *flags*])  
+从套接字接收数据。返回值是一个字节对象，代表收到的数据。一次接收的最大数据量由 *bufsize* 指定。可选参数 *flags* 的含义参考 Unix 手册页面 [*recv(2)*](https://manpages.debian.org/recv(2))；它默认为0。
+
+**注解：** 为了最匹配硬件及网络现状，*bufsize* 的值应该是一个相对小的2的幂，例如，4096。
+
+*在 3.5 版更改:* 如果系统调用被中断且信号处理程序没有抛出一个异常，这个方法现在将重试系统调用而不是抛出一个 [InterruptedError](https://docs.python.org/zh-cn/3/library/exceptions.html#InterruptedError) 异常 (原理参见 [PEP 475](https://www.python.org/dev/peps/pep-0475))。
+
+socket.**send**(*bytes*[, *flags*])  
+发送数据到套接字。套接字必须连接到一个远程套接字。可选参数 *flags* 的含义与上面的 [recv()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.recv) 中的含义相同。返回发送的字节数。应用程序负责检查所有数据是否已发送；如果只传输了一些数据，应用程序必须尝试递送剩余的数据。关于这个主题的详细信息，请查阅 [套接字编程指南](https://docs.python.org/zh-cn/3/howto/sockets.html#socket-howto)。
+
+*在 3.5 版更改:* 如果系统调用被中断且信号处理程序没有抛出一个异常，这个方法现在将重试系统调用而不是抛出一个 [InterruptedError](https://docs.python.org/zh-cn/3/library/exceptions.html#InterruptedError) 异常 (原理参见 [PEP 475](https://www.python.org/dev/peps/pep-0475))。
+
 socket.**shutdown**(*how*)  
 Shut down one or both halves of the connection. 如果 *how* 是 SHUT_RD, 则不允许后面的接收。如果 *how* 是 SHUT_WR, 则不允许后面的发送。如果 *how* 是 SHUT_RDWR, 则后面的发送和接收都不被允许。  
 <br>
@@ -2073,6 +2115,22 @@ socket.**type**
 
 socket.**proto**  
 套接字协议。
+
+#### 关于套接字超时的说明
+
+一个套接字对象可以是下面三种模式中的一种：blocking，non-blocking，或者 timeout。默认情况下套接字总是按阻塞模式被创建，但这可以通过调用 [setdefaulttimeout()](https://docs.python.org/zh-cn/3/library/socket.html#socket.setdefaulttimeout) 来改变。
+
+* 在 *阻塞模式* 下，operations block until complete or the system returns an error (例如连接超时)。
+
+* 在 *非阻塞模式* 下，operations fail (with an error that is unfortunately system-dependent) if they cannot be completed immediately: functions from the [select](https://docs.python.org/zh-cn/3/library/select.html#module-select) can be used to know when and whether a socket is available for reading or writing.
+
+* 在 *超时模式* 下， operations fail if they cannot be completed within the timeout specified for the socket (它们抛出一个 [超时](https://docs.python.org/zh-cn/3/library/socket.html#socket.timeout) 异常) or if the system returns an error.
+
+**注解：** 在操作系统级别，sockets in *timeout mode* are internally set in non-blocking mode. Also, the blocking and timeout modes are shared between file descriptors and socket objects that refer to the same network endpoint. This implementation detail can have visible consequences if e.g. you decide to use the [fileno()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.fileno) of a socket.
+
+#### 示例
+
+注意一个服务器必须按顺序执行 [socket()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket)，[bind()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.bind)，[listen()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.listen)，[accept()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.accept) (可能需要重复 [accept()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.accept) 以服务多个客户端)，而一个客户端仅仅只需要按顺序执行 [socket()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket)，[connect()](https://docs.python.org/zh-cn/3/library/socket.html#socket.socket.connect)。 
 
 ## 互联网数据处理
 ### json --- JSON 编码和解码器
@@ -4620,7 +4678,16 @@ MySQLdb is an interface to the popular [MySQL](http://www.mysql.com/) database s
 
 **注意：** 安装 MySQL-python 库以后，导入的模块名是 **MySQLdb**。
 
-### pip
+## openpyxl
+介绍：openpyxl is a Python library to read/write Excel 2010 xlsx/xlsm/xltx/xltm files.  
+
+**安装**  
+
+```sh
+pip install openpyxl
+```
+
+## pip
 ## 安装
 ### 我需要安装pip吗？
 pip is already installed if you are using Python 2 >=2.7.9 or Python 3 >=3.4 downloaded from [python.org](https://www.python.org/) or if you are working in a [Virtual Environment](https://packaging.python.org/tutorials/installing-packages/#creating-and-using-virtual-environments) created by [virtualenv](https://packaging.python.org/key_projects/#virtualenv) or [pyvenv](https://packaging.python.org/key_projects/#venv). Just make sure to [upgrade pip](https://pip.pypa.io/en/latest/installing/#upgrading-pip).
@@ -5399,6 +5466,59 @@ GitHub：[https://github.com/tornadoweb/tornado](https://github.com/tornadoweb/t
 
 ```sh
 $ pip3 install tornado
+```
+
+## tushare
+Tushare官方网站：[https://tushare.pro](https://tushare.pro)  
+Tushare官方文档：[http://tushare.org](http://tushare.org)  
+
+### 安装tushare  
+tushare依赖于lxml、requests
+
+```sh
+$ pip3 install --user lxml requests tushare
+```
+
+### 初始化pro接口
+**导入tushare**
+
+```python
+import tushare as ts
+```
+
+**设置token**
+
+```python
+ts.set_token('your token here')
+```
+
+以上方法只需要在第一次或者token失效后调用，完成调取tushare数据凭证的设置，正常情况下不需要重复设置。也可以忽略此步骤，直接用pro_api('your token')完成初始化
+
+**初始化pro接口**
+
+```python
+pro = ts.pro_api()
+```
+
+如果上一步骤ts.set_token('your token')无效或不想保存token到本地，也可以在初始化接口里直接设置token:
+
+```python
+pro = ts.pro_api('your token')
+```
+
+**常见用法**  
+1.根据股票代码获取单个股票的历史交易数据  
+
+```python
+>>> import tushare as ts
+>>> ts.get_hist_data('600568')
+```
+
+2.设定历史数据的时间
+
+```python
+>>> import tushare as ts
+>>> ts.get_hist_data('600568', start='2019-12-18', end='2020-01-19')
 ```
 
 # Python Snippets
