@@ -116,6 +116,7 @@
             * [安装IPython内核](#安装ipython内核)
                 * [Kernels for Python 2 and 3](#kernels-for-python-2-and-3)
     * [lxml](#lxml)
+    * [matplotlib](#matplotlib)
     * [mitmproxy](#mitmproxy)
     * [MySQL-python](#mysql-python)
     * [openpyxl](#openpyxl)
@@ -4329,8 +4330,37 @@ s.connect(("www.python.org", 80))
 网络服务器发生了什么这个问题就有点复杂了。首页，服务器创建一个「服务端套接字」:
 
 ```python
-
+# create an INET, STREAMing socket
+serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# bind the socket to a public host, and a well-known port
+serversocket.bind((socket.gethostname(), 80))
+# become a server socket
+serversocket.listen(5)
 ```
+
+**注意：**  
+* 低端口号通常被一些「常用的」服务（HTTP, SNMP 等）所保留。如果你想把程序跑起来，最好使用一个高位端口号（通常是4位的数字）。
+
+* 最后，`listen` 方法的参数会告诉套接字库，我们希望在队列中累积多达 5 个（通常的最大值）连接请求后再拒绝外部连接。 如果所有其他代码都准确无误，这个队列长度应该是足够的。
+
+现在我们已经有一个「服务端」套接字，监听了 80 端口，我们可以进入网络服务器的主循环了:
+
+```python
+while True:
+    # accept connections from outside
+    (clientsocket, address) = serversocket.accept()
+    # now do something with the clientsocket
+    # in this case, we'll pretend this is a threaded server
+    ct = client_thread(clientsocket)
+    ct.run()
+```
+
+事际上，通常有 3 种方法可以让这个循环工作起来 - 调度一个线程来处理 `clientsocket`，创建一个新的进程处理 `clientsocket`，或者把这个应用改成使用非阻塞套接字，亦或是使用 `select` 库来实现 "server" 套接字与任意活动 `clientsocket`s 之间的多路复用。稍后会详细介绍。现在最重要的是理解：这就是一个 "服务端"" 套接字做的 *所有* 事情。它并没有发送任何数据。也没有接收任何数据。它只创建 "客户端" 套接字。每个 `clientsocket` 都是为了响应某些*其它*"客户端"套接字 `connect()` 到我们绑定的主机和端口。一旦完成创建 `clientsocket`，我们就会返回并监听更多的连接请求。这两个"客户端"可以随意通信 - 它们使用了一些动态分配的端口，会话结束时端口会被回收。
+
+### 使用一个套接字
+当 `recv` 方法返回 0 字节时，就表示另一端已经关闭（或者它所在的进程关闭）了连接。你再也不能从这个连接上获取到任何数据了。你可以成功的发送数据；我将在后面讨论这一点。
+
+像 HTTP 这样的协议只使用一个套接字进行一次传输。客户端发送一个请求，然后读取响应。就这么简单。套接字会被销毁。 这意味着客户端可以通过接收 0 字节来检测到响应的结束。
 
 ## 如何使用urllib包获取互联网资源
 ### 头信息
@@ -4596,6 +4626,24 @@ GitHub：[https://github.com/lxml/lxml](https://github.com/lxml/lxml)
 ```sh
 $ pip3 install lxml
 ```
+
+## matplotlib
+### 安装matplotlib
+pip install matplotlib
+
+### 用法
+简单的折线图  
+
+```python
+>>> import matplotlib.pyplot as plt
+>>> x_data = ['2011', '2012', '2013', '2014', '2015']
+>>> y_data = [1, 4, 9, 16, 25]
+>>> plt.plot(x_data, y_data)
+>>> plt.show()
+>>>
+```
+
+![简单的折线图](./img/simple_matplotlib_1.png)  
 
 ### mitmproxy
 GitHub：[https://github.com/mitmproxy/mitmproxy](https://github.com/mitmproxy/mitmproxy)  
