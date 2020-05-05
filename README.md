@@ -4628,6 +4628,8 @@ $ pip3 install lxml
 ```
 
 ## matplotlib
+PyPI链接：[https://pypi.org/project/matplotlib/](#https://pypi.org/project/matplotlib/)  
+
 ### 安装matplotlib
 pip install matplotlib
 
@@ -4636,9 +4638,12 @@ pip install matplotlib
 
 ```python
 >>> import matplotlib.pyplot as plt
->>> x_data = ['2011', '2012', '2013', '2014', '2015']
->>> y_data = [1, 4, 9, 16, 25]
+>>> x_data = ['01', '02', '03', '04', '05']
+>>> y_data = [1.1, 1.5, 1.7, 2.0, 2.5]
 >>> plt.plot(x_data, y_data)
+>>> plt.xlabel('month')  # 设置x轴的标签
+>>> plt.ylabel('ratio')  # 设置y轴的标签
+>>> plt.title('600031')  # 设置绘图的标题
 >>> plt.show()
 >>>
 ```
