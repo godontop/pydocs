@@ -4650,6 +4650,48 @@ pip install matplotlib
 
 ![简单的折线图](./img/simple_matplotlib_1.png)  
 
+### matplotlib.pyplot.plot
+Plot y versus x as lines and/or markers.
+
+Call signatures:  
+plot([x], y, [fmt], \*, data=None, \*\*kwargs)  
+
+可选参数 *fmt* 是一种用于定义基本格式如颜色，标记及线条样式的简单方式。
+
+#### 格式化字符串
+格式字符串由颜色，标记及线条的一部分组成：
+
+`fmt = '[marker][line][color]'`
+
+**标记**  
+
+字符 |描述
+-----|----
+'.'  |点标记
+'o'  |圆标记
+
+**线条风格**  
+
+字符 |描述
+-----|-----
+'-'  |实线风格
+'--' |虚线风格
+
+**颜色**  
+
+支持的颜色缩写是单个字母代码
+
+字符 |颜色
+-----|-----
+'b'  |blue
+'g'  |green
+'r'  |red
+'c'  |cyan
+'m'  |magenta
+'y'  |yellow
+'k'  |black
+'w'  |white
+
 ### mitmproxy
 GitHub：[https://github.com/mitmproxy/mitmproxy](https://github.com/mitmproxy/mitmproxy)  
 官方网站：[https://mitmproxy.org](https://mitmproxy.org)  
