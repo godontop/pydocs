@@ -123,6 +123,7 @@
     * [mitmproxy](#mitmproxy)
     * [MySQL-python](#mysql-python)
     * [openpyxl](#openpyxl)
+    * [pandas](#pandas)
     * [pip](#pip)
     * [PyMongo](#pymongo)
     * [PyMySQL](#pymysql)
@@ -4560,7 +4561,7 @@ print(chardet.detect(page.read()))
 {'encoding': 'ISO-8859-1', 'confidence': 0.73, 'language': ''}
 ```
 
-### Django
+## Django
 Django官网  
 [https://www.djangoproject.com](https://www.djangoproject.com)
 
@@ -4586,6 +4587,9 @@ pip3 install Django
 **注解**
 
 自从 Django 第一版发布将 **TIME_ZONE** 设置为 **'America/Chicago'** 以来，全局设置 (如果你的项目的 **settings.py** 中什么都没定义则使用) 保持 **'America/Chicago'** 是为了向后兼容。新项目模板默认为 **'UTC'**。
+
+### django.contrib.auth
+django.contrib.auth 是 Django 开发的认证框架，它提供 “组和用户” 相关功能。  
 
 ### Flask
 GitHub：[https://github.com/pallets/flask](https://github.com/pallets/flask)  
@@ -4816,6 +4820,120 @@ MySQLdb is an interface to the popular [MySQL](http://www.mysql.com/) database s
 
 ```sh
 pip install openpyxl
+```
+
+## pandas
+官方网站：[https://pandas.pydata.org](https://pandas.pydata.org)  
+PyPi主页：[https://pypi.org/project/pandas/](https://pypi.org/project/pandas/)  
+pandas 参考手册：[https://pandas.pydata.org/pandas-docs/stable/reference/index.html](https://pandas.pydata.org/pandas-docs/stable/reference/index.html)  
+
+### 安装pandas
+$ pip install pandas  
+
+### pandas.Series.isin
+Series.**isin**(*self, values*)  
+Check whether *values* are contained in Series.
+
+Return a boolean Series showing whether each element in the Series matches an element in the passed sequence of *values* exactly.
+
+**参数：**  
+**values：** *必须是集合或类列表*    
+The sequence of values to test. 传递一个单字符串将抛出一个 TypeError. 将一个单字符串变成一个单元素的列表代替。
+
+**返回值：** **Series**  
+Series of booleans indicating if each element is in values.
+
+```python
+>>> df
+  trade_date   ggt_ss   ggt_sz      hgt      sgt  north_money  south_money
+0   20200515   871.53  1206.17  -111.53  1305.91      1194.38      2077.70
+1   20200514  2471.56  1604.79 -1650.19   325.38     -1324.81      4076.35
+2   20200513  1478.46  1915.81    26.09  -230.73      -204.64      3394.27
+3   20200512   752.76  1075.14   561.87  1188.07      1749.94      1827.90
+4   20200511 -2296.58   659.60  1071.89  1575.67      2647.56     -1636.98
+>>> s = df['north_money']
+>>> type(s)
+<class 'pandas.core.series.Series'>
+>>> s
+0    1194.38
+1   -1324.81
+2    -204.64
+3    1749.94
+4    2647.56
+Name: north_money, dtype: float64
+>>> a = s.isin(['2647.56'])
+>>> type(a)
+<class 'pandas.core.series.Series'>
+>>> a
+0    False
+1    False
+2    False
+3    False
+4     True
+Name: north_money, dtype: bool
+>>> df[a]
+  trade_date   ggt_ss  ggt_sz      hgt      sgt  north_money  south_money
+4   20200511 -2296.58   659.6  1071.89  1575.67      2647.56     -1636.98
+>>>
+```
+
+### pandas例子
+pandas 示例 1  
+选择DateFrame中的特定行及列  
+
+```python
+>>> import tushare as ts
+>>> pro = ts.pro_api()
+>>> df = pro.moneyflow_hsgt(start_date='20200511', end_date='20205015')
+>>> df
+  trade_date   ggt_ss   ggt_sz      hgt      sgt  north_money  south_money
+0   20200515   871.53  1206.17  -111.53  1305.91      1194.38      2077.70
+1   20200514  2471.56  1604.79 -1650.19   325.38     -1324.81      4076.35
+2   20200513  1478.46  1915.81    26.09  -230.73      -204.64      3394.27
+3   20200512   752.76  1075.14   561.87  1188.07      1749.94      1827.90
+4   20200511 -2296.58   659.60  1071.89  1575.67      2647.56     -1636.98
+>>> df['hgt']    # 选择'hgt'列，使用类字典属性，返回的是Series类型
+0    -111.53
+1   -1650.19
+2      26.09
+3     561.87
+4    1071.89
+Name: hgt, dtype: float64
+>>> type(df['hgt'])
+<class 'pandas.core.series.Series'>
+>>> df.hgt       # 选择'hgt'列，使用点属性，返回的是Series类型
+0    -111.53
+1   -1650.19
+2      26.09
+3     561.87
+4    1071.89
+Name: hgt, dtype: float64
+>>> type(df.hgt)
+<class 'pandas.core.series.Series'>
+>>> df[['hgt']]  # 选择'hgt'列，返回的是DataFrame类型
+       hgt
+0  -111.53
+1 -1650.19
+2    26.09
+3   561.87
+4  1071.89
+>>> type(df[['hgt']])
+<class 'pandas.core.frame.DataFrame'>
+>>> df[['hgt', 'sgt']]  # 选择'hgt'和'sgt'列
+       hgt      sgt
+0  -111.53  1305.91
+1 -1650.19   325.38
+2    26.09  -230.73
+3   561.87  1188.07
+4  1071.89  1575.67
+>>> df[0:2]             # 返回前两行
+  trade_date   ggt_ss   ggt_sz      hgt      sgt  north_money  south_money
+0   20200515   871.53  1206.17  -111.53  1305.91      1194.38      2077.70
+1   20200514  2471.56  1604.79 -1650.19   325.38     -1324.81      4076.35
+>>> df[1:2]             # 返回第2行，返回的是单行，如果使用 df[1] 则报错
+  trade_date   ggt_ss   ggt_sz      hgt     sgt  north_money  south_money
+1   20200514  2471.56  1604.79 -1650.19  325.38     -1324.81      4076.35
+>>> 
 ```
 
 ## pip
