@@ -122,6 +122,7 @@
     * [matplotlib](#matplotlib)
     * [mitmproxy](#mitmproxy)
     * [MySQL-python](#mysql-python)
+    * [numpy](#numpy)
     * [openpyxl](#openpyxl)
     * [pandas](#pandas)
     * [pip](#pip)
@@ -376,14 +377,15 @@ Python 标准库包含提供访问系统功能如文件 I/O 的内置模块（C 
 ### 内置函数
 Python解释器内置了许多总是可用的函数和类型。在这里以字母顺序列出它们。
 
-|          |          |Built-in Functions|          |          |
-|----------|----------|------------------|----------|----------|
-|          |          |                  |object()  |          |
-|          |          |issubclass()      |pow()     |super()   |
-|          |          |                  |print()   |          |
-|          |          |                  |range()   |          |
-|          |getattr() |                  |          |          |
-|complex() |          |                  |          |          |
+|          |            |Built-in Functions|          |          |
+|----------|------------|------------------|----------|----------|
+|          |            |                  |object()  |          |
+|          |enumerate() |                  |          |          |
+|          |            |issubclass()      |pow()     |super()   |
+|          |            |                  |print()   |          |
+|          |            |                  |range()   |          |
+|          |getattr()   |                  |          |          |
+|complex() |            |                  |          |          |
 
 *class* **complex([**_real_**[**, _imag_**]])**  
 返回值为 *real* + _imag_\*1j 的复数，或将字符串或数字转换为复数。如果第一个形参是字符串，则它被解释为一个复数，并且函数调用时必须没有第二个形参。第二个形参不能是字符串。每个实参都可以是任意的数值类型（包括复数）。如果省略了 *imag*，则默认值为零，构造函数会像 [int](https://docs.python.org/zh-cn/3/library/functions.html#int) 和 [float](https://docs.python.org/zh-cn/3/library/functions.html#float) 一样进行数值转换。如果两个实参都省略，则返回 `0j`。
@@ -397,6 +399,28 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 *在 3.6 版更改:* 您可以使用下划线将代码文字中的数字进行分组。
 
 *在 3.8 版更改:* 如果 [\_\_complex\_\_()](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__complex__) 和 [\_\_float\_\_()](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__float__) 未定义则回退至 [\_\_index\_\_()](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__index__)。
+
+**enumerate**(*iterable, start=0*)  
+返回一个枚举对象。*iterable* 必须是一个序列，或 [迭代器](https://docs.python.org/zh-cn/3/glossary.html#term-iterator)，或其他支持迭代的对象。 [enumerate()](https://docs.python.org/zh-cn/3/library/functions.html?highlight=enumerate#enumerate) 返回的迭代器的 [\_\_next\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__next__) 方法返回一个元组，里面包含一个计数值（从 *start* 开始，默认为 0）和通过迭代 *iterable* 获得的值。
+
+```python
+>>> seasons = ['Spring', 'Summer', 'Fall', 'Winter']
+>>> list(enumerate(seasons))
+[(0, 'Spring'), (1, 'Summer'), (2, 'Fall'), (3, 'Winter')]
+>>> list(enumerate(seasons, start=1))
+[(1, 'Spring'), (2, 'Summer'), (3, 'Fall'), (4, 'Winter')]
+>>>
+```
+
+等价于：
+
+```python
+def enumerate(sequence, start=0):
+    n = start
+    for elem in sequence:
+        yield n, elem
+        n += 1
+```
 
 **getattr**(*object, name*__[__*, default*__]__)  
 返回 *object* 的 *name* 属性的值。*name* 必须是一个字符串。如果这个字符串是这个对象的一个属性的名称，则结果为那个属性的值。例如，`getattr(x, 'foobar')` 等同于 `x.foobar`。如果名称属性不存在，则返回 *default* 如果有提供的话，否则抛出 [AttributeError](https://docs.python.org/3/library/exceptions.html#AttributeError)。
@@ -2964,6 +2988,15 @@ def Bar():
 
 不是包的模块不应该具有 `__path__` 属性。
 
+查询Django包的安装路径
+
+```python
+>>> import django
+>>> django.__path__
+['/usr/local/lib/python3.6/dist-packages/django']
+>>> 
+```
+
 **\_\_file\_\_**  
 **\_\_cached\_\_**  
 `__file__` 是可选项。 如果设置，此属性的值必须为字符串。 导入系统可以选择在其没有语法意义时不设置 `__file__` (例如从数据库加载的模块)。
@@ -4565,7 +4598,7 @@ print(chardet.detect(page.read()))
 Django官网  
 [https://www.djangoproject.com](https://www.djangoproject.com)
 
-安装Django  
+### 安装Django  
 pip3 install Django
 
 #### settings.py
@@ -4590,6 +4623,18 @@ pip3 install Django
 
 ### django.contrib.auth
 django.contrib.auth 是 Django 开发的认证框架，它提供 “组和用户” 相关功能。  
+
+### 创建项目
+创建一个名为mysite的项目  
+$ django-admin startproject mysite  
+
+#### 创建一个应用
+创建一个名为web的应用  
+$ python3 manage.py startapp web  
+
+创建应用后需要修改项目的urls.py文件，将新应用添加到urlpatterns中。  
+
+{% 和 {{ 标签是 Django 模板语言的一部分。
 
 ### Flask
 GitHub：[https://github.com/pallets/flask](https://github.com/pallets/flask)  
@@ -4672,6 +4717,12 @@ PyPI链接：[https://pypi.org/project/matplotlib/](#https://pypi.org/project/ma
 
 ### 安装matplotlib
 pip install matplotlib
+
+引用 matplotlib API 通常使用标准约定：  
+
+```python
+import matplotlib.pyplot as plt
+```
 
 ### 用法
 简单的折线图  
@@ -4813,6 +4864,13 @@ MySQLdb is an interface to the popular [MySQL](http://www.mysql.com/) database s
 
 **注意：** 安装 MySQL-python 库以后，导入的模块名是 **MySQLdb**。
 
+## numpy
+习惯上，我们按以下方式导入numpy：
+
+```python
+import numpy as np
+```
+
 ## openpyxl
 介绍：openpyxl is a Python library to read/write Excel 2010 xlsx/xlsm/xltx/xltm files.  
 
@@ -4822,6 +4880,8 @@ MySQLdb is an interface to the popular [MySQL](http://www.mysql.com/) database s
 pip install openpyxl
 ```
 
+如果需要将 pandas DataFrame 数据导出为 Excle 文件，则必须安装 openpyxl。  
+
 ## pandas
 官方网站：[https://pandas.pydata.org](https://pandas.pydata.org)  
 PyPi主页：[https://pypi.org/project/pandas/](https://pypi.org/project/pandas/)  
@@ -4829,6 +4889,12 @@ pandas 参考手册：[https://pandas.pydata.org/pandas-docs/stable/reference/in
 
 ### 安装pandas
 $ pip install pandas  
+
+习惯上，我们按以下方式导入：  
+
+```python
+import pandas as pd
+```
 
 ### pandas.Series.isin
 Series.**isin**(*self, values*)  
@@ -4878,8 +4944,8 @@ Name: north_money, dtype: bool
 ```
 
 ### pandas例子
-pandas 示例 1  
-选择DateFrame中的特定行及列  
+pandas 示例   
+1.选择DateFrame中的特定行及列  
 
 ```python
 >>> import tushare as ts
@@ -4935,6 +5001,48 @@ Name: hgt, dtype: float64
 1   20200514  2471.56  1604.79 -1650.19  325.38     -1324.81      4076.35
 >>> 
 ```
+
+2.查询DataFrame的总行数  
+
+```python
+>>> df = pro.income(ts_code='600031.SH', period='20191231', fields='ts_code, end_date, n_income_attr_p, update_flag')
+>>> df
+     ts_code  end_date  n_income_attr_p update_flag
+0  600031.SH  20191231     1.120666e+10           0
+1  600031.SH  20191231     1.120666e+10           1
+>>> len(df)
+2
+>>> len(df.index)
+2
+>>>
+```
+
+```python
+In [125]: df = pro.income(ts_code='600031.SH', start_date='20160101', end_date='20200531', 
+     ...:                fields='ts_code, ann_date, end_date, n_income_attr_p, update_flag')                   
+
+In [126]: df1 = df[df['end_date'].isin(['20161231', '20171231', '20181231', '20191231'])]                      
+
+In [127]: df1              
+Out[127]: 
+      ts_code  ann_date  end_date  n_income_attr_p update_flag
+1   600031.SH  20200424  20191231     1.120666e+10           1
+2   600031.SH  20200424  20191231     1.120666e+10           0
+9   600031.SH  20190401  20181231     6.116288e+09           1
+13  600031.SH  20180417  20171231     2.092253e+09           1
+17  600031.SH  20170428  20161231     2.034570e+08           0
+
+In [128]: timeit df1.shape 
+1.49 µs ± 483 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+
+In [129]: timeit len(df1)  
+738 ns ± 91.8 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+
+In [130]: timeit len(df1.index)                        
+548 ns ± 91.3 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+```
+
+可以看到，在效率上 len(df1.index) > len(df1) > df1.shape ，如果要计算DataFrame的总行数，df.index 是更好的选择。  
 
 ## pip
 ## 安装
@@ -5754,6 +5862,79 @@ pro = ts.pro_api()
 ```python
 pro = ts.pro_api('your token')
 ```
+
+### 利润表
+接口：income  
+权限：用户需要至少800积分才可以调取  
+
+income 接口可以查询股票的净利润
+
+**输入参数**  
+
+名称         |类型  |必选  |描述
+------------|------|------|-----
+ts_code     |str   |Y     |TS股票代码  
+start_date  |str   |N     |公告开始日期  
+end_date    |str   |N     |公告结束日期  
+period      |str   |N     |报告期(每个季度最后一天的日期，比如20171231表示年报)  
+
+**输出参数**  
+
+名称             |类型    |默认显示  |描述
+-----------------|-------|---------|-----
+ts_code          |str    |Y        |TS代码  
+ann_date         |str    |Y        |公告日期  
+end_date         |str    |Y        |报告期  
+n_income_attr_p  |float  |Y        |净利润(不含少数股东损益)  
+update_flag      |str    |N        |更新标识，0未修改1更正过  
+
+n_income_attr_p 对应的就是同花顺财务报表中的净利润  
+
+获取三一重工2016 ~ 2019年度的年报中的净利润数据  
+
+```python
+>>> df = pro.income(ts_code='600031.SH', start_date='20160101', end_date='20200531', fields='ts_code, ann_date, end_date, n_income_attr_p, update_flag')
+>>> df_year = df[df['end_date'].isin(['20161231', '20171231', '20181231', '20191231'])]
+>>> df_year_dup = df_year.drop_duplicates(subset=['end_date'])  # subset 参数表示仅考虑 end_date 列
+>>> df_year_dup
+      ts_code  ann_date  end_date  n_income_attr_p update_flag
+1   600031.SH  20200424  20191231     1.120666e+10           1
+9   600031.SH  20190401  20181231     6.116288e+09           1
+13  600031.SH  20180417  20171231     2.092253e+09           1
+17  600031.SH  20170428  20161231     2.034570e+08           0
+>>>
+```
+
+### 财务指标数据
+接口： fina_indicator  
+权限： 用户需要至少800积分才可以调取，每分钟最多可访问该接口200次  
+
+fina_indicator 接口可以查询股票的ROE  
+fina_indicator 不包括“业绩预告”  
+
+**输入参数**  
+
+名称         |类型  |必选  |描述
+------------|------|------|-----
+ts_code     |str   |Y     |TS股票代码,e.g. 600001.SH/000001.SZ  
+start_date  |str   |N     |报告期开始日期  
+end_date    |str   |N     |报告期结束日期  
+
+**输出参数**
+
+名称          |类型  |默认显示  |描述
+--------------|------|---------|-------
+ts_code       |str   |Y        |TS代码  
+ann_date      |str   |Y        |公告日期  
+end_date      |str   |Y        |报告期  
+extra_item    |float |Y        |非经常性损益  
+profit_dedt   |float |Y        |扣除非经常性损益后的净利润  
+roe           |float |Y        |净资产收益率  
+netprofit_yoy |float |Y        |归属母公司股东的净利润同比增长率(%)  
+update_flag   |str   |N        |更新标识  
+
+净利润（同花顺中的净利润） = 非经常性损益（extra_item） + 扣除非经常性损益后的净利润（profit_dedt）  
+netprofit_yoy 对应的是同花顺财务板块中的净利润同比增幅；  
 
 **常见用法**  
 1.根据股票代码获取单个股票的历史交易数据  
