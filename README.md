@@ -21,8 +21,10 @@
     * [数据类型](#数据类型)
         * [collections --- 容器数据类型](#collections-----容器数据类型)
         * [collections.abc --- 容器的抽象基类](#collectionsabc-----容器的抽象基类)
-        * [文件和目录访问](#文件和目录访问)
-            * [os.path — 通用路径名操作](#ospath--通用路径名操作)
+    * [函数式编程模块](#函数式编程模块)
+        * [itertools -- 为高效循环创建迭代器的函数](#itertools----为高效循环创建迭代器的函数)
+    * [文件和目录访问](#文件和目录访问)
+        * [os.path — 通用路径名操作](#ospath--通用路径名操作)
     * [通用操作系统服务](#通用操作系统服务)
         * [os --- 各种各样的操作系统接口](#os-----各种各样的操作系统接口)
             * [进程参数](#进程参数)
@@ -1233,7 +1235,63 @@ hex_codec  |hex     |将操作数转换为十六进制表示，每个字节有�
 </br>
 
 *class* collections.abc.**Iterator**  
-提供了 [\_\_iter\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__iter__) 和 [\_\_next\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__next__) 方法的抽象基类。参见 [iterator](https://docs.python.org/zh-cn/3/glossary.html#term-iterator) 的定义。
+提供了 [\_\_iter\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__iter__) 和 [\_\_next\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__next__) 方法的抽象基类。参见 [iterator](https://docs.python.org/zh-cn/3/glossary.html#term-iterator) 的定义。  
+</br>
+
+## 函数式编程模块
+### itertools -- 为高效循环创建迭代器的函数
+
+本模块实现一系列 [迭代器](https://docs.python.org/zh-cn/3/glossary.html#term-iterator) ，这些迭代器受到APL，Haskell和SML的启发。为了适用于Python，它们都被重写过。
+
+#### Itertool函数
+下列模块函数均创建并返回迭代器。有些迭代器不限制输出流长度，所以它们只应在能截断输出流的函数或循环中使用。
+
+itertools.**groupby**(*iterable, key=None*)  
+创建一个迭代器，返回 *iterable* 中连续的键和组。*key* 是一个为每个元素计算键值的函数。如果未指定或为 `None`，*key* 缺省为恒等函数（identity function），返回元素不变。一般来说，the iterable needs to already be sorted on the same key function.
+
+groupby() 操作类似于Unix中的 `uniq`。每当 key 函数产生的键值改变时，迭代器会分组或生成一个新组（这就是为什么通常需要使用同一个键值函数先对数据进行排序）。That behavior differs from SQL’s GROUP BY which aggregates common elements regardless of their input order.
+
+返回的组本身也是一个迭代器，它与 [groupby()](https://docs.python.org/3/library/itertools.html#itertools.groupby) 共享底层的可迭代对象。因为源是共享的，when the [groupby()](https://docs.python.org/3/library/itertools.html#itertools.groupby) object is advanced, the previous group is no longer visible. 因此，如果稍后还需要返回结果，可保存为列表：
+
+```python
+groups = []
+uniquekeys = []
+data = sorted(data, key=keyfunc)
+for k, g in groupby(data, keyfunc):
+    groups.append(list(g))      # Store group iterator as a list
+    uniquekeys.append(k)
+```
+
+[groupby()](https://docs.python.org/3/library/itertools.html#itertools.groupby) 大致等同于：
+
+```python
+class groupby:
+    # [k for k, g in groupby('AAAABBBCCDAABBB')] --> A B C D A B
+    # [list(g) for k, g in groupby('AAAABBBCCD')] --> AAAA BBB CC D
+    def __init__(self, iterable, key=None):
+        if key is None:
+            key = lambda x: x
+        self.keyfunc = key
+        self.it = iter(iterable)
+        self.tgtkey = self.currkey = self.currvalue = object()
+    def __iter__(self):
+        return self
+    def __next__(self):
+        self.id = object()
+        while self.currkey == self.tgtkey:
+            self.currvalue = next(self.it)    # Exit on StopIteration
+            self.currkey = self.keyfunc(self.currvalue)
+        self.tgtkey = self.currkey
+        return (self.currkey, self._grouper(self.tgtkey, self.id))
+    def _grouper(self, tgtkey, id):
+        while self.id is id and self.currkey == tgtkey:
+            yield self.currvalue
+            try:
+                self.currvalue = next(self.it)
+            except StopIteration:
+                return
+            self.currkey = self.keyfunc(self.currvalue)
+```
 
 ## 文件和目录访问
 这章描述的模块处理磁盘文件和目录。例如，有读取文件内容的模块，有以便携的方式操作路径的模块，和创建临时文件的模块。这章中完整的模块列表是：
