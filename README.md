@@ -1311,6 +1311,17 @@ class groupby:
             self.currkey = self.keyfunc(self.currvalue)
 ```
 
+```python
+>>> from itertools import groupby
+>>> [k for k, g in groupby('AAAABBBCCDAABBB')]
+['A', 'B', 'C', 'D', 'A', 'B']
+>>> [list(g) for k, g in groupby('AAAABBBCCD')]
+[['A', 'A', 'A', 'A'], ['B', 'B', 'B'], ['C', 'C'], ['D']]
+>>> [len(list(g)) for k, g in groupby('AAAABBBCCD')]
+[4, 3, 2, 1]
+>>>
+```
+
 ## 文件和目录访问
 这章描述的模块处理磁盘文件和目录。例如，有读取文件内容的模块，有以便携的方式操作路径的模块，和创建临时文件的模块。这章中完整的模块列表是：
 
@@ -4971,6 +4982,102 @@ $ pip install pandas
 ```python
 import pandas as pd
 ```
+
+### pandas.DataFrame.sort_values
+DataFrame.**sort_values**(*by, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last', ignore_index=False, key=None*)  
+沿任一轴按值排序。
+
+**参数：**  
+**by：** *__字符串或字符串列表__*
+
+**axis：** *__{0 or ‘index’, 1 or ‘columns’}, default 0__*  
+按指定轴排序。
+
+**ascending：** *__布尔值或布尔值列表，默认为真__*  
+按升序或降序排序。多重排序请使用列表。如果这是一个布尔值列表，则它必须匹配 *by* 参数的长度。
+
+**inplace：** *__布尔值，默认为假__*  
+如果为真，则就地执行。
+
+**na_position：** *__{‘first’, ‘last’}, default ‘last’__*  
+如果为 *first* 则将 NaNs 放在开头；如果为 *last* 则将 NaNs 放在末尾。
+
+**例子**
+
+```python
+>>> df = pd.DataFrame({
+...     'col1': ['A', 'A', 'B', np.nan, 'D', 'C'],
+...     'col2': [2, 1, 9, 8, 7, 4],
+...     'col3': [0, 1, 9, 4, 2, 3],
+...     'col4': ['a', 'B', 'c', 'D', 'e', 'F']
+... })
+>>> df
+  col1  col2  col3 col4
+0    A     2     0    a
+1    A     1     1    B
+2    B     9     9    c
+3  NaN     8     4    D
+4    D     7     2    e
+5    C     4     3    F
+>>>
+```
+
+按 col1 列排序
+
+```python
+>>> df.sort_values(by=['col1'])
+  col1  col2  col3 col4
+0    A     2     0    a
+1    A     1     1    B
+2    B     9     9    c
+5    C     4     3    F
+4    D     7     2    e
+3  NaN     8     4    D
+>>>
+```
+
+按多列排序
+
+```python
+>>> df.sort_values(by=['col1', 'col2'])
+  col1  col2  col3 col4
+1    A     1     1    B
+0    A     2     0    a
+2    B     9     9    c
+5    C     4     3    F
+4    D     7     2    e
+3  NaN     8     4    D
+>>>
+```
+
+降序排列
+
+```python
+>>> df.sort_values(by='col1', ascending=False)
+  col1  col2  col3 col4
+4    D     7     2    e
+5    C     4     3    F
+2    B     9     9    c
+0    A     2     0    a
+1    A     1     1    B
+3  NaN     8     4    D
+>>>
+```
+
+将 NAs 放在最前面
+
+```python
+>>> df.sort_values(by='col1', ascending=False, na_position='first')
+  col1  col2  col3 col4
+3  NaN     8     4    D
+4    D     7     2    e
+5    C     4     3    F
+2    B     9     9    c
+0    A     2     0    a
+1    A     1     1    B
+>>>
+```  
+<br/>
 
 ### pandas.Series.isin
 Series.**isin**(*self, values*)  
