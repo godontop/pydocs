@@ -127,6 +127,7 @@
     * [numpy](#numpy)
     * [openpyxl](#openpyxl)
     * [pandas](#pandas)
+        * [索引与选择数据](#索引与选择数据)
     * [pip](#pip)
     * [PyMongo](#pymongo)
     * [PyMySQL](#pymysql)
@@ -446,6 +447,15 @@ True
 返回 *x* 的 *y* 次方；如果 *z* 出现，则返回 *x* 的 *y* 次方再以 *z* 取模(比`pow(x, y) % z`的计算效率更高).两个参数的形式 `pow(x, y)` 等同于使用幂运算: `x**y`。
 
 The arguments must have numeric types. With mixed operand types, the coercion rules for binary arithmetic operators apply. 对于 [整型数](https://docs.python.org/3.6/library/functions.html#int) 操作数，结果与操作数的类型相同 (强制之后) 除非第二个参数是负的；在那种情况下，所有参数被转换成浮点数并返回一个浮点数结果。例如，`10**2` 返回 `100`，但 `10**-2` 返回 `0.01`。如果第二个参数是负的，第三个参数必须被省略。如果 *z* 出现，*x* 和 *y* 必须是整数类型，且 *y* 必须是非负的。
+
+**根据一段时间的收益，计算复合年化收益**  
+计算8年翻5倍的复合年化收益，即5开8次方根，亦即5的1/8次幂
+
+```python
+>>> pow(5, 1/8) - 1
+0.22284454499385187
+>>>
+```
 
 **print**(_*objects, sep=' ', end='\n', file=sys.stdout, flush=False_)  
 打印 *objects* 到文本流 *file*, separated by *sep* and followed by *end*. 如果出现*sep*, *end*, *file* 和 *flush*, 则必须被作为关键字参数给出。  
@@ -4982,6 +4992,40 @@ $ pip install pandas
 ```python
 import pandas as pd
 ```
+
+### 索引与选择数据
+#### 索引的不同选择
+为了支持更明确的位置，对象选择已经添加了一些用户要求的基本索引。Pandas 现在支持三种类型的多轴索引。
+
+* .loc 主要是基于标签，但是也可以和一个布尔数组一起使用。当元素没有找到时 .loc 将抛出 KeyError 。允许的输入是： 
+
+    * 一个单一的标签，例如 5 或者 'a' (注意 5 被解释为一个索引标签。这种用法 **不是** 沿着索引位置的一个整型数。)。
+
+    * 一个列表或标签数组 ['a', 'b', 'c']。
+
+    * 一个标签分片对象 `'a':'f'` (注意与通常的 python 分片相反，当起点（'a'）和终点（'f'）都在索引中出现时，它们将都被包含！参加 [标签分片](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-slicing-with-labels) 及 [端点被包含](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html#advanced-endpoints-are-inclusive)。)
+
+    * 一个布尔数组 (所有 NA 值都将被当作 False)。
+
+    * A callable function with one argument (the calling Series or DataFrame) and that returns valid output for indexing (one of the above).
+
+  更多信息参见 [通过标签选择](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-label)。
+
+* .iloc 主要是基于位置的整型数 (从 0 到 轴的长度减1)，但也可以和一个布尔数组一起使用。如果请求的索引在界外，则 .iloc 将抛出 IndexError，除了分片索引，因为分片索引允许界外索引。 (这与 Python/NumPy 的 *分片* 语义一致)。允许的输入是：
+
+    * 一个整型数，例如 5。
+
+    * 一个整型数列表或数组 [4, 3, 0]。
+
+    * 一个整型数分片对象 1:7。
+
+    * 一个布尔数组 (所有 NA 值都将被作为 False)。
+
+    * A callable function with one argument (the calling Series or DataFrame) and that returns valid output for indexing (one of the above).
+
+  更多信息请参考 [根据位置选择](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-integer)，[高级索引](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html#advanced) 和 [高级层次结构](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html#advanced-advanced-hierarchical)。
+
+* .loc，.iloc，以及 [] 索引可以接受一个可调用对象作为索引。更多信息参见 [通过可调用对象选择](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-callable)。
 
 ### pandas.DataFrame.sort_values
 DataFrame.**sort_values**(*by, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last', ignore_index=False, key=None*)  
