@@ -4968,6 +4968,37 @@ MySQLdb is an interface to the popular [MySQL](http://www.mysql.com/) database s
 import numpy as np
 ```
 
+### numpy.random.randn
+numpy.random.**randn**(*d0, d1, ..., dn*)  
+如果没有指定参数则返回一个随机的浮点数。  
+
+**参数：**  
+整型数，可选的
+
+**返回值：**  
+浮点数或者 ndarray 类型的数组  
+
+```python
+>>> np.random.randn()
+-1.2479550666117432
+```
+
+```python
+>>> np.random.randn(2, 3)
+array([[ 2.19473825,  1.1897689 , -0.27926663],
+       [ 0.16774206,  0.05763704,  0.54997363]])
+>>> type(np.random.randn(2, 3))
+<class 'numpy.ndarray'>
+>>> df =pd.DataFrame(np.random.randn(2, 3), columns=list('ABC'))
+>>> df
+          A         B         C
+0 -0.150573 -0.545417  0.112082
+1 -0.238589  1.684458  0.141182
+>>>
+```
+
+`pd.DataFrame(np.random.randn(2, 3), columns=list('ABC'))` 返回的是一个2行3列的 DataFrame。  
+
 ## openpyxl
 介绍：openpyxl is a Python library to read/write Excel 2010 xlsx/xlsm/xltx/xltm files.  
 
@@ -5026,6 +5057,314 @@ import pandas as pd
   更多信息请参考 [根据位置选择](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-integer)，[高级索引](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html#advanced) 和 [高级层次结构](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html#advanced-advanced-hierarchical)。
 
 * .loc，.iloc，以及 [] 索引可以接受一个可调用对象作为索引。更多信息参见 [通过可调用对象选择](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-callable)。
+
+用多轴筛选从一个对象中获取值使用下面的记法 (以 .loc 为例，但下面的例子也适用于 .iloc)。任何轴存取器都可以是空分片 `:`。忽略轴的规格会假定轴为 `:`，例如 `p.loc['a']` 等同于 `p.loc['a', :]`。
+
+对象类型   |索引  
+----------|------
+Series    |s.loc[indexer]  
+DataFrame |df.loc[row_indexer,column_indexer]  
+
+```python
+>>> import numpy as np
+>>> import pandas as pd
+>>> df = pd.DataFrame(np.arange(16).reshape(4, 4), columns=list('ABCD'), index=list('1234'))
+>>> df
+    A   B   C   D
+1   0   1   2   3
+2   4   5   6   7
+3   8   9  10  11
+4  12  13  14  15
+>>> df.loc['1']              # 获取第'1'行的数据
+A    0
+B    1
+C    2
+D    3
+Name: 1, dtype: int32
+>>> df.loc['1', :]           # 获取第'1'行的数据
+A    0
+B    1
+C    2
+D    3
+Name: 1, dtype: int32
+>>> df.loc['1', 'B':]        # 获取第'1'行从'B'列开始的数据
+B    1
+C    2
+D    3
+Name: 1, dtype: int32
+>>> df.loc['1', ['B', 'D']]  # 获取第'1'行'B'列和'D'列的数据
+B    1
+D    3
+Name: 1, dtype: int32
+>>>
+```
+
+#### 基础
+就像在[上一节](https://pandas.pydata.org/pandas-docs/stable/user_guide/basics.html#basics)中介绍数据结构时提到的那样，`[]` 索引 (对于那些熟悉在 Python 中实现类行为的人来说，这亦称 `__getitem__`) 的主要功能是选出低维切片。下表展示的是当使用 `[]` 索引 pandas 对象时返回值的类型：
+
+对象类型    |选择           |返回值类型  
+-----------|---------------|-----------
+Series     |series[label]  |scalar value  
+DataFrame  |frame[colname] |`Series` corresponding to colname  
+
+你可以给 `[]` 传递一个关于列的列表，然后按该列表中的顺序选择列。多列也可以通过这种方式来设置：  
+
+```python
+>>> df = pd.DataFrame(np.arange(16).reshape(4, 4), columns=list('ABCD'), index=list('1234'))
+>>> df
+    A   B   C   D
+1   0   1   2   3
+2   4   5   6   7
+3   8   9  10  11
+4  12  13  14  15
+>>> df[['D', 'B']]
+    D   B
+1   3   1
+2   7   5
+3  11   9
+4  15  13
+>>>
+```
+
+#### 属性访问
+你可以直接访问 Series 的一个索引或者 DataFrame 的一个列，就像访问一个属性一样：  
+
+```python
+>>> sa = pd.Series([1, 2, 3], index=list('abc'))
+>>> sa.b
+2
+>>>
+```
+
+```python
+>>> dfa = df.copy()
+>>> dfa.A
+1     0
+2     4
+3     8
+4    12
+Name: A, dtype: int32
+>>>
+```
+
+**警告**  
+* 如果一个属性与一个已存在的方法名冲突了，则该属性将不可用，例如 `s.min` 是不被允许的，但 `s['min']` 是可以的。  
+
+你也可以将一个字典赋值给 DataFrame 的一个行：  
+
+```python
+>>> x = pd.DataFrame({'x': [1, 2, 3], 'y': [3, 4, 5]})
+>>> x.iloc[1] = {'x': 9, 'y': 99}
+>>> x
+   x   y
+0  1   3
+1  9  99
+2  3   5
+>>>
+```
+
+你可以使用属性访问来修改一个已存在的 Series 元素或者 DataFrame 列，但是要小心；如果你尝试使用属性访问来创建一个新列，它将创建一个新属性而不是一个新列。在 0.21.0 及更新的版本中，这将抛出一个 `UserWarning`：  
+
+```python
+>>> df = pd.DataFrame({'one': [1., 2., 3.]})
+>>> df.two = [4, 5, 6]
+__main__:1: UserWarning: Pandas doesn't allow columns to be created via a new attribute name - see https://pandas.pydata.org/pandas-docs/stable/indexing.html#attribute-access
+>>> df
+   one
+0  1.0
+1  2.0
+2  3.0
+>>>
+```
+
+#### 切片范围
+沿任意轴切片范围的最稳健及一致的方式在 [按位置选择](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-integer) 章节的 `.iloc` 方法的详述中描述。从现在起，我们解释使用 `[]` 运算符分片的语法。
+
+对于 Series，当使用一个 ndarray 时，句法正确地工作，返回一个值切片及对应的标签：  
+
+```python
+In [945]: s[:5]              
+Out[945]: 
+2000-01-01    0.934894
+2000-01-02   -1.052417
+2000-01-03   -1.239888
+2000-01-04   -1.125825
+2000-01-05   -0.768745
+Freq: D, Name: A, dtype: float64
+
+In [946]: s[::2]             
+Out[946]: 
+2000-01-01    0.934894
+2000-01-03   -1.239888
+2000-01-05   -0.768745
+2000-01-07    0.593572
+Freq: 2D, Name: A, dtype: float64
+
+In [947]: s[::-1]            
+Out[947]: 
+2000-01-08   -0.868615
+2000-01-07    0.593572
+2000-01-06   -1.268688
+2000-01-05   -0.768745
+2000-01-04   -1.125825
+2000-01-03   -1.239888
+2000-01-02   -1.052417
+2000-01-01    0.934894
+Freq: -1D, Name: A, dtype: float64
+```
+
+对于 DataFrame，`[]` 中的切片切割行。这大大提高了便利性，因为这是一个如此常用的操作。
+
+```python
+In [949]: df[:3]             
+Out[949]: 
+                   A         B         C         D
+2000-01-01  0.934894  1.246335  1.000530  0.468386
+2000-01-02 -1.052417 -0.121034  0.004829  2.353777
+2000-01-03 -1.239888  0.839079  0.449671  0.404814
+
+In [950]: df[::-1]           
+Out[950]: 
+                   A         B         C         D
+2000-01-08 -0.868615 -0.824368 -0.488416  0.450658
+2000-01-07  0.593572 -0.265830 -1.508893 -1.381523
+2000-01-06 -1.268688  0.597614  0.618702  1.465065
+2000-01-05 -0.768745  0.179232 -1.804884  0.522359
+2000-01-04 -1.125825 -0.065592  0.461488  0.886664
+2000-01-03 -1.239888  0.839079  0.449671  0.404814
+2000-01-02 -1.052417 -0.121034  0.004829  2.353777
+2000-01-01  0.934894  1.246335  1.000530  0.468386
+```
+
+#### 按标签选择
+**警告**  
+用于设置操作而返回的，不管是一个副本还是一个引用，可能依赖于上下文。这有时被成为链式赋值且应该被避免。参考 [返回一个视图 vs 副本](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-view-versus-copy)。
+
+```python
+In [1234]: df = pro.fund_daily(ts_code='512760.SH', start_date='20200825', end_date='20200901', fields='ts_code, trade_date, amount')                                                            
+
+In [1235]: df                                   
+Out[1235]: 
+     ts_code trade_date      amount
+0  512760.SH   20200901  301999.161
+1  512760.SH   20200831  499673.933
+2  512760.SH   20200828  457668.061
+3  512760.SH   20200827  800757.929
+4  512760.SH   20200826  850562.865
+5  512760.SH   20200825  414941.116
+
+In [1236]: df1 = df.head(1)                     
+
+In [1237]: df1                                  
+Out[1237]: 
+     ts_code trade_date      amount
+0  512760.SH   20200901  301999.161
+
+In [1238]: df1['average_amoount'] = df.amount.mean()                                            
+/usr/bin/ipython:1: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  #!/usr/bin/python
+
+In [1239]: df1                                  
+Out[1239]: 
+     ts_code trade_date      amount  average_amoount
+0  512760.SH   20200901  301999.161      554267.1775
+```
+
+通过上面的例子可以看出，当给一个 DataFrame 切片的副本添加列，并赋值时，弹出了警告。对于上述问题，有两种解决办法，一是可以先对原 DataFrame 进行操作，之后再进行切片。二是先创建一个空的 DataFrame（使其与原 DataFrame 既无引用关系，也无复制关系），再对其进行赋值。  
+
+方法一：  
+
+```python
+In [1254]: df['average_amount'] = df.amount.mean()                                              
+
+In [1255]: df                                   
+Out[1255]: 
+     ts_code trade_date      amount  average_amount
+0  512760.SH   20200901  301999.161     554267.1775
+1  512760.SH   20200831  499673.933     554267.1775
+2  512760.SH   20200828  457668.061     554267.1775
+3  512760.SH   20200827  800757.929     554267.1775
+4  512760.SH   20200826  850562.865     554267.1775
+5  512760.SH   20200825  414941.116     554267.1775
+
+In [1256]: df1 = df.head(1)                     
+
+In [1257]: df1                                  
+Out[1257]: 
+     ts_code trade_date      amount  average_amount
+0  512760.SH   20200901  301999.161     554267.1775
+```
+
+方法二：
+
+```python
+In [1303]: df                                   
+Out[1303]: 
+     ts_code trade_date      amount
+0  512760.SH   20200901  301999.161
+1  512760.SH   20200831  499673.933
+2  512760.SH   20200828  457668.061
+3  512760.SH   20200827  800757.929
+4  512760.SH   20200826  850562.865
+5  512760.SH   20200825  414941.116
+
+In [1304]: df1 = pd.DataFrame(columns=df.columns)                                               
+
+In [1305]: df1                                  
+Out[1305]: 
+Empty DataFrame
+Columns: [ts_code, trade_date, amount]
+Index: []
+
+In [1306]: df1.loc[0] = df.loc[0]               
+
+In [1307]: df1                                  
+Out[1307]: 
+     ts_code trade_date      amount
+0  512760.SH   20200901  301999.161
+
+In [1308]: df1['average_amount'] = df.amount.mean()                                             
+
+In [1309]: df1                                  
+Out[1309]: 
+     ts_code trade_date      amount  average_amount
+0  512760.SH   20200901  301999.161     554267.1775
+```
+
+**警告**  
+
+当你提交的分片与索引类型不兼容（或者不可转换）时，.loc 是严格的。例如在一个 `DatetimeIndex` 中使用整型数。这将抛出一个 `TypeError`。
+
+```python
+In [1310]: df1 = pd.DataFrame(np.random.randn(5, 4), columns=list('ABCD'), index=pd.date_range('20130101', periods=5)) 
+
+In [1311]: df1               
+Out[1311]: 
+                   A         B         C         D
+2013-01-01  0.687998  0.286866 -2.024732  0.221790
+2013-01-02 -0.313433  1.907409 -1.874109  1.530983
+2013-01-03 -0.853349 -0.028631 -1.125664  2.389619
+2013-01-04  0.089914  0.762910 -0.781565 -0.445401
+2013-01-05 -0.488538 -0.221172  0.645656 -0.131853
+
+In [1312]: df1.loc[2:3]      
+TypeError: cannot do slice indexing on <class 'pandas.core.indexes.datetimes.DatetimeIndex'> with these indexers [2] of <class 'int'>
+```
+
+对于 DatetimeIndex，分片中的类字符串可以被转换成 DatetimeIndex 类型的索引并获得正常的切片。
+
+```python
+In [1313]: df1.loc['20130102':'20130104']                  
+Out[1313]: 
+                   A         B         C         D
+2013-01-02 -0.313433  1.907409 -1.874109  1.530983
+2013-01-03 -0.853349 -0.028631 -1.125664  2.389619
+2013-01-04  0.089914  0.762910 -0.781565 -0.445401
+```
 
 ### pandas.DataFrame.sort_values
 DataFrame.**sort_values**(*by, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last', ignore_index=False, key=None*)  
