@@ -384,6 +384,7 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 |----------|------------|------------------|----------|----------|
 |          |            |                  |object()  |          |
 |          |enumerate() |                  |          |          |
+|          |            |                  |open()    |          |
 |          |            |issubclass()      |pow()     |super()   |
 |          |            |                  |print()   |          |
 |          |            |                  |range()   |          |
@@ -441,7 +442,201 @@ True
 *class* **object**  
 返回一个没有特征的新对象。[object](https://docs.python.org/zh-cn/3/library/functions.html#object) 是所有类的基类。它具有所有 Python 类实例的通用方法。这个函数不接受任何实参。
 
-**注解:** 由于 [object](https://docs.python.org/zh-cn/3/library/functions.html#object) 没有 [\_\_dict\_\_](https://docs.python.org/zh-cn/3/library/stdtypes.html#object.__dict__)，因此无法将任意属性赋给 [object](https://docs.python.org/zh-cn/3/library/functions.html#object) 的实例。
+**注解:** 由于 [object](https://docs.python.org/zh-cn/3/library/functions.html#object) 没有 [\_\_dict\_\_](https://docs.python.org/zh-cn/3/library/stdtypes.html#object.__dict__)，因此无法将任意属性赋给 [object](https://docs.python.org/zh-cn/3/library/functions.html#object) 的实例。  
+<br />  
+
+**open**(*file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None*)  
+打开 *file* 并返回一个对应的[文件对象](https://docs.python.org/3.6/glossary.html#term-file-object)。如果文件不能被打开，则抛出一个[OSError](https://docs.python.org/3.6/library/exceptions.html#OSError)异常。
+
+*file* is a [path-like object](https://docs.python.org/3.6/glossary.html#term-path-like-object) giving the pathname (绝对的或者相对于当前工作目录的) of the file to be opened or an integer file descriptor of the file to be wrapped. (If a file descriptor is given, it is closed when the returned I/O object is closed, unless *closefd* is set to `False`.)
+
+*mode* 是一个可选字符串，用于指定打开文件的模式。默认值为`'r'`，意味着在文本模式下以只读方式打开。其它常用值是`'w’`意味着写(如果文件已经存在则截断文件), `'x'`意味着专门创建（exclusive creation），而`'a'`意味着附加 (在一些Unix系统，意味着所有写操作被附加到文件末尾而不考虑当前搜索位置). 在文本模式下，如果 *encoding* 没有指定，使用的编码将依赖于平台：`locale.getpreferredencoding(False)` 将被调用以得到当前区域编码（locale encoding）。(读写裸字节 (raw bytes)使用binary模式且不要指定 *encoding*.) 可用的模式是：
+
+|Character |Meaning                                        |
+|----------|-----------------------------------------------|
+|`'r'`     |只读模式打开（默认）                              |
+|`'w'`     |open for writing, 首先截断文件                   |
+|`'x'`     |open for exclusive creation, 如果文件已存在则失败 |
+|`'a'`     |open for writing, 如果文件存在则附加到文件末尾     |
+|`'b'`     |二进制模式                                      |
+|`'t'`     |文本模式（默认）                                 |
+|`'+'`     |open a disk file for updating (读和写)          |
+|`'U'`     |[通用新行](https://docs.python.org/3.6/glossary.html#term-universal-newlines) 模式（已弃用）        |
+
+默认模式是 `'r'` (打开只读文本, 同义词 `'rt'`). 对于二进制读写访问，模式 `'w+b'` 打开并将文件截断为0字节。`'r+b'` 打开文件时不截断。
+
+就像在[概述](https://docs.python.org/3.6/library/io.html#io-overview)中提到的，Python区分二进制和文本I/O。以二进制模式（*mode*参数包含`'b'`）打开的文件返回内容作为[bytes](https://docs.python.org/3.6/library/stdtypes.html#bytes)对象无需任何解码。在文本模式(默认, 或者当 *mode* 参数中包含 `'t'` ), 文件内容作为[str](https://docs.python.org/3.6/library/stdtypes.html#str)被返回，字节首先被一个平台相关的编码或者指定的*编码*（如果指定了*encoding*参数）解码。
+
+**注意：** Python不依赖于底层操作系统的文本文件的概念；所有的处理都是由Python自己完成，因此是跨平台的。
+
+*buffering*是一个可选整型数用于设置缓冲区策略。传递0关闭缓冲区(仅在二进制模式下允许), 1 选择行缓冲区 (仅在文本模式下可用), 
+大于1的整型数表示一个固定大小的块缓冲区的大小，以字节为单位。当没有给出*buffering*参数时, 默认的缓冲区策略工作如下：  
+* 二进制文件被缓冲在固定大小的块中；the size of the buffer is chosen using a heuristic trying to determine the underlying device's "block size" and falling back on [io.DEFAULT_BUFFER_SIZE](https://docs.python.org/3.6/library/io.html#io.DEFAULT_BUFFER_SIZE). 在许多系统中，缓冲区通常是4096或者8192字节长。  
+* "Interactive" 文本文件([isatty()](https://docs.python.org/3.6/library/io.html#io.IOBase.isatty) 返回`True`的文件) 使用行缓冲区。其它文本文件使用上面描述的二进制文件的缓冲策略。
+
+*encoding* 是用来解码或者编码文件的编码的名字。这个应该仅用于文本模式。默认编码依赖于平台(不管 [locale.getpreferredencoding()](https://docs.python.org/3.6/library/locale.html#locale.getpreferredencoding) 返回什么), 但任何Python支持的[文本编码](https://docs.python.org/3.6/glossary.html#term-text-encoding)都可以被使用。支持的编码列表请看[codecs](https://docs.python.org/3.6/library/codecs.html#module-codecs)模块。
+
+*errors* 是一个可选字符串，用于指定如何处理编码及解码错误——这不能被用于二进制模式。许多标准错误处理程序是可用的 (listed under [Error Handlers](https://docs.python.org/3.6/library/codecs.html#error-handlers)), 但任何已经通过[codecs.register_error()](https://docs.python.org/3.6/library/codecs.html#codecs.register_error)注册的错误处理名字也是有效的。标准名字包括：  
+* `'strict'` 如果有编码错误则抛出一个[ValueError](https://docs.python.org/3.6/library/exceptions.html#ValueError)异常。默认值 `None` 有相同的效果。
+* `'ignore'` 忽略错误。注意，忽略编码错误可能导致数据丢失。
+* `'replace'` 导致一个替换标记(例如`'?'`)被插入到有畸形数据的地方。
+* `'surrogateescape'` 将任何不正确的字节表示为Unicode私有使用区域范围（从 U+DC80 到 U+DCFF）内的代码点。当写数据且`surrogateescape`错误处理程序被使用时这些私有代码点将被转回为相同的字节。这在处理未知编码文件时很有用。
+* `'xmlcharrefreplace'` 仅当向文件中写数据时支持。字符不被编码支持的时候被替换为适当的XML字符引用 `&#nnn;`.
+* `'backslashreplace'` 通过Python的反斜杠转义序列替换畸形数据。
+* `'namereplace'` (也是仅当写数据的时候支持) 用`\N{...}`转义序列替换不支持的字符。
+
+*newline* 控制[通用新行](https://docs.python.org/3.6/glossary.html#term-universal-newlines)模式如何工作(它仅用于文本模式). 它可以是 `None`, `''`, `'\n'`, `'\r'`, 和 `'\r\n'`. 它的工作方式如下：  
+* 当从流读取输入时，如果 *newline* 是 `None`，通用换行模式开启。输入中的行可以以 `'\n'`, `'\r'`, 或者 `'\r\n'` 结尾，且在返回给调用方以前这些被翻译成 `'\n'` 。如果 *newline* 是 `''`，通用换行模式开启，行尾结束符号返回给调用方的时候没有被翻译。如果 *newline* 是其它合法的值，输入行仅被给定的字符串终结，且返回给调用方的行尾结束符号没有被翻译。
+* 当向流写入输出的时候，如果 *newline* 是 `None`，所有写入的 `'\n'` 字符都被翻译成系统默认的行分隔符，[os.linesep](#https://docs.python.org/3.6/library/os.html#os.linesep). 如果 *newline* 是 `''` 或者 `'\n'`, 则不翻译。如果 *newline* 是任何其它的合法值，所有写入的 `'\n'` 字符都被翻译为指定的字符串。
+
+如果 *closefd* 是 `False` 且给定的是一个文件描述符而不是一个文件名，则当文件被关闭的时候底层的文件描述符将保持打开状态。如果给定的是一个文件名则 *closefd* 必须是 `True` (默认值) ，否则将抛出一个错误。
+
+A custom opener can be used by passing a callable as *opener*. The underlying file descriptor for the file object is then obtained by calling *opener* with (*file, flags*). *opener* must return an open file descriptor (passing [os.open](https://docs.python.org/3.6/library/os.html#os.open) as *opener* results in functionality similar to passing `None`).
+
+新创建的文件是[不可继承的](https://docs.python.org/3.6/library/os.html#fd-inheritance)。
+
+下面的例子使用[os.open()](https://docs.python.org/3.6/library/os.html#os.open)函数的 [dir_fd](https://docs.python.org/3.6/library/os.html#dir-fd) 参数打开一个相对于给定目录的文件：
+
+```python
+>>> import os
+>>> dir_fd = os.open('somedir', os.O_RDONLY)
+>>> def opener(path, flags):
+...     return os.open(path, flags, dir_fd=dir_fd)
+...
+>>> with open('spamspam.txt', 'w', opener=opener) as f:
+...     print('This will be written to somedir/spamspam.txt', file=f)
+...
+>>> os.close(dir_fd)  # don't leak a file descriptor
+```
+
+[open()](https://docs.python.org/3.6/library/functions.html#open)函数返回的[文件对象](https://docs.python.org/3.6/glossary.html#term-file-object)的类型依赖于模式。当[open()](https://docs.python.org/3.6/library/functions.html#open)以文本模式打开一个文件时(`'w'`, `'r'`, `'wt'`, `'rt'`, etc.), 它返回一个 [io.TextIOBase](https://docs.python.org/3.6/library/io.html#io.TextIOBase) 的子类(具体地是 [io.TextIOWrapper](https://docs.python.org/3.6/library/io.html#io.TextIOWrapper)). When used to open a file in a binary mode with buffering, 返回类是[io.BufferedIOBase](https://docs.python.org/3.6/library/io.html#io.BufferedIOBase)的一个子类. The exact class varies: in read binary mode, 它返回一个[io.BufferedReader](https://docs.python.org/3.6/library/io.html#io.BufferedReader)类; in write binary and append binary modes, 它返回一个[io.BufferedWriter](https://docs.python.org/3.6/library/io.html#io.BufferedWriter)类, and in read/write mode, 它返回一个[io.BufferedRandom](https://docs.python.org/3.6/library/io.html#io.BufferedRandom)类. 当buffering关闭时，the raw stream, 返回一个[io.RawIOBase](https://docs.python.org/3.6/library/io.html#io.RawIOBase)的子类[io.FileIO](https://docs.python.org/3.6/library/io.html#io.FileIO)。
+
+### 文本模式
+```python
+>>> with open('test.txt', 'r') as f:
+...     print(type(f))
+...
+<class '_io.TextIOWrapper'>
+>>> with open('test.txt', 'w') as f:
+...     print(type(f))
+...
+<class '_io.TextIOWrapper'>
+>>> with open('test.txt', 'rt') as f:
+...     print(type(f))
+...
+<class '_io.TextIOWrapper'>
+>>> with open('test.txt', 'wt') as f:
+...     print(type(f))
+...
+<class '_io.TextIOWrapper'>
+>>> with open('test.txt', 'a') as f:
+...     print(type(f))
+...
+<class '_io.TextIOWrapper'>
+>>> with open('test.txt', 'at') as f:
+...     print(type(f))
+...
+<class '_io.TextIOWrapper'>
+>>> with open('test.txt', 'r+') as f:
+...     print(type(f))
+...
+<class '_io.TextIOWrapper'>
+>>> with open('test.txt', 'r+t') as f:
+...     print(type(f))
+...
+<class '_io.TextIOWrapper'>
+>>> with open('test.txt', 'w+') as f:
+...     print(type(f))
+...
+<class '_io.TextIOWrapper'>
+>>> with open('test.txt', 'w+t') as f:
+...     print(type(f))
+...
+<class '_io.TextIOWrapper'>
+>>> import io
+>>> issubclass(io.TextIOWrapper, io.TextIOBase)
+True
+```
+
+### 开启buffering的二进制模式
+```python
+>>> with open('test.txt', 'rb') as f:
+...     print(type(f))
+...
+<class '_io.BufferedReader'>
+>>> with open('test.txt', 'wb') as f:
+...     print(type(f))
+...
+<class '_io.BufferedWriter'>
+>>> with open('test.txt', 'ab') as f:
+...     print(type(f))
+...
+<class '_io.BufferedWriter'>
+>>> with open('test.txt', 'r+b') as f:
+...     print(type(f))
+...
+<class '_io.BufferedRandom'>
+>>> with open('test.txt', 'w+b') as f:
+...     print(type(f))
+...
+<class '_io.BufferedRandom'>
+>>> import io
+>>> issubclass(io.BufferedReader, io.BufferedIOBase)
+True
+>>> issubclass(io.BufferedWriter, io.BufferedIOBase)
+True
+>>> issubclass(io.BufferedRandom, io.BufferedIOBase)
+True
+```
+
+### 关闭buffering的二进制模式
+```python
+>>> with open('test.txt', 'rb', buffering=0) as f:
+...     print(type(f))
+...
+<class '_io.FileIO'>
+>>> with open('test.txt', 'wb', buffering=0) as f:
+...     print(type(f))
+...
+<class '_io.FileIO'>
+>>> with open('test.txt', 'ab', buffering=0) as f:
+...     print(type(f))
+...
+<class '_io.FileIO'>
+>>> with open('test.txt', 'r+b', buffering=0) as f:
+...     print(type(f))
+...
+<class '_io.FileIO'>
+>>> with open('test.txt', 'w+b', buffering=0) as f:
+...     print(type(f))
+...
+<class '_io.FileIO'>
+>>> import io
+>>> issubclass(io.FileIO, io.RawIOBase)
+True
+```
+
+也看下文件处理模块，例如，[fileinput](https://docs.python.org/3.6/library/fileinput.html#module-fileinput), [io](https://docs.python.org/3.6/library/io.html#module-io) (where [open()](https://docs.python.org/3.6/library/functions.html#open) is declared), [os](https://docs.python.org/3.6/library/os.html#module-os), [os.path](https://docs.python.org/3.6/library/os.path.html#module-os.path), [tempfile](https://docs.python.org/3.6/library/tempfile.html#module-tempfile), and [shutil](https://docs.python.org/3.6/library/shutil.html#module-shutil).
+
+*在版本3.3中发生变化：*  
+* 增加了*opener*参量（parameter）.
+* 增加了 `'x'` 模式。
+* [IOError](https://docs.python.org/3.6/library/exceptions.html#IOError) used to be raised, it is now an alias of [OSError]().
+* 如果以exclusive creation mode (`'x’`) 打开的文件已经存在，则抛出 [FileExistsError](https://docs.python.org/3.6/library/exceptions.html#FileExistsError).
+
+*在版本3.4中发生变化：*  
+* The file is now non-inheritable.
+
+`'U'` 模式 *从版本3.4开始弃用，将在版本4.0中被移除*。
+
+*在版本3.5中发生变化：*  
+* 如果系统调用被终止且信号处理程序没有抛出异常，现在函数将重试系统调用而不是抛出一个[InterruptedError](https://docs.python.org/3.6/library/exceptions.html#InterruptedError)异常 (原理请看 [PEP 475](https://www.python.org/dev/peps/pep-0475)).
+* 新增 `'namereplace'` 错误处理程序。
+
+*在版本3.6中发生变化：*  
+* 增加支持：接受实现了 [os.PathLike](https://docs.python.org/3.6/library/os.html#os.PathLike) 的对象。
+* 在 Windows平台, opening a console buffer may return a subclass of [io.RawIOBase](https://docs.python.org/3.6/library/io.html#io.RawIOBase) other than [io.FileIO](https://docs.python.org/3.6/library/io.html#io.FileIO).  
+<br />  
 
 **pow**(*x*, *y*[, *z*])  
 返回 *x* 的 *y* 次方；如果 *z* 出现，则返回 *x* 的 *y* 次方再以 *z* 取模(比`pow(x, y) % z`的计算效率更高).两个参数的形式 `pow(x, y)` 等同于使用幂运算: `x**y`。
@@ -467,6 +662,15 @@ The *file* argument must be an object with a `write(string)` method; if it is no
 输出是否缓冲通常由 *file* 决定，但如果 *flush* 关键字参数是 true, 则流被强制 flushed.
 
 _在版本3.3中发生变化：_ 增加了 *flush* 关键字参数。
+
+将 print 函数的输出信息写入到 p.log 文件中：  
+
+```python
+>>> with open('p.log', 'a') as f:
+...     print('a 代表附加模式', file=f)
+...
+>>>
+```
 
 **range**(*stop*)  
 **range**(*start, stop*[*, step*])  
@@ -5034,7 +5238,7 @@ import pandas as pd
 
     * 一个列表或标签数组 ['a', 'b', 'c']。
 
-    * 一个标签分片对象 `'a':'f'` (注意与通常的 python 分片相反，当起点（'a'）和终点（'f'）都在索引中出现时，它们将都被包含！参加 [标签分片](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-slicing-with-labels) 及 [端点被包含](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html#advanced-endpoints-are-inclusive)。)
+    * 一个标签分片对象 `'a':'f'` (注意与通常的 python 分片相反，当起点（'a'）和终点（'f'）都在索引中出现时，它们将都被包含！参见 [标签分片](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-slicing-with-labels) 及 [端点被包含](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html#advanced-endpoints-are-inclusive)。)
 
     * 一个布尔数组 (所有 NA 值都将被当作 False)。
 
@@ -5364,6 +5568,73 @@ Out[1313]:
 2013-01-02 -0.313433  1.907409 -1.874109  1.530983
 2013-01-03 -0.853349 -0.028631 -1.125664  2.389619
 2013-01-04  0.089914  0.762910 -0.781565 -0.445401
+```
+
+为了拥有**纯粹基于标签的索引**pandas 提供了一整套方法。这是一种基于协议的严格包含。每一个请求的标签都必须在索引中，否则将抛出一个 `KeyError`。当切片时，起始边界**和**终止边界都将被包含，如果它们出现在索引中的话。整型数是有效的标签，但它们指的是标签**而不是位置**。
+
+`.loc` 属性是主要的访问方法。下面的是有效输入：  
+
+* 一个单一的标签，例如 5 或者 'a' (注意 5 被解释为一个索引标签。这种用法**不是**一个沿着索引的整型数位置。)。
+
+* 一个列表或者一个标签数组 `['a', 'b', 'c']`。
+
+* 一个标签分片对象 `'a':'f'` (注意与通常的 python 分片相反，当它们出现在索引中时，开始索引（'a'）和结束索引（'f'）都将被包含！参见 [标签分片](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-slicing-with-labels)。
+
+* 一个布尔数组。
+
+* 一个可调用对象，参见 [通过可调用对象选择](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-callable)。
+
+
+### 输入/输出
+#### pandas.read_excel
+pandas.**read_excel**(\*args, \*\*kwargs)  
+将一个 Excel 文件读取到一个 pandas DataFrame 中。  
+
+**参数：**  
+**io：** *__str, bytes, ExcelFile, xlrd.Book, path object, or file-like object__*  
+任何有效的字符串路径都是可接受的。  
+
+**index_col：** *__int, list of int, default None__*  
+用作 DataFrame 行标签的列 (0-indexed)。  
+
+例子：  
+
+```python
+>>> pd.read_excel('SZ.xlsx')
+   Unnamed: 0   code  trade_date    ts_code  name         vol  ratio exchange
+0           0  70001    20200522  000001.SZ  平安银行  1647348155   8.48       SZ
+1           1  70002    20200522  000002.SZ  万 科A   482338018   4.96       SZ
+2           2  70005    20200522  000005.SZ  世纪星源        2010   0.00       SZ
+>>> pd.read_excel('SZ.xlsx', index_col=0)
+    code  trade_date    ts_code  name         vol  ratio exchange
+0  70001    20200522  000001.SZ  平安银行  1647348155   8.48       SZ
+1  70002    20200522  000002.SZ  万 科A   482338018   4.96       SZ
+2  70005    20200522  000005.SZ  世纪星源        2010   0.00       SZ
+>>>
+``` 
+
+### 通用函数
+
+
+### pandas.DataFrame.index
+DataFrame.**index**: *Index*  
+返回 DataFrame 的索引（行标签）。  
+
+```python
+In [1435]: df                                  
+Out[1435]: 
+       ts_code     name         management    fund_type list_date invest_type
+905  163801.SZ     中银中国       中银基金       混合型  20050223         稳定型
+906  510050.SH    上证50ETF       华夏基金       股票型  20050223       被动指数型
+907  160105.SZ     南方积配       南方基金       混合型  20041220         混合型
+
+In [1436]: df[df['ts_code'] == '510050.SH']    
+Out[1436]: 
+       ts_code     name          management   fund_type list_date invest_type
+906  510050.SH    上证50ETF       华夏基金       股票型  20050223       被动指数型
+
+In [1437]: df[df['ts_code'] == '510050.SH'].index                                              
+Out[1437]: Int64Index([906], dtype='int64')
 ```
 
 ### pandas.DataFrame.sort_values
@@ -6489,6 +6760,24 @@ n_income_attr_p 对应的就是同花顺财务报表中的净利润
 ```
 
 ### 财务指标数据
+#### 资产负债表
+接口：balancesheet  
+权限：每分钟最多访问200次  
+
+**输出参数**  
+
+名称                        |类型    |默认显示  |描述  
+----------------------------|-------|----------|----
+ts_code                     |str    |Y         |TS股票代码  
+ann_date                    |str    |Y         |公告日期  
+end_date                    |str    |Y         |报告期  
+goodwill                    |str    |Y         |商誉  
+total_hldr_eqy_exc_min_int  |float  |Y         |股东权益合计（不含少数股东权益）  
+update_flag                 |str    |N         |更新标识  
+
+total_hldr_eqy_exc_min_int 对应的即是同花顺中的“净资产”概念。  
+
+#### 财务指标数据
 接口： fina_indicator  
 权限： 用户需要至少800积分才可以调取，每分钟最多可访问该接口200次  
 
