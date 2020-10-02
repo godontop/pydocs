@@ -7,6 +7,7 @@
         * [内置类型](#内置类型)
             * [数值类型 — int, float, complex](#数值类型--int-float-complex)
                 * [整型数类型的按位运算](#整型数类型的按位运算)
+            * [集合类型 --- set, frozenset](#集合类型-----set-frozenset)
         * [文本处理服务](#文本处理服务)
             * [string — 通用字符串操作](#string--通用字符串操作)
                 * [格式化字符串语法](#格式化字符串语法)
@@ -758,6 +759,56 @@ Operation  |Result          |Notes
 0
 >>>
 ```
+
+### 集合类型 --- set, frozenset
+*set* 对象是由具有唯一性的 [hashable](https://docs.python.org/zh-cn/3/glossary.html#term-hashable) 对象所组成的无序多项集。 常见的用途包括成员检测、从序列中去除重复项以及数学中的集合类计算，例如交集、并集、差集与对称差集等等。 （关于其他容器对象请参看 [dict](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#dict), [list](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#list) 与 [tuple](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#tuple) 等内置类，以及 [collections](https://docs.python.org/zh-cn/3/library/collections.html#module-collections) 模块。）
+
+与其他多项集一样，集合也支持 `x in set`, `len(set)` 和 `for x in set`。 作为一种无序的多项集，集合并不记录元素位置或插入顺序。 相应地，集合不支持索引、切片或其他序列类的操作。
+
+目前有两种内置集合类型，[set](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#set) 和 [frozenset](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#frozenset)。 [set](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#set) 类型是可变的 --- 其内容可以使用 add() 和 remove() 这样的方法来改变。 由于是可变类型，它没有哈希值，且不能被用作字典的键或其他集合的元素。 [frozenset](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#frozenset) 类型是不可变并且为 [hashable](https://docs.python.org/zh-cn/3/glossary.html#term-hashable) --- 其内容在被创建后不能再改变；因此它可以被用作字典的键或其他集合的元素。
+
+除了可以使用 [set](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#set) 构造器，非空的 set (不是 frozenset) 还可以通过将以逗号分隔的元素列表包含于花括号之内来创建，例如: `{'jack', 'sjoerd'}`。
+
+两个类的构造器具有相同的作用方式：
+
+*class* **set**([*iterable*])  
+*class* **frozenset**([*iterable*])  
+返回一个新的 set 或 frozenset 对象，其元素来自于 *iterable*。 集合的元素必须为 [hashable](https://docs.python.org/zh-cn/3/glossary.html#term-hashable)。 要表示由集合对象构成的集合，所有的内层集合必须为 [frozenset](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#frozenset) 对象。 如果未指定 *iterable*，则将返回一个新的空集合。
+
+[set](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#set) 和 [frozenset](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#frozenset) 的实例提供以下操作：
+
+**len(s)**  
+返回集合 *s* 中的元素数量（即 *s* 的基数）。
+
+**x in s**  
+检测 *x* 是否为 *s* 中的成员。
+
+**x not in s**  
+检测 *x* 是否非 *s* 中的成员。
+
+**union**(_\*others_)  
+**set | other | ...**  
+返回一个新集合，其中包含来自原集合以及 others 指定的所有集合中的元素。
+
+**intersection**(_\*others_)  
+**set & other & ...**  
+返回一个新集合，其中包含原集合以及 others 指定的所有集合中共有的元素。
+
+**difference**(_\*others_)  
+**set - other - ...**  
+返回一个新集合，其中包含原集合中在 others 指定的其他集合中不存在的元素。
+
+```python
+>>> s1 = {1, 2, 3, 4}
+>>> s2 = {3, 4, 5, 6}
+>>> s1 - s2
+{1, 2}
+>>>
+```
+
+**symmetric_difference**(_other_)  
+**set ^ other**  
+返回一个新集合，其中的元素或属于原集合或属于 *other* 指定的其他集合，但不能同时属于两者。
 
 ## 文本处理服务
 这章描述的模块提供了广泛的字符串操作运算和其它的文本处理服务。
