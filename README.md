@@ -49,13 +49,15 @@
         * [socket --- 底层网络接口](#socket-----底层网络接口)
     * [互联网数据处理](#互联网数据处理)
         * [json --- JSON 编码和解码器](#json-----json-编码和解码器)
-        * [互联网协议与支持](#互联网协议与支持)
-            * [urllib.request — 打开URLs的可扩展库](#urllibrequest--打开urls的可扩展库)
-                * [OpenerDirector对象](#openerdirector对象)
-            * [urllib.parse — 将URLs解析为组件](#urllibparse--将urls解析为组件)
-                * [URL解析](#url解析)
-            * [urllib.error — urllib.request抛出的异常类](#urlliberror--urllibrequest抛出的异常类)
-            * [urllib.robotparser — 解析robots.txt](#urllibrobotparser--解析robotstxt)
+    * [互联网协议与支持](#互联网协议与支持)
+        * [urllib.request — 打开URLs的可扩展库](#urllibrequest--打开urls的可扩展库)
+            * [OpenerDirector对象](#openerdirector对象)
+        * [urllib.parse — 将URLs解析为组件](#urllibparse--将urls解析为组件)
+            * [URL解析](#url解析)
+        * [urllib.error — urllib.request抛出的异常类](#urlliberror--urllibrequest抛出的异常类)
+        * [urllib.robotparser — 解析robots.txt](#urllibrobotparser--解析robotstxt)
+    * [Python运行时服务](#python运行时服务)
+        * [\_\_main\_\_ --- 顶层脚本环境](#__main__-----顶层脚本环境)
     * [Python语言参考](#python语言参考)
         * [3. 数据模型](#3-数据模型)
             * [3.3. 特殊方法名](#33-特殊方法名)
@@ -2789,7 +2791,7 @@ for chunk in json.JSONEncoder().iterencode(bigobject):
     mysocket.write(chunk)
 ```
 
-### 互联网协议与支持
+## 互联网协议与支持
 #### urllib.request — 打开URLs的可扩展库
 **源代码：** [Lib/urllib/request.py](https://github.com/python/cpython/tree/3.7/Lib/urllib/request.py)
 
@@ -3032,6 +3034,58 @@ This class provides methods to read, parse and answer questions about the `robot
 
 **can_fetch**(*useragent, url*)  
 根据解析的 `robots.txt` 文件中的规则，如果 *useragent* 允许获取 *url* ，则返回 `True`，否则返回 `False`。
+
+## Python运行时服务
+### \_\_main\_\_ --- 顶层脚本环境
+`'__main__'` 是顶层代码执行的作用域的名称。模块的 \_\_name\_\_ 在通过标准输入、脚本文件或是交互式命令读入的时候会等于 `'__main__'`。
+
+模块可以通过检查自己的 \_\_name\_\_ 来得知是否运行在 main 作用域中，这使得模块可以在作为脚本或是通过 `python -m` 运行时条件性地执行一些代码，而在被 import 时不会执行。
+
+```python
+if __name__ == "__main__":
+    # execute only if run as a script
+    main()
+```
+
+对软件包来说，通过加入 `__main__.py` 模块可以达到同样的效果，当使用 `-m` 运行模块时，其中的代码会被执行。
+
+当没有添加 `if __name__ == "__main__":` 代码块时：
+
+```python
+➜  test$ cat a.py
+def func():
+    print('This message is from function func() in a.py')
+
+
+func()
+
+➜  test$ cat b.py
+import a
+
+➜  test$ python b.py
+This message is from function func() in a.py
+➜  test$ 
+```
+
+当添加 `if __name__ == "__main__":` 代码块后：
+
+```python
+➜  test$ cat a.py
+def func():
+    print('This message is from function func() in a.py')
+
+
+if __name__ == "__main__":
+    func()
+
+➜  test$ cat b.py
+import a
+
+➜  test$ python b.py
+➜  test$ 
+```
+
+通过上面的例子可以看出，在 `a.py` 模块中添加 `if __name__ == "__main__":` 代码块后，在其它模块中导入 `a.py` 模块时，`if __name__ == "__main__":` 代码块内的代码不会被执行。
 
 ## Python语言参考
 ### 3. 数据模型
@@ -5203,6 +5257,40 @@ array([[ 2.19473825,  1.1897689 , -0.27926663],
 
 `pd.DataFrame(np.random.randn(2, 3), columns=list('ABC'))` 返回的是一个2行3列的 DataFrame。  
 
+```python
+>>> np.random.randn(3)
+array([-1.00131874, -1.56444553, -0.44134847])
+>>> np.random.randn(3, 1)
+array([[1.22019482],
+       [0.47821871],
+       [2.00688915]])
+>>> pd.DataFrame(np.random.randn(3))
+          0
+0  1.348695
+1 -0.592470
+2 -2.501976
+>>> pd.DataFrame(np.random.randn(3, 1))
+          0
+0 -2.009443
+1  1.227551
+2  0.116526
+>>>
+```
+
+通过 np.random.randn() 来构建 DataFrame 时，np.random.randn() 的第一个参数表示行数，第二个参数表示列数，如果第二个没有，则表示列数为 1。  
+
+```python
+>>> s1 = pd.Series(np.random.randn(3), index=list('abc'))
+>>> s1
+a   -0.276098
+b    0.571327
+c   -0.605284
+dtype: float64
+>>>
+```
+
+构建 Series 的数据必须是一维的，所以通过 np.random.randn() 来构建 Series 对象时只能使用一个参数。  
+
 ## openpyxl
 介绍：openpyxl is a Python library to read/write Excel 2010 xlsx/xlsm/xltx/xltm files.  
 
@@ -5582,8 +5670,50 @@ Out[1313]:
 
 * 一个布尔数组。
 
-* 一个可调用对象，参见 [通过可调用对象选择](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-callable)。
+* 一个可调用对象，参见 [通过可调用对象选择](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-callable)。  
 
+```python
+In [1993]: s1 = pd.Series(np.random.randn(6), index=list('abcdef'))                            
+
+In [1994]: s1                
+Out[1994]: 
+a   -1.395686
+b    0.424361
+c   -0.258070
+d   -0.868951
+e   -1.274847
+f   -1.050252
+dtype: float64
+
+In [1995]: s1.loc['c':]      
+Out[1995]: 
+c   -0.258070
+d   -0.868951
+e   -1.274847
+f   -1.050252
+dtype: float64
+
+In [1996]: s1.loc['b']       
+Out[1996]: 0.42436116596528517
+```
+
+#### 用标签分片
+当使用 `.loc` 分片时，如果起始标签和终止标签都出现在索引中，则它们两者之间的元素 (包括它们自身) 被返回：  
+
+```python
+In [2033]: s = pd.Series(list('abcde'), index=[0, 3, 2, 5, 4])                                                         
+
+In [2034]: s.loc[3:5]        
+Out[2034]: 
+3    b
+2    c
+5    d
+dtype: object
+```
+
+#### 按位置选择
+**警告**  
+为了一个设置操作而返回的，不管是一个副本还是一个引用，有可能依赖于上下文。这有时被称为 `链式赋值` 且应该被禁止。参见 [返回一个视图 vs 副本](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-view-versus-copy)。  
 
 ### 输入/输出
 #### pandas.read_excel
@@ -5614,7 +5744,38 @@ pandas.**read_excel**(\*args, \*\*kwargs)
 ``` 
 
 ### 通用函数
+pandas.concat  
+pandas.**concat**_(objs: Union[Iterable[‘DataFrame’], Mapping[Label, ‘DataFrame’]], axis='0', join: str = "'outer'", ignore_index: bool = 'False', keys='None', levels='None', names='None', verify_integrity: bool = 'False', sort: bool = 'False', copy: bool = 'True') → ’DataFrame’_  
 
+**参数：**  
+**objs：** a sequence or mapping of Series or DataFrame objects
+
+**axis：** _{0/’index’, 1/’columns’}, default 0_  
+指定沿哪一个轴合并，默认是按横轴合并。  
+
+**例子**  
+
+合并两个具有相同列的 DataFrame 对象。
+
+```python
+>>> df1 = pd.DataFrame([['a', 1], ['b', 2]], columns=['letter', 'number'])
+>>> df1
+  letter  number
+0      a       1
+1      b       2
+>>> df2 = pd.DataFrame([['c', 3], ['d', 4]], columns=['letter', 'number'])
+>>> df2
+  letter  number
+0      c       3
+1      d       4
+>>> pd.concat([df1, df2])
+  letter  number
+0      a       1
+1      b       2
+0      c       3
+1      d       4
+>>>
+```
 
 ### pandas.DataFrame.index
 DataFrame.**index**: *Index*  
@@ -6771,11 +6932,17 @@ n_income_attr_p 对应的就是同花顺财务报表中的净利润
 ts_code                     |str    |Y         |TS股票代码  
 ann_date                    |str    |Y         |公告日期  
 end_date                    |str    |Y         |报告期  
+total_cur_assets            |float  |Y         |流动资产合计  
 goodwill                    |str    |Y         |商誉  
+total_nca                   |float  |Y         |非流动资产合计  
+total_assets                |float  |Y         |资产总计  
+total_liab                  |float  |Y         |负债合计  
 total_hldr_eqy_exc_min_int  |float  |Y         |股东权益合计（不含少数股东权益）  
 update_flag                 |str    |N         |更新标识  
 
+total_assets 对应同花顺中的“资产合计”。  
 total_hldr_eqy_exc_min_int 对应的即是同花顺中的“净资产”概念。  
+资产负债率 = 负债合计/资产合计 * 100%  
 
 #### 财务指标数据
 接口： fina_indicator  
