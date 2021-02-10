@@ -385,6 +385,7 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 
 |          |            |Built-in Functions|          |          |
 |----------|------------|------------------|----------|----------|
+|all()     |            |                  |          |          |
 |          |            |                  |object()  |          |
 |          |enumerate() |                  |          |          |
 |          |            |                  |open()    |          |
@@ -393,6 +394,30 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 |          |            |                  |range()   |          |
 |          |getattr()   |                  |          |          |
 |complex() |            |                  |          |          |
+
+**all**(*iterable*)  
+如果 *iterable* 的所有元素都为真则返回`True` (或者如果iterable为空)。相当于：
+
+```python
+def all(iterable):
+    for element in iterable:
+        if not element:
+            return False
+    return True
+```
+
+用法举例
+```python
+>>> a = []
+>>> b = [1, 2, 3]
+>>> c = [1, 2, None]
+>>> print(all(a))
+True
+>>> print(all(b))
+True
+>>> print(all(c))
+False
+```
 
 *class* **complex([**_real_**[**, _imag_**]])**  
 返回值为 *real* + _imag_\*1j 的复数，或将字符串或数字转换为复数。如果第一个形参是字符串，则它被解释为一个复数，并且函数调用时必须没有第二个形参。第二个形参不能是字符串。每个实参都可以是任意的数值类型（包括复数）。如果省略了 *imag*，则默认值为零，构造函数会像 [int](https://docs.python.org/zh-cn/3/library/functions.html#int) 和 [float](https://docs.python.org/zh-cn/3/library/functions.html#float) 一样进行数值转换。如果两个实参都省略，则返回 `0j`。
@@ -5277,6 +5302,50 @@ MySQLdb is an interface to the popular [MySQL](http://www.mysql.com/) database s
 import numpy as np
 ```
 
+### numpy.arange
+numpy.**arange**([*start*, ]*stop*, [*step*, ]*dtype=None*)  
+在指定的区间内返回等间距的值。
+
+```python
+>>> np.arange(3)
+array([0, 1, 2])
+>>> type(np.arange(3))
+<class 'numpy.ndarray'>
+>>>
+```
+
+返回值：  
+类型：*ndarray*  
+
+### numpy.ndarray.reshape
+方法  
+
+ndarray.**reshape**(*shape, order='C'*)  
+返回一个包含相同数据的新的形状的数组。
+
+完整的文档请参考 [numpy.reshape](https://numpy.org/doc/stable/reference/generated/numpy.reshape.html#numpy.reshape)。
+
+**另请参考：**  
+[numpy.reshape](https://numpy.org/doc/stable/reference/generated/numpy.reshape.html#numpy.reshape) 等价函数
+
+**注意**  
+与自由函数 [numpy.reshape](https://numpy.org/doc/stable/reference/generated/numpy.reshape.html#numpy.reshape) 不同，这个 [ndarray](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray) 方法允许形状参数的元素作为单独的参数被传递。例如，`a.reshape(10, 11)` 等同于 `a.reshape((10, 11))`。
+
+```python
+>>> a = np.arange(6)
+>>> type(a)
+<class 'numpy.ndarray'>
+>>> a.reshape(3, 2)
+array([[0, 1],
+       [2, 3],
+       [4, 5]])
+>>> np.arange(6).reshape(3, 2)
+array([[0, 1],
+       [2, 3],
+       [4, 5]])
+>>>
+```
+
 ### numpy.random.randn
 numpy.random.**randn**(*d0, d1, ..., dn*)  
 如果没有指定参数则返回一个随机的浮点数。  
@@ -5341,6 +5410,33 @@ dtype: float64
 ```
 
 构建 Series 的数据必须是一维的，所以通过 np.random.randn() 来构建 Series 对象时只能使用一个参数。  
+
+### numpy.reshape
+numpy.**reshape**(*a, newshape, order='C'*)  
+在不改变数组数据的前提下给出一个新的数组形态。
+
+**参数：**  
+**a：** **_array_like_**  
+需要被改造的数组。  
+
+**newshape：**  
+*整型数或者整型数元组*  
+新的形状应该与原始的形状相兼容。  
+
+**返回值：**  
+**reshaped_array：** **_ndarray_** 类型  
+
+**另请参考：**  
+[ndarray.reshape](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.reshape.html#numpy.ndarray.reshape) 等价方法。
+
+```python
+>>> a = np.arange(6).reshape((3, 2))
+>>> a
+array([[0, 1],
+       [2, 3],
+       [4, 5]])
+>>>
+```
 
 ## openpyxl
 介绍：openpyxl is a Python library to read/write Excel 2010 xlsx/xlsm/xltx/xltm files.  
@@ -5748,6 +5844,68 @@ In [1996]: s1.loc['b']
 Out[1996]: 0.42436116596528517
 ```
 
+For getting a cross section using a label (等同于 `df.xs('a')`):
+
+```python
+In [2269]: df1.loc['a']      
+Out[2269]: 
+A    0.088747
+B    0.561819
+C    0.331591
+D    0.355395
+Name: a, dtype: float64
+
+In [2270]: df1.xs('a')       
+Out[2270]: 
+A    0.088747
+B    0.561819
+C    0.331591
+D    0.355395
+Name: a, dtype: float64
+```
+
+当 DataFrame 的列超过了一屏时，可以通过 df.loc[row label] 或 df.xs(row label) 命令来将指定的行按纵向的方式来展示：
+
+```python
+In [2284]: df = pro.fund_basic(status='L', market='E')     
+
+In [2285]: df.head(1)        
+Out[2285]: 
+   ts_code    name            management  custodian  fund_type  ...    type        trustee purc_startdate redm_startdate market
+0  502056.SH  医疗基金(LOF)    广发基金     北京银行    股票型     ...  契约型开放式    None       20200831       20200831      E
+
+[1 rows x 25 columns]
+
+In [2286]: df.loc[0]         
+Out[2286]: 
+ts_code                               502056.SH
+name                                  医疗基金(LOF)
+management                                 广发基金
+custodian                                  北京银行
+fund_type                                   股票型
+found_date                             20200826
+due_date                                   None
+list_date                              20150731
+issue_date                             20200826
+delist_date                                None
+issue_amount                             0.5931
+m_fee                                       0.5
+c_fee                                      0.15
+duration_year                              None
+p_value                                       1
+min_amount                                  NaN
+exp_return                                 None
+benchmark         中证医疗指数收益率*95%+银行活期存款利率(税后)*5%
+status                                        L
+invest_type                               被动指数型
+type                                     契约型开放式
+trustee                                    None
+purc_startdate                         20200831
+redm_startdate                         20200831
+market                                        E
+Name: 0, dtype: object
+```
+
 #### 用标签分片
 当使用 `.loc` 分片时，如果起始标签和终止标签都出现在索引中，则它们两者之间的元素 (包括它们自身) 被返回：  
 
@@ -5765,6 +5923,331 @@ dtype: object
 #### 按位置选择
 **警告**  
 为了一个设置操作而返回的，不管是一个副本还是一个引用，有可能依赖于上下文。这有时被称为 `链式赋值` 且应该被禁止。参见 [返回一个视图 vs 副本](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-view-versus-copy)。  
+
+为了获得**完全基于整型数的索引** Pandas 提供了一整套方法。语法接近 Python 和 NumPy 分片。有基于 0 的索引。当分片时，会包含起始边界，但不会包含终止边界。当尝试使用一个非整型数时，即使是一个**有效的**标签也将抛出一个 `IndexError`。
+
+`.iloc` 属性是主要的访问方法。下面是有效的输入：
+
+* 一个整型数，例如：`5`。
+
+* 一个整型数列表或者数组 `[4, 3, 0]`。
+
+* 一个整型数分片对象 `1:7`。
+
+* 一个布尔数组。
+
+* 一个可调用对象，参见 [按可调用对象选择](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-callable)。
+
+For getting a cross section using an integer position (等同于 `df.xs(1)`):  
+df.xs() 的 key 参数只能为标签或标签元组。  
+
+```python
+In [2287]: df1 = pd.DataFrame(np.random.randn(6, 4), index=list(range(0, 12, 2)), 
+                              columns=list(range(0, 8, 2)))        
+
+In [2288]: df1.iloc[1]       
+Out[2288]: 
+0    0.163863
+2    0.948425
+4   -0.035419
+6   -0.183619
+Name: 2, dtype: float64
+```
+
+当 DataFrame 的列太多时，可以通过 df.iloc[row position] 或 df.xs(row position) 命令来将指定行中的列按纵向展示，以便查看完整的列数据。  
+
+超出范围的分片索引会被优雅地处理，就像 Python/Numpy 中一样。  
+
+```python
+# these are allowed in python/numpy.
+In [2300]: x = list('abcdef')
+
+In [2301]: x                 
+Out[2301]: ['a', 'b', 'c', 'd', 'e', 'f']
+
+In [2302]: x[4:10]           
+Out[2302]: ['e', 'f']
+
+In [2303]: x[8:10]           
+Out[2303]: []
+
+In [2304]: s = pd.Series(x)  
+
+In [2305]: s                 
+Out[2305]: 
+0    a
+1    b
+2    c
+3    d
+4    e
+5    f
+dtype: object
+
+In [2306]: s.iloc[4:40]      
+Out[2306]: 
+4    e
+5    f
+dtype: object
+
+In [2307]: s.iloc[8:10]      
+Out[2307]: Series([], dtype: object)
+```
+
+一个超出范围的单一索引将抛出一个 `IndexError`。一个索引列表中任何一个元素超出范围都将抛出一个 `IndexError`。
+
+```python
+>>> df1 = pd.DataFrame(np.random.randn(5, 2), columns=list('AB'))
+>>> df1.iloc[[4, 5, 6]]
+IndexError: positional indexers are out-of-bounds
+
+>>> df1.iloc[:, 4]
+IndexError: single positional indexer is out-of-bounds
+```
+
+#### 按可调用对象选择
+`.loc`, `.iloc`, 和 `[]` 索引可以接受一个可调用对象作为索引。The callable must be a function with one argument (the calling Series or DataFrame) that returns valid output for indexing.
+
+#### 重建索引
+实现选择可能找不到的元素的惯用方式是通过 `.reindex()`。另请参考关于 [重建索引](https://pandas.pydata.org/pandas-docs/stable/user_guide/basics.html#basics-reindexing) 的章节。
+
+```python
+In [2338]: s = pd.Series([1, 2, 3])                        
+
+In [2339]: s                 
+Out[2339]: 
+0    1
+1    2
+2    3
+dtype: int64
+
+In [2340]: s.reindex([1, 2, 3])                            
+Out[2340]: 
+1    2.0
+2    3.0
+3    NaN
+dtype: float64
+```
+
+另一种选择是，如果你想仅选择*有效的*键，下面的方法是惯用且有效的；它确保保护选择的数据的类型。
+
+```python
+In [2343]: labels = [1, 2, 3]
+
+In [2344]: s.loc[s.index.intersection(labels)]             
+Out[2344]: 
+1    2
+2    3
+dtype: int64
+```
+
+#### 扩大设置
+当设置一个不存在的键时，`.loc/[]` 操作可以为相应的轴执行扩大设置。
+
+对于 `Series` 这等效于附加操作。  
+
+```python
+In [2358]: se = pd.Series([1, 2, 3])                       
+
+In [2359]: se                
+Out[2359]: 
+0    1
+1    2
+2    3
+dtype: int64
+
+In [2360]: se[5] = 5         
+
+In [2361]: se                
+Out[2361]: 
+0    1
+1    2
+2    3
+5    5
+dtype: int64
+```
+
+#### 快速地获取及设置标量值
+因为 `[]` 索引必须处理一些情况 (单标签访问，分片，布尔索引，等等。)，为了计算出你正在问什么它有一定的开销。如果你仅仅想访问一个标量值，最快的方式是使用 `at` 和 `iat` 方法，这两个方法在所有数据结构上都实现了。
+
+与 `loc` 类似，`at` 提供基于标签的标量查找，与此同时，`iat` 提供类似于 `iloc` 基于整型数的查找  
+
+```python
+In [2395]: s = pd.Series([0, 1, 2, 3, 4, 5])               
+
+In [2396]: s.iat[5]          
+Out[2396]: 5
+
+In [2397]: dates = pd.date_range('1/1/2000', periods=8)    
+
+In [2398]: df = pd.DataFrame(np.random.randn(8, 4), index=dates, columns=['A', 'B', 'C', 'D'])                         
+
+In [2399]: df                
+Out[2399]: 
+                   A         B         C         D
+2000-01-01  0.532947 -0.265345  2.131531 -1.060020
+2000-01-02  0.318499  1.453165  1.650231 -0.193968
+2000-01-03  1.406332  0.452542  0.027695  0.333423
+2000-01-04 -0.903745  1.229573 -0.265945  0.700144
+2000-01-05  0.097685  0.049682 -0.150477 -0.622863
+2000-01-06  1.005626  1.778057 -0.873678 -1.065244
+2000-01-07 -0.524694  1.234492 -0.220565 -1.095799
+2000-01-08 -1.158843 -0.239093 -0.188501  0.061266
+
+In [2400]: df.at[dates[5], 'A']                            
+Out[2400]: 1.0056264261667067
+
+In [2401]: df.iat[3, 0]      
+Out[2401]: -0.903744648864624
+```
+
+#### 布尔索引
+另一种常用操作是使用布尔向量过滤数据。这些操作符是：`|` for `or`, `&` for `and`, and `~` for `not`。这些必须使用圆括号分组，因为默认情况下 Python 将一个表达式如 `df['A'] > 2 & df['B'] < 3` 计算为 `df['A'] > (2 & df['B']) < 3`，而期望的计算顺序是 `(df['A'] > 2) & (df['B'] < 3)`。
+
+使用一个布尔向量索引一个 Series 能正确地工作就像在一个 NumPy ndarray 中一样：
+
+```python
+In [2402]: s = pd.Series(range(-3, 4))                     
+
+In [2403]: s                 
+Out[2403]: 
+0   -3
+1   -2
+2   -1
+3    0
+4    1
+5    2
+6    3
+dtype: int64
+
+In [2404]: s[s > 0]          
+Out[2404]: 
+4    1
+5    2
+6    3
+dtype: int64
+```
+
+列表包含以及 Series 的 `map` 方法也可以用来创作更复杂的条件：  
+
+```python
+In [2469]: df2 = pd.DataFrame({'a': ['one', 'one', 'two', 'three', 'two', 'one', 'six'], 
+      ...:                     'b': ['x', 'y', 'y', 'x', 'y', 'x', 'x'], 
+      ...:                     'c': np.random.randn(7)})   
+
+# only want 'two' or 'three'
+In [2470]: criterion = df2['a'].map(lambda x: x.startswith('t'))                                                       
+In [2471]: df2[criterion]    
+Out[2471]: 
+       a  b         c
+2    two  y -0.151329
+3  three  x -0.574711
+4    two  y  0.763878
+
+# equivalent but slower
+In [2472]: df2[[x.startswith('t') for x in df2['a']]]      
+Out[2472]: 
+       a  b         c
+2    two  y -0.151329
+3  three  x -0.574711
+4    two  y  0.763878
+
+# Multiple criteria
+In [2473]: df2[criterion & (df2['b'] == 'x')]              
+Out[2473]: 
+       a  b         c
+3  three  x -0.574711
+
+```
+
+对于可供选择的方法 [按标签选择](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-label)，[按位置选择](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-integer)，以及 [高级索引](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html#advanced)，你可能会使用布尔向量结合其它索引表达式沿多个轴选择数据。
+
+```python
+In [2474]: df2.loc[criterion & (df2['b'] == 'x'), 'b':'c'] 
+Out[2474]: 
+   b         c
+3  x -0.574711
+
+```
+
+#### 用 isin 方法索引
+考虑到 Series 的 [isin()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.isin.html#pandas.Series.isin) 方法，它返回一个布尔向量，如果 Series 的元素存在于传递的列表中，则相应的布尔值为 true。这个方法允许你选择那些一列或者多列中包含你想要的值的行：
+
+```python
+In [15]: s = pd.Series(np.arange(5), index=np.arange(5)[::-1], dtype='int64')                           
+
+In [16]: s                   
+Out[16]: 
+4    0
+3    1
+2    2
+1    3
+0    4
+dtype: int64
+
+In [17]: s.isin([2, 4, 6])   
+Out[17]: 
+4    False
+3    False
+2     True
+1    False
+0     True
+dtype: bool
+
+In [18]: s[s.isin([2, 4, 6])]
+Out[18]: 
+2    2
+0    4
+dtype: int64
+
+```
+
+这个方法也适用于 Index 对象，当你不知道哪些被寻找的标签实际存在时很有用：
+
+```python
+In [44]: s[s.index.isin([2, 4, 6])]                        
+Out[44]: 
+4    0
+2    2
+dtype: int64
+
+# compare it to the following
+In [45]: s.reindex([2, 4, 6])
+Out[45]: 
+2    2.0
+4    0.0
+6    NaN
+dtype: float64
+```
+
+DataFrame 也有一个 [isin()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.isin.html#pandas.DataFrame.isin) 方法。当调用 `isin` 时，传递一个数组或字典的值的集合。如果值是一个数组，`isin` 返回一个与原始 DataFrame 形状相同的布尔值 DataFrame，只要元素在值的序列中则相应的布尔值为 True。
+
+```python
+In [233]: df = pd.DataFrame({'vals': [1, 2, 3, 4], 'ids': ['a', 'b', 'f', 'n'], 'ids2': ['a', 'n', 'c', 'n']})         
+
+In [234]: values = ['a', 'b', 1, 3]                        
+
+In [235]: df.isin(values)    
+Out[235]: 
+    vals    ids   ids2
+0   True   True   True
+1  False   True  False
+2   True  False  False
+3  False  False  False
+```
+
+你常常想在确定的列中匹配确定的值。只需将一个字典作为值，其中键是列名，而值是你想检查的项的列表。
+
+```python
+In [236]: values = {'ids': ['a', 'b'], 'vals': [1, 3]}     
+
+In [237]: df.isin(values)    
+Out[237]: 
+    vals    ids   ids2
+0   True   True  False
+1  False   True  False
+2   True  False  False
+3  False  False  False
+```
 
 ### 输入/输出
 #### pandas.read_excel
@@ -7012,19 +7495,23 @@ end_date    |str   |N     |报告期结束日期
 
 **输出参数**
 
-名称          |类型  |默认显示  |描述
---------------|------|---------|-------
-ts_code       |str   |Y        |TS代码  
-ann_date      |str   |Y        |公告日期  
-end_date      |str   |Y        |报告期  
-extra_item    |float |Y        |非经常性损益  
-profit_dedt   |float |Y        |扣除非经常性损益后的净利润  
-roe           |float |Y        |净资产收益率  
-netprofit_yoy |float |Y        |归属母公司股东的净利润同比增长率(%)  
-update_flag   |str   |N        |更新标识  
+名称               |类型  |默认显示  |描述
+-------------------|------|---------|-------
+ts_code            |str   |Y        |TS代码  
+ann_date           |str   |Y        |公告日期  
+end_date           |str   |Y        |报告期  
+extra_item         |float |Y        |非经常性损益  
+profit_dedt        |float |Y        |扣除非经常性损益后的净利润  
+netprofit_margin   |float |Y        |销售净利率  
+grossprofit_margin |float |Y        |销售毛利率  
+profit_to_gr       |float |Y        |净利润/营业总收入  
+roe                |float |Y        |净资产收益率  
+netprofit_yoy      |float |Y        |归属母公司股东的净利润同比增长率(%)  
+update_flag        |str   |N        |更新标识  
 
 净利润（同花顺中的净利润） = 非经常性损益（extra_item） + 扣除非经常性损益后的净利润（profit_dedt）  
 netprofit_yoy 对应的是同花顺财务板块中的净利润同比增幅；  
+netprofit_margin 和 profit_to_gr 对应的都是净利率；  
 
 **常见用法**  
 1.根据股票代码获取单个股票的历史交易数据  
