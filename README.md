@@ -6249,6 +6249,19 @@ Out[237]:
 3  False  False  False
 ```
 
+结合 DataFrame 的 isin 和 any() 及 all() 方法可以快速地从你的数据中筛选出符合指定条件的子集。选择每一列都符合它自己的条件的行：
+
+```python
+In [252]: values = {'ids': ['a', 'b'], 'ids2': ['a', 'c'], 'vals': [1, 3]}                               
+
+In [253]: row_mask = df.isin(values).all(1)                
+
+In [254]: df[row_mask]       
+Out[254]: 
+   vals ids ids2
+0     1   a    a
+```
+
 ### 输入/输出
 #### pandas.read_excel
 pandas.**read_excel**(\*args, \*\*kwargs)  
@@ -6309,6 +6322,70 @@ pandas.**concat**_(objs: Union[Iterable[‘DataFrame’], Mapping[Label, ‘Data
 0      c       3
 1      d       4
 >>>
+```
+
+### pandas.DataFrame.all
+DataFrame.all(*axis=0, bool_only=None, skipna=True, level=None, \*\*kwargs*)  
+返回至少一个轴上的所有元素是否为真。  
+
+返回真，如果在一个 series 中或者沿 Dataframe 的一个轴上至少有一个元素为假或等价（例如：0或者空）则返回假。
+
+**参数：**  
+**axis：** **_{0 or ‘index’, 1 or ‘columns’, None}, default 0_**  
+表明哪一个轴（or axes）应该被缩减。
+
+* 0/‘index’: 缩减索引，返回一个 Series，其索引是原来的列标签。  
+* 1/‘columns’: 缩减列，返回一个 Series，其索引是原来的索引。  
+* None: 缩减所有轴，返回一个标量。  
+
+**返回值**  
+**Series 或者 DataFrame**  
+如果指定了 level 则返回 DataFrame；否则返回 Series。  
+
+**例子**  
+**DataFrames**  
+通过字典构建一个 dataframe。
+
+```python
+>>> df = pd.DataFrame({'col1': [True, True, True], 'col2': [True, True, False], 'col3': [True, False, False]})
+>>> df
+   col1   col2   col3
+0  True   True   True
+1  True   True  False
+2  True  False  False
+```
+
+默认行为检查列式的值是否都返回真。
+
+```python
+>>> df.all()
+col1     True
+col2    False
+col3    False
+dtype: bool
+>>>
+```
+
+指定 axis='columns'（或者 axis=1）以检查是否行式的值都返回真。
+
+```python
+>>> df.all(axis='columns')
+0     True
+1    False
+2    False
+dtype: bool
+>>> df.all(axis=1)
+0     True
+1    False
+2    False
+dtype: bool
+```
+
+或者指定 axis=None 以检查是否所有值都为真。
+
+```python
+>>> df.all(axis=None)
+False
 ```
 
 ### pandas.DataFrame.index
