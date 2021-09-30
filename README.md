@@ -138,6 +138,7 @@
     * [pyspider](#pyspider)
     * [redis-py](#redis-py)
     * [Requests](#requests)
+    * [SciPy](#scipy)
     * [Scrapy](#scrapy)
     * [Scrapy-Redis](#scrapy-redis)
     * [Scrapy-Splash](#scrapy-splash)
@@ -5153,6 +5154,10 @@ pip install matplotlib
 
 ```python
 import matplotlib.pyplot as plt
+
+# 如果你正在使用 Jupyter Notebook，你可能也想运行下面这行代码，以便在你的 notebook 中显示你的代码：
+
+%matplotlib inline
 ```
 
 ### 用法
@@ -5302,6 +5307,22 @@ MySQLdb is an interface to the popular [MySQL](http://www.mysql.com/) database s
 import numpy as np
 ```
 
+### NumPy: 初学者的绝对基础
+#### 欢迎来到 NumPy!
+NumPy (**Numerical Python**) 是一个开源的 Python 库，它几乎用于科学与工程学的每一个领域。NumPy API 广泛用于 Pandas, SciPy, Matplotlib, scikit-learn, scikit-image 以及大多数其它数据科学及与科学有关的 Python 包。
+
+**ndarray** —— a homogeneous n-dimensional array（一个同类型的N维数组）
+
+#### 关于 arrays 的更多信息
+NumPy **ndarray** 类被用于表示矩阵及向量。一个**向量**是一个一维数组 (行向量和列向量之间没有区别)，而一个**矩阵**指的是一个二维数组。对于 **3-D** 或 更高维度的数组，通常使用术语张量。  
+
+在 NumPy 中，维被称为**坐标轴**。   
+
+**ndarray.ndim** 将高速你数组的坐标轴或者维的个数。  
+
+**ndarray.shape** 将显示一个整型数元组用以表明数组的每个维所存储的元素的个数。例如，如果你有一个2行3列的2维数组，则你的数组的形状是 (2, 3)。  
+
+
 ### numpy.arange
 numpy.**arange**([*start*, ]*stop*, [*step*, ]*dtype=None*)  
 在指定的区间内返回等间距的值。
@@ -5436,6 +5457,130 @@ array([[0, 1],
        [2, 3],
        [4, 5]])
 >>>
+```
+
+### 术语表
+**along an axis**  
+参考链接：[https://docs.scipy.org/doc/numpy-1.10.0/glossary.html](https://docs.scipy.org/doc/numpy-1.10.0/glossary.html)  
+轴被用于定义超过一维的数组。一个 2 维的数组有两个对应的轴：第一个垂直向下穿过行 (axis 0)，而第二个水平运行穿过列 (axis 1)。  
+
+许多操作可以沿着一个轴发生。例如，we can sum each row of an array, in which case we operate along columns, or axis 1:  
+
+```python
+>>> x = np.arange(12).reshape((3, 4))
+>>> x
+array([[ 0,  1,  2,  3],
+       [ 4,  5,  6,  7],
+       [ 8,  9, 10, 11]])
+>>> x.sum(axis=1)
+array([ 6, 22, 38])
+>>>
+```
+
+**along an axis**  
+参考链接：[https://numpy.org/doc/stable/glossary.html](https://numpy.org/doc/stable/glossary.html)  
+沿着数组 **a** 的*轴 n* 的一个操作的行为就好像它的参数是数组 **a** 的分片，并且每个分片都有一个连续的轴 *n* 索引。    
+
+例如，如果 **a** 是一个 3 x *N* 数组，一个沿轴 0 的操作行为就好像它的参数是一个包含每一行分片的数组一样：  
+
+```python
+>>> np.array((a[0,:], a[1,:], a[2,:]))
+```
+
+为使它更具体，我们可以选择操作数组逆转的函数 [numpy.flip](https://numpy.org/doc/stable/reference/generated/numpy.flip.html#numpy.flip)，它接受一个 **axis** 参数。我们构造一个 3 x 4 的数组 **a**：  
+
+```python
+>>> a = np.arange(12).reshape(3, 4)
+>>> a
+array([[ 0,  1,  2,  3],
+       [ 4,  5,  6,  7],
+       [ 8,  9, 10, 11]])
+>>> 
+```
+
+沿轴 0 反转 (the row axis)   
+
+```python
+>>> np.flip(a, axis=0)
+array([[ 8,  9, 10, 11],
+       [ 4,  5,  6,  7],
+       [ 0,  1,  2,  3]])
+>>> 
+```
+
+回顾沿一个轴的定义，沿轴 0 翻转对待它的参数就好像它是  
+
+```python
+>>> np.array((a[0,:], a[1,:], a[2,:]))
+array([[ 0,  1,  2,  3],
+       [ 4,  5,  6,  7],
+       [ 8,  9, 10, 11]])
+>>>
+```
+
+而 **np.flip(a,axis=0)** 的结果是反转分片：  
+
+```python
+>>> np.array((a[2,:], a[1,:], a[0,:]))
+array([[ 8,  9, 10, 11],
+       [ 4,  5,  6,  7],
+       [ 0,  1,  2,  3]])
+>>> 
+```
+
+三维数组  
+
+```python
+>>> a = np.arange(27).reshape(3, 3, 3)                                                            
+>>> a
+array([[[ 0,  1,  2],
+        [ 3,  4,  5],
+        [ 6,  7,  8]],
+
+       [[ 9, 10, 11],
+        [12, 13, 14],
+        [15, 16, 17]],
+
+       [[18, 19, 20],
+        [21, 22, 23],
+        [24, 25, 26]]])
+>>> a[0,:,:]
+array([[0, 1, 2],
+       [3, 4, 5],
+       [6, 7, 8]])
+>>> a[:,0,:]
+array([[ 0,  1,  2],
+       [ 9, 10, 11],
+       [18, 19, 20]])
+>>> a[:,:,0]
+array([[ 0,  3,  6],
+       [ 9, 12, 15],
+       [18, 21, 24]])
+>>> a.sum(axis=0)     
+array([[27, 30, 33],
+       [36, 39, 42],
+       [45, 48, 51]])
+>>> a[0,:,:] + a[1,:,:] + a[2,:,:]   
+array([[27, 30, 33],
+       [36, 39, 42],
+       [45, 48, 51]])
+>>> a.sum(axis=1)
+array([[ 9, 12, 15],
+       [36, 39, 42],
+       [63, 66, 69]])
+>>> a[:,0,:] + a[:,1,:] + a[:,2,:]      
+array([[ 9, 12, 15],
+       [36, 39, 42],
+       [63, 66, 69]])
+>>> a.sum(axis=2)
+array([[ 3, 12, 21],
+       [30, 39, 48],
+       [57, 66, 75]])
+>>> a[:,:,0] + a[:,:,1] + a[:,:,2]     
+array([[ 3, 12, 21],
+       [30, 39, 48],
+       [57, 66, 75]])
+>>> 
 ```
 
 ## openpyxl
@@ -6262,6 +6407,278 @@ Out[254]:
 0     1   a    a
 ```
 
+### where() 方法及 Masking  
+通过布尔向量从一个 Series 中选择值通常返回一个原始数据的子集。为了保证筛选的输出与原始数据的形状相同，你可以在 Series 和 DataFrame 中使用 where 方法。  
+
+仅返回被选择的行：  
+
+```python
+In [264]: s[s > 0]           
+Out[264]: 
+3    1
+2    2
+1    3
+0    4
+dtype: int64
+```
+
+返回一个和原始 Series 形状相同的 Series：
+
+```python
+In [265]: s.where(s > 0)     
+Out[265]: 
+4    NaN
+3    1.0
+2    2.0
+1    3.0
+0    4.0
+dtype: float64
+```
+
+现在通过布尔规范从一个 DataFrame 中选择值也将保持输入数据的形状。背后的实现是通过 where 。下面的代码等同于 `df.where(df < 0)`。  
+
+```python
+In [271]: df[df < 0]         
+Out[271]: 
+                   A         B         C         D
+2000-01-01       NaN -1.254982       NaN -0.016761
+2000-01-02       NaN -0.656100 -2.003315       NaN
+2000-01-03 -1.211283       NaN -1.021318 -0.181545
+2000-01-04 -1.093566 -0.267235       NaN -0.393395
+2000-01-05 -1.479570 -0.924544 -0.380941       NaN
+2000-01-06 -0.190404 -0.212619       NaN       NaN
+2000-01-07       NaN       NaN -1.721793       NaN
+2000-01-08       NaN       NaN -0.067199       NaN
+```
+
+另外，`where` 带有一个可选的 `other` 参数用于替换条件为假的值，并就地返回相应的副本。
+
+```python
+In [273]: df.where(df < 0, -df)                            
+Out[273]: 
+                   A         B         C         D
+2000-01-01 -1.027261 -1.254982 -0.347028 -0.016761
+2000-01-02 -0.959209 -0.656100 -2.003315 -1.678398
+2000-01-03 -1.211283 -2.775171 -1.021318 -0.181545
+2000-01-04 -1.093566 -0.267235 -0.211445 -0.393395
+2000-01-05 -1.479570 -0.924544 -0.380941 -0.046379
+2000-01-06 -0.190404 -0.212619 -1.470182 -0.710863
+2000-01-07 -1.620551 -1.852458 -1.721793 -1.036632
+2000-01-08 -0.148211 -2.144672 -0.067199 -1.913107
+```
+
+默认情况下，`where`返回一个数据副本的修改版本。有一个可选参数 `inplace` 可以在不创建副本的情况下直接修改原始数据：
+
+```python
+In [285]: df_orig = df.copy()
+
+In [286]: df_orig.where(df > 0, -df, inplace=True)         
+
+In [287]: df_orig            
+Out[287]: 
+                   A         B         C         D
+2000-01-01  1.027261  1.254982  0.347028  0.016761
+2000-01-02  0.959209  0.656100  2.003315  1.678398
+2000-01-03  1.211283  2.775171  1.021318  0.181545
+2000-01-04  1.093566  0.267235  0.211445  0.393395
+2000-01-05  1.479570  0.924544  0.380941  0.046379
+2000-01-06  0.190404  0.212619  1.470182  0.710863
+2000-01-07  1.620551  1.852458  1.721793  1.036632
+2000-01-08  0.148211  2.144672  0.067199  1.913107
+```
+
+**注意**
+
+[DataFrame.where()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.where.html#pandas.DataFrame.where) 的签名不同于 [numpy.where()](https://numpy.org/doc/stable/reference/generated/numpy.where.html#numpy.where)。虽然 `df1.where(m, df2)` 大体上等同于 `np.where(m, df1, df2)`。
+
+```python
+In [294]: df.where(df < 0, -df) == np.where(df < 0, df, -df)                                                           
+Out[294]: 
+               A     B     C     D
+2000-01-01  True  True  True  True
+2000-01-02  True  True  True  True
+2000-01-03  True  True  True  True
+2000-01-04  True  True  True  True
+2000-01-05  True  True  True  True
+2000-01-06  True  True  True  True
+2000-01-07  True  True  True  True
+2000-01-08  True  True  True  True
+```
+
+**对齐**
+
+而且，`where` 使输入的布尔条件对齐 (ndarray 或者 DataFrame)，因此设置部分数据是可能的。这类似于通过 `.loc` 设置部分数据 (但这是通过内容而不是轴标签)。  
+
+```python
+In [295]: df2 = df.copy()    
+
+In [296]: df2[df2[1:4] > 0] = 3                            
+
+In [297]: df2                
+Out[297]: 
+                   A         B         C         D
+2000-01-01  1.027261 -1.254982  0.347028 -0.016761
+2000-01-02  3.000000 -0.656100 -2.003315  3.000000
+2000-01-03 -1.211283  3.000000 -1.021318 -0.181545
+2000-01-04 -1.093566 -0.267235  3.000000 -0.393395
+2000-01-05 -1.479570 -0.924544 -0.380941  0.046379
+2000-01-06 -0.190404 -0.212619  1.470182  0.710863
+2000-01-07  1.620551  1.852458 -1.721793  1.036632
+2000-01-08  0.148211  2.144672 -0.067199  1.913107
+```
+
+当执行 `where` 时，Where 也能接受 `axis` 和 `level` 参数使输入对齐。
+
+```python
+In [299]: df2 = df.copy()    
+
+In [300]: df2.where(df2 > 0, df2['A'], axis='index')       
+Out[300]: 
+                   A         B         C         D
+2000-01-01  1.027261  1.027261  0.347028  1.027261
+2000-01-02  0.959209  0.959209  0.959209  1.678398
+2000-01-03 -1.211283  2.775171 -1.211283 -1.211283
+2000-01-04 -1.093566 -1.093566  0.211445 -1.093566
+2000-01-05 -1.479570 -1.479570 -1.479570  0.046379
+2000-01-06 -0.190404 -0.190404  1.470182  0.710863
+2000-01-07  1.620551  1.852458  1.620551  1.036632
+2000-01-08  0.148211  2.144672  0.148211  1.913107
+```
+
+这等同于下面的代码（但比下面的更快）。
+
+```python
+In [301]: df2 = df.copy()    
+
+In [302]: df.apply(lambda x, y: x.where(x > 0, y), y=df['A'])                                                          
+Out[302]: 
+                   A         B         C         D
+2000-01-01  1.027261  1.027261  0.347028  1.027261
+2000-01-02  0.959209  0.959209  0.959209  1.678398
+2000-01-03 -1.211283  2.775171 -1.211283 -1.211283
+2000-01-04 -1.093566 -1.093566  0.211445 -1.093566
+2000-01-05 -1.479570 -1.479570 -1.479570  0.046379
+2000-01-06 -0.190404 -0.190404  1.470182  0.710863
+2000-01-07  1.620551  1.852458  1.620551  1.036632
+2000-01-08  0.148211  2.144672  0.148211  1.913107
+```
+
+**Mask**
+
+[mask()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.mask.html#pandas.DataFrame.mask) 是 `where` 的反向布尔操作。
+
+```python
+In [310]: s.mask(s >= 0)     
+Out[310]: 
+4   NaN
+3   NaN
+2   NaN
+1   NaN
+0   NaN
+dtype: float64
+```
+
+### query() 方法
+[DataFrame](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame) 对象有一个 query() 方法，该方法允许筛选使用一个表达式。
+
+```python
+In [320]: n = 10             
+
+In [321]: df = pd.DataFrame(np.random.rand(n, 3), columns=list('abc'))                                                 
+In [322]: df                 
+Out[322]: 
+          a         b         c
+0  0.322170  0.380921  0.571703
+1  0.951441  0.335061  0.146904
+2  0.245722  0.686748  0.609397
+3  0.230059  0.531634  0.924360
+4  0.749230  0.862731  0.882803
+5  0.490591  0.138896  0.666389
+6  0.699899  0.453408  0.537391
+7  0.383800  0.440843  0.381102
+8  0.214088  0.200563  0.919920
+9  0.327337  0.507083  0.887235
+
+# pure python      
+In [324]: df[(df['a'] < df['b']) & (df['b'] < df['c'])]    
+Out[324]: 
+          a         b         c
+0  0.322170  0.380921  0.571703
+3  0.230059  0.531634  0.924360
+4  0.749230  0.862731  0.882803
+9  0.327337  0.507083  0.887235
+
+# query            
+In [326]: df.query('(a < b) & (b < c)')                    
+Out[326]: 
+          a         b         c
+0  0.322170  0.380921  0.571703
+3  0.230059  0.531634  0.924360
+4  0.749230  0.862731  0.882803
+9  0.327337  0.507083  0.887235
+```
+
+### 重置索引
+为方便起见，DataFrame 有一个新的函数叫作 [reset_index()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html#pandas.DataFrame.reset_index)，它将索引值转换为 DataFrame 的列并设置一个简单的整型数索引。这是 [set_index()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.set_index.html#pandas.DataFrame.set_index) 的反向操作。
+
+```python
+In [503]: data               
+Out[503]: 
+         c    d
+a   b          
+bar one  z  1.0
+    two  y  2.0
+foo one  x  3.0
+    two  w  4.0
+
+In [504]: data.reset_index() 
+Out[504]: 
+     a    b  c    d
+0  bar  one  z  1.0
+1  bar  two  y  2.0
+2  foo  one  x  3.0
+3  foo  two  w  4.0
+```
+
+### 返回一个视图 vs 一个副本
+当给 pandas 对象设置值时，必须小心一种称之为 **链索引** 的情况。这里有一个例子。
+
+```python
+In [516]: dfmi = pd.DataFrame([list('abcd'), list('efgh'), list('ijkl'), list('mnop')], 
+     ...: columns=pd.MultiIndex.from_product([['one', 'two'], ['first', 'second']]))      
+
+In [517]: dfmi               
+Out[517]: 
+    one          two       
+  first second first second
+0     a      b     c      d
+1     e      f     g      h
+2     i      j     k      l
+3     m      n     o      p
+```
+
+比较这两种访问方法：
+
+```python
+In [518]: dfmi['one']['second']                            
+Out[518]: 
+0    b
+1    f
+2    j
+3    n
+Name: second, dtype: object
+
+In [519]: dfmi.loc[:, ('one', 'second')]                   
+Out[519]: 
+0    b
+1    f
+2    j
+3    n
+Name: (one, second), dtype: object
+```
+
+方法2比方法1（chained []）更好。方法2不仅更快，而且还允许同时索引两个轴。  
+
 ### 输入/输出
 #### pandas.read_excel
 pandas.**read_excel**(\*args, \*\*kwargs)  
@@ -7044,6 +7461,17 @@ proxies = {
 ```
 
 使用 `socks5` 方案会导致 DNS 解析发生在客户端，而不是在代理服务器上。这和 curl 是一致的，curl 使用协议方案来决定是在客户端还是在代理上做 DNS 解析。如果你想在代理服务器上做域名解析，使用 `socks5h` 作为协议方案。
+
+### SciPy 
+官方网站：[https://scipy.org](https://scipy.org)  
+
+SciPy 是一个基于 Python 的用于数学，科学以及工程学的开源软件生态系统。特别地，这些是一些核心包：  
+* **NumPy** 基于N维数组的包  
+* **SciPy 库** 用于科学计算的基础库  
+* **Matplotlib** 全面的 2-D 绘图库  
+* **IPython** 增强的交互式控制台  
+* **SymPy** 符号数学  
+* **pandas** 数据结构与分析  
 
 ### Scrapy
 官方网站：[https://scrapy.org](https://scrapy.org)  
