@@ -127,10 +127,12 @@
     * [matplotlib](#matplotlib)
     * [mitmproxy](#mitmproxy)
     * [MySQL-python](#mysql-python)
-    * [numpy](#numpy)
+    * [NumPy](#numpy)
     * [openpyxl](#openpyxl)
     * [pandas](#pandas)
         * [索引与选择数据](#索引与选择数据)
+        * [选项和设置](#选项和设置)
+        * [输入/输出](#输入输出)
     * [pip](#pip)
     * [PyMongo](#pymongo)
     * [PyMySQL](#pymysql)
@@ -5270,7 +5272,7 @@ MySQLdb is an interface to the popular [MySQL](http://www.mysql.com/) database s
 
 **注意：** 安装 MySQL-python 库以后，导入的模块名是 **MySQLdb**。
 
-## numpy
+## NumPy
 习惯上，我们按以下方式导入numpy：
 
 ```python
@@ -6179,6 +6181,17 @@ Out[2361]:
 2    3
 5    5
 dtype: int64
+
+In [2362]: se.loc[6] = 6
+
+In [2363]: se
+Out[2363]:
+0    1
+1    2
+2    3
+5    5
+6    6
+dtype: int64
 ```
 
 #### 快速地获取及设置标量值
@@ -6649,8 +6662,45 @@ Name: (one, second), dtype: object
 
 方法2比方法1（chained []）更好。方法2不仅更快，而且还允许同时索引两个轴。  
 
+参考链接：  
+[https://pandas.pydata.org/docs/user_guide/indexing.html](https://pandas.pydata.org/docs/user_guide/indexing.html)  
+
+### 选项和设置
+#### 概述
+pandas 有一个选项系统，可以让你自定义其行为的某些方面，与显示相关的选项是用户最有可能调整的选项。  
+
+#### Unicode 格式
+**警告：**  
+启用此选项将影响打印 DataFrame 和 Series 的性能（大约慢 2 倍）。仅在实际需要时使用。  
+
+一些东亚国家使用 Unicode 字符，其宽度对应于两个拉丁字符。如果 DataFrame 或 Series 包含这些字符，则默认输出模式可能无法正确对齐它们。  
+
+```python
+>>> df = pd.read_excel('E:/Downloads/2021-10-13.xlsx').head(1)
+>>> df
+        股票代码  股票简称 最新户均持股市值(元) 最新户均持股数量(股) 最新户均持股比例(%) 股东人数变动公告日2021.10.13    holders
+0  601728.SH  中国电信     6204.72      1453.1           0            20210819  303.1684万
+```
+
+![默认设置](./img/display.unicode.east_asian_width-1.png)  
+
+启用 **display.unicode.east_asian_width** 允许 pandas 检查每个字符的“东亚宽度”属性。通过将此选项设置为 True，可以正确对齐这些字符。但是，这将导致比标准 **len** 函数更长的渲染时间。  
+
+```python
+>>> pd.set_option("display.unicode.east_asian_width", True)
+>>> df
+    股票代码   股票简称   最新户均持股市值(元)  最新户均持股数量(股)   最新户均持股比例(%)  股东人数变动公告日2021.10.13     holders
+0  601728.SH  中国电信              6204.72               1453.1                   0                     20210819  303.1684万
+```
+
+![display.unicode.east_asian_width-with-True](./img/display.unicode.east_asian_width-2.png)  
+
+参考链接：  
+[https://pandas.pydata.org/docs/user_guide/options.html](https://pandas.pydata.org/docs/user_guide/options.html)  
+
 ### 输入/输出
 #### pandas.read_excel
+pandas.**read_excel**(*io, sheet_name=0, header=0, names=None, index_col=None, usecols=None, squeeze=False, dtype=None, engine=None, converters=None, true_values=None, false_values=None, skiprows=None, nrows=None, na_values=None, keep_default_na=True, na_filter=True, verbose=False, parse_dates=False, date_parser=None, thousands=None, comment=None, skipfooter=0, convert_float=None, mangle_dupe_cols=True, storage_options=None*)  
 pandas.**read_excel**(\*args, \*\*kwargs)  
 将一个 Excel 文件读取到一个 pandas DataFrame 中。  
 
@@ -6676,6 +6726,9 @@ pandas.**read_excel**(\*args, \*\*kwargs)
 2  70005    20200522  000005.SZ  世纪星源        2010   0.00       SZ
 >>>
 ``` 
+
+参考链接：  
+[https://pandas.pydata.org/docs/reference/io.html](https://pandas.pydata.org/docs/reference/io.html)  
 
 ### 通用函数
 pandas.concat  
@@ -6937,6 +6990,31 @@ Name: north_money, dtype: bool
   trade_date   ggt_ss  ggt_sz      hgt      sgt  north_money  south_money
 4   20200511 -2296.58   659.6  1071.89  1575.67      2647.56     -1636.98
 >>>
+```
+#### pandas 修改列名
+修改所有列名  
+
+```python
+>>> df = pd.DataFrame({"A1": [1, 2], "B2": [3, 4], "C3": [5, 6], "D4": [7, 8]})
+>>> df
+   A1  B2  C3  D4
+0   1   3   5   7
+1   2   4   6   8
+>>> df.columns = ["A", "B", "C", "D"]
+>>> df
+   A  B  C  D
+0  1  3  5  7
+1  2  4  6  8
+```
+
+修改指定列名  
+
+```python
+>>> df.rename(columns={"C": "c", "D": "d"}, inplace=True)
+>>> df
+   A  B  c  d
+0  1  3  5  7
+1  2  4  6  8
 ```
 
 ### pandas例子
