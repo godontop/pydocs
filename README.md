@@ -133,6 +133,9 @@
         * [索引与选择数据](#索引与选择数据)
         * [选项和设置](#选项和设置)
         * [输入/输出](#输入输出)
+        * [通用函数](#通用函数)
+        * [Series](#series)
+        * [DataFrame](#dataframe)
     * [pip](#pip)
     * [PyMongo](#pymongo)
     * [PyMySQL](#pymysql)
@@ -6689,7 +6692,7 @@ pandas 有一个选项系统，可以让你自定义其行为的某些方面，�
 ```python
 >>> pd.set_option("display.unicode.east_asian_width", True)
 >>> df
-    股票代码   股票简称   最新户均持股市值(元)  最新户均持股数量(股)   最新户均持股比例(%)  股东人数变动公告日2021.10.13     holders
+    股票代码   股票简称   最新户均持股市值(元)  最新户均持股数量(股)   最新户均持股比例(%)  股东人数变动公告日2021.10.13  holders
 0  601728.SH  中国电信              6204.72               1453.1                   0                     20210819  303.1684万
 ```
 
@@ -6701,6 +6704,7 @@ pandas 有一个选项系统，可以让你自定义其行为的某些方面，�
 ### 输入/输出
 #### pandas.read_excel
 pandas.**read_excel**(*io, sheet_name=0, header=0, names=None, index_col=None, usecols=None, squeeze=False, dtype=None, engine=None, converters=None, true_values=None, false_values=None, skiprows=None, nrows=None, na_values=None, keep_default_na=True, na_filter=True, verbose=False, parse_dates=False, date_parser=None, thousands=None, comment=None, skipfooter=0, convert_float=None, mangle_dupe_cols=True, storage_options=None*)  
+
 pandas.**read_excel**(\*args, \*\*kwargs)  
 将一个 Excel 文件读取到一个 pandas DataFrame 中。  
 
@@ -6731,7 +6735,7 @@ pandas.**read_excel**(\*args, \*\*kwargs)
 [https://pandas.pydata.org/docs/reference/io.html](https://pandas.pydata.org/docs/reference/io.html)  
 
 ### 通用函数
-pandas.concat  
+#### pandas.concat  
 pandas.**concat**_(objs: Union[Iterable[‘DataFrame’], Mapping[Label, ‘DataFrame’]], axis='0', join: str = "'outer'", ignore_index: bool = 'False', keys='None', levels='None', names='None', verify_integrity: bool = 'False', sort: bool = 'False', copy: bool = 'True') → ’DataFrame’_  
 
 **参数：**  
@@ -6764,7 +6768,131 @@ pandas.**concat**_(objs: Union[Iterable[‘DataFrame’], Mapping[Label, ‘Data
 >>>
 ```
 
-### pandas.DataFrame.all
+#### pandas.to_numeric
+pandas.**to_numeric**(*arg, errors='raise', downcast=None*)  
+将参数转换为数字类型。  
+
+默认返回数据类型为 *float64* 或 *int64*，具体取决于提供的数据。使用 *downcast* 参数获取其它数据类型。  
+
+```python
+>>> df = pd.DataFrame({"股票简称": ["中国电信", "京东方A", "华润材料"], "holders": ["303.1684万", "141.0821万", 3]})
+>>> df
+   股票简称    holders
+0  中国电信  303.1684万
+1  京东方A  141.0821万
+2  华润材料          3
+>>> df.holders = df.holders.replace('万', 'E4', regex=True)
+>>> df
+   股票简称     holders
+0  中国电信  303.1684E4
+1  京东方A  141.0821E4
+2  华润材料           3
+>>> df.holders = pd.to_numeric(df.holders, downcast="integer")
+>>> df
+   股票简称  holders
+0  中国电信  3031684
+1  京东方A  1410821
+2  华润材料        3
+```
+
+参考链接：  
+[https://pandas.pydata.org/docs/reference/general_functions.html](https://pandas.pydata.org/docs/reference/general_functions.html)  
+
+### Series
+#### pandas.Series.isin
+Series.**isin**(*self, values*)  
+Check whether *values* are contained in Series.
+
+Return a boolean Series showing whether each element in the Series matches an element in the passed sequence of *values* exactly.
+
+**参数：**  
+**values：** *必须是集合或类列表*    
+The sequence of values to test. 传递一个单字符串将抛出一个 TypeError. 将一个单字符串变成一个单元素的列表代替。
+
+**返回值：** **Series**  
+Series of booleans indicating if each element is in values.
+
+```python
+>>> df
+  trade_date   ggt_ss   ggt_sz      hgt      sgt  north_money  south_money
+0   20200515   871.53  1206.17  -111.53  1305.91      1194.38      2077.70
+1   20200514  2471.56  1604.79 -1650.19   325.38     -1324.81      4076.35
+2   20200513  1478.46  1915.81    26.09  -230.73      -204.64      3394.27
+3   20200512   752.76  1075.14   561.87  1188.07      1749.94      1827.90
+4   20200511 -2296.58   659.60  1071.89  1575.67      2647.56     -1636.98
+>>> s = df['north_money']
+>>> type(s)
+<class 'pandas.core.series.Series'>
+>>> s
+0    1194.38
+1   -1324.81
+2    -204.64
+3    1749.94
+4    2647.56
+Name: north_money, dtype: float64
+>>> a = s.isin(['2647.56'])
+>>> type(a)
+<class 'pandas.core.series.Series'>
+>>> a
+0    False
+1    False
+2    False
+3    False
+4     True
+Name: north_money, dtype: bool
+>>> df[a]
+  trade_date   ggt_ss  ggt_sz      hgt      sgt  north_money  south_money
+4   20200511 -2296.58   659.6  1071.89  1575.67      2647.56     -1636.98
+>>>
+```
+
+#### pandas.Series.replace
+Series.**replace**(*to_replace=None, value=None, inplace=False, limit=None, regex=False, method='pad'*)  
+用 *value* 替换 *to_replace* 中给出的值。  
+
+Series 的值被动态地替换为其它值。  
+
+```python
+>>> df = pd.DataFrame({"股票简称": ["中国电信", "京东方A", "华润材料"], "holders": ["303.1684万", "141.0821万", 3]})
+>>> df
+   股票简称    holders
+0  中国电信  303.1684万
+1  京东方A  141.0821万
+2  华润材料          3
+>>> df.holders.replace('万', 'E4', inplace=True, regex=True)
+>>> df
+   股票简称     holders
+0  中国电信  303.1684E4
+1  京东方A  141.0821E4
+2  华润材料           3
+```
+
+参考链接：  
+[https://pandas.pydata.org/docs/reference/series.html](https://pandas.pydata.org/docs/reference/series.html)  
+
+### DataFrame
+#### pandas.DataFrame.index
+DataFrame.**index**: *Index*  
+返回 DataFrame 的索引（行标签）。  
+
+```python
+In [1435]: df                                  
+Out[1435]: 
+       ts_code     name         management    fund_type list_date invest_type
+905  163801.SZ     中银中国       中银基金       混合型  20050223         稳定型
+906  510050.SH    上证50ETF       华夏基金       股票型  20050223       被动指数型
+907  160105.SZ     南方积配       南方基金       混合型  20041220         混合型
+
+In [1436]: df[df['ts_code'] == '510050.SH']    
+Out[1436]: 
+       ts_code     name          management   fund_type list_date invest_type
+906  510050.SH    上证50ETF       华夏基金       股票型  20050223       被动指数型
+
+In [1437]: df[df['ts_code'] == '510050.SH'].index                                              
+Out[1437]: Int64Index([906], dtype='int64')
+```
+
+#### pandas.DataFrame.all
 DataFrame.all(*axis=0, bool_only=None, skipna=True, level=None, \*\*kwargs*)  
 返回至少一个轴上的所有元素是否为真。  
 
@@ -6828,28 +6956,7 @@ dtype: bool
 False
 ```
 
-### pandas.DataFrame.index
-DataFrame.**index**: *Index*  
-返回 DataFrame 的索引（行标签）。  
-
-```python
-In [1435]: df                                  
-Out[1435]: 
-       ts_code     name         management    fund_type list_date invest_type
-905  163801.SZ     中银中国       中银基金       混合型  20050223         稳定型
-906  510050.SH    上证50ETF       华夏基金       股票型  20050223       被动指数型
-907  160105.SZ     南方积配       南方基金       混合型  20041220         混合型
-
-In [1436]: df[df['ts_code'] == '510050.SH']    
-Out[1436]: 
-       ts_code     name          management   fund_type list_date invest_type
-906  510050.SH    上证50ETF       华夏基金       股票型  20050223       被动指数型
-
-In [1437]: df[df['ts_code'] == '510050.SH'].index                                              
-Out[1437]: Int64Index([906], dtype='int64')
-```
-
-### pandas.DataFrame.sort_values
+#### pandas.DataFrame.sort_values
 DataFrame.**sort_values**(*by, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last', ignore_index=False, key=None*)  
 沿任一轴按值排序。
 
@@ -6945,52 +7052,9 @@ DataFrame.**sort_values**(*by, axis=0, ascending=True, inplace=False, kind='quic
 ```  
 <br/>
 
-### pandas.Series.isin
-Series.**isin**(*self, values*)  
-Check whether *values* are contained in Series.
+参考链接：  
+[https://pandas.pydata.org/docs/reference/frame.html](https://pandas.pydata.org/docs/reference/frame.html)  
 
-Return a boolean Series showing whether each element in the Series matches an element in the passed sequence of *values* exactly.
-
-**参数：**  
-**values：** *必须是集合或类列表*    
-The sequence of values to test. 传递一个单字符串将抛出一个 TypeError. 将一个单字符串变成一个单元素的列表代替。
-
-**返回值：** **Series**  
-Series of booleans indicating if each element is in values.
-
-```python
->>> df
-  trade_date   ggt_ss   ggt_sz      hgt      sgt  north_money  south_money
-0   20200515   871.53  1206.17  -111.53  1305.91      1194.38      2077.70
-1   20200514  2471.56  1604.79 -1650.19   325.38     -1324.81      4076.35
-2   20200513  1478.46  1915.81    26.09  -230.73      -204.64      3394.27
-3   20200512   752.76  1075.14   561.87  1188.07      1749.94      1827.90
-4   20200511 -2296.58   659.60  1071.89  1575.67      2647.56     -1636.98
->>> s = df['north_money']
->>> type(s)
-<class 'pandas.core.series.Series'>
->>> s
-0    1194.38
-1   -1324.81
-2    -204.64
-3    1749.94
-4    2647.56
-Name: north_money, dtype: float64
->>> a = s.isin(['2647.56'])
->>> type(a)
-<class 'pandas.core.series.Series'>
->>> a
-0    False
-1    False
-2    False
-3    False
-4     True
-Name: north_money, dtype: bool
->>> df[a]
-  trade_date   ggt_ss  ggt_sz      hgt      sgt  north_money  south_money
-4   20200511 -2296.58   659.6  1071.89  1575.67      2647.56     -1636.98
->>>
-```
 #### pandas 修改列名
 修改所有列名  
 
