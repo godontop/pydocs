@@ -4971,7 +4971,80 @@ $ pip3 install beautifulsoup4
 **注意**  
 这里我们虽然安装的是 beautifulsoup4 这个包，但是在引入的时候却是 bs4。这是因为这个包源代码本身的库文件夹名称就是 bs4，所以安装完成之后，这个库文件夹就被移入到本机 Python3 的 lib 库（/usr/local/lib/python3.6/site-packages）里，所以识别到的库文件名就叫作 bs4。
 
-因此，包本身的名称和我们使用时导入的包的名称并不一定是一致的。
+因此，包本身的名称和我们使用时导入的包的名称并不一定是一致的。  
+
+### 安装解析器
+Beautiful Soup支持Python标准库中的HTML解析器,还支持一些第三方的解析器,其中一个是 [lxml](http://lxml.de/) .根据操作系统不同,可以选择下列方法来安装lxml:  
+
+$ apt-get install Python-lxml  
+
+$ easy_install lxml  
+
+$ pip install lxml  
+
+另一个可供选择的解析器是纯Python实现的 [html5lib](http://code.google.com/p/html5lib/) , html5lib的解析方式与浏览器相同,可以选择下列方法来安装html5lib:  
+
+$ apt-get install Python-html5lib  
+
+$ easy_install html5lib  
+
+$ pip install html5lib  
+
+下表列出了主要的解析器,以及它们的优缺点:  
+
+解析器        |使用方法                               |优势  |劣势  
+-------------|--------------------------------------|------|------
+Python标准库  |BeautifulSoup(markup, "html.parser")  |<ul><li>Python的内置标准库</li><li>执行速度适中</li><li>文档容错能力强</li></ul>  |Python 2.7.3 或 3.2.2 以前的版本中文档容错能力差  
+lxml HTML 解析器  |BeautifulSoup(markup, "lxml")  |<ul><li>速度快</li><li>文档容错能力强</li></ul>  |<ul><li>需要安装C语言库</li></ul>  
+lxml XML 解析器  |BeautifulSoup(markup, ["lxml-xml"])<br><br>BeautifulSoup(markup, "xml")  |<ul><li>速度快</li><li>唯一支持XML的解析器</li></ul>  |<ul><li>需要安装C语言库</li></ul>  
+html5lib  |BeautifulSoup(markup, "html5lib")  |<ul><li>最好的容错性</li><li>以浏览器的方式解析文档</li><li>生成HTML5格式的文档</li></ul>  |<ul><li>速度慢</li><li>不依赖外部扩展</li></ul>  
+
+推荐使用lxml作为解析器,因为效率更高. 在Python2.7.3之前的版本和Python3中3.2.2之前的版本,必须安装lxml或html5lib, 因为那些Python版本的标准库中内置的HTML解析方法不够稳定.  
+
+提示: 如果一段HTML或XML文档格式不正确的话,那么在不同的解析器中返回的结果可能是不一样的。  
+
+从文档中获取所有文字内容  
+
+```python
+>>> from bs4 import BeautifulSoup
+>>> html_doc = """
+... <div bdsfid="72" class="answer_2AM9f">动词加ed的读音主要有三种：<br bdsfid="73">以清辅音结尾的读t,如worked<br bdsfid="74">以浊辅音结尾的读d,如rained.<br bdsfid="75">以t和d结尾的读id.如needed.</div>
+... """
+>>> soup = BeautifulSoup(html_doc, 'html.parser')
+>>> print(soup)
+
+<div bdsfid="72" class="answer_2AM9f">动词加ed的读音主要有三种：<br bdsfid="73"/>以清辅音结尾的读t,如worked<br bdsfid="74"/>以浊辅音结尾的读d,如rained.<br bdsfid="75"/>以t和d结尾的读id.如needed.</div>
+
+>>> print(soup.get_text())
+
+动词加ed的读音主要有三种：以清辅音结尾的读t,如worked以浊辅音结尾的读d,如rained.以t和d结尾的读id.如needed.
+              
+>>> html_doc2 = soup.prettify()
+>>> print(html_doc2)
+<div bdsfid="72" class="answer_2AM9f">
+ 动词加ed的读音主要有三种：
+ <br bdsfid="73"/>
+ 以清辅音结尾的读t,如worked      
+ <br bdsfid="74"/>
+ 以浊辅音结尾的读d,如rained.                                                                                  
+ <br bdsfid="75"/>                                                              
+ 以t和d结尾的读id.如needed.
+</div>                                           
+                   
+>>> soup2 = BeautifulSoup(html_doc2, 'html.parser')                                                            
+>>> print(soup2.get_text())
+
+ 动词加ed的读音主要有三种：                                                                              
+
+ 以清辅音结尾的读t,如worked    
+                   
+ 以浊辅音结尾的读d,如rained.
+                                                                                                                         
+ 以t和d结尾的读id.如needed.                                                 
+
+   
+>>>         
+```
 
 ## chardet
 官方文档：[https://chardet.readthedocs.io/en/latest/index.html](https://chardet.readthedocs.io/en/latest/index.html)
@@ -6671,6 +6744,26 @@ Name: (one, second), dtype: object
 ### 选项和设置
 #### 概述
 pandas 有一个选项系统，可以让你自定义其行为的某些方面，与显示相关的选项是用户最有可能调整的选项。  
+
+选项有一个完整的“dotted-style”，不区分大小写的名称（例如 display.max_rows）。 您可以直接获取/设置选项作为顶层 **options** 属性的属性：  
+
+```python
+In [602]: pd.options.display.max_rows                      
+Out[602]: 60
+
+In [603]: pd.options.display.max_rows = 999                
+
+In [604]: pd.options.display.max_rows                      
+Out[604]: 999
+```
+
+这个 API 由 5 个相关函数组成，可直接从 pandas 命名空间获得：  
+
+* [get_option()](https://pandas.pydata.org/docs/reference/api/pandas.get_option.html#pandas.get_option) / [set_option()](https://pandas.pydata.org/docs/reference/api/pandas.set_option.html#pandas.set_option) - 获取/设置一个单一选项的值。  
+* [reset_option()](https://pandas.pydata.org/docs/reference/api/pandas.reset_option.html#pandas.reset_option) - 将一个或多个选项重置为其默认值。  
+* [describe_option()](https://pandas.pydata.org/docs/reference/api/pandas.describe_option.html#pandas.describe_option) - 打印一个或多个选项的描述。  
+* [option_context()](https://pandas.pydata.org/docs/reference/api/pandas.option_context.html#pandas.option_context) - 使用一组选项执行代码块，这些选项在执行后恢复为先前的设置。  
+**注意：**开发者可以查看 [pandas/core/config_init.py](https://github.com/pandas-dev/pandas/blob/master/pandas/core/config_init.py) 以了解更多信息。  
 
 #### Unicode 格式
 **警告：**  
