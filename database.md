@@ -22,6 +22,7 @@
         * [11.1.2 日期和时间类型概述](#1112-日期和时间类型概述)
         * [11.3.2 CHAR 和 VARCHAR 类型](#1132-char-和-varchar-类型)
         * [11.3.5 为TIMESTAMP和DATETIME自动初始化和更新](#1135-为timestamp和datetime自动初始化和更新)
+    * [MySQL 参考手册](#mysql-参考手册)
         * [12.5 字符串函数](#125-字符串函数)
         * [12.7 日期和时间函数](#127-日期和时间函数)
         * [13.1.9 ALTER TABLE语法](#1319-alter-table语法)
@@ -1391,113 +1392,146 @@ date_format(SEND_TIME, '%Y-%m')='2018-10' and char_length(m.content)>280 and cha
 
 查询2018年10月份SMS_MESSAGE_TASK_HISTORY表中content字段的字符数大于280且小于等于350的记录数。
 
+## MySQL 参考手册
 ### 12.7 日期和时间函数
-**日期和时间函数**
+**表 12.11 日期和时间函数**
 
 Name                                    |Description
 ----------------------------------------|------------
 [CURRENT_TIMESTAMP()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp), [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp)  |NOW() 的同义词
-[DATE_FORMAT()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_date-format)  |将date格式化为指定的形式
+[DATE_FORMAT()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_date-format)  |将 date 格式化为指定的形式
+[LOCALTIME()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_localtime), [LOCALTIME](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_localtime)  |NOW() 的同义词  
+[LOCALTIMESTAMP](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_localtimestamp), [LOCALTIMESTAMP()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_localtimestamp)  |NOW() 的同义词  
 [NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now)  |返回当前的日期和时间
 
-每个查询中每个返回当前日期和时间的函数仅在查询开始执行时计算一次。这意味着在一个单一查询中多次引用一个函数如 [NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now) 总是产生相同的结果。
+每个查询中每个返回当前日期和时间的函数仅在查询开始执行时计算一次。这意味着在一个单个查询中多次引用一个函数诸如 [NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now) 之类的函数总是产生相同的结果。（为了我们的目的，单个查询还包括对存储程序（存储例行程序、触发器或事件）的调用以及该程序调用的所有子程序。）这个原则也适用于 [CURDATE()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_curdate)、[CURTIME()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_curtime)、[UTC_DATE()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_utc-date)、[UTC_TIME()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_utc-time)、[UTC_TIMESTAMP()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_utc-timestamp) 以及它们的任何同义词。
 
 * [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp), [CURRENT_TIMESTAMP([fsp])](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp)
 
   [CURRENT_TIMESTAMP](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp) 和 [CURRENT_TIMESTAMP()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_current-timestamp) 是 [NOW()](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now) 的同义词。
 
+* [DATE_FORMAT(*date,format*)](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_date-format)  
+根据 *format* 字符串格式化 *date* 的值。  
+
+下表中显示的说明符可用于 *format* 字符串。在格式说明符字符之前需要 % 字符。说明符也适用于其他函数：[STR_TO_DATE()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_str-to-date)、[TIME_FORMAT()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_time-format)、[UNIX_TIMESTAMP()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_unix-timestamp)。  
+
+说明符 |描述  
+------|-----  
+%a    |星期名称的缩写（Sun...Sat）  
+%b    |月份名称的缩写（Jan..Dec）  
+%c    |月份，数值（0..12）  
+%D    |带有英文后缀的月份日期（0th，1st，2nd，3rd，...）  
+%d    |Day of month, 数值（00...31）  
+%e    |Day of month, 数值（0..31）  
+%f    |微秒（000000..999999）  
+%H    |小时（00..23）  
+%h    |小时（01..12）  
+%I    |小时（01..12）
+%i    |分钟，数值（00..59）  
+%j    |Day of year（001..366）  
+%k    |小时（0..23）  
+%l    |小时（1..12）  
+%M    |月份名称（January..Decmber）  
+%m    |月份，数值（00..12）  
+%p    |AM 或 PM  
+%r    |时间，12-小时（*hh:mm:ss* 后面跟随 AM 或 PM）  
+%S    |秒（00..59）  
+%s    |秒（00..59）  
+%T    |时间，24-小时（*hh:mm:ss*）  
+%U    |星期（00..53），其中星期日是一周的第一天；[WEEK()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_week) 模式 0  
+%u    |星期（00..53），其中星期一是一周的第一天；[WEEK()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_week) 模式 1  
+%V    |星期（01..53），其中星期日是一周的第一天；[WEEK()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_week) 模式 2；和 %X 一起使用  
+%v    |星期（01..53），其中星期一是一周的第一天；[WEEK()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_week) 模式 3；和 %x 一起使用  
+%W    |工作日名称（Sunday..Saturday）  
+%w    |Day of week（0=Sunday..6=Saturday）  
+%X    |星期天是一周的第一天的那一周的年份，四位数字，和 %V 一起使用  
+%x    |星期一是一周的第一天的那一周的年份，四位数字，和 %v 一起使用  
+%Y    |年份，四位数字  
+%y    |年份，两位数字  
+%%    |一个 % 字符  
+%*X*  |*x*，对于上面未列出的任何“*X*”  
+
+由于 MySQL 允许存储不完整的日期，例如“2014-00-00”，因此月份和日期说明符的范围从零开始。  
+
+```sql
+mysql> select date_format('1999-01-01', '%X %V');
++------------------------------------+
+| date_format('1999-01-01', '%X %V') |
++------------------------------------+
+| 1998 52                            |
++------------------------------------+
+1 row in set (0.00 sec)
+```
+
+```sql
+mysql> select date_format('2022-04-06 17:34:20', '%Y-%m-%d');
++------------------------------------------------+
+| date_format('2022-04-06 17:34:20', '%Y-%m-%d') |
++------------------------------------------------+
+| 2022-04-06                                     |
++------------------------------------------------+
+1 row in set (0.00 sec)
+```
+
+查询 SEND_TIME 日期为 2022-04-06 的记录  
+
+```sql
+mysql> select TASK_ID, SEND_TIME from SMS_MESSAGE_TASK where date_format(SEND_TIME, '%Y-%m-%d')='2022-04-06';
++---------+---------------------+
+| TASK_ID | SEND_TIME           |
++---------+---------------------+
+|   23767 | 2022-04-06 17:34:20 |
++---------+---------------------+
+1 row in set (0.01 sec)
+```
+
+* [LOCALTIME](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_localtime), [LOCALTIME([*fsp*])](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_localtime)  
+  
+  [LOCALTIME](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_localtime) 和 [LOCALTIME()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_localtime) 是 [NOW()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_now) 的同义词。  
+
+* [LOCALTIMESTAMP](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_localtimestamp), [LOCALTIMESTAMP([*fsp*])](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_localtimestamp)  
+
+  [LOCALTIMESTAMP](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_localtimestamp) 和 [LOCALTIMESTAMP()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_localtimestamp) 是 [NOW()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_now) 的同义词。  
+
 * [NOW([fsp])](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_now)
 
-  以 'YYYY-MM-DD HH:MM:SS' 或 YYYYMMDDHHMMSS 格式返回当前的日期和时间作为一个值，取决于这个函数是用于一个字符串还是数字环境。这个值用当前时区来展示。
+  返回当前日期和时间作为 _**'YYYY-MM-DD hh:mm:ss'**_ 或 _**YYYYMMDDhhmmss**_ 格式的值，具体取决于函数是在字符串还是数字上下文中使用。 该值以会话时区表示。  
 
-  如果 *fsp* 参数给出并从0到6指定了一个小数秒精度，则返回值包含一个指定位数的小数秒部分。
+  如果 *fsp* 参数给出并从0到6指定了一个小数秒精度，则返回值包含一个指定位数的小数秒部分。  
 
-MySQL 5.5.37，默认小数秒精度为6。
+MySQL 5.7.33  
 
 ```sql
 mysql> select NOW();
 +---------------------+
 | NOW()               |
 +---------------------+
-| 2018-12-05 19:55:04 |
+| 2022-04-06 20:49:19 |
 +---------------------+
 1 row in set (0.00 sec)
 
 mysql> select NOW() + 0;
-+-----------------------+
-| NOW() + 0             |
-+-----------------------+
-| 20181205195511.000000 |
-+-----------------------+
-1 row in set (0.00 sec)
-
-mysql> select NOW(2);
-+---------------------+
-| NOW(2)              |
-+---------------------+
-| 2018-12-06 10:32:02 |
-+---------------------+
-1 row in set (0.00 sec)
-
-mysql> select NOW(2) + 0;
-+-----------------------+
-| NOW(2) + 0            |
-+-----------------------+
-| 20181206103215.000000 |
-+-----------------------+
-1 row in set (0.00 sec)
-
-mysql> select version();
-+------------+
-| version()  |
-+------------+
-| 5.5.37-log |
-+------------+
-1 row in set (0.00 sec)
-
-```
-
-MariaDB 5.5.60，默认小数秒精度为0。
-
-```sql
-MariaDB [mysql]> select NOW();                                                                       
-+---------------------+
-| NOW()               |
-+---------------------+
-| 2018-12-05 20:04:58 |
-+---------------------+
-1 row in set (0.01 sec)
-
-MariaDB [mysql]> select NOW() + 0;
 +----------------+
 | NOW() + 0      |
 +----------------+
-| 20181205200512 |
+| 20220406204932 |
 +----------------+
 1 row in set (0.00 sec)
 
-MariaDB [mysql]> select NOW(2);
+mysql> select NOW(2);
 +------------------------+
 | NOW(2)                 |
 +------------------------+
-| 2018-12-05 20:07:31.38 |
+| 2022-04-06 20:51:06.01 |
 +------------------------+
 1 row in set (0.01 sec)
 
-MariaDB [mysql]> select NOW(2) + 0;
+mysql> select NOW(2) + 0;
 +-------------------+
 | NOW(2) + 0        |
 +-------------------+
-| 20181205200737.46 |
+| 20220406205149.44 |
 +-------------------+
-1 row in set (0.01 sec)
-
-MariaDB [mysql]> select version();
-+----------------+
-| version()      |
-+----------------+
-| 5.5.60-MariaDB |
-+----------------+
 1 row in set (0.00 sec)
 
 ```
@@ -1522,6 +1556,10 @@ mysql> SELECT SYSDATE(), SLEEP(2), SYSDATE();
 1 row in set (2.00 sec)
 
 ```
+
+此外，*SET TIMESTAMP* 语句会影响 [NOW()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_now) 而不影响 [SYSDATE()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_sysdate) 返回的值。这意味着二进制日志中的时间戳设置对 [SYSDATE()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_sysdate) 的调用没有影响。将时间戳设置为非零值会导致 [NOW()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_now) 的每个后续调用都返回该值。将时间戳设置为零会取消此效果，以便 [NOW()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_now) 再次返回当前日期和时间。  
+
+有关这两个函数之间差异的更多信息，请参阅 [SYSDATE()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_sysdate) 的描述。  
 
 ### 13.1.9 ALTER TABLE语法
 
