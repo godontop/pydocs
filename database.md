@@ -22,9 +22,10 @@
         * [11.1.2 日期和时间类型概述](#1112-日期和时间类型概述)
         * [11.3.2 CHAR 和 VARCHAR 类型](#1132-char-和-varchar-类型)
         * [11.3.5 为TIMESTAMP和DATETIME自动初始化和更新](#1135-为timestamp和datetime自动初始化和更新)
-    * [MySQL 参考手册](#mysql-参考手册)
         * [12.5 字符串函数](#125-字符串函数)
+    * [MySQL 参考手册](#mysql-参考手册)
         * [12.7 日期和时间函数](#127-日期和时间函数)
+        * [13.7.3.4 ]
         * [13.1.9 ALTER TABLE语法](#1319-alter-table语法)
         * [13.2.6 INSERT语法](#1326-insert语法)
         * [13.2.10 SELECT语法](#13210-select语法)
@@ -1560,6 +1561,69 @@ mysql> SELECT SYSDATE(), SLEEP(2), SYSDATE();
 此外，*SET TIMESTAMP* 语句会影响 [NOW()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_now) 而不影响 [SYSDATE()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_sysdate) 返回的值。这意味着二进制日志中的时间戳设置对 [SYSDATE()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_sysdate) 的调用没有影响。将时间戳设置为非零值会导致 [NOW()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_now) 的每个后续调用都返回该值。将时间戳设置为零会取消此效果，以便 [NOW()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_now) 再次返回当前日期和时间。  
 
 有关这两个函数之间差异的更多信息，请参阅 [SYSDATE()](https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_sysdate) 的描述。  
+
+#### 13.7.3.4 OPTIMIZE TABLE 语句
+
+```sql
+OPTIMIZE [NO_WRITE_TO_BINLOG | LOCAL]
+    TABLE tbl_name [, tbl_name] ...
+```
+
+[OPTIMIZE TABLE](https://dev.mysql.com/doc/refman/8.0/en/optimize-table.html) 重新组织表数据和关联索引数据的物理存储，以减少存储空间并提高访问表时的 I/O 效率。对每个表所做的确切更改取决于该表使用的[存储引擎](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_storage_engine)。  
+
+在这些情况下使用 [OPTIMIZE TABLE](https://dev.mysql.com/doc/refman/8.0/en/optimize-table.html)，具体取决于表的类型：  
+
+* 在对具有自己的 [.ibd 文件](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_ibd_file) 的 InnoDB 表执行大量插入、更新或删除操作后，因为它（.ibd 文件）是在启用了 [innodb_file_per_table](https://dev.mysql.com/doc/refman/8.0/en/innodb-parameters.html#sysvar_innodb_file_per_table) 选项的情况下创建的。 [OPTIMIZE TABLE](https://dev.mysql.com/doc/refman/8.0/en/optimize-table.html) 将重新组织表和索引，并且可以回收磁盘空间以供操作系统使用。  
+
+* 在对属于 InnoDB 表中的 **FULLTEXT** 索引的列执行大量插入、更新或删除操作之后。首先设置配置选项 [innodb_optimize_fulltext_only=1](https://dev.mysql.com/doc/refman/8.0/en/innodb-parameters.html#sysvar_innodb_optimize_fulltext_only)。要将索引维护期保持在一个合理的时间内，请设置 [innodb_ft_num_word_optimize](https://dev.mysql.com/doc/refman/8.0/en/innodb-parameters.html#sysvar_innodb_ft_num_word_optimize) 选项以指定要在搜索索引中更新多少单词，并运行一系列 **OPTIMIZE TABLE** 语句，直到搜索索引完全更新。  
+
+* 在删除大部分 MyISAM 或 ARCHIVE 表，或对具有可变长度行（具有 [VARCHAR](https://dev.mysql.com/doc/refman/8.0/en/char.html)、[VARBINARY](https://dev.mysql.com/doc/refman/8.0/en/binary-varbinary.html)、[BLOB](https://dev.mysql.com/doc/refman/8.0/en/blob.html) 或 [TEXT](https://dev.mysql.com/doc/refman/8.0/en/blob.html) 列的表）的 MyISAM 或 ARCHIVE 表进行许多更改之后。删除的行保存在一个链表中，随后的 [INSERT](https://dev.mysql.com/doc/refman/8.0/en/insert.html) 操作重用旧行的位置。您可以使用 [OPTIMIZE TABLE](https://dev.mysql.com/doc/refman/8.0/en/optimize-table.html) 来回收未使用的空间并对数据文件进行碎片整理。在对表进行大量更改后，此语句还可以提高使用该表的语句的性能，有时会显着提高。  
+
+**OPTIMIZE TABLE 输出**  
+
+[OPTIMIZE TABLE](https://dev.mysql.com/doc/refman/8.0/en/optimize-table.html) 返回一个包含下表所示列的结果集。  
+
+列        |值  
+----------|----  
+Table     |表名称  
+Op        |总是 optimize  
+Msg_type  |status, error, info, note, 或 warning  
+Msg_text  |信息性消息  
+
+**InnoDB 详细信息**  
+
+对于 InnoDB 表，[OPTIMIZE TABLE](https://dev.mysql.com/doc/refman/8.0/en/optimize-table.html) 映射到 [ALTER TABLE ... FORCE](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html)，它会重建表以更新索引统计信息并释放聚集索引中未使用的空间。 当您在 InnoDB 表上运行它时，它会显示在 [OPTIMIZE TABLE](https://dev.mysql.com/doc/refman/8.0/en/optimize-table.html) 的输出中，如下所示：  
+
+```sql
+mysql> OPTIMIZE TABLE foo;
++----------+----------+----------+-------------------------------------------------------------------+
+| Table    | Op       | Msg_type | Msg_text                                                          |
++----------+----------+----------+-------------------------------------------------------------------+
+| test.foo | optimize | note     | Table does not support optimize, doing recreate + analyze instead |
+| test.foo | optimize | status   | OK                                                                |
++----------+----------+----------+-------------------------------------------------------------------+
+```
+
+当在 InnoDB 表中删除了大量数据后，使用 OPTIMIZE TABLE *tab_name* 会大大减小相应 .ibd 文件的大小。  
+
+![optimize table tab_name](./img/optimize-table-tab_name.png)  
+
+```sql
+mysql> system ls -lh SMS_MESSAGE_TASK_HISTORY.ibd
+-rw-rw---- 1 mysql mysql 2.8G May 16  2021 SMS_MESSAGE_TASK_HISTORY.ibd
+mysql> optimize table SMS_MESSAGE_TASK_HISTORY;
++--------------------------------------+----------+----------+-------------------------------------------------------------------+
+| Table                                | Op       | Msg_type | Msg_text                                                          |
++--------------------------------------+----------+----------+-------------------------------------------------------------------+
+| ISCHOOLYARD.SMS_MESSAGE_TASK_HISTORY | optimize | note     | Table does not support optimize, doing recreate + analyze instead |
+| ISCHOOLYARD.SMS_MESSAGE_TASK_HISTORY | optimize | status   | OK                                                                |
++--------------------------------------+----------+----------+-------------------------------------------------------------------+
+2 rows in set (5.99 sec)
+
+mysql> system ls -lh SMS_MESSAGE_TASK_HISTORY.ibd
+-rw-r----- 1 mysql mysql 64M Apr  9 11:37 SMS_MESSAGE_TASK_HISTORY.ibd
+mysql> 
+```
 
 ### 13.1.9 ALTER TABLE语法
 
