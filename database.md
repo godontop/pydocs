@@ -25,7 +25,8 @@
         * [12.5 字符串函数](#125-字符串函数)
     * [MySQL 参考手册](#mysql-参考手册)
         * [12.7 日期和时间函数](#127-日期和时间函数)
-        * [13.7.3.4 ]
+        * [13.7.3.4 OPTIMIZE TABLE 语句](#13734-optimize-table-语句)
+        * [14.6.3.1 系统表空间](#14631-系统表空间)
         * [13.1.9 ALTER TABLE语法](#1319-alter-table语法)
         * [13.2.6 INSERT语法](#1326-insert语法)
         * [13.2.10 SELECT语法](#13210-select语法)
@@ -1624,6 +1625,32 @@ mysql> system ls -lh SMS_MESSAGE_TASK_HISTORY.ibd
 -rw-r----- 1 mysql mysql 64M Apr  9 11:37 SMS_MESSAGE_TASK_HISTORY.ibd
 mysql> 
 ```
+
+#### 14.6.3.1 系统表空间
+系统表空间是 InnoDB 数据字典、双写缓冲区、更改缓冲区和回滚日志的存储区域。如果表是在系统表空间而不是 file-per-table 或通用表空间中创建的，它还可能包含表和索引数据。  
+
+系统表空间可以有一个或多个数据文件。 默认情况下，会在数据目录中创建一个名为 **ibdata1** 的系统表空间数据文件。系统表空间数据文件的大小和数量由 [innodb_data_file_path](https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_data_file_path) 启动选项定义。有关配置信息，请参阅[系统表空间数据文件配置](https://dev.mysql.com/doc/refman/5.7/en/innodb-init-startup-configuration.html#innodb-startup-data-file-configuration)。  
+**调整系统表空间的大小**  
+**增加系统表空间的大小**  
+增加系统表空间大小的最简单方法是将其配置为自动扩展。 为此，请在 [innodb_data_file_path](https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_data_file_path) 设置中为最后一个数据文件指定 **autoextend** 属性，然后重新启动MySQL服务器。 例如：  
+
+```sql
+[mysqld]
+innodb_data_file_path=ibdata1:10M:autoextend
+```
+
+只能为 [innodb_data_file_path](https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_data_file_path) 设置中的最后一个数据文件指定 **autoextend** 属性。  
+
+```sql
+[mysqld]
+innodb_data_home_dir =
+innodb_data_file_path = /ibdata/ibdata1:988M;/disk2/ibdata2:50M:autoextend
+```
+
+添加新数据文件时，不要指定一个已存在的文件名。 InnoDB 在您启动MySQL服务器时创建并初始化新的数据文件。  
+
+**注意**  
+您不能通过更改其大小属性来增加现有系统表空间数据文件的大小。  
 
 ### 13.1.9 ALTER TABLE语法
 
