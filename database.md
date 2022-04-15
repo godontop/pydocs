@@ -27,6 +27,7 @@
         * [12.7 日期和时间函数](#127-日期和时间函数)
         * [13.7.3.4 OPTIMIZE TABLE 语句](#13734-optimize-table-语句)
         * [14.6.3.1 系统表空间](#14631-系统表空间)
+        * [14.8.1 InnoDB 启动配置](#1481-innodb-启动配置)
         * [13.1.9 ALTER TABLE语法](#1319-alter-table语法)
         * [13.2.6 INSERT语法](#1326-insert语法)
         * [13.2.10 SELECT语法](#13210-select语法)
@@ -1651,6 +1652,60 @@ innodb_data_file_path = /ibdata/ibdata1:988M;/disk2/ibdata2:50M:autoextend
 
 **注意**  
 您不能通过更改其大小属性来增加现有系统表空间数据文件的大小。  
+
+### 14.8.1 InnoDB 启动配置
+**系统表空间数据文件配置**  
+[Innodb_data_file_path](https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_data_file_path) 选项定义 InnoDB 系统表空间数据文件的名称，大小和属性。 如果你在初始化 MySQL Server 之前没有配置此选项，则默认行为是创建一个自动扩展数据文件，略大于12MB，名为ibdata1：  
+
+```sql
+mysql> show variables like 'innodb_data_file_path';
++-----------------------+------------------------+
+| Variable_name         | Value                  |
++-----------------------+------------------------+
+| innodb_data_file_path | ibdata1:12M:autoextend |
++-----------------------+------------------------+
+1 row in set (0.01 sec)
+```
+
+完整的数据文件规范语法包括文件名，文件大小，自动扩展属性和MAX属性：
+
+*file_name*:*file_size*[:autoextend[:max:*max_file_size*]]  
+
+通过将 K、M 或 G 附加到大小值，以千字节、兆字节或千兆字节为单位指定文件大小。文件大小的总和必须至少略大于 12MB。  
+
+您可以使用分号分隔的列表指定多个数据文件。 例如：  
+
+```sql
+[mysqld]
+innodb_data_file_path=ibdata1:50M;ibdata2:50M:autoextend
+```
+
+autoextend 和 max 属性只能用于最后指定的数据文件。  
+
+当指定 autoextend 属性时，数据文件的大小会随着空间的需要自动增加 64MB。 [innodb_autoextend_increment](https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_autoextend_increment) 变量控制增量大小。  
+
+对第一个系统表空间数据文件强制执行最小文件大小，以确保有足够的空间用于双写缓冲区页面。 下表显示了每个 InnoDB 页面大小的最小文件大小。 默认 InnoDB 页面大小为 16384 (16KB)。  
+
+页面大小 (innodb_page_size)    |最小文件大小  
+------------------------------|------------  
+16384 (16KB) or less          |3MB  
+32768 (32KB)                  |6MB  
+65536 (64KB)                  |12MB  
+
+系统表空间文件默认创建在数据目录（[datadir](https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_datadir)）中。要指定另一个位置，请使用 [innodb_data_home_dir](https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_data_home_dir) 选项。 例如，要在名为 myibdata 的目录中创建系统表空间数据文件，请使用以下配置：  
+
+```sql
+[mysqld]
+innodb_data_home_dir = /myibdata/
+innodb_data_file_path=ibdata1:50M:autoextend
+```
+
+指定 [innodb_data_home_dir](https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_data_home_dir) 的值时需要尾部斜杠。 InnoDB 不创建目录，所以在启动服务器之前确保指定的目录存在。 此外，确保 MySQL 服务器具有在目录中创建文件的适当访问权限。  
+
+InnoDB 通过将 [innodb_data_home_dir](https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_data_home_dir) 的值文本地连接到数据文件名来构成每个数据文件的目录路径。 如果 [innodb_data_home_dir](https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_data_home_dir) 没有定义，默认值为“./”，即数据目录。（MySQL 服务器在开始执行时将其当前工作目录更改为数据目录。）  
+
+**临时表空间配置**  
+[innodb_data_home_dir](https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_data_home_dir) 的默认值为 MySQL 数据目录 ([datadir](https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_datadir))。  
 
 ### 13.1.9 ALTER TABLE语法
 
