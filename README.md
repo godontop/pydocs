@@ -132,10 +132,11 @@
     * [pandas](#pandas)
         * [索引与选择数据](#索引与选择数据)
         * [选项和设置](#选项和设置)
-        * [输入/输出](#输入输出)
-        * [通用函数](#通用函数)
-        * [Series](#series)
-        * [DataFrame](#dataframe)
+        * [Pandas API 参考](#pandas-api-参考)
+            * [输入/输出](#输入输出)
+            * [通用函数](#通用函数)
+            * [Series](#series)
+            * [DataFrame](#dataframe)
     * [pip](#pip)
     * [PyMongo](#pymongo)
     * [PyMySQL](#pymysql)
@@ -6794,7 +6795,30 @@ Out[604]: 999
 参考链接：  
 [https://pandas.pydata.org/docs/user_guide/options.html](https://pandas.pydata.org/docs/user_guide/options.html)  
 
+## Pandas API 参考
 ### 输入/输出
+#### pandas.read_csv
+__pandas.read_csv(*filepath_or_buffer, sep=NoDefault.no_default, delimiter=None, header='infer', names=NoDefault.no_default, index_col=None, usecols=None, squeeze=None, prefix=NoDefault.no_default, mangle_dupe_cols=True, dtype=None, engine=None, converters=None, true_values=None, false_values=None, skipinitialspace=False, skiprows=None, skipfooter=0, nrows=None, na_values=None, keep_default_na=True, na_filter=True, verbose=False, skip_blank_lines=True, parse_dates=None, infer_datetime_format=False, keep_date_col=False, date_parser=None, dayfirst=False, cache_dates=True, iterator=False, chunksize=None, compression='infer', thousands=None, decimal='.', lineterminator=None, quotechar='"', quoting=0, doublequote=True, escapechar=None, comment=None, encoding=None, encoding_errors='strict', dialect=None, error_bad_lines=None, warn_bad_lines=None, on_bad_lines=None, delim_whitespace=False, low_memory=True, memory_map=False, float_precision=None, storage_options=None*)__  
+
+将逗号分隔值 (csv) 文件读入 DataFrame。  
+
+还支持可选地将文件迭代或分解成块。  
+
+更多帮助可以在 [IO Tools](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html) 的在线文档中找到。  
+
+**参数：**  
+**skiprows:** __*list-like, int or callable, 可选的*__  
+文件开头要跳过的行号（0-indexed）或要跳过的行数（int）。  
+
+**thousands:** __*str, 可选的*__  
+千位分隔符。  
+
+**decimal:** __*str, 默认为 ‘.’*__  
+识别为小数点的字符（例如，对欧洲数据使用“,”）。  
+
+**encoding:** __*str, 可选的*__  
+读取/写入时用于 UTF 的编码（例如“utf-8”）。 [Python 标准编码列表](https://docs.python.org/3/library/codecs.html#standard-encodings)。  
+
 #### pandas.read_excel
 pandas.**read_excel**(*io, sheet_name=0, header=0, names=None, index_col=None, usecols=None, squeeze=False, dtype=None, engine=None, converters=None, true_values=None, false_values=None, skiprows=None, nrows=None, na_values=None, keep_default_na=True, na_filter=True, verbose=False, parse_dates=False, date_parser=None, thousands=None, comment=None, skipfooter=0, convert_float=None, mangle_dupe_cols=True, storage_options=None*)  
 
