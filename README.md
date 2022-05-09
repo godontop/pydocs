@@ -1407,16 +1407,19 @@ Python 自带了许多内置的编解码器，它们的实现或者是通过 C �
 * 某个 IBM EBCDIC 编码页
 * 某个 IBM PC 编码页，通常会兼容 ASCII
 
-编码  |别名         |语言
------|-------------|-----
-ascii|646, us-ascii|英语
-cp1252 |windows-1252 |西欧
-gb2312 |chinese, csiso58gb231280, euc-cn, euccn, eucgb2312-cn, gb2312-1980, gb2312-80, iso-ir-58 |简体中文
-gbk    |936, cp936, ms936 |统一汉语
-gb18030 |gb18030-2000 |统一汉语
-hz     |hzgb, hz-gb, hz-gb-2312 |简体中文
-latin_1 |iso-8859-1, iso8859-1, 8859, cp819, latin, latin1, L1 |西欧
-utf_8  |U8, UTF, utf8 |所有语言
+编解码器         |别名         |语言
+----------------|-------------|-----
+ascii           |646, us-ascii|英语
+cp1252          |windows-1252 |西欧
+gb2312          |chinese, csiso58gb231280, euc-cn, euccn, eucgb2312-cn, gb2312-1980, gb2312-80, iso-ir-58 |简体中文
+gbk             |936, cp936, ms936 |统一汉语
+gb18030         |gb18030-2000 |统一汉语
+hz              |hzgb, hz-gb, hz-gb-2312 |简体中文
+latin_1         |iso-8859-1, iso8859-1, 8859, cp819, latin, latin1, L1 |西欧  
+shift_jis       |csshiftjis, shiftjis, sjis, s_jis  |日语  
+shift_jis_2004  |shiftjis2004, sjis_2004, sjis2004  |日语  
+shift_jisx0213  |shiftjisx0213, sjisx0213, s_jisx0213  |日语  
+utf_8           |U8, UTF, utf8 |所有语言  
 
 ##### Python 专属的编码格式
 有一些预定义编解码器是 Python 专属的，因此它们在 Python 之外没有意义。 这些编解码器按其所预期的输入和输出类型在下表中列出（请注意虽然文本编码是编解码器最常见的使用场景，但下层的编解码器架构支持任意数据转换而不仅是文本编码）。 对于非对称编解码器，所列目的描述的是编码方向。
