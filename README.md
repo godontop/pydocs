@@ -6854,6 +6854,52 @@ pandas.**read_excel**(\*args, \*\*kwargs)
 参考链接：  
 [https://pandas.pydata.org/docs/reference/io.html](https://pandas.pydata.org/docs/reference/io.html)  
 
+#### pandas.DataFrame.to_excel
+**DataFrame.to_excel(*excel_writer, sheet_name='Sheet1', na_rep='', float_format=None, columns=None, header=True, index=True, index_label=None, startrow=0, startcol=0, engine=None, merge_cells=True, encoding=None, inf_rep='inf', verbose=True, freeze_panes=None, storage_options=None*)**  
+
+将对象写入 Excel 工作表。  
+
+要将单个对象写入 Excel .xlsx 文件，只需指定目标文件名。 要写入多个工作表，需要创建一个具有目标文件名的 *ExcelWriter* 对象，并在文件中指定要写入的工作表。  
+
+通过指定唯一的 *sheet_name* 可以写入多个工作表。 将所有数据写入文件后，有必要保存更改。请注意，使用已存在的文件名创建 *ExcelWriter* 对象将导致现有文件的内容被删除。
+
+**参数：**  
+**excel_writer：** **_path-like, file-like, or ExcelWriter 对象_**  
+文件路径或者已存在的 ExcelWriter。  
+
+**sheet_name：** **_str, 默认为 ‘Sheet1’_**  
+将包含 DataFrame 的工作表的名称。  
+
+**header：** **_bool or list of str, 默认为 True_**  
+写出列名。 如果给出字符串列表，则假定它是列名的别名。  
+
+**index：** **_bool, 默认为 True_**  
+写行名称（索引）。  
+
+**例子**  
+创建、写入和保存工作簿：  
+
+```python
+>>> df1 = pd.DataFrame([['a', 'b'], ['c', 'd']], index=['row 1', 'row 2'], columns=['col 1', 'col 2'])
+>>> df1.to_excel("output.xlsx", sheet_name='Sheet_name_1')
+```
+
+如果您希望写入工作簿中的多个工作表，则需要指定一个 ExcelWriter 对象：  
+
+```python
+>>> df2 = df1.copy()
+>>> with pd.ExcelWriter('output.xlsx') as writer:
+...     df1.to_excel(writer, sheet_name='Sheet_name_1')
+...     df2.to_excel(writer, sheet_name='Sheet_name_2')
+```
+
+ExcelWriter 也可用于附加到现有的 Excel 文件：  
+
+```python
+>>> with pd.ExcelWriter('output.xlsx', mode='a') as writer:
+...     df.to_excel(writer, sheet_name='Sheet_name_3')
+```
+
 ### 通用函数
 #### pandas.concat  
 pandas.**concat**_(objs: Union[Iterable[‘DataFrame’], Mapping[Label, ‘DataFrame’]], axis='0', join: str = "'outer'", ignore_index: bool = 'False', keys='None', levels='None', names='None', verify_integrity: bool = 'False', sort: bool = 'False', copy: bool = 'True') → ’DataFrame’_  
