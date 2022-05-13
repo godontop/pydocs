@@ -6900,6 +6900,22 @@ ExcelWriter 也可用于附加到现有的 Excel 文件：
 ...     df.to_excel(writer, sheet_name='Sheet_name_3')
 ```
 
+#### pandas.ExcelWriter  
+**class pandas.ExcelWriter(*path, engine=None, date_format=None, datetime_format=None, mode='w', storage_options=None, if_sheet_exists=None, engine_kwargs=None, \*\*kwargs*)**  
+
+用于将 DataFrame 对象写入 Excel 工作表的类。  
+
+默认使用：* xlwt 用于 xls，* xlsxwriter 用于 xlsx，如果安装了 xlsxwriter 否则 openpyxl，* odf 用于 ods。有关典型用法，请参阅 DataFrame.to_excel。  
+
+writer 应该用作上下文管理器。否则，调用 *close()* 保存并关闭任何打开的文件句柄。  
+
+**参数：**  
+**path：** **_str or typing.BinaryIO_**  
+xls 或 xlsx 或 ods 文件的路径。  
+
+**mode：** **_{‘w’, ‘a’}, 默认值 ‘w’_**  
+要使用的文件模式（写入或附加）。 附加不适用于 fsspec URLs。  
+
 ### 通用函数
 #### pandas.concat  
 pandas.**concat**_(objs: Union[Iterable[‘DataFrame’], Mapping[Label, ‘DataFrame’]], axis='0', join: str = "'outer'", ignore_index: bool = 'False', keys='None', levels='None', names='None', verify_integrity: bool = 'False', sort: bool = 'False', copy: bool = 'True') → ’DataFrame’_  
