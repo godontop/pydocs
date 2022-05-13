@@ -6981,6 +6981,22 @@ pandas.**to_numeric**(*arg, errors='raise', downcast=None*)
 [https://pandas.pydata.org/docs/reference/general_functions.html](https://pandas.pydata.org/docs/reference/general_functions.html)  
 
 ### Series
+#### pandas.Series.all
+**Series.all(*axis=0, bool_only=None, skipna=True, level=None, \*\*kwargs*)**  
+
+返回是否所有元素都为真，可能在一个轴上。  
+
+
+返回 True 除非在 Series 中或沿 Dataframe 轴至少有一个元素为 False 或等效（例如零或空）。  
+
+**参数：**  
+**axis： *{0 or ‘index’, 1 or ‘columns’, None}, 默认值 0***  
+指示应减少哪个轴或哪些轴。  
+
+* 0 / ‘index’ : 减少索引，返回一个索引为原始列标签的 Series。  
+* 1 / ‘columns’ : 减少列，返回一个索引为原始索引的 Series。  
+* None : 减少所有轴，返回一个标量。  
+
 #### pandas.Series.isin
 Series.**isin**(*self, values*)  
 Check whether *values* are contained in Series.
@@ -7028,6 +7044,28 @@ Name: north_money, dtype: bool
 >>>
 ```
 
+#### pandas.Series.isna
+**Series.isna()**  
+
+检测缺失值。
+
+返回一个相同大小的布尔值对象，表明值是否为 NA。 NA 值，例如 None 或 **numpy.NaN**，被映射到 True 值。 其他所有内容都映射到 False 值。空字符串 '' 或 **numpy.inf** 等字符不被视为 NA 值（除非您设置 **pandas.options.mode.use_inf_as_na = True**）。  
+
+**Returns：** **Series**  
+Series 中每个元素的布尔值掩码，表明元素是否为 NA 值。  
+
+#### pandas.Series.isnull
+**Series.isnull()**  
+
+Series.isnull 是 Series.isna 的别名。  
+
+检测缺失值。
+
+返回一个相同大小的布尔值对象，表明值是否为 NA。 NA 值，例如 None 或 **numpy.NaN**，被映射到 True 值。 其他所有内容都映射到 False 值。空字符串 '' 或 **numpy.inf** 等字符不被视为 NA 值（除非您设置 **pandas.options.mode.use_inf_as_na = True**）。  
+
+**Returns：** **Series**  
+Series 中每个元素的布尔值掩码，表明元素是否为 NA 值。  
+
 #### pandas.Series.replace
 Series.**replace**(*to_replace=None, value=None, inplace=False, limit=None, regex=False, method='pad'*)  
 
@@ -7070,8 +7108,19 @@ Series 的值被动态地替换为其它值。
 2  华润材料           3
 ```
 
-参考链接：  
-[https://pandas.pydata.org/docs/reference/series.html](https://pandas.pydata.org/docs/reference/series.html)  
+#### pandas.Series.str.extract  
+**Series.str.extract(*pat, flags=0, expand=True*)**  
+
+将正则表达式 *pat* 中的捕获组提取为 DataFrame 中的列。  
+
+对于 Series 中的每个主题字符串，从正则表达式 *pat* 的第一个匹配项中提取组。  
+
+**参数：**  
+**pat：** ***str***  
+带有捕获组的正则表达式模式。  
+
+**Returns：** **DataFrame 或 Series 或 Index**  
+一个 DataFrame，每个主题字符串一行，每组一列。正则表达式 pat 中的任何捕获组名称都将用于列名称；否则将使用捕获组编号。每个结果列的 dtype 始终是 object，即使没有找到匹配项。如果 **expand=False** 并且 pat 只有一个捕获组，则返回一个 Series （如果主题是系列）或索引（如果主题是索引）。  
 
 ### DataFrame
 #### pandas.DataFrame.index
