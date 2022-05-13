@@ -7030,9 +7030,30 @@ Name: north_money, dtype: bool
 
 #### pandas.Series.replace
 Series.**replace**(*to_replace=None, value=None, inplace=False, limit=None, regex=False, method='pad'*)  
+
 用 *value* 替换 *to_replace* 中给出的值。  
 
 Series 的值被动态地替换为其它值。  
+
+**参数：**  
+**to_replace：** **_str, regex, list, dict, Series, int, float, or None_**  
+如何找到将被替换的值。  
+* 数值，字符串或正则表达式：  
+    * 数值：等于 *to_replace* 的数值将被替换为 *value*  
+    * 字符串：与 *to_replace* 完全匹配的字符串将被替换为 *value*  
+    * 正则表达式：匹配 *to_replace* 的正则表达式将被替换为 *value*  
+
+**value：** **_scalar, dict, list, str, regex, 默认值 None_**  
+替换与 *to_replace* 匹配的任何值的值。对于 DataFrame，可以使用值的字典来指定每列使用哪个值（不在字典中的列将不会被填充）。 正则表达式、字符串和列表或此类对象的字典也是被允许的。  
+
+**inplace：** **_bool, 默认值 False_**  
+如果为 True，则就地执行操作并返回 None。  
+
+**regex：** **_bool or same types as to_replace, 默认值 False_**  
+是否将 *to_replace* 和/或 *value* 解释为正则表达式。如果这是 **True** 那么 *to_replace 必须*是一个字符串。 或者，这可以是正则表达式或正则表达式列表、字典或数组，在这种情况下 *to_replace* 必须为 **None**。  
+
+**Returns：** **Series**  
+替换后的对象。  
 
 ```python
 >>> df = pd.DataFrame({"股票简称": ["中国电信", "京东方A", "华润材料"], "holders": ["303.1684万", "141.0821万", 3]})
