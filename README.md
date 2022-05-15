@@ -917,6 +917,13 @@ None
 
 如果模式中包含 `\number` ，则模式必须使用 Python 原始字符串表示法，即在正则表达式模式前面加上 `r` 前缀。
 
+`\d`  
+For Unicode (str) patterns:  
+匹配任何 Unicode 十进制数字（即 Unicode 字符类别 [Nd] 中的任何字符）。 这包括 [0-9] 以及许多其他数字字符。如果使用 ASCII 标志，则仅匹配 [0-9]。  
+
+For 8-bit (bytes) patterns:  
+匹配任何十进制数字； 这相当于 [0-9]。  
+
 `\s`  
 For Unicode (str) patterns:  
 匹配 Unicode 空白字符 (包括 `[ \t\n\r\f\v]`，及一些其它字符，例如在许多语言的排版规则中所要求的 non-breaking spaces)。如果 ASCII 标志被使用，则仅匹配 `[ \t\n\r\f\v]`。
@@ -6817,13 +6824,15 @@ __pandas.read_csv(*filepath_or_buffer, sep=NoDefault.no_default, delimiter=None,
 千位分隔符。  
 
 **decimal:** __*str, 默认为 ‘.’*__  
-识别为小数点的字符（例如，对欧洲数据使用“,”）。  
+识别为小数点的字符（例如，对欧洲数据使用“,”）。   
+
+**注意： 如果数值列中出现了字符串（如空格），则整个列都无法应用 decimal 选项。**  
 
 **encoding:** __*str, 可选的*__  
 读取/写入时用于 UTF 的编码（例如“utf-8”）。 [Python 标准编码列表](https://docs.python.org/3/library/codecs.html#standard-encodings)。  
 
 #### pandas.read_excel
-pandas.**read_excel**(*io, sheet_name=0, header=0, names=None, index_col=None, usecols=None, squeeze=False, dtype=None, engine=None, converters=None, true_values=None, false_values=None, skiprows=None, nrows=None, na_values=None, keep_default_na=True, na_filter=True, verbose=False, parse_dates=False, date_parser=None, thousands=None, comment=None, skipfooter=0, convert_float=None, mangle_dupe_cols=True, storage_options=None*)  
+**pandas.read_excel(*io, sheet_name=0, header=0, names=None, index_col=None, usecols=None, squeeze=None, dtype=None, engine=None, converters=None, true_values=None, false_values=None, skiprows=None, nrows=None, na_values=None, keep_default_na=True, na_filter=True, verbose=False, parse_dates=False, date_parser=None, thousands=None, decimal='.', comment=None, skipfooter=0, convert_float=None, mangle_dupe_cols=True, storage_options=None*)**  
 
 pandas.**read_excel**(\*args, \*\*kwargs)  
 将一个 Excel 文件读取到一个 pandas DataFrame 中。  
@@ -6831,6 +6840,16 @@ pandas.**read_excel**(\*args, \*\*kwargs)
 **参数：**  
 **io：** *__str, bytes, ExcelFile, xlrd.Book, path object, or file-like object__*  
 任何有效的字符串路径都是可接受的。  
+
+**sheet_name： *str, int, list, or None, 默认值 0***  
+字符串用于工作表名称。 整数用于零索引工作表位置（图表工作表不计为工作表位置）。 字符串/整数列表用于请求多张工作表。 指定 None 以获取所有工作表。  
+
+可用实例：  
+* 默认为 0： 第一张工作表作为一个 *DataFrame*  
+* 1： 第二张工作表作为一个 *DataFrame*  
+* “Sheet1”： 加载名为“Sheet1”的工作表  
+* [0, 1, "Sheet5"]: 加载第一个、第二个和名为“Sheet5”的工作表作为一个 *DataFrame* 的字典  
+* None： 所有工作表。  
 
 **index_col：** *__int, list of int, default None__*  
 用作 DataFrame 行标签的列 (0-indexed)。  
@@ -6851,8 +6870,16 @@ pandas.**read_excel**(\*args, \*\*kwargs)
 >>>
 ``` 
 
-参考链接：  
-[https://pandas.pydata.org/docs/reference/io.html](https://pandas.pydata.org/docs/reference/io.html)  
+**thousands： *str, 默认值 None***  
+千位分隔符用于将字符串列解析为数字。请注意，此参数仅对在 Excel 中存储为 TEXT 的列是必需的，无论显示格式如何，任何数字列都会被自动解析。  
+
+**decimal： *str, 默认值 ‘.’***  
+将字符串列解析为数字时识别为小数点的字符。请注意，此参数仅对在 Excel 中存储为 TEXT 的列是必需的，任何数字列都将自动被解析，无论显示格式如何。（例如，对于欧洲数据使用“,”）。  
+
+***1.4.0 版中的新功能。***  
+
+**Returns： DataFrame 或 DataFrames 字典**  
+来自传入的 Excel 文件的 DataFrame。 有关何时返回 DataFrames 字典的更多信息，请参阅 sheet_name 参数中的注释。  
 
 #### pandas.DataFrame.to_excel
 **DataFrame.to_excel(*excel_writer, sheet_name='Sheet1', na_rep='', float_format=None, columns=None, header=True, index=True, index_label=None, startrow=0, startcol=0, engine=None, merge_cells=True, encoding=None, inf_rep='inf', verbose=True, freeze_panes=None, storage_options=None*)**  
@@ -6997,6 +7024,62 @@ pandas.**to_numeric**(*arg, errors='raise', downcast=None*)
 * 1 / ‘columns’ : 减少列，返回一个索引为原始索引的 Series。  
 * None : 减少所有轴，返回一个标量。  
 
+#### pandas.Series.astype  
+**Series.astype(*dtype, copy=True, errors='raise')***  
+
+将 pandas 对象转换为指定的 dtype ***dtype***。  
+
+**参数：**  
+**dtype： *data type, or dict of column name -> data type***  
+使用 numpy.dtype 或 Python 类型将整个 pandas 对象转换为相同类型。或者，使用 {col: dtype, ...}，其中 col 是列标签，dtype 是 numpy.dtype 或 Python 类型，将 DataFrame 的一个或多个列转换为特定于列的类型。  
+
+**Returns：**  
+**casted： *与调用者相同的类型***  
+
+```python
+>>> df1
+   id  sku name
+0   1  NaN   aa
+>>> df2
+   id    sku name
+0   1    NaN   aa
+1   2    NaN   bb
+2   3  HH-Y6   cc
+3   4  HH-Y7   dd
+>>> type(df1.sku)
+<class 'pandas.core.series.Series'>
+>>> type(df2.sku)
+<class 'pandas.core.series.Series'>
+>>> try:
+...     df1['sku'] = df1.sku.str.extract(r'(\w+)')
+... except AttributeError as e:
+...     print(e)
+...
+Can only use .str accessor with string values!
+>>> try:
+...     df2['sku'] = df2.sku.str.extract(r'(\w+)')
+... except AttributeError as e:
+...     print(e)
+...
+>>> df2
+   id  sku name
+0   1  NaN   aa
+1   2  NaN   bb
+2   3   HH   cc
+3   4   HH   dd
+>>> try:
+...     df1['sku'] = df1.sku.astype(str).str.extract(r'(\w+)')
+... except AttributeError as e:
+...     print(e)
+...
+>>> df1
+   id  sku name
+0   1  nan   aa
+>>> type(df1.sku.astype(str))
+<class 'pandas.core.series.Series'>
+>>>
+```
+
 #### pandas.Series.isin
 Series.**isin**(*self, values*)  
 Check whether *values* are contained in Series.
@@ -7123,27 +7206,6 @@ Series 的值被动态地替换为其它值。
 一个 DataFrame，每个主题字符串一行，每组一列。正则表达式 pat 中的任何捕获组名称都将用于列名称；否则将使用捕获组编号。每个结果列的 dtype 始终是 object，即使没有找到匹配项。如果 **expand=False** 并且 pat 只有一个捕获组，则返回一个 Series （如果主题是系列）或索引（如果主题是索引）。  
 
 ### DataFrame
-#### pandas.DataFrame.index
-DataFrame.**index**: *Index*  
-返回 DataFrame 的索引（行标签）。  
-
-```python
-In [1435]: df                                  
-Out[1435]: 
-       ts_code     name         management    fund_type list_date invest_type
-905  163801.SZ     中银中国       中银基金       混合型  20050223         稳定型
-906  510050.SH    上证50ETF       华夏基金       股票型  20050223       被动指数型
-907  160105.SZ     南方积配       南方基金       混合型  20041220         混合型
-
-In [1436]: df[df['ts_code'] == '510050.SH']    
-Out[1436]: 
-       ts_code     name          management   fund_type list_date invest_type
-906  510050.SH    上证50ETF       华夏基金       股票型  20050223       被动指数型
-
-In [1437]: df[df['ts_code'] == '510050.SH'].index                                              
-Out[1437]: Int64Index([906], dtype='int64')
-```
-
 #### pandas.DataFrame.all
 DataFrame.all(*axis=0, bool_only=None, skipna=True, level=None, \*\*kwargs*)  
 返回至少一个轴上的所有元素是否为真。  
@@ -7206,6 +7268,102 @@ dtype: bool
 ```python
 >>> df.all(axis=None)
 False
+```
+
+#### pandas.DataFrame.index
+DataFrame.**index**: *Index*  
+返回 DataFrame 的索引（行标签）。  
+
+```python
+In [1435]: df                                  
+Out[1435]: 
+       ts_code     name         management    fund_type list_date invest_type
+905  163801.SZ     中银中国       中银基金       混合型  20050223         稳定型
+906  510050.SH    上证50ETF       华夏基金       股票型  20050223       被动指数型
+907  160105.SZ     南方积配       南方基金       混合型  20041220         混合型
+
+In [1436]: df[df['ts_code'] == '510050.SH']    
+Out[1436]: 
+       ts_code     name          management   fund_type list_date invest_type
+906  510050.SH    上证50ETF       华夏基金       股票型  20050223       被动指数型
+
+In [1437]: df[df['ts_code'] == '510050.SH'].index                                              
+Out[1437]: Int64Index([906], dtype='int64')
+```
+
+#### pandas.DataFrame.merge  
+**DataFrame.merge(*right, how='inner', on=None, left_on=None, right_on=None, left_index=False, right_index=False, sort=False, suffixes=('_x', '_y'), copy=True, indicator=False, validate=None)***  
+
+用数据库风格的 join 将 DataFrame 或命名的 Series 对象合并。  
+
+一个命名的 Series 对象被视为具有单个命名列的 DataFrame。  
+
+连接是在列或索引上完成的。 如果在列上连接列，则 DataFrame 索引*将被忽略*。否则，如果合并索引上的索引或列上的索引，则索引将被传递。 执行交叉合并时，不允许合并列规范。  
+
+**参数：**  
+**right： *DataFrame or named Series***  
+要合并的对象。  
+
+**how： *{‘left’, ‘right’, ‘outer’, ‘inner’, ‘cross’}, 默认值 ‘inner’***  
+要执行的合并类型。  
+
+* left: 仅使用左帧中的键，类似于 SQL 左外连接；保留键的顺序。  
+* right: 仅使用右帧中的键，类似于 SQL 右外连接；保留键的顺序。  
+* outer: 使用两个帧中键的并集，类似于 SQL 全外连接；按字典顺序对键进行排序。  
+* inner: 使用来自两个帧的键的交集，类似于 SQL 内连接；保留左键的顺序。  
+* cross: 从两个帧创建笛卡尔积，保留左键的顺序。  
+
+***版本 1.2.0 中的新功能。***  
+
+**Returns： DataFrame**  
+两个合并对象的 DataFrame。  
+
+```python
+>>> df1
+     type             order id             sku  ... selling fees  fba fees  total
+0   Order  702-1138646-9141825   HT-CWSBLE8BKS  ...        -7.37       0.0  41.78
+2   Order  701-0152570-2531474   HT-CWSBLD9BKS  ...        -4.42      -8.7  16.36
+3   Order  701-5837171-7378639  HT-CWSBLD9BKXL  ...        -4.54      -8.7  17.02
+4   Order  701-2584669-0129845  HT-CWSBLD9PPXL  ...        -5.34       0.0  30.25
+5   Order  701-2584669-0129845  HT-CWSBLD9WTXL  ...        -5.34       0.0  30.25
+7   Order  701-6310582-5160205   HT-CWSBLD9BKS  ...        -4.42      -8.7  16.36
+8   Order  701-0200508-1054662   HT-CWSBLV8ORS  ...        -5.85       0.0  33.14
+9   Order  701-0909993-5240234   HT-CWSBLD9BKS  ...        -4.42      -8.7  16.36
+10  Order  702-1107566-1984247   HT-CWSBLD9BES  ...        -5.34       0.0  30.25
+12  Order  701-0787880-4570618   HT-CWSBLD9BKM  ...        -4.54      -8.7  17.02
+
+[10 rows x 10 columns]
+>>> df2
+                 sku        采购成本
+0        HT-TWTWG4SG    7.350000
+1       HT-TWTWG4SBE    7.350000
+2        HT-TWTWG4CG    6.700000
+3       HT-TWTWG4CBE    7.350000
+4         HT-TWTSR2R   11.750000
+...              ...         ...
+7179  HT-CWSBLH8BK10   41.333333
+7180    HT-BCPWP2LGY   18.910000
+7181  HT-DWTSWBPD22D   20.200000
+7182   HT-ACANHA10CB   30.000000
+7183     HT-DWTC20BK  135.000000
+
+[7184 rows x 2 columns]
+>>> df1 = df1.merge(df2)
+>>> df1
+    type             order id             sku  ... fba fees  total       采购成本
+0  Order  702-1138646-9141825   HT-CWSBLE8BKS  ...      0.0  41.78  34.560000
+1  Order  701-0152570-2531474   HT-CWSBLD9BKS  ...     -8.7  16.36  39.000000
+2  Order  701-6310582-5160205   HT-CWSBLD9BKS  ...     -8.7  16.36  39.000000
+3  Order  701-0909993-5240234   HT-CWSBLD9BKS  ...     -8.7  16.36  39.000000
+4  Order  701-5837171-7378639  HT-CWSBLD9BKXL  ...     -8.7  17.02  39.000000
+5  Order  701-2584669-0129845  HT-CWSBLD9PPXL  ...      0.0  30.25  39.640288
+6  Order  701-2584669-0129845  HT-CWSBLD9WTXL  ...      0.0  30.25  39.640288
+7  Order  701-0200508-1054662   HT-CWSBLV8ORS  ...      0.0  33.14  40.793333
+8  Order  702-1107566-1984247   HT-CWSBLD9BES  ...      0.0  30.25  40.666667
+9  Order  701-0787880-4570618   HT-CWSBLD9BKM  ...     -8.7  17.02  39.492500
+
+[10 rows x 11 columns]
+>>>
 ```
 
 #### pandas.DataFrame.sort_values
