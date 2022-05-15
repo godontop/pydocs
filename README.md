@@ -5,9 +5,23 @@
     * [Python 3 标准库](#python-3-标准库)
         * [内置函数](#内置函数)
         * [内置类型](#内置类型)
+            * [布尔运算 — and, or, not](#布尔运算--and-or-not)
             * [数值类型 — int, float, complex](#数值类型--int-float-complex)
                 * [整型数类型的按位运算](#整型数类型的按位运算)
+            * [序列类型 — 列表, 元组, range](#序列类型--列表-元组-range)
+                * [通用序列操作](#通用序列操作)
+                * [可变序列类型](#可变序列类型)
+                * [列表](#列表)
+                * [Ranges](#ranges)
+            * [文本序列类型 — str](#文本序列类型--str)
+                * [字符串方法](#字符串方法)
+                * [printf-style 字符串格式化](#printf-style-字符串格式化)
+            * [二进制序列类型 — 字节、字节数组、内存视图](#二进制序列类型--字节字节数组内存视图)
+                * [字节和字节数组操作](#字节和字节数组操作)
             * [集合类型 --- set, frozenset](#集合类型-----set-frozenset)
+            * [映射类型 — 字典](#映射类型--字典)
+                * [字典视图对象](#字典视图对象)
+            * [特殊属性](#特殊属性)
         * [文本处理服务](#文本处理服务)
             * [string — 通用字符串操作](#string--通用字符串操作)
                 * [格式化字符串语法](#格式化字符串语法)
@@ -731,6 +745,20 @@ Dunder init func in class B.
 ```
 
 ## 内置类型
+### 布尔运算 — and, or, not
+这些是布尔运算，按优先级升序排列：
+
+|Operation   |Result                            |Notes |
+|------------|----------------------------------|------|
+|`x or y`    |如果x是false，则y，否则x            |(1)   |
+|`x and y`   |如果x是false，则x，否则y            |(2)   |
+|`not x`     |如果x是false，则`True`，否则`False` |(3)   |
+
+备注：  
+1. 这是一个缩短操作，因此仅当第一个参数为false时，它才会计算第二个参数。
+2. 这是一个缩短操作，因此仅当第一个参数为true时，它才会计算第二个参数。
+3. `not` 的优先级低于非布尔运算，因此 `not a == b` 被解释为 `not (a == b)`, 而 `a == not b` 是一个语法错误。  
+
 ### 数值类型 — int, float, complex
 存在三种不同的数字类型: *整数*, *浮点数* 和 *复数*。 此外，布尔值属于整数的子类型。 整数具有无限的精度。
 
@@ -761,6 +789,286 @@ Operation  |Result          |Notes
 0
 >>>
 ```
+
+### 序列类型 — 列表, 元组, range
+有三种基本的序列类型：列表，元组, 和 range 对象。专门处理[二进制数据](https://docs.python.org/3/library/stdtypes.html#binaryseq)和[文本字符串](https://docs.python.org/3/library/stdtypes.html#textseq)的额外的序列类型在专门的章节中描述。
+
+#### 通用序列操作
+大多数序列类型（不可变的和可变的）都支持下表中的操作。Python 提供的抽象基类 [collections.abc.Sequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) 使自定义序列类型正确地实现这些操作变得容易。
+
+下表列出的序列操作按优先级升序排列。下表中，*s* 和 *t* 是相同类型的序列，*n*, *i*, *j* 和 *k* 是整型数，*x* 是符合由 *s* 所限制的类型及值的一个任意对象。
+
+Operation  |Result                      |Notes
+-----------|----------------------------|------
+`s[i:j]`   |从 *i* 到 *j* 的 *s* 的分片  |(3)(4)
+
+**注意：**
+
+1. 
+
+2. 
+
+3. 
+
+4. 从 *i* 到 *j* 的 *s* 的分片的定义就像序列的元素的索引为 *k* 且 `i <= k < j`。如果 *i* 或 *j* 大于 `len(s)`，使用 `len(s)`。如果 *i* 被忽略或者为 `None`，则使用 `0`。如果 *j* 被忽略或者为 `None`，使用 `len(s)`。如果 `i` 大于或等于 `j`，则分片为空。
+
+```python
+>>> s = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+>>> len(s)
+7
+>>> s[8:16]
+[]
+>>> s[len(s):len(s)]
+[]
+>>> s[3:16]
+['d', 'e', 'f', 'g']
+>>> s[3:len(s)]
+['d', 'e', 'f', 'g']
+>>>
+```
+
+#### 可变序列类型
+可变序列定义了下表中的操作。Python 提供的抽象基类 [collections.abc.MutableSequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableSequence) 使自定义序列类型正确地实现这些操作变得更容易。
+
+表中的 *s* 表示可变序列类型的一个实例，*t* 是任何可迭代对象，*x* 是符合由 *s* 所限制的类型及值的一个任意对象 (例如，[bytearray](https://docs.python.org/3/library/stdtypes.html#bytearray) 仅接受符合 `0 <= x <= 255` 值限制的整型数)。
+
+Operation                  |Result                |Notes
+---------------------------|----------------------|-----
+`s.extend(t)` 或 `s += t`  |用 `t` 的内容扩展 `s`  |
+
+```python
+>>> s = [1, 2]
+>>> t = ('a', 'b')
+>>> s.extend(t)
+>>> print(s)
+[1, 2, 'a', 'b']
+>>>
+```
+
+#### 列表
+列表是可变序列，通常用于存储同类元素的集合(元素精确的相似度因应用程序而变化).
+
+class **list**([*iterable*])
+
+列表实现了所有的通用序列操作和可变序列操作。列表还提供如下额外的方法：  
+**sort**(_*, key=None, reverse=False_)  
+这个方法就地对列表进行排序，仅使用 `<` 比较元素。
+
+[sort()](https://docs.python.org/3.6/library/stdtypes.html#list.sort) 仅接受传递两个关键字参数([仅关键字参数](https://docs.python.org/3.6/glossary.html#keyword-only-parameter)):
+
+*reverse* 是一个布尔值。如果设置为 True，则列表元素将按逆序排列（即从大到小）。
+
+To remind users that it operates by side effect, 它不返回排序后的序列(使用 sorted() 明确地请求一个新的排序后的列表实例).  
+
+```python
+letters = ['d', 'a', 'e', 'c', 'b']
+print(letters.sort())
+```
+
+**Result:**  
+None
+
+list.sort()方法的返回值是None，要打印排序后的列表，应使用下面的代码：
+
+```python
+letters = ['d', 'a', 'e', 'c', 'b']
+letters.sort()
+print(letters)
+```
+
+**Result:**  
+['a', 'b', 'c', 'd', 'e']
+
+#### Ranges
+[range](https://docs.python.org/3/library/stdtypes.html#range) 类型代表一种不可变的数字序列且通常用于在 [for](https://docs.python.org/3/reference/compound_stmts.html#for) 循环中循环一个特定的次数。
+
+*class* **range**(*stop*)  
+*class* **range**(*start, stop*[*, step*])  
+range 构造函数的参数必须是整型数(要么是内置 [int](https://docs.python.org/3/library/functions.html#int) 要么是任何实现了 `__index__` 特殊方法的对象)。如果省略了 *step* 参数，则它默认为 `1`。如果省略了 *start* 参数，则它默认为 `0`。如果 *step* 是 zero, 则抛出 [ValueError](https://docs.python.org/3/library/exceptions.html#ValueError)。
+
+对于正数 *step*, 一个 range `r` 的内容由公式 `r[i] = start + step*i` 决定，其中 `i >= 0` 且 `r[i] < stop`。
+
+对于负数 *step*, range的内容仍然由公式 `r[i] = start + step*i` 决定，但约束条件是 `i >= 0` 和 `r[i] > stop`。
+
+如果 `r[0]` 不满足值的约束条件则range对象将为空。Ranges do support negative indices, but these are interpreted as indexing from the end of the sequence determined by the positive indices.  
+
+### 文本序列类型 — str
+在Python中，文本数据是通过 [str](https://docs.python.org/3.6/library/stdtypes.html#str) 对象或 *strings* 来处理的。字符串是不可变的Unicode代码点[序列](https://docs.python.org/3.6/library/stdtypes.html#typesseq)。字符串的写法有多种方式：
+
+* 单引号: `'allows embedded "double" quotes'`
+* 双引号: `"allows embedded 'single' quotes"`.
+* 三引号: `'''Three single quotes'''`, `"""Three double quotes"""`
+
+三引号字符串可能跨越多行 - 所有关联的空白都将被包含在字符串中。
+
+如果一个单一表达式的各个字符串之间仅有空格，那么它们将被含蓄地转换成一个单字符串。即，`("spam " "eggs") == "spam eggs"`。单一字符串等于单一表达式中各个字符串拼接的结果。
+
+```python
+>>> ("spam" "eggs") == "spameggs"
+True
+>>> ("spam " "eggs") == "spam eggs"
+True
+>>> ("spam "  "eggs") == "spam eggs"
+True
+```
+
+#### 字符串方法
+字符串实现了所有[常见的](https://docs.python.org/3.6/library/stdtypes.html#typesseq-common)序列操作，连同下面描述的额外的方法。
+
+str.**encode**(*encoding="utf-8", errors="strict"*)  
+返回一个编码的字符串版本作为一个字节对象。默认编码是 `'utf-8'`。*errors* 可以设置为一个不同的错误处理方案。*errors* 的默认值是 `'strict'`，意为编码错误将抛出一个 [UnicodeError](https://docs.python.org/3.6/library/exceptions.html#UnicodeError)。其它可能的值是 `'ignore'`, `'replace'`, `'xmlcharrefreplace'`, `'backslashreplace'` 和任何其它通过 [codecs.register_error()](https://docs.python.org/3.6/library/codecs.html#codecs.register_error) 注册的名字，参考 [Error Handlers](https://docs.python.org/3.6/library/codecs.html#error-handlers) 章节。可能的编码列表，请参考 [Standard Encodings](https://docs.python.org/3.6/library/codecs.html#standard-encodings) 章节。
+
+*在版本3.1中发生变化：* 增加了对关键字参数的支持。
+
+str.**endswith**(*suffix*[, *start*[, *end*]])  
+如果字符串以指定的 *suffix* 结尾返回 `True`，否则返回 `False`。*suffix* can also be a tuple of suffixes to look for. With optional *start*, test beginning at that position. With optional *end*, stop comparing at that position.
+
+str.**join**(*iterable*)  
+返回一个由 *iterable* 中的字符串串联而成的字符串。如果 *iterable* 中有任何非字符串值则抛出一个 [TypeError](https://docs.python.org/3.6/library/exceptions.html#TypeError)，包括 [bytes](https://docs.python.org/3.6/library/stdtypes.html#bytes) 对象。元素之间的分隔符是提供这个方法的字符串。
+
+```python
+>>> a = ['apple', 'banana', 'cisco', 'decode']
+>>> '*'.join(a)
+'apple*banana*cisco*decode'
+>>> ' '.join(a)
+'apple banana cisco decode'
+>>> ''.join(a)
+'applebananaciscodecode'
+>>>
+```
+
+str.**lower()**  
+Return a copy of the string with all the cased characters [[4]](https://docs.python.org/3.6/library/stdtypes.html#id15) converted to lowercase.
+
+The lowercasing algorithm used is described in section 3.13 of the Unicode Standard.
+
+str.**replace**(*old*, *new*[, *count*])  
+返回一个字符串的副本并将所有子串 *old* 替换为 *new*。如果指定了可选参数 *count*，则仅将前 *count* 个 *old* 替换为 *new*。
+
+```python
+>>> s = "tools for windows"
+>>> s.replace('o', 'p')
+'tppls fpr windpws'
+>>> s.replace('o', 'p', 2)
+'tppls for windows'
+```
+
+str.**split**(*sep=None, maxsplit=-1*)  
+返回字符串中的一个单词列表，使用 *sep* 作为分隔字符串。If *maxsplit* is given, at most *maxsplit* splits are done (thus, the list will have at most `maxsplit+1` elements). If *maxsplit* is not specified or `-1`, then there is no limit on the number of splits (all possible splits are made).
+
+如果指定 *sep*，连续的分隔符不会被聚集到一起而是被视为界定空串 (例如， `'1,,2'.split(',')` 返回 `['1', '', '2']`)。*sep* 参数可以包括多个字符 (例如，`'1<>2<>3'.split('<>')` 返回 `['1', '2', '3']`)。用一个指定的分隔符分隔一个空串返回 `['']`。
+
+例如：
+
+```python
+>>> '1,2,3'.split(',')
+['1', '2', '3']
+>>> '1,2,3'.split(',', maxsplit=1)
+['1', '2,3']
+>>> '1,2,,3,'.split(',')
+['1', '2', '', '3', '']
+```
+
+如果 *sep* 没有指定或者为 `None`，则应用一个不同的分隔算法：连续的空白被作为一个分隔符，而且如果字符串有前导和尾随空白，输出结果的起始或结束位置将不包含空串。因此，当分隔符为 `None` 时，分隔一个空串或者仅由空白组成的字符串返回 `[]`。
+
+例如：
+
+```python
+>>> '1 2 3'.split()
+['1', '2', '3']
+>>> '1 2 3'.split(maxsplit=1)
+['1', '2 3']
+>>> '   1   2   3   '.split()
+['1', '2', '3']
+```
+
+str.**startswith**(*prefix*[, *start*[, *end*]])  
+如果字符串以指定的 *prefix* 开始则返回 `True`，否则返回 `False`。*prefix* can also be a tuple of prefixes to look for. With optional *start*, test string beginning at that position. With optional *end*, stop comparing string at that position.
+
+str.**upper**()  
+返回一个字符串的副本且将所有的 cased characters（Cased characters are those with general category property being one of “Lu” (Letter, uppercase), “Ll” (Letter, lowercase), or “Lt” (Letter, titlecase).）转换为大写字母。 
+
+#### printf-style 字符串格式化
+**注意：** 这里描述的格式化操作展示了一些导致若干常见错误的怪现象 (例如无法正确地显示元组和字典)。使用更新的[格式化字符串文字](https://docs.python.org/3/reference/lexical_analysis.html#f-strings)，[str.format()](https://docs.python.org/3/library/stdtypes.html#str.format) 接口，或者[模板字符串](https://docs.python.org/3/library/string.html#template-strings)可以帮助避免这些错误。这些替代选择每一个都提供了它们自己的权衡及简单，灵活，和/或可扩展性的好处。
+
+字符串对象有一个唯一的内置运算： % 运算符 (模运算)。这也称为字符串*格式化*或*插值*运算符。给定 `format % values` (其中 *format* 是一个字符串)，`%` conversion specifications in *format* are replaced with zero or more elements of *values*. 效果与在C语言中使用 `sprintf()` 相似。
+
+如果 *format* 要求一个单一参数，*values* 可以是一个单一的非元组对象。[\[5\]](https://docs.python.org/3/library/stdtypes.html#id16) 否则，*values* 必须是一个恰好带有由格式化字符串指定的项数的元组，或者一个单一的映射对象 (例如，一个字典)。
+
+一个转换说明符包含2个或多个字符并拥有下面的组件，这些组件必须按下面的顺序出现：
+
+1. `'%'` 字符，标识说明符的开始。
+2. 映射键 (可选)，由一个圆括号括起来的字符序列组成 (例如， `(somename)` )。
+3. 转换标志 (可选)，影响一些转换类型的结果。
+4. 最小字段宽度 (可选)。If specified as an `'*'` (星号), the actual width is read from the next element of the tuple in *values*, and the object to convert comes after the minimum field width and optional precision.
+5. 精度 (可选)，表示为一个 `'.'` (点) 后跟精度。If specified as `'*'` (一个星号)， the actual precision is read from the next element of the tuple in *values*, and the value to convert comes after the precision.
+6. Length modifier (可选).
+7. 转换类型。
+
+当右边的参数是一个字典 (或者其它映射类型)时，则字符串中的 *formats* 必须包含一个圆括号括起来的映射键到那个字典且立即插入到 `'%'` 字符后面。映射键从映射中选择将被格式化的值。例如：
+
+```python
+>>> print('%(language)s has %(number)03d quote types.' %
+...       {'language': "Python", "number": 2})
+Python has 002 quote types.
+>>> print('%(language)s has %(number)03d quote types.' %
+...       {"language": "Python", "number": 22})
+Python has 022 quote types.
+>>> print('%(language)s has %(number)03d quote types.' %
+...       {"language": "Python", "number": 222})
+Python has 222 quote types.
+>>> print('%(language)s has %(number)03d quote types.' %
+...       {"language": "Python", "number": 2222})
+Python has 2222 quote types.
+>>>
+```
+
+转换标志字符是：
+
+Flag   |Meaning
+-------|------------------
+`'0'`  |转换将为数值填充0。
+
+转换类型是：
+
+Conversion    |Meaning            |Notes
+--------------|-------------------|------
+`'d'`         |象征十进制整型数。   |
+`'f'`         |浮点小数格式。       |(3)
+`'s'`         |字符串（使用 [str()](https://docs.python.org/3/library/stdtypes.html#str) 转换任何Python对象）。  |(5)
+
+注释：
+
+3. 替代形式导致结果总是包含一个小数点，即使它后面没有数字。
+
+   精度决定小数点后面的位数，默认为6位。
+
+4. 
+
+5. 如果精度是 `N`，则输出被截断为 `N` 个字符。
+
+```python
+>>> print('%(language).2s has %(number)03d quote types.' %
+...       {"language": "Python", "number": 222})
+Py has 222 quote types.
+>>>
+```
+
+### 二进制序列类型 — 字节、字节数组、内存视图
+操作二进制数据的核心内置类型是[字节](https://docs.python.org/3/library/stdtypes.html#bytes)和[字节数组](https://docs.python.org/3/library/stdtypes.html#bytearray)。 它们由 [memoryview](https://docs.python.org/3/library/stdtypes.html#memoryview) 支持，它使用[缓冲区协议](https://docs.python.org/3/c-api/buffer.html#bufferobjects)访问其他二进制对象的内存而无需复制。  
+
+[array](https://docs.python.org/3/library/array.html#module-array) 模块支持基本数据类型（如 32 位整型数和 IEEE754 双精度浮点值）的高效存储。  
+
+#### 字节和字节数组操作
+字节和字节数组对象都支持[通用](https://docs.python.org/3.6/library/stdtypes.html#typesseq-common)序列操作。它们不仅可以与同类型的运算对象互操作，还可以与任何 [bytes-like 对象](https://docs.python.org/3.6/glossary.html#term-bytes-like-object)互操作。因为这种灵活性，它们可以自由地混合操作而不引起错误。然而，返回结果的类型可能依赖于操作数的顺序。
+
+bytes.**decode**(*encoding="utf-8", errors="strict"*)  
+bytearray.**decode**(*encoding="utf-8", errors="strict”*)  
+从给定的字节返回一个解码的字符串。默认编码是 `'utf-8'`. `errors` 可以设置为一个不同的错误处理方案。`errors` 的默认值是 `'strict'`, 意为编码错误则抛出一个 [UnicodeError](https://docs.python.org/3.6/library/exceptions.html#UnicodeError). 其它可能的值是`'ignore'`, `'replace'` 和任何其它通过 [codecs.register_error()](https://docs.python.org/3.6/library/codecs.html#codecs.register_error) 注册的名字，参考[错误处理程序](https://docs.python.org/3.6/library/codecs.html#error-handlers)章节。对于可能的编码列表，请参考[标准编码](https://docs.python.org/3.6/library/codecs.html#standard-encodings)章节。
+
+**Note:** Passing the *encoding* argument to [str](https://docs.python.org/3.6/library/stdtypes.html#str) allows decoding any [bytes-like object](https://docs.python.org/3.6/glossary.html#term-bytes-like-object) directly, without needing to make a temporary bytes or bytearray object.
+
+*在版本3.1中发生变化：* 新增对关键字参数的支持。  
 
 ### 集合类型 --- set, frozenset
 *set* 对象是由具有唯一性的 [hashable](https://docs.python.org/zh-cn/3/glossary.html#term-hashable) 对象所组成的无序多项集。 常见的用途包括成员检测、从序列中去除重复项以及数学中的集合类计算，例如交集、并集、差集与对称差集等等。 （关于其他容器对象请参看 [dict](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#dict), [list](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#list) 与 [tuple](https://docs.python.org/zh-cn/3/library/stdtypes.html?highlight=set#tuple) 等内置类，以及 [collections](https://docs.python.org/zh-cn/3/library/collections.html#module-collections) 模块。）
@@ -811,6 +1119,131 @@ Operation  |Result          |Notes
 **symmetric_difference**(_other_)  
 **set ^ other**  
 返回一个新集合，其中的元素或属于原集合或属于 *other* 指定的其他集合，但不能同时属于两者。
+
+### 映射类型 — 字典
+一个[映射](https://docs.python.org/3.6/glossary.html#term-mapping) 对象映射 [可哈希的](https://docs.python.org/3.6/glossary.html#term-hashable) 值到任意对象。映射是可变对象。目前仅有一个标准映射类型，*字典*。 (其它容器请参考内置[列表](https://docs.python.org/3.6/library/stdtypes.html#list)，[集合](https://docs.python.org/3.6/library/stdtypes.html#set)和[元组](https://docs.python.org/3.6/library/stdtypes.html#tuple)类，以及 [collections](https://docs.python.org/3.6/library/collections.html#module-collections) 模块.)
+
+字典的键 *几乎* 可以是任意值。不[可哈希的](https://docs.python.org/3.6/glossary.html#term-hashable)值，即值包含列表，字典或其它可变类型 (通过比较值而不是对象身份) 不能被用作键。  
+
+*class* __dict__(_\*\*kwargs_)  
+*class* __dict__(_mapping, \*\*kwargs_)  
+*class* __dict__(_iterable, \*\*kwargs_)  
+返回一个从一个可选位置参数和一组可能为空集的关键字参数初始化的新字典。  
+
+这些是字典支持的操作 (因此，自定义映射类型也应该支持)：  
+
+**list(d)**  
+返回字典 *d* 中使用的所有键的列表。  
+
+**len(d)**  
+返回字典 *d* 中的项目数。  
+
+**d[key]**  
+用 key *key* 返回 *d* 中的项目。 如果 *key* 不在映射中，则抛出一个 KeyError。  
+
+**d[key] = value**  
+将 `d[key]` 设置为 *value*。  
+
+**del d[key]**  
+从 *d* 中移除 `d[key]`。如果 *key* 不在映射中，则抛出一个 [KeyError](https://docs.python.org/3/library/exceptions.html#KeyError)。
+
+**key in d**  
+如果 *d* 有一个键 *key* 则返回 True，否则返回 False。  
+
+**key not in d**  
+等同于 `not key in d`。  
+
+**clear()**  
+从字典中删除所有项。  
+
+**get**(*key*[, *default*])  
+如果 *key* 在字典中，则返回 *key* 的值，否则返回 *default*。If default is not given, it defaults to `None`, 所以这个方法永远不会抛出 [KeyError](https://docs.python.org/3.6/library/exceptions.html#KeyError)。
+
+**items()**  
+返回一个新的字典的元素的视图 (`(key, value)` pairs)。请看[视图对象的文档](https://docs.python.org/3.6/library/stdtypes.html#dict-views)。
+
+**keys()**  
+返回一个字典的键的新的视图。请看[视图对象的文档](https://docs.python.org/3.6/library/stdtypes.html#dict-views)。
+
+**values()**  
+返回一个字典的值的新的视图。请看[视图对象的文档](https://docs.python.org/3.6/library/stdtypes.html#dict-views)。
+
+#### 字典视图对象
+[dict.keys()](https://docs.python.org/3.6/library/stdtypes.html#dict.keys), [dict.values()](https://docs.python.org/3.6/library/stdtypes.html#dict.values) 和 [dict.items()](https://docs.python.org/3.6/library/stdtypes.html#dict.items) 返回的对象是 *视图对象*。它们提供了一个关于字典条目的动态视图，这意味着当字典变化的时候，视图将反映这些变化。
+
+字典视图用法的一个例子：
+
+```python
+>>> dishes = {'eggs': 2, 'sausage': 1, 'bacon': 1, 'spam': 500}
+>>> keys = dishes.keys()
+>>> values = dishes.values()
+
+>>> keys
+dict_keys(['eggs', 'sausage', 'bacon', 'spam'])
+>>> values
+dict_values([2, 1, 1, 500])
+
+>>> type(keys)
+<class 'dict_keys'>
+>>> type(values)
+<class 'dict_values'>
+
+>>> # iteration
+...
+>>> n = 0
+>>> for val in values:
+...     n += val
+...
+>>> print(n)
+504
+
+>>> # keys and values are iterated over in the same order
+...
+>>> list(keys)
+['eggs', 'sausage', 'bacon', 'spam']
+>>> list(values)
+[2, 1, 1, 500]
+
+>>> # view objects are dynamic and reflect dict changes
+...
+>>> del dishes['eggs']
+>>> del dishes['sausage']
+>>> list(keys)
+['bacon', 'spam']
+>>> list(values)
+[1, 500]
+
+>>> # set operations
+...
+>>> keys & {'eggs', 'bacon', 'salad'}
+{'bacon'}
+>>> keys ^ {'sausage', 'juice'}
+{'juice', 'sausage', 'spam', 'bacon'}
+```
+
+### 上下文管理器类型
+Python 的 [with](https://docs.python.org/3/reference/compound_stmts.html#with) 语句支持由上下文管理器定义的运行时上下文的概念。 这是使用一对允许用户定义的类定义运行时上下文的方法实现的，该运行时上下文在语句体执行之前进入并在语句结束时退出：  
+
+### 特殊属性
+The implementation adds a few special read-only attributes to several object types, where they are relevant. 其中有些不被内置函数[dir()](https://docs.python.org/3.6/library/functions.html#dir) 报道。
+
+object.**\_\_dict\_\_**  
+一个字典或其它映射对象，用于存储对象的(可写的)属性。
+
+instance.**\_\_class\_\_**  
+一个类实例属于哪个类。
+
+class.**\_\_bases\_\_**  
+一个类对象的基类元组。
+
+class.**\_\_subclasses\_\_()**  
+每个类都保持了一份它的直接子类的弱引用列表。这个方法返回一个所有仍然活跃的引用的列表。例如：
+
+```python
+>>> import io
+>>> io.IOBase.__subclasses__()
+[<class 'io.RawIOBase'>, <class 'io.BufferedIOBase'>, <class 'io.TextIOBase'>]
+```
 
 ## 文本处理服务
 这章描述的模块提供了广泛的字符串操作运算和其它的文本处理服务。
