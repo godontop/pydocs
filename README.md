@@ -72,7 +72,8 @@
         * [urllib.error — urllib.request抛出的异常类](#urlliberror--urllibrequest抛出的异常类)
         * [urllib.robotparser — 解析robots.txt](#urllibrobotparser--解析robotstxt)
     * [Python运行时服务](#python运行时服务)
-        * [\_\_main\_\_ --- 顶层脚本环境](#__main__-----顶层脚本环境)
+        * [sys — 系统专用参量和函数](#sys--系统专用参量和函数)
+        * [\_\_main\_\_ --- 顶层代码环境](#__main__-----顶层代码环境)
     * [Python语言参考](#python语言参考)
         * [3. 数据模型](#3-数据模型)
             * [3.3. 特殊方法名](#33-特殊方法名)
@@ -3532,7 +3533,37 @@ This class provides methods to read, parse and answer questions about the `robot
 根据解析的 `robots.txt` 文件中的规则，如果 *useragent* 允许获取 *url* ，则返回 `True`，否则返回 `False`。
 
 ## Python运行时服务
-### \_\_main\_\_ --- 顶层脚本环境
+### sys — 系统专用参量和函数
+该模块提供了一些变量和函数。这些变量可能被解释器使用，也可能由解释器提供。这些函数会影响解释器。本模块总是可用的。
+
+sys.**argv**  
+传递给Python脚本的命令行参数列表。`argv[0]` 是脚本的名字 (是否是full pathname依赖于操作系统)。If the command was executed using the [-c](https://docs.python.org/3.6/using/cmdline.html#cmdoption-c) command line option to the interpreter, `argv[0]` 将被设置为字符串 `'-c'`。如果没有脚本名称传递给Python解释器，则 `argv[0]` 是空串。
+
+循环处理（loop over）标准输入，或者命令行中给出的文件列表，参考 [fileinput](https://docs.python.org/3.6/library/fileinput.html#module-fileinput) 模块。
+
+sys.**exc_info()**  
+本函数返回的元组包含三个值，它们给出当前正在处理的异常的信息。返回的信息仅限于当前线程和当前堆栈帧。如果当前堆栈帧没有正在处理的异常，则信息将从下级被调用的堆栈帧或上级调用者等位置获取，依此类推，直到找到正在处理异常的堆栈帧为止。此处的“处理异常”指的是“执行一个 except 子句”。任何堆栈帧都只能访问当前正在处理的异常的信息。  
+
+如果整个堆栈都没有正在处理的异常，则返回包含三个 None 值的元组。否则返回值为 `(type, value, traceback)`。它们的含义是：*type* 获取正在处理的异常类型（它是 [BaseException](https://docs.python.org/3.10/library/exceptions.html#BaseException) 的子类）；*value* 获取异常实例（异常类型的一个实例）；*traceback* 获取一个 [回溯对象](https://docs.python.org/3.10/reference/datamodel.html#traceback-objects)，该对象封装了最初发生异常时的调用堆栈。  
+
+sys.**exit**([*arg*])  
+退出Python。
+
+可选参数 *arg* 可以是给出退出状态的整型数 (默认为0)，或者另一种类型的对象。如果它是一个整型数，shells和与shells类似的认为0是"成功终止"，而任何非0的值被认为是"不正常的终止"。大多数系统要求它在0-127的范围内，否则将产生未定义的结果。一些系统对特定的退出代码分配特定的含义有一个约定，但这些通常是非充分开发的；Unix程序通常使用 2 表示命令行语法错误，而 1 表示所有其它类型的错误。如果传递的是另一种类型的对象，`None` 等价于传递 0，而任何其它对象则打印到 [stderr](https://docs.python.org/3.6/library/sys.html#sys.stderr) 并导致一个退出代码 1。特别是，当一个错误发生的时候，`sys.exit("some error message")` 是退出一个程序的一种快速的方式。
+
+sys.**path**  
+一个指定模块搜索路径的字符串列表。Initialized from the environment variable [PYTHONPATH](https://docs.python.org/3.6/using/cmdline.html#envvar-PYTHONPATH), plus an installation-dependent default.
+
+As initialized upon program startup, the first item of this list, `path[0]`, is the directory containing the script that was used to invoke the Python interpreter. If the script directory is not available (e.g. if the interpreter is invoked interactively or if the script is read from standard input), `path[0]` is the empty string, which directs Python to search modules in the current directory first. Notice that the script directory is inserted *before* the entries inserted as a result of [PYTHONPATH](https://docs.python.org/3.6/using/cmdline.html#envvar-PYTHONPATH).
+
+程序为了自己的目的可以自由修改这个列表。只有 strings 和 bytes 可以被添加到 [sys.path](https://docs.python.org/3.6/library/sys.html#sys.path)；所有其它数据类型在导入期间被忽略。
+
+sys.**version_info**  
+一个包含版本号的5个组成部分的元组：*major*, *minor*, *micro*, *releaselevel*, and *serial*. 除了 *releaselevel* 所有值都是整型数；发行版级别是 `'alpha'`, `'beta'`, `'candidate'`, 或者 `'final'`. Python版本2.0对应的 `version_info` 值是 `(2, 0, 0, 'final', 0)`. 组件也可以通过名称来访问，如 `sys.version_info[0]` 等价于 `sys.version_info.major`。
+
+*在版本3.1中发生了变化：* 增加了名称组件属性。  
+
+### \_\_main\_\_ --- 顶层代码环境
 `'__main__'` 是顶层代码执行的作用域的名称。模块的 \_\_name\_\_ 在通过标准输入、脚本文件或是交互式命令读入的时候会等于 `'__main__'`。
 
 模块可以通过检查自己的 \_\_name\_\_ 来得知是否运行在 main 作用域中，这使得模块可以在作为脚本或是通过 `python -m` 运行时条件性地执行一些代码，而在被 import 时不会执行。
