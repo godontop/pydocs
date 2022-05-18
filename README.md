@@ -4,6 +4,7 @@
 * [Python](#python)
     * [Python 3 标准库](#python-3-标准库)
         * [内置函数](#内置函数)
+        * [内置常量](#内置常量)
         * [内置类型](#内置类型)
             * [布尔运算 — and, or, not](#布尔运算--and-or-not)
             * [数值类型 — int, float, complex](#数值类型--int-float-complex)
@@ -22,6 +23,9 @@
             * [映射类型 — 字典](#映射类型--字典)
                 * [字典视图对象](#字典视图对象)
             * [特殊属性](#特殊属性)
+        * [内置异常](#内置异常)
+            * [具体异常](#具体异常)
+                * [OS异常](#os异常)
         * [文本处理服务](#文本处理服务)
             * [string — 通用字符串操作](#string--通用字符串操作)
                 * [格式化字符串语法](#格式化字符串语法)
@@ -844,6 +848,23 @@ Dunder init func in class B.
 True
 ```  
 
+## 内置常量
+有一小部分常量在命名空间中。它们是：
+
+**False**  
+[bool](https://docs.python.org/3/library/functions.html#bool) 类型的false值。给 `False` 赋值是不合法的且会抛出一个 [SyntaxError](https://docs.python.org/3/library/exceptions.html#SyntaxError)。
+
+**True**  
+[bool](https://docs.python.org/3/library/functions.html#bool) 类型的true值。给 `True` 赋值是不合法的且会抛出一个 [SyntaxError](https://docs.python.org/3/library/exceptions.html#SyntaxError)。
+
+**None**  
+`NoneType` 类型唯一的值。`None` 经常用于表示一个不存在的值，如当默认参数没有传递给函数时。给 `None` 赋值是不合法的且会抛出一个 [SyntaxError](https://docs.python.org/3/library/exceptions.html#SyntaxError)。
+
+**\_\_debug\_\_**  
+如果Python启动时没带 [-O](https://docs.python.org/3/using/cmdline.html#cmdoption-o) 选项则这个常量为真。另请参见 [assert](https://docs.python.org/3/reference/simple_stmts.html#assert) 语句。
+
+**注意：** 名称 [None](https://docs.python.org/3/library/constants.html#None), [False](https://docs.python.org/3/library/constants.html#False), [True](https://docs.python.org/3/library/constants.html#True) 和 [__debug__](https://docs.python.org/3/library/constants.html#__debug__) 不能被再分配 (给它们赋值，哪怕是一个属性名称，也会抛出 [SyntaxError](https://docs.python.org/3/library/exceptions.html#SyntaxError)), 所以它们可以被认为是 “true” 常量。  
+
 ## 内置类型
 ### 布尔运算 — and, or, not
 这些是布尔运算，按优先级升序排列：
@@ -1344,6 +1365,30 @@ class.**\_\_subclasses\_\_()**
 >>> io.IOBase.__subclasses__()
 [<class 'io.RawIOBase'>, <class 'io.BufferedIOBase'>, <class 'io.TextIOBase'>]
 ```
+
+## 内置异常
+### 具体异常
+下面的异常是经常被抛出的异常。
+
+下面的异常是为了与之前的版本保持兼容；从Python 3.3开始，它们都是 [OSError](https://docs.python.org/3.6/library/exceptions.html#OSError) 的别名。
+
+*exception* **EnvironmentError**
+
+*exception* **IOError**
+
+*exception* **WindowsError**  
+仅Windows下可用。
+
+#### OS异常
+下面的异常是 [OSError](https://docs.python.org/3.6/library/exceptions.html#OSError) 的子类，they get raised depending on the system error code.
+
+*exception* **ConnectionError**  
+连接相关的问题的一个基类。
+
+子类是 [BrokenPipeError](https://docs.python.org/3.6/library/exceptions.html#BrokenPipeError), [ConnectionAbortedError](https://docs.python.org/3.6/library/exceptions.html#ConnectionAbortedError), [ConnectionRefusedError](https://docs.python.org/3.6/library/exceptions.html#ConnectionRefusedError) 和 [ConnectionResetError](https://docs.python.org/3.6/library/exceptions.html#ConnectionResetError)。
+
+*exception* **ConnectionResetError**  
+[ConnectionError](https://docs.python.org/3.6/library/exceptions.html#ConnectionError) 的一个子类，当一个连接被对方重置时抛出。相当于 errno `ECONNRESET`。  
 
 ## 文本处理服务
 这章描述的模块提供了广泛的字符串操作运算和其它的文本处理服务。
