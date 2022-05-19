@@ -7898,6 +7898,35 @@ dtype: bool
 False
 ```
 
+#### pandas.DataFrame.drop
+**DataFrame.drop(*labels=None, axis=0, index=None, columns=None, level=None, inplace=False, errors='raise')***  
+
+从行或列中删除指定的标签。  
+
+通过指定标签名称和相应的轴，或直接指定索引或列名称来删除行或列。使用多索引时，可以通过指定级别来移除不同级别的标签。 有关现在未使用的级别的更多信息，请参阅*用户指南 <advanced.shown_levels>*。  
+
+**参数：**  
+**labels： *single label or list-like***  
+要删除的索引或列标签。 元组将用作单个标签，而不被视为一个类似列表。  
+
+**axis： *{0 or ‘index’, 1 or ‘columns’}, 默认值 0***  
+是否从索引（0 或“index”）或列（1 或“columns”）中删除标签。  
+
+**index： *single label or list-like***  
+替代指定轴（labels，axis=0 相当于 index=labels）。  
+
+**columns： *single label or list-like***  
+替代指定轴（labels，axis=1 相当于 columns=labels）。  
+
+**inplace： *bool, 默认值 False***  
+如果为 False，则返回一个副本。 否则，就地执行操作并返回 None。  
+
+**Returns： DataFrame or None**  
+无已删除索引或列标签的 DataFrame，如果 `inplace=True`，则为 None。  
+
+**Raises： KeyError**  
+如果在所选轴中有任何标签未找到。  
+
 #### pandas.DataFrame.index
 DataFrame.**index**: *Index*  
 返回 DataFrame 的索引（行标签）。  
