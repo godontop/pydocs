@@ -24,8 +24,10 @@
                 * [字典视图对象](#字典视图对象)
             * [特殊属性](#特殊属性)
         * [内置异常](#内置异常)
+            * [基类](#基类)
             * [具体异常](#具体异常)
                 * [OS异常](#os异常)
+            * [异常层次结构](#异常层次结构)
         * [文本处理服务](#文本处理服务)
             * [string — 通用字符串操作](#string--通用字符串操作)
                 * [格式化字符串语法](#格式化字符串语法)
@@ -1367,28 +1369,235 @@ class.**\_\_subclasses\_\_()**
 ```
 
 ## 内置异常
+在 Python 中，所有异常都必须是派生自 [BaseException](https://docs.python.org/3.8/library/exceptions.html#BaseException) 的类的实例。在带有提及特定类的 [except](https://docs.python.org/3.8/reference/compound_stmts.html#except) 子句的 [try](https://docs.python.org/3.8/reference/compound_stmts.html#try) 语句中，该子句还处理从该类派生的任何异常类（但不处理派生*它*的异常类）。 通过子类化创建的两个不相关的异常类永远不会等价，即使它们具有相同的名称。  
+
+下面列出的内置异常可以由解释器或内置函数生成。 除非另有说明，它们都有一个“关联值”，指示错误的详细原因。这可能是一个字符串或几项信息的元组（例如，错误代码和解释代码的字符串）。 关联值通常作为参数传递给异常类的构造函数。  
+
+用户代码可以引发内置异常。 这可用于测试异常处理程序或报告错误情况，“就像”解释器引发相同异常的情况一样； 但请注意，没有什么可以阻止用户代码引发不适当的错误。  
+
+内置的异常类可以被子类化以定义新的异常； 鼓励程序员从 [Exception](https://docs.python.org/3.8/library/exceptions.html#Exception) 类或其子类之一派生新的异常，而不是从 [BaseException](https://docs.python.org/3.8/library/exceptions.html#BaseException)。 有关定义异常的更多信息，请参阅 Python 教程中的[用户定义的异常](https://docs.python.org/3.8/tutorial/errors.html#tut-userexceptions)。  
+
+当在 [except](https://docs.python.org/3.8/reference/compound_stmts.html#except) 或 [finally](https://docs.python.org/3.8/reference/compound_stmts.html#finally) 子句中引发（或重新引发）异常时，\_\_context\_\_ 会被自动设置为最后一个捕获的异常； 如果未处理新异常，则最终显示的回溯将包括原始异常和最后的异常。  
+
+当引发一个新的异常（而不是使用一个简单的 `raise` 来重新引发当前正在处理的异常）时，隐式的异常上下文可以通过使用带有 [raise](https://docs.python.org/3.8/reference/simple_stmts.html#raise) 的 [from](https://docs.python.org/3.8/reference/simple_stmts.html#raise) 来补充一个明确的原因：  
+
+```python
+raise new_exc from original_exc
+```
+
+[from](https://docs.python.org/3.8/reference/simple_stmts.html#raise) 后面的表达式必须是异常或 `None`。 它将在引发的异常上被设置为 \_\_cause\_\_。 设置 \_\_cause\_\_ 还会隐式地将 \_\_suppress\_context\_\_ 属性设置为 `True`，因此使用 `raise new_exc from None` 可以有效地将旧异常替换为新异常以显示其目的（例如，将 [KeyError](https://docs.python.org/3.8/library/exceptions.html#KeyError) 转换为 [AttributeError](https://docs.python.org/3.8/library/exceptions.html#AttributeError)），同时让旧异常在 \_\_context\_\_ 中保持可用状态以便调试时进行内省。    
+
+除了异常本身的回溯之外，默认的回溯显示代码还会显示这些串联的异常。 \_\_cause\_\_ 中的显式串联异常如果存在将总是显示。仅当 \_\_cause\_\_ 为 [None](https://docs.python.org/3.8/library/constants.html#None) 且 \_\_suppress\_context\_\_ 为 false 时，才会显示 \_\_context\_\_ 中的隐式串联异常。  
+
+在任何一种情况下，异常本身总是显示在任何串联异常之后，因此回溯的最后一行总是显示引发的最后一个异常。  
+
+### 基类
+下列异常主要被用作其他异常的基类。  
+
+*exception* **BaseException**  
+所有内置异常的基类。它不应该被用户自定义类直接继承 (这种情况请使用 [Exception](https://docs.python.org/3.8/library/exceptions.html#Exception))。 如果在此类的实例上调用 [str()](https://docs.python.org/3.8/library/stdtypes.html#str)，则会返回实例的参数表示，或者当没有参数时返回空字符串。  
+
+**args**  
+    传给异常构造器的参数元组。 某些内置异常 (例如 [OSError](https://docs.python.org/3.8/library/exceptions.html#OSError)) 期待特定数量的参数并赋予此元组中的元素特殊的含义，而其他异常通常只调用一个给出错误信息的单独字符串。    
+
+*exception* **Exception**  
+    所有内置的、非系统退出的异常都派生自这个类。 所有用户定义的异常也应该从这个类派生。    
+
 ### 具体异常
-下面的异常是经常被抛出的异常。
+下面的异常是经常被抛出的异常。  
 
-下面的异常是为了与之前的版本保持兼容；从Python 3.3开始，它们都是 [OSError](https://docs.python.org/3.6/library/exceptions.html#OSError) 的别名。
+*exception* **AttributeError**  
+    当属性引用 (参见 [属性引用](https://docs.python.org/3.8/reference/expressions.html#attribute-references)) 或赋值失败时将被引发。（当一个对象根本不支持属性引用或属性赋值时，将引发 [TypeError](https://docs.python.org/3.8/library/exceptions.html#TypeError)。）    
 
-*exception* **EnvironmentError**
+*exception* **IndexError**  
+    当序列下标超出范围时引发。（切片索引被静默截断以落在允许的范围内；如果索引不是整数，则引发 [TypeError](https://docs.python.org/3.8/library/exceptions.html#TypeError)。）  
 
-*exception* **IOError**
+*exception* **KeyError**  
+    当在现有键集合中找不到指定的映射（字典）键时将被引发。  
+
+*exception* **KeyboardInterrupt**  
+    当用户按下中断键 (通常为 Control-C 或 Delete) 时将被引发。 在执行期间，会定期检测中断。 该异常继承自 [BaseException](https://docs.python.org/3.8/library/exceptions.html#BaseException) 以确保不会被捕获 [Exception](https://docs.python.org/3.8/library/exceptions.html#Exception) 的代码意外捕获，从而阻止解释器退出。  
+
+*exception* **NameError**  
+    当某个局部或全局名称未找到时将被引发。此异常仅用于非限定名称。关联的值是一条错误信息，其中包含未找到的名称。  
+
+*exception* **OSError([**arg**])**    
+*exception* **OSError(**_errno, strerror_**[**, *filename***[**, *winerror***[**, *filename2***]]])**  
+    此异常在一个系统函数返回一个系统相关的错误时将被引发，此类错误包括 I/O 操作失败例如 "文件未找到" 或 "磁盘已满" （不包括非法参数类型或其他偶然性错误）。
+
+    构造器的第二种形式可设置如下所述的相应属性。 如果未指定这些属性则默认为 [None](https://docs.python.org/3.8/library/constants.html#None)。 为了能向下兼容，如果传入了三个参数，则 [args](https://docs.python.org/3.8/library/exceptions.html#BaseException.args) 属性将仅包含由前两个构造器参数组成的 2 元组。    
+
+    构造器实际返回的往往是 [OSError](https://docs.python.org/3.8/library/exceptions.html#OSError) 的某个子类，如下文 [OS exceptions](https://docs.python.org/3.8/library/exceptions.html#os-exceptions) 中所描述的。 具体的子类取决于最终的 [errno](https://docs.python.org/3.8/library/exceptions.html#OSError.errno) 值。 此行为仅在直接或通过别名来构造 [OSError](https://docs.python.org/3.8/library/exceptions.html#OSError) 时发生，并且在子类化时不会被继承。  
+
+    **errno**  
+        来自于 C 变量 `errno` 的数字错误代码。  
+
+*exception* **SyntaxError**  
+    当解析器遇到语法错误时将被引发。 这可以发生在 [import](https://docs.python.org/3.8/reference/simple_stmts.html#import) 语句，对内置函数 [exec()](https://docs.python.org/3.8/library/functions.html#exec) 或 [eval()](https://docs.python.org/3.8/library/functions.html#eval) 的调用，或者读取原始脚本或标准输入（也包括交互模式）的时候。  
+
+    异常实例的 [str()](https://docs.python.org/3.8/library/stdtypes.html#str) 只返回错误消息。  
+
+    **filename**  
+        语法错误所在文件的名称。
+
+    **lineno**  
+        发生错误所在文件中的行号。 行号索引从 1 开始：文件中首行的 `lineno` 为 1。  
+
+    **offset**  
+        发生错误所在文件中的列号。 列号索引从 1 开始：行中首个字符的 `offset` 为 1。  
+
+    **text**  
+        错误所涉及的源代码文本。  
+<br>  
+
+*exception* **TypeError**  
+    当一个操作或函数被应用于类型不适当的对象时将被引发。 关联的值是一个字符串，给出有关类型不匹配的详情。  
+
+    此异常可以由用户代码引发，以表明尝试对某个对象进行的操作不受支持也不应当受支持。如果某个对象应当支持给定的操作但尚未提供相应的实现，所要引发的适当异常应为 [NotImplementedError](https://docs.python.org/3.8/library/exceptions.html#NotImplementedError)。  
+
+    传入参数的类型错误 (例如在要求 [int](https://docs.python.org/3.8/library/functions.html#int) 时却传入了 [list](https://docs.python.org/3.8/library/stdtypes.html#list)) 应当导致 [TypeError](https://docs.python.org/3.8/library/exceptions.html#TypeError)，但传入参数的值错误 (例如传入要求范围之外的数值) 则应当导致 [ValueError](https://docs.python.org/3.8/library/exceptions.html#ValueError)。
+<br>  
+
+*exception* **UnicodeError**  
+    当发生与 Unicode 相关的编码或解码错误时将被引发。 此异常是 [ValueError](https://docs.python.org/3.8/library/exceptions.html#ValueError) 的一个子类。  
+
+    [UnicodeError](https://docs.python.org/3.8/library/exceptions.html#UnicodeError) 具有一些描述编码或解码错误的属性。 例如 `err.object[err.start:err.end]` 会给出导致编解码器失败的特定无效输入。  
+
+    **encoding**  
+        引发错误的编码名称。
+
+    **reason**  
+        描述特定编解码器错误的字符串。  
+
+    **object**  
+        编解码器试图要编码或解码的对象。  
+
+    **start**  
+        [object](https://docs.python.org/3.8/library/functions.html#object) 中无效数据的开始位置索引。  
+
+    **end**  
+        [object](https://docs.python.org/3.8/library/functions.html#object) 中无效数据的末尾位置索引（不含）。  
+<br>
+
+*exception* **UnicodeEncodeError**  
+    当在编码过程中发生与 Unicode 相关的错误时将被引发。 此异常是 [UnicodeError](https://docs.python.org/3.8/library/exceptions.html#UnicodeError) 的一个子类。  
+<br>  
+
+*exception* **UnicodeDecodeError**  
+    当在解码过程中发生与 Unicode 相关的错误时将被引发。 此异常是 [UnicodeError](https://docs.python.org/3.8/library/exceptions.html#UnicodeError) 的一个子类。  
+<br>  
+
+*exception* **ValueError**  
+当操作或函数接收到具有正确类型但值不适合的参数，并且情况不能用更精确的异常例如 [IndexError](https://docs.python.org/3.8/library/exceptions.html#IndexError) 来描述时将被引发。  
+<br>  
+
+*exception* **ZeroDivisionError**  
+当除法或取余运算的第二个参数为零时将被引发。 关联的值是一个字符串，指明操作数和运算的类型。  
+<br>  
+
+下面的异常是为了与之前的版本保持兼容；从Python 3.3开始，它们都是 [OSError](https://docs.python.org/3.6/library/exceptions.html#OSError) 的别名。  
+
+*exception* **EnvironmentError**  
+
+*exception* **IOError**  
 
 *exception* **WindowsError**  
 仅Windows下可用。
 
 #### OS异常
-下面的异常是 [OSError](https://docs.python.org/3.6/library/exceptions.html#OSError) 的子类，they get raised depending on the system error code.
+下面的异常是 [OSError](https://docs.python.org/3.6/library/exceptions.html#OSError) 的子类，它们将根据系统错误代码被引发。  
 
 *exception* **ConnectionError**  
-连接相关的问题的一个基类。
+连接相关的问题的基类。  
 
-子类是 [BrokenPipeError](https://docs.python.org/3.6/library/exceptions.html#BrokenPipeError), [ConnectionAbortedError](https://docs.python.org/3.6/library/exceptions.html#ConnectionAbortedError), [ConnectionRefusedError](https://docs.python.org/3.6/library/exceptions.html#ConnectionRefusedError) 和 [ConnectionResetError](https://docs.python.org/3.6/library/exceptions.html#ConnectionResetError)。
+子类是 [BrokenPipeError](https://docs.python.org/3.6/library/exceptions.html#BrokenPipeError), [ConnectionAbortedError](https://docs.python.org/3.6/library/exceptions.html#ConnectionAbortedError), [ConnectionRefusedError](https://docs.python.org/3.6/library/exceptions.html#ConnectionRefusedError) 和 [ConnectionResetError](https://docs.python.org/3.6/library/exceptions.html#ConnectionResetError)。  
+<br>  
 
 *exception* **ConnectionResetError**  
-[ConnectionError](https://docs.python.org/3.6/library/exceptions.html#ConnectionError) 的一个子类，当一个连接被对方重置时抛出。相当于 errno `ECONNRESET`。  
+[ConnectionError](https://docs.python.org/3.6/library/exceptions.html#ConnectionError) 的一个子类，当一个连接被对方重置时抛出。相当于 errno 为 `ECONNRESET`。  
+<br>  
+
+*exception* **FileNotFoundError**  
+当所请求的文件或目录不存在时将被引发。 对应于 errno `ENOENT`。  
+<br>  
+
+*exception* **TimeoutError**  
+当一个系统函数在系统级超时时将被引发。 对应于 errno `ETIMEDOUT`。  
+
+*3.3 新版功能:* 添加了以上所有 [OSError](https://docs.python.org/3.8/library/exceptions.html#OSError) 的子类。  
+
+参见： [PEP 3151](https://www.python.org/dev/peps/pep-3151) - 重写 OS 和 IO 异常的层次结构  
+
+### 异常层次结构
+内置异常的类层次结构如下：  
+
+`
+BaseException
+ +-- SystemExit
+ +-- KeyboardInterrupt
+ +-- GeneratorExit
+ +-- Exception
+      +-- StopIteration
+      +-- StopAsyncIteration
+      +-- ArithmeticError
+      |    +-- FloatingPointError
+      |    +-- OverflowError
+      |    +-- ZeroDivisionError
+      +-- AssertionError
+      +-- AttributeError
+      +-- BufferError
+      +-- EOFError
+      +-- ImportError
+      |    +-- ModuleNotFoundError
+      +-- LookupError
+      |    +-- IndexError
+      |    +-- KeyError
+      +-- MemoryError
+      +-- NameError
+      |    +-- UnboundLocalError
+      +-- OSError
+      |    +-- BlockingIOError
+      |    +-- ChildProcessError
+      |    +-- ConnectionError
+      |    |    +-- BrokenPipeError
+      |    |    +-- ConnectionAbortedError
+      |    |    +-- ConnectionRefusedError
+      |    |    +-- ConnectionResetError
+      |    +-- FileExistsError
+      |    +-- FileNotFoundError
+      |    +-- InterruptedError
+      |    +-- IsADirectoryError
+      |    +-- NotADirectoryError
+      |    +-- PermissionError
+      |    +-- ProcessLookupError
+      |    +-- TimeoutError
+      +-- ReferenceError
+      +-- RuntimeError
+      |    +-- NotImplementedError
+      |    +-- RecursionError
+      +-- SyntaxError
+      |    +-- IndentationError
+      |         +-- TabError
+      +-- SystemError
+      +-- TypeError
+      +-- ValueError
+      |    +-- UnicodeError
+      |         +-- UnicodeDecodeError
+      |         +-- UnicodeEncodeError
+      |         +-- UnicodeTranslateError
+      +-- Warning
+           +-- DeprecationWarning
+           +-- PendingDeprecationWarning
+           +-- RuntimeWarning
+           +-- SyntaxWarning
+           +-- UserWarning
+           +-- FutureWarning
+           +-- ImportWarning
+           +-- UnicodeWarning
+           +-- BytesWarning
+           +-- ResourceWarning
+`
+<br>  
 
 ## 文本处理服务
 这章描述的模块提供了广泛的字符串操作运算和其它的文本处理服务。
