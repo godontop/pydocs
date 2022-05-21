@@ -1398,93 +1398,93 @@ raise new_exc from original_exc
 所有内置异常的基类。它不应该被用户自定义类直接继承 (这种情况请使用 [Exception](https://docs.python.org/3.8/library/exceptions.html#Exception))。 如果在此类的实例上调用 [str()](https://docs.python.org/3.8/library/stdtypes.html#str)，则会返回实例的参数表示，或者当没有参数时返回空字符串。  
 
 **args**  
-    传给异常构造器的参数元组。 某些内置异常 (例如 [OSError](https://docs.python.org/3.8/library/exceptions.html#OSError)) 期待特定数量的参数并赋予此元组中的元素特殊的含义，而其他异常通常只调用一个给出错误信息的单独字符串。    
+传给异常构造器的参数元组。 某些内置异常 (例如 [OSError](https://docs.python.org/3.8/library/exceptions.html#OSError)) 期待特定数量的参数并赋予此元组中的元素特殊的含义，而其他异常通常只调用一个给出错误信息的单独字符串。    
 
 *exception* **Exception**  
-    所有内置的、非系统退出的异常都派生自这个类。 所有用户定义的异常也应该从这个类派生。    
+所有内置的、非系统退出的异常都派生自这个类。 所有用户定义的异常也应该从这个类派生。    
 
 ### 具体异常
 下面的异常是经常被抛出的异常。  
 
 *exception* **AttributeError**  
-    当属性引用 (参见 [属性引用](https://docs.python.org/3.8/reference/expressions.html#attribute-references)) 或赋值失败时将被引发。（当一个对象根本不支持属性引用或属性赋值时，将引发 [TypeError](https://docs.python.org/3.8/library/exceptions.html#TypeError)。）    
+当属性引用 (参见 [属性引用](https://docs.python.org/3.8/reference/expressions.html#attribute-references)) 或赋值失败时将被引发。（当一个对象根本不支持属性引用或属性赋值时，将引发 [TypeError](https://docs.python.org/3.8/library/exceptions.html#TypeError)。）    
 
 *exception* **IndexError**  
-    当序列下标超出范围时引发。（切片索引被静默截断以落在允许的范围内；如果索引不是整数，则引发 [TypeError](https://docs.python.org/3.8/library/exceptions.html#TypeError)。）  
+当序列下标超出范围时引发。（切片索引被静默截断以落在允许的范围内；如果索引不是整数，则引发 [TypeError](https://docs.python.org/3.8/library/exceptions.html#TypeError)。）  
 
 *exception* **KeyError**  
-    当在现有键集合中找不到指定的映射（字典）键时将被引发。  
+当在现有键集合中找不到指定的映射（字典）键时将被引发。  
 
 *exception* **KeyboardInterrupt**  
-    当用户按下中断键 (通常为 Control-C 或 Delete) 时将被引发。 在执行期间，会定期检测中断。 该异常继承自 [BaseException](https://docs.python.org/3.8/library/exceptions.html#BaseException) 以确保不会被捕获 [Exception](https://docs.python.org/3.8/library/exceptions.html#Exception) 的代码意外捕获，从而阻止解释器退出。  
+当用户按下中断键 (通常为 Control-C 或 Delete) 时将被引发。 在执行期间，会定期检测中断。 该异常继承自 [BaseException](https://docs.python.org/3.8/library/exceptions.html#BaseException) 以确保不会被捕获 [Exception](https://docs.python.org/3.8/library/exceptions.html#Exception) 的代码意外捕获，从而阻止解释器退出。  
 
 *exception* **NameError**  
-    当某个局部或全局名称未找到时将被引发。此异常仅用于非限定名称。关联的值是一条错误信息，其中包含未找到的名称。  
+当某个局部或全局名称未找到时将被引发。此异常仅用于非限定名称。关联的值是一条错误信息，其中包含未找到的名称。  
 
 *exception* **OSError([**arg**])**    
 *exception* **OSError(**_errno, strerror_**[**, *filename***[**, *winerror***[**, *filename2***]]])**  
-    此异常在一个系统函数返回一个系统相关的错误时将被引发，此类错误包括 I/O 操作失败例如 "文件未找到" 或 "磁盘已满" （不包括非法参数类型或其他偶然性错误）。
+此异常在一个系统函数返回一个系统相关的错误时将被引发，此类错误包括 I/O 操作失败例如 "文件未找到" 或 "磁盘已满" （不包括非法参数类型或其他偶然性错误）。
 
-    构造器的第二种形式可设置如下所述的相应属性。 如果未指定这些属性则默认为 [None](https://docs.python.org/3.8/library/constants.html#None)。 为了能向下兼容，如果传入了三个参数，则 [args](https://docs.python.org/3.8/library/exceptions.html#BaseException.args) 属性将仅包含由前两个构造器参数组成的 2 元组。    
+构造器的第二种形式可设置如下所述的相应属性。 如果未指定这些属性则默认为 [None](https://docs.python.org/3.8/library/constants.html#None)。 为了能向下兼容，如果传入了三个参数，则 [args](https://docs.python.org/3.8/library/exceptions.html#BaseException.args) 属性将仅包含由前两个构造器参数组成的 2 元组。    
 
-    构造器实际返回的往往是 [OSError](https://docs.python.org/3.8/library/exceptions.html#OSError) 的某个子类，如下文 [OS exceptions](https://docs.python.org/3.8/library/exceptions.html#os-exceptions) 中所描述的。 具体的子类取决于最终的 [errno](https://docs.python.org/3.8/library/exceptions.html#OSError.errno) 值。 此行为仅在直接或通过别名来构造 [OSError](https://docs.python.org/3.8/library/exceptions.html#OSError) 时发生，并且在子类化时不会被继承。  
+构造器实际返回的往往是 [OSError](https://docs.python.org/3.8/library/exceptions.html#OSError) 的某个子类，如下文 [OS exceptions](https://docs.python.org/3.8/library/exceptions.html#os-exceptions) 中所描述的。 具体的子类取决于最终的 [errno](https://docs.python.org/3.8/library/exceptions.html#OSError.errno) 值。 此行为仅在直接或通过别名来构造 [OSError](https://docs.python.org/3.8/library/exceptions.html#OSError) 时发生，并且在子类化时不会被继承。  
 
-    **errno**  
-        来自于 C 变量 `errno` 的数字错误代码。  
+**errno**  
+来自于 C 变量 `errno` 的数字错误代码。  
 
 *exception* **SyntaxError**  
-    当解析器遇到语法错误时将被引发。 这可以发生在 [import](https://docs.python.org/3.8/reference/simple_stmts.html#import) 语句，对内置函数 [exec()](https://docs.python.org/3.8/library/functions.html#exec) 或 [eval()](https://docs.python.org/3.8/library/functions.html#eval) 的调用，或者读取原始脚本或标准输入（也包括交互模式）的时候。  
+当解析器遇到语法错误时将被引发。 这可以发生在 [import](https://docs.python.org/3.8/reference/simple_stmts.html#import) 语句，对内置函数 [exec()](https://docs.python.org/3.8/library/functions.html#exec) 或 [eval()](https://docs.python.org/3.8/library/functions.html#eval) 的调用，或者读取原始脚本或标准输入（也包括交互模式）的时候。  
 
-    异常实例的 [str()](https://docs.python.org/3.8/library/stdtypes.html#str) 只返回错误消息。  
+异常实例的 [str()](https://docs.python.org/3.8/library/stdtypes.html#str) 只返回错误消息。  
 
-    **filename**  
-        语法错误所在文件的名称。
+**filename**  
+语法错误所在文件的名称。
 
-    **lineno**  
-        发生错误所在文件中的行号。 行号索引从 1 开始：文件中首行的 `lineno` 为 1。  
+**lineno**  
+发生错误所在文件中的行号。 行号索引从 1 开始：文件中首行的 `lineno` 为 1。  
 
-    **offset**  
-        发生错误所在文件中的列号。 列号索引从 1 开始：行中首个字符的 `offset` 为 1。  
+**offset**  
+发生错误所在文件中的列号。 列号索引从 1 开始：行中首个字符的 `offset` 为 1。  
 
-    **text**  
-        错误所涉及的源代码文本。  
+**text**  
+错误所涉及的源代码文本。  
 <br>  
 
 *exception* **TypeError**  
-    当一个操作或函数被应用于类型不适当的对象时将被引发。 关联的值是一个字符串，给出有关类型不匹配的详情。  
+当一个操作或函数被应用于类型不适当的对象时将被引发。 关联的值是一个字符串，给出有关类型不匹配的详情。  
 
-    此异常可以由用户代码引发，以表明尝试对某个对象进行的操作不受支持也不应当受支持。如果某个对象应当支持给定的操作但尚未提供相应的实现，所要引发的适当异常应为 [NotImplementedError](https://docs.python.org/3.8/library/exceptions.html#NotImplementedError)。  
+此异常可以由用户代码引发，以表明尝试对某个对象进行的操作不受支持也不应当受支持。如果某个对象应当支持给定的操作但尚未提供相应的实现，所要引发的适当异常应为 [NotImplementedError](https://docs.python.org/3.8/library/exceptions.html#NotImplementedError)。  
 
-    传入参数的类型错误 (例如在要求 [int](https://docs.python.org/3.8/library/functions.html#int) 时却传入了 [list](https://docs.python.org/3.8/library/stdtypes.html#list)) 应当导致 [TypeError](https://docs.python.org/3.8/library/exceptions.html#TypeError)，但传入参数的值错误 (例如传入要求范围之外的数值) 则应当导致 [ValueError](https://docs.python.org/3.8/library/exceptions.html#ValueError)。
+传入参数的类型错误 (例如在要求 [int](https://docs.python.org/3.8/library/functions.html#int) 时却传入了 [list](https://docs.python.org/3.8/library/stdtypes.html#list)) 应当导致 [TypeError](https://docs.python.org/3.8/library/exceptions.html#TypeError)，但传入参数的值错误 (例如传入要求范围之外的数值) 则应当导致 [ValueError](https://docs.python.org/3.8/library/exceptions.html#ValueError)。
 <br>  
 
 *exception* **UnicodeError**  
-    当发生与 Unicode 相关的编码或解码错误时将被引发。 此异常是 [ValueError](https://docs.python.org/3.8/library/exceptions.html#ValueError) 的一个子类。  
+当发生与 Unicode 相关的编码或解码错误时将被引发。 此异常是 [ValueError](https://docs.python.org/3.8/library/exceptions.html#ValueError) 的一个子类。  
 
-    [UnicodeError](https://docs.python.org/3.8/library/exceptions.html#UnicodeError) 具有一些描述编码或解码错误的属性。 例如 `err.object[err.start:err.end]` 会给出导致编解码器失败的特定无效输入。  
+[UnicodeError](https://docs.python.org/3.8/library/exceptions.html#UnicodeError) 具有一些描述编码或解码错误的属性。 例如 `err.object[err.start:err.end]` 会给出导致编解码器失败的特定无效输入。  
 
-    **encoding**  
-        引发错误的编码名称。
+ **encoding**  
+引发错误的编码名称。
 
-    **reason**  
-        描述特定编解码器错误的字符串。  
+**reason**  
+描述特定编解码器错误的字符串。  
 
-    **object**  
-        编解码器试图要编码或解码的对象。  
+**object**  
+编解码器试图要编码或解码的对象。  
 
-    **start**  
-        [object](https://docs.python.org/3.8/library/functions.html#object) 中无效数据的开始位置索引。  
+**start**  
+[object](https://docs.python.org/3.8/library/functions.html#object) 中无效数据的开始位置索引。  
 
-    **end**  
-        [object](https://docs.python.org/3.8/library/functions.html#object) 中无效数据的末尾位置索引（不含）。  
+**end**  
+[object](https://docs.python.org/3.8/library/functions.html#object) 中无效数据的末尾位置索引（不含）。  
 <br>
 
 *exception* **UnicodeEncodeError**  
-    当在编码过程中发生与 Unicode 相关的错误时将被引发。 此异常是 [UnicodeError](https://docs.python.org/3.8/library/exceptions.html#UnicodeError) 的一个子类。  
+当在编码过程中发生与 Unicode 相关的错误时将被引发。 此异常是 [UnicodeError](https://docs.python.org/3.8/library/exceptions.html#UnicodeError) 的一个子类。  
 <br>  
 
 *exception* **UnicodeDecodeError**  
-    当在解码过程中发生与 Unicode 相关的错误时将被引发。 此异常是 [UnicodeError](https://docs.python.org/3.8/library/exceptions.html#UnicodeError) 的一个子类。  
+当在解码过程中发生与 Unicode 相关的错误时将被引发。 此异常是 [UnicodeError](https://docs.python.org/3.8/library/exceptions.html#UnicodeError) 的一个子类。  
 <br>  
 
 *exception* **ValueError**  
