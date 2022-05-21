@@ -1531,7 +1531,7 @@ raise new_exc from original_exc
 ### 异常层次结构
 内置异常的类层次结构如下：  
 
-`
+```
 BaseException
  +-- SystemExit
  +-- KeyboardInterrupt
@@ -1596,7 +1596,7 @@ BaseException
            +-- UnicodeWarning
            +-- BytesWarning
            +-- ResourceWarning
-`
+```
 <br>  
 
 ## 文本处理服务
