@@ -3998,8 +3998,8 @@ import a
 这个模块使用 traceback 对象 —— 这是存储在 [sys.last_traceback](https://docs.python.org/3.8/library/sys.html#sys.last_traceback) 变量中并作为 [sys.exc_info()](https://docs.python.org/3.8/library/sys.html#sys.exc_info) 的第三项被返回的对象类型。  
 
 这个模块定义了以下函数：  
-
-traceback**.print_exception(***etype, value, tb, limit=None, file=None, chain=True***)**  
+ 
+traceback.**print_exception(**_etype, value, tb, limit=None, file=None, chain=True_**)**  
 从 traceback 对象 *tb* 将异常信息和堆栈跟踪条目打印到 *file*。这在以下方面与 [print_tb()](https://docs.python.org/3.8/library/traceback.html?highlight=exc_value#traceback.print_tb) 不同：  
 
 * 如果 *tb* 不是 `None`，它将打印一个标题 `Traceback (most recent call last):`  
@@ -4018,7 +4018,7 @@ traceback**.print_exception(***etype, value, tb, limit=None, file=None, chain=Tr
 
 [TracebackException](https://docs.python.org/3.8/library/traceback.html?highlight=exc_value#traceback.TracebackException) 对象是从实际异常创建的，以捕获数据以供以后以轻量级方式打印。  
 
-*class* traceback**.TracebackException(***exc_type, exc_value, exc_traceback, *, limit=None, lookup_lines=True, capture_locals=False***)**  
+*class* traceback.**TracebackException(**_exc_type, exc_value, exc_traceback, \*, limit=None, lookup_lines=True, capture_locals=False_**)**  
 捕获异常以供以后渲染。 *limit*、*lookup_lines* 和 *capture_locals* 与 [StackSummary](https://docs.python.org/3.8/library/traceback.html?highlight=exc_value#traceback.StackSummary) 类相同。  
 
 请注意，当 *locals* 被捕获时，它们也会显示在回溯中。  
@@ -4053,12 +4053,12 @@ traceback**.print_exception(***etype, value, tb, limit=None, file=None, chain=Tr
 **msg**  
 对于语法错误 - 编译器错误消息。  
 
-*classmethod* **from_exception(***exc, \*, limit=None, lookup_lines=True, capture_locals=False***)**  
+*classmethod* **from_exception(**_exc, \*, limit=None, lookup_lines=True, capture_locals=False_**)**  
 捕获异常以供以后渲染。 *limit*、*lookup_lines* 和 *capture_locals* 与 [StackSummary](https://docs.python.org/3.8/library/traceback.html?highlight=exc_value#traceback.StackSummary) 类相同。  
 
 请注意，当 *locals* 被捕获时，它们也会显示在回溯中。  
 
-**format(***\*, chain=True***)**  
+**format(**_\*, chain=True_**)**  
 格式化异常。  
 
 如果 *chain* 不是 `True`，`__cause__` 和 `__context__` 将不会被格式化。  
