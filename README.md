@@ -80,6 +80,8 @@
     * [Python运行时服务](#python运行时服务)
         * [sys — 系统专用参量和函数](#sys--系统专用参量和函数)
         * [\_\_main\_\_ --- 顶层代码环境](#__main__-----顶层代码环境)
+        * [traceback — 打印或检索堆栈回溯](#traceback--打印或检索堆栈回溯)
+            * [TracebackException 对象](#tracebackException-对象)
     * [Python语言参考](#python语言参考)
         * [3. 数据模型](#3-数据模型)
             * [3.3. 特殊方法名](#33-特殊方法名)
@@ -3985,7 +3987,95 @@ import a
 ➜  test$ 
 ```
 
-通过上面的例子可以看出，在 `a.py` 模块中添加 `if __name__ == "__main__":` 代码块后，在其它模块中导入 `a.py` 模块时，`if __name__ == "__main__":` 代码块内的代码不会被执行。
+通过上面的例子可以看出，在 `a.py` 模块中添加 `if __name__ == "__main__":` 代码块后，在其它模块中导入 `a.py` 模块时，`if __name__ == "__main__":` 代码块内的代码不会被执行。  
+<br>  
+
+### traceback — 打印或检索堆栈回溯
+源代码： [Lib/traceback.py](https://github.com/python/cpython/tree/3.8/Lib/traceback.py)  
+
+该模块提供了一个标准接口来提取、格式化和打印 Python 程序的堆栈跟踪。它在打印堆栈跟踪时完全模仿 Python 解释器的行为。当您想要在程序控制下打印堆栈跟踪时，例如在解释器周围的“封装器”中，这是非常有用的。  
+
+这个模块使用 traceback 对象 —— 这是存储在 [sys.last_traceback](https://docs.python.org/3.8/library/sys.html#sys.last_traceback) 变量中并作为 [sys.exc_info()](https://docs.python.org/3.8/library/sys.html#sys.exc_info) 的第三项被返回的对象类型。  
+
+这个模块定义了以下函数：  
+
+traceback**.print_exception(***etype, value, tb, limit=None, file=None, chain=True***)**  
+从 traceback 对象 *tb* 将异常信息和堆栈跟踪条目打印到 *file*。这在以下方面与 [print_tb()](https://docs.python.org/3.8/library/traceback.html?highlight=exc_value#traceback.print_tb) 不同：  
+
+* 如果 *tb* 不是 `None`，它将打印一个标题 `Traceback (most recent call last):`  
+* 它在堆栈跟踪之后打印异常 *etype* 和 *value*  
+* 如果 *type(value)* 是 [SyntaxError](https://docs.python.org/3.8/library/exceptions.html#SyntaxError) 并且 *value* 具有适当的格式，它会打印出现语法错误的行，并用插入符号指示错误的大致位置。  
+
+可选的 *limit* 参数与 [print_tb()](https://docs.python.org/3.8/library/traceback.html?highlight=exc_value#traceback.print_tb) 的含义相同。 如果 *chain* 为真（默认值），那么链式异常（异常的 \_\_cause\_\_ 或 \_\_context\_\_ 属性）也将被打印，就像解释器本身在打印未处理的异常时所做的那样。  
+
+*在 3.5 版中已更改：* *etype* 参数被忽略，然后从 *value* 的类型推断。  
+<br>  
+
+该模块还定义了以下类：  
+
+#### TracebackException 对象
+*3.5 版中的新功能。*  
+
+[TracebackException](https://docs.python.org/3.8/library/traceback.html?highlight=exc_value#traceback.TracebackException) 对象是从实际异常创建的，以捕获数据以供以后以轻量级方式打印。  
+
+*class* traceback**.TracebackException(***exc_type, exc_value, exc_traceback, *, limit=None, lookup_lines=True, capture_locals=False***)**  
+捕获异常以供以后渲染。 *limit*、*lookup_lines* 和 *capture_locals* 与 [StackSummary](https://docs.python.org/3.8/library/traceback.html?highlight=exc_value#traceback.StackSummary) 类相同。  
+
+请注意，当 *locals* 被捕获时，它们也会显示在回溯中。  
+
+**\_\_cause\_\_**  
+原始 `__cause__` 的 [TracebackException](https://docs.python.org/3.8/library/traceback.html?highlight=exc_value#traceback.TracebackException)。  
+
+**\_\_context\_\_**  
+原始 `__context__` 的 [TracebackException](https://docs.python.org/3.8/library/traceback.html?highlight=exc_value#traceback.TracebackException)。  
+
+**\_\_suppress\_context\_\_**  
+来自原始异常的 `__suppress_context__` 值。  
+
+**stack**  
+表示回溯的 [StackSummary](https://docs.python.org/3.8/library/traceback.html?highlight=exc_value#traceback.StackSummary)。
+
+**exc_type**  
+原始回溯的类。  
+
+**filename**  
+对于语法错误 - 发生错误的文件名。  
+
+**lineno**  
+对于语法错误 - 发生错误的行号。  
+
+**text**  
+对于语法错误 - 发生错误的文本。  
+
+**offset**  
+对于语法错误 - 发生错误的文本中的偏移量。  
+
+**msg**  
+对于语法错误 - 编译器错误消息。  
+
+*classmethod* **from_exception(***exc, \*, limit=None, lookup_lines=True, capture_locals=False***)**  
+捕获异常以供以后渲染。 *limit*、*lookup_lines* 和 *capture_locals* 与 [StackSummary](https://docs.python.org/3.8/library/traceback.html?highlight=exc_value#traceback.StackSummary) 类相同。  
+
+请注意，当 *locals* 被捕获时，它们也会显示在回溯中。  
+
+**format(***\*, chain=True***)**  
+格式化异常。  
+
+如果 *chain* 不是 `True`，`__cause__` 和 `__context__` 将不会被格式化。  
+
+返回值是一个字符串生成器，每个字符串都以一个换行符结尾，一些包含内部换行符。 [print_exception()](https://docs.python.org/3.8/library/traceback.html?highlight=exc_value#traceback.print_exception) 是这个方法的包装器，它只是将行打印到文件中。  
+
+指示发生了哪个异常的消息始终是输出中的最后一个字符串。  
+
+**format_exception_only()**  
+格式化回溯的异常部分。  
+
+返回值是一个字符串生成器，每个字符串都以一个换行符结尾。  
+
+通常，生成器发出单个字符串； 但是，对于 [SyntaxError](https://docs.python.org/3.8/library/exceptions.html#SyntaxError) 异常，它会发出几行（当打印时）显示有关语法错误发生位置的详细信息。  
+
+指示发生了哪个异常的消息始终是输出中的最后一个字符串。  
+<br>  
 
 ## Python语言参考
 ### 3. 数据模型
