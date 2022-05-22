@@ -82,18 +82,25 @@
         * [\_\_main\_\_ --- 顶层代码环境](#__main__-----顶层代码环境)
         * [traceback — 打印或检索堆栈回溯](#traceback--打印或检索堆栈回溯)
             * [TracebackException 对象](#tracebackException-对象)
-    * [Python语言参考](#python语言参考)
-        * [3. 数据模型](#3-数据模型)
-            * [3.3. 特殊方法名](#33-特殊方法名)
-                * [3.3.1. 基本自定义](#331-基本自定义)
-                * [3.3.7. 仿真容器类型](#337-仿真容器类型)
-        * [5. 导入系统](#5-导入系统)
-            * [5.1. importlib](#51-importlib)
-            * [5.2. 包](#52-包)
-            * [5.3. 搜索](#53-搜索)
-            * [5.5. 基于路径的查找器](#55-基于路径的查找器)
-            * [5.7. 包相对导入](#57-包相对导入)
-            * [5.8. 有关 \_\_main\_\_ 的特殊事项](#58-有关-__main__-的特殊事项)
+* [Python语言参考](#python语言参考)
+    * [3. 数据模型](#3-数据模型)
+        * [3.2. 标准类型层次结构](#32-标准类型层次结构)
+        * [3.3. 特殊方法名](#33-特殊方法名)
+            * [3.3.1. 基本自定义](#331-基本自定义)
+            * [3.3.6. 仿真可调用对象](#336-仿真可调用对象)
+            * [3.3.7. 仿真容器类型](#337-仿真容器类型)
+    * [5. 导入系统](#5-导入系统)
+        * [5.1. importlib](#51-importlib)
+        * [5.2. 包](#52-包)
+        * [5.3. 搜索](#53-搜索)
+        * [5.5. 基于路径的查找器](#55-基于路径的查找器)
+        * [5.7. 包相对导入](#57-包相对导入)
+        * [5.8. 有关 \_\_main\_\_ 的特殊事项](#58-有关-__main__-的特殊事项)
+    * [7. 简单语句](#7-简单语句)
+        * [7.3. assert语句](#73-assert语句)
+        * [7.12. global语句](#712-global语句)
+    * [8. 复合语句](#8-复合语句)
+        * [8.5. with语句](#85-with语句)
 * [Python 教程](#python-教程)
     * [5. 数据结构](#5-数据结构)
         * [5.1. 列表的更多特性](#51-列表的更多特性)
@@ -4077,8 +4084,18 @@ traceback.**print_exception(**_etype, value, tb, limit=None, file=None, chain=Tr
 指示发生了哪个异常的消息始终是输出中的最后一个字符串。  
 <br>  
 
-## Python语言参考
-### 3. 数据模型
+# Python语言参考
+## 3. 数据模型
+### 3.2. 标准类型层次结构
+**模块**  
+　　模块是 Python 代码的基本组织单元，模块由 [import](https://docs.python.org/3/reference/simple_stmts.html#import) 语句 (参见 [import](https://docs.python.org/3/reference/simple_stmts.html#import))，或通过调用函数如 [importlib.import_module()](https://docs.python.org/3/library/importlib.html#importlib.import_module) 和内置的 [\_\_import\_\_()](https://docs.python.org/3/library/functions.html#__import__) 调用 [导入系统](https://docs.python.org/3/reference/import.html#importsystem) 所创建。每个模块对象都有一个通过一个字典对象实现的命名空间 (这就是模块中定义的函数的 `__globals__` 属性所引用的字典)。属性引用被转换为在字典中查找，例如，`m.x` 等同于 `m.__dict__["x"]`。模块对象不包含用于初始化模块的代码对象 (因为一旦初始化完成就不需要它了)。
+
+属性赋值更新模块的命名空间字典，例如，`m.x = 1` 等价于 `m.__dict__["x"] = 1`。
+
+预定义的 (可写的) 属性： [\_\_name\_\_](https://docs.python.org/3/reference/import.html#__name__) 是模块的名字；\_\_doc\_\_ 是模块的文档字符串，如不可用则为 `None`；\_\_annotations\_\_ (可选的) 是一个包含模块正文执行期间收集的变量注释的字典；如果模块是从一个文件加载，则 [\_\_file\_\_](https://docs.python.org/3/reference/import.html#__file__) 是该文件的路径名。
+
+特殊的只读属性：[\_\_dict\_\_](https://docs.python.org/3/library/stdtypes.html#object.__dict__) is the module’s namespace as a dictionary object.  
+
 #### 3.3. 特殊方法名
 ##### 3.3.1. 基本自定义
 object.**\_\_init\_\_**(*self*__[__, ...__]__)  
@@ -4124,7 +4141,11 @@ object.**\_\_str\_\_**(*self*)
 默认实现由内置 [object](https://docs.python.org/3/library/functions.html#object) 调用 [object.\_\_repr\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__repr__) 定义。
 
 object.**\_\_bool\_\_**(*self*)  
-调用以实现真值测试及内置操作 `bool()`；应该返回 `False` 或 `True`。当这个方法没有被定义时，[\_\_len\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__len__) 被调用，如果它被定义了，且如果它的结果是非零的，则该对象被认为是真的。如果一个类既没有定义 [\_\_len\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__len__) 也没有定义 [\_\_bool\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__bool__)，则它所有的实例都被认为是真的。
+调用以实现真值测试及内置操作 `bool()`；应该返回 `False` 或 `True`。当这个方法没有被定义时，[\_\_len\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__len__) 被调用，如果它被定义了，且如果它的结果是非零的，则该对象被认为是真的。如果一个类既没有定义 [\_\_len\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__len__) 也没有定义 [\_\_bool\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__bool__)，则它所有的实例都被认为是真的。  
+
+#### 3.3.6. 仿真可调用对象
+object.**\_\_call\_\_**(*self*__\[__*, args...*__\]__)  
+当实例作为一个函数被“调用”时调用；如果定义了这个方法，则 `x(arg1, arg2, ...)` 是 `x.__call__(arg1, arg2, ...)` 的缩写。  
 
 ##### 3.3.7. 仿真容器类型
 可以定义下面的方法用来实现容器对象。容器通常是序列 (例如列表或元组) 或映射 (像字典)，但也可以表示其它容器。第一组方法通常用于要么仿真一个序列要么仿真一个映射；不同之处在于，对一个序列而言，允许的键应该是整型数 *k* 且 `0 <= k < N` ，其中 *N* 是序列的长度，或者定义了一个元素范围的分片对象。也建议映射提供行为类似于 Python 标准字典对象的方法 keys(), values(), items(), get(), clear(), setdefault(), pop(), popitem(), copy(), 和 update()。[collections.abc](https://docs.python.org/3/library/collections.abc.html#module-collections.abc) 模块提供了一个 [MutableMapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping) 抽象基类以帮助从一个基本集合 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__), [\_\_setitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__setitem__), [\_\_delitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__delitem__), 和 keys() 中创建那些方法。可变序列应该提供方法 append(), count(), index(), extend(), insert(), pop(), remove(), reverse() 和 sort(), 就像 Python 标准列表对象。最后，序列类型应该通过定义下面描述的方法 [\_\_add\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__add__), [\_\_radd\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__radd__), [\_\_iadd\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__iadd__), [\_\_mul\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__mul__), [\_\_rmul\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__rmul__) 和 [\_\_imul\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__imul__) 来实现加法 (意味着连结) 和乘法 (意味着重复)；它们不应该定义其它数字运算符。建议映射和序列都实现 [\_\_contains\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__contains__) 方法以允许有效地使用 `in` 运算符；对于映射，`in` 应该搜索映射的键；对于序列，它应该搜寻值。进一步建议映射和序列都实现 [\_\_iter\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__iter__) 方法以允许有效地迭代容器；对于映射，[\_\_iter\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__iter__) 应该和 keys() 一样；对于序列，它应该迭代值。
@@ -4475,7 +4496,77 @@ import XXX.YYY.ZZZ
 
 请注意在最后一种情况中 `__main__.__spec__` 总是为 `None`，*即使* 文件从技术上说可以作为一个模块被导入。 如果想要让 [\_\_main\_\_](https://docs.python.org/zh-cn/3/library/__main__.html#module-__main__) 中的元数据生效，请使用 [-m](https://docs.python.org/zh-cn/3/using/cmdline.html#cmdoption-m) 开关。
 
-还要注意即使是在 `__main__` 对应于一个可导入模块且 `__main__.__spec__` 被相应地设定时，它们仍会被视为 *不同的* 模块。 这是由于以下事实：使用 `if __name__ == "__main__":` 检测来保护的代码块仅会在模块被用来填充 `__main__` 命名空间时而非普通的导入时被执行。
+还要注意即使是在 `__main__` 对应于一个可导入模块且 `__main__.__spec__` 被相应地设定时，它们仍会被视为 *不同的* 模块。 这是由于以下事实：使用 `if __name__ == "__main__":` 检测来保护的代码块仅会在模块被用来填充 `__main__` 命名空间时而非普通的导入时被执行。  
+
+## 7. 简单语句
+### 7.3. assert语句
+将调试断言插入到一个程序中，assert 语句是一种方便的方式：
+
+**assert_stmt** ::=  "assert" [expression](https://docs.python.org/3/reference/expressions.html#grammar-token-expression) \["," [expression](https://docs.python.org/3/reference/expressions.html#grammar-token-expression)\]
+
+简单形式，`assert expression`，等同于
+
+```python
+if __debug__:
+    if not expression: raise AssertionError
+```
+
+### 7.12. global语句
+**global_stmt** ::=  "global" [identifier](https://docs.python.org/3/reference/lexical_analysis.html#grammar-token-identifier) ("," [identifier](https://docs.python.org/3/reference/lexical_analysis.html#grammar-token-identifier))*
+
+[global](https://docs.python.org/3/reference/simple_stmts.html#global) 语句是一个适用于整个当前代码块的公告。它意味着global语句中的identifiers都将被解释为全局变量。
+
+## 8. 复合语句
+一个复合语句由一个或多个“子句”构成。一个子句由一个头部和一个“套件”构成。一个具体的复合语句的子句头部拥有相同的缩进级别。每个子句头部以一个唯一的标识关键字开始及以一个冒号结尾。一个套件是由一个子句控制的一组语句。一个套件可以是与头部处于同一行且位于头部的冒号之后的一个或多个由分号分隔的简单语句，或者它可以是随后的行中的一个或多个缩进的语句。只有后面这种形式的套件可以包含嵌套的复合语句；下面是非法的，主要是因为接下来的 [else](https://docs.python.org/3/reference/compound_stmts.html#else) 子句属于哪一个 [if](https://docs.python.org/3/reference/compound_stmts.html#if) 子句不清晰：
+
+```python
+if test1: if test2: print(x)
+```
+
+还要注意在这个上下文中分号比冒号捆绑得更紧密，所以在下面的例子中，要么所有的 [print()](https://docs.python.org/3/library/functions.html#print) 调用都被执行，要么一个都没有：
+
+```python
+if x < y < z: print(x); print(y); print(z)
+```
+
+总结：
+
+**compound_stmt ::**=&nbsp;&nbsp;[if_stmt](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-if_stmt)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [while_stmt](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-while_stmt)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [for_stmt](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-for_stmt)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [try_stmt](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-try_stmt)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [with_stmt](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-with_stmt)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [funcdef](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-funcdef)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [classdef](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-classdef)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [async_with_stmt](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-async_with_stmt)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [async_for_stmt](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-async_for_stmt)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [async_funcdef](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-async_funcdef)  
+**suite&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::**=&nbsp;&nbsp;[stmt_list](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-stmt_list) NEWLINE | NEWLINE INDENT [statement](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-statement)+ DEDENT  
+**statement&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::**=&nbsp;&nbsp;[stmt_list](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-stmt_list) NEWLINE | [compound_stmt](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-compound_stmt)  
+**stmt_list&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::**=&nbsp;&nbsp;[simple_stmt](https://docs.python.org/3/reference/simple_stmts.html#grammar-token-simple_stmt) (";" [simple_stmt](https://docs.python.org/3/reference/simple_stmts.html#grammar-token-simple_stmt))* [";"]
+
+### 8.5. with语句
+The [with](https://docs.python.org/3.6/reference/compound_stmts.html#with) statement is used to wrap the execution of a block with methods defined by a context manager (参见 [With语句上下文管理器](https://docs.python.org/3.6/reference/datamodel.html#context-managers) 章节).
+
+**with_stmt ::=**&nbsp;&nbsp;"with" with_item ("," with_item)* ":" [suite](https://docs.python.org/3.6/reference/compound_stmts.html#grammar-token-suite)  
+**with_item ::=**&nbsp;&nbsp;[expression](https://docs.python.org/3.6/reference/expressions.html#grammar-token-expression) \["as" [target](https://docs.python.org/3.6/reference/simple_stmts.html#grammar-token-target)\]
+
+当不止一个 with_item 时，上下文管理器的处理就好像有多个 [with](https://docs.python.org/3.6/reference/compound_stmts.html#with) 语句嵌套似的。
+
+```python
+with A() as a, B() as b:
+    suite
+```
+
+等同于
+
+```python
+with A() as a:
+    with B() as b:
+        suite
+```
+
+*在版本3.1中发生变化：* 支持多个上下文表达式。  
 
 # Python 教程
 ## 5. 数据结构
