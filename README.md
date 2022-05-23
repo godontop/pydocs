@@ -89,6 +89,9 @@
             * [3.3.1. 基本自定义](#331-基本自定义)
             * [3.3.6. 仿真可调用对象](#336-仿真可调用对象)
             * [3.3.7. 仿真容器类型](#337-仿真容器类型)
+    * [4. 执行模型](#4-执行模型)
+        * [4.1. 程序的结构](#41-程序的结构)
+        * [4.3. 异常](#43-异常)
     * [5. 导入系统](#5-导入系统)
         * [5.1. importlib](#51-importlib)
         * [5.2. 包](#52-包)
@@ -4161,7 +4164,31 @@ object.**\_\_getitem\_\_**(*self, key*)
 **注意：** 对于非法索引，[for](https://docs.python.org/3/reference/compound_stmts.html#for) 循环期待抛出一个 [IndexError](https://docs.python.org/3/library/exceptions.html#IndexError) 以允许正确地检测序列的末尾。
 
 object.**\_\_setitem\_\_**(*self, key, value*)  
-调用以实现赋值给 `self[key]`。注意事项同 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__)。这应该仅为映射实现如果对象支持改变键的值，或者如果可以增加新键，或者对于序列如果元素可以被替换。对于不正确的 *key* 值应该抛出和 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__) 方法相同的异常。
+调用以实现赋值给 `self[key]`。注意事项同 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__)。这应该仅为映射实现如果对象支持改变键的值，或者如果可以增加新键，或者对于序列如果元素可以被替换。对于不正确的 *key* 值应该抛出和 [\_\_getitem\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__getitem__) 方法相同的异常。  
+<br>  
+
+## 4. 执行模型
+### 4.1. 程序的结构
+Python 程序是由代码块构成的。 一个*代码块* 是被作为一个单元来执行的一段 Python 程序文本。 以下几个都是代码块：一个模块、一个函数体和一个类定义。 交互式输入的每条命令都是一个代码块。 一个脚本文件（作为标准输入发送给解释器或是作为命令行参数发送给解释器的文件）是一个代码块。 一条脚本命令（通过 [-c](https://docs.python.org/3.8/using/cmdline.html#cmdoption-c) 选项在解释器命令行中指定的命令）是一个代码块。 传递给内置函数 [eval()](https://docs.python.org/3.8/library/functions.html#eval) 和 [exec()](https://docs.python.org/3.8/library/functions.html#exec) 的字符串参数也是代码块。  
+
+代码块在 *执行帧* 中被执行。 一个帧会包含某些管理信息（用于调试）并决定代码块执行完成后应前往何处以及如何继续执行。  
+<br>  
+
+### 4.3. 异常
+异常是为了处理错误或其他异常情况而打破代码块的正常控制流的一种方法。异常会在错误被检测到的位置被 *引发*，它可以由周围的代码块或者由直接或间接调用发生错误的代码块的任何代码块来处理。  
+
+Python 解析器会在检测到运行时错误（例如零作为被除数）的时候引发异常。 Python 程序也可以通过 [raise](https://docs.python.org/3.8/reference/simple_stmts.html#raise) 语句显式地引发异常。 异常处理程序是通过 [try](https://docs.python.org/3.8/reference/compound_stmts.html#try) ... [except](https://docs.python.org/3.8/reference/compound_stmts.html#except) 语句来指定的。 该语句的 [finally](https://docs.python.org/3.8/reference/compound_stmts.html#finally) 子句可被用来指定清理代码，它并不处理异常，而是无论之前的代码是否发生异常都会被执行。  
+
+Python 使用错误处理的“终止”模型：异常处理程序可以找出发生了什么问题，并在外层继续执行，但它不能修复错误的根源并重试失败的操作（除非通过从顶层重新进入出错的代码片段）。  
+
+当一个异常完全未被处理时，解释器会终止程序的执行，或者返回交互模式的主循环。 无论是哪种情况，它都会打印堆栈回溯，除了当异常是 [SystemExit](https://docs.python.org/3.8/library/exceptions.html#SystemExit) 的时候。  
+
+异常由类实例来标识。 根据实例的类选择 [except](https://docs.python.org/3.8/reference/compound_stmts.html#except) 子句：它必须引用实例的类或其基类。 该实例可以由处理程序接收，并且可以携带有关异常情况的附加信息。  
+
+**注意：** 异常消息不是 Python API 的一部分。 它们的内容可能会在没有警告的情况下从 Python 的一个版本升级为下一个版本时发生改变，并且不应该被需要在多版本解释器下运行的代码所依赖。    
+
+另请参考 [try 语句](https://docs.python.org/3.8/reference/compound_stmts.html#try) 小节中对 [try](https://docs.python.org/3.8/reference/compound_stmts.html#try) 语句的描述以及 [raise 语句](https://docs.python.org/3.8/reference/simple_stmts.html#raise) 小节中对 [raise](https://docs.python.org/3.8/reference/simple_stmts.html#raise) 语句的描述。  
+<br>  
 
 ## 5. 导入系统
 一个 [module](https://docs.python.org/zh-cn/3/glossary.html#term-module) 内的 Python 代码通过 [importing](https://docs.python.org/zh-cn/3/glossary.html#term-importing) 操作就能够访问另一个模块内的代码。 [import](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#import) 语句是发起调用导入机制的最常用方式，但不是唯一的方式。 [importlib.import_module()](https://docs.python.org/zh-cn/3/library/importlib.html#importlib.import_module) 以及内置的 [\_\_import\_\_()](https://docs.python.org/zh-cn/3/library/functions.html#__import__) 等函数也可以被用来发起调用导入机制。
