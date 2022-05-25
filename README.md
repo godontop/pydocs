@@ -1,47 +1,44 @@
 # Python 文档
 主要是我平时使用 Python 时遇到问题后查阅官方文档，之后翻译相应的部分，有些会补充相应的代码。翻译的文档主要来源于 Python 标准库、Python 语言参考、Python 教程及 Pandas 等 Python 第三方库的官方文档。  
+<br>  
 
-* [Windows](#windows)
-* [Markdown](#markdown)
-* [HTML](#html)
-* [Python](#python)
-    * [Python 3 标准库](#python-3-标准库)
-        * [内置函数](#内置函数)
-        * [内置常量](#内置常量)
-        * [内置类型](#内置类型)
-            * [布尔运算 — and, or, not](#布尔运算--and-or-not)
-            * [数值类型 — int, float, complex](#数值类型--int-float-complex)
-                * [整型数类型的按位运算](#整型数类型的按位运算)
-            * [序列类型 — 列表, 元组, range](#序列类型--列表-元组-range)
-                * [通用序列操作](#通用序列操作)
-                * [可变序列类型](#可变序列类型)
-                * [列表](#列表)
-                * [Ranges](#ranges)
-            * [文本序列类型 — str](#文本序列类型--str)
-                * [字符串方法](#字符串方法)
-                * [printf-style 字符串格式化](#printf-style-字符串格式化)
-            * [二进制序列类型 — 字节、字节数组、内存视图](#二进制序列类型--字节字节数组内存视图)
-                * [字节和字节数组操作](#字节和字节数组操作)
-            * [集合类型 --- set, frozenset](#集合类型-----set-frozenset)
-            * [映射类型 — 字典](#映射类型--字典)
-                * [字典视图对象](#字典视图对象)
-            * [特殊属性](#特殊属性)
-        * [内置异常](#内置异常)
-            * [基类](#基类)
-            * [具体异常](#具体异常)
-                * [OS异常](#os异常)
-            * [异常层次结构](#异常层次结构)
-        * [文本处理服务](#文本处理服务)
-            * [string — 通用字符串操作](#string--通用字符串操作)
-                * [格式化字符串语法](#格式化字符串语法)
-            * [re — 正则表达式操作](#re--正则表达式操作)
-                * [正则表达式语法](#正则表达式语法)
-                * [模块内容](#模块内容)
-                * [正则表达式对象](#正则表达式对象)
-                * [匹配对象](#匹配对象)
-                * [正则表达式例子](#正则表达式例子)
-        * [二进制数据服务](#二进制数据服务)
-            * [codecs — 编解码器注册和相关基类](#codecs--编解码器注册和相关基类)
+* [Python 3 标准库](#python-3-标准库)
+    * [内置函数](#内置函数)
+    * [内置常量](#内置常量)
+    * [内置类型](#内置类型)
+        * [布尔运算 — and, or, not](#布尔运算--and-or-not)
+        * [数值类型 — int, float, complex](#数值类型--int-float-complex)
+            * [整型数类型的按位运算](#整型数类型的按位运算)
+        * [序列类型 — 列表, 元组, range](#序列类型--列表-元组-range)
+            * [通用序列操作](#通用序列操作)
+            * [可变序列类型](#可变序列类型)
+            * [列表](#列表)
+            * [Ranges](#ranges)
+        * [文本序列类型 — str](#文本序列类型--str)
+            * [字符串方法](#字符串方法)
+            * [printf-style 字符串格式化](#printf-style-字符串格式化)
+        * [二进制序列类型 — 字节、字节数组、内存视图](#二进制序列类型--字节字节数组内存视图)
+            * [字节和字节数组操作](#字节和字节数组操作)
+        * [集合类型 --- set, frozenset](#集合类型-----set-frozenset)
+        * [映射类型 — 字典](#映射类型--字典)
+            * [字典视图对象](#字典视图对象)
+        * [特殊属性](#特殊属性)
+    * [内置异常](#内置异常)
+        * [基类](#基类)
+        * [具体异常](#具体异常)
+            * [OS异常](#os异常)
+        * [异常层次结构](#异常层次结构)
+    * [文本处理服务](#文本处理服务)
+        * [string — 通用字符串操作](#string--通用字符串操作)
+            * [格式化字符串语法](#格式化字符串语法)
+        * [re — 正则表达式操作](#re--正则表达式操作)
+            * [正则表达式语法](#正则表达式语法)
+            * [模块内容](#模块内容)
+            * [正则表达式对象](#正则表达式对象)
+            * [匹配对象](#匹配对象)
+            * [正则表达式例子](#正则表达式例子)
+    * [二进制数据服务](#二进制数据服务)
+        * [codecs — 编解码器注册和相关基类](#codecs--编解码器注册和相关基类)
     * [数据类型](#数据类型)
         * [collections --- 容器数据类型](#collections-----容器数据类型)
         * [collections.abc --- 容器的抽象基类](#collectionsabc-----容器的抽象基类)
@@ -203,11 +200,6 @@
     * [tushare](#tushare)
 * [Python Snippets](#python-snippets)
     * [proxy.py](#proxypy)
-* [Python2](#python2)
-    * [Python 2 语言参考](#python-2-语言参考)
-        * [3. 数据模型](#3-数据模型-1)
-            * [3.4. 特殊方法名](#34-特殊方法名)
-                * [3.4.1. 基本自定义](#341-基本自定义)
 * [Anaconda](#anaconda)
 * [Android Studio](#android-studio)
 * [Appium](#appium)
@@ -215,81 +207,9 @@
 * [ChromeDriver](#chromedriver)
 * [GeckoDriver](#geckodriver)
 * [PhantomJS](#phantomjs)
-* [vim](#vim)
-	* [vim插件](#vim插件)
-		* [YouCompleteMe](#youcompleteme)
 
 
-# Windows  
-计算机系统硬件类  
-[https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/computer-system-hardware-classes](https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/computer-system-hardware-classes)
-
-## PowerShell
-### PowerShell 模块
-#### Microsoft.PowerShell.Core
-The Core module contains cmdlets and providers that manage the basic features of PowerShell.
-
-[Microsoft.PowerShell.Core](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/?view=powershell-6)
-
-#### Microsoft.PowerShell.Utility
-这个模块包含用于管理 PowerShell 基本特性的命令。
-
-[Microsoft.PowerShell.Utility](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/?view=powershell-6)
-
-Wireshark  
-[https://www.wireshark.org](https://www.wireshark.org)  
-简介：开源的包分析器。也被称为网络协议分析器或抓包工具。
-
-2018年12月中华人民共和国县以上行政区划代码  
-[http://www.mca.gov.cn/article/sj/xzqh/2018/201804-12/20181201301111.html](http://www.mca.gov.cn/article/sj/xzqh/2018/201804-12/20181201301111.html)
-
-清华大学开源软件镜像站  
-[https://mirrors.tuna.tsinghua.edu.cn](https://mirrors.tuna.tsinghua.edu.cn)
-
-时区列表  
-[tz数据库时区列表](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
-
-# Markdown
-要在Markdown中显示`<`和`>`，必须使用使用转义字符`&lt;`和`&gt;`。
-
-Markdown中的多个空行会被当做一个空行来处理。如果要显示多个空行，需要使用 `<br />` 标签。
-
-如果目录中的标题同名，则在第二个同名标题的末尾加上 `-1`，在第三个同名标题的末尾加上 `-2`，如：  
-
-* [测试标题](#测试标题)
-* [测试标题](#测试标题-1)
-* [测试标题](#测试标题-2)
-
-##### 测试标题  
-这是第一个同名测试标题
-
-##### 测试标题  
-这是第二个同名测试标题
-
-##### 测试标题  
-这是第三个同名测试标题
-
-# HTML
-HTML `<ul>` 标签  
-
-```
-<ul>
-  <li>Coffee</li>
-  <li>Tea</li>
-  <li>Milk</li>
-</ul>
-```
-
-无序HTML列表：
-
-<ul>
-  <li>Coffee</li>
-  <li>Tea</li>
-  <li>Milk</li>
-</ul>
-
-# Python
-## Python 3 标准库
+# Python 3 标准库
 Python 3 版本：3.6.4——3.8
 
 [Python 语言参考](https://docs.python.org/3/reference/index.html#reference-index)描述的是 Python 语言精确的语法及语义，这个库参考手册描述的是和 Python 一起发布的标准库。它也描述一些通常包含在 Python 发行版中的可选组件。
@@ -9964,20 +9884,6 @@ response = opener.open('https://www.google.com')
 print(response.read())
 ```
 
-# Python2
-## Python 2 语言参考
-### 3. 数据模型
-#### 3.4. 特殊方法名
-##### 3.4.1. 基本自定义
-object.**\_\_nonzero\_\_**(*self*)  
-调用以实现真值测试及内置操作 `bool()`；应该返回 `False` 或者 `True`，或者它们的等值整型数 `0` 或 `1`。当这个方法没有被定义时，[\_\_len\_\_()](https://docs.python.org/2/reference/datamodel.html#object.__len__) 被调用，如果它被定义了，且如果它的结果是非零的则对象被认为是真。如果一个类既没有定义 [\_\_len\_\_()](https://docs.python.org/2/reference/datamodel.html#object.__len__) 也没有定义 [\_\_nonzero\_\_()](https://docs.python.org/2/reference/datamodel.html#object.__nonzero__)，则它所有的实例都被认为是真。
-
-##### 3.4.6. 仿真容器类型
-object.**\_\_len\_\_**(*self*)  
-调用以实现内置函数 [len()](https://docs.python.org/2/library/functions.html#len)。应该返回对象的长度，一个 `>=` 0 的整型数。同样，一个没有定义 [\_\_nonzero\_\_()](https://docs.python.org/2/reference/datamodel.html#object.__nonzero__) 方法且其 [\_\_len\_\_()](https://docs.python.org/2/reference/datamodel.html#object.__len__) 方法返回 `0` 的对象在一个布尔上下文中被认为是假的。
-
-**CPython实现细节：** 在CPython中，对象的长度被要求至多为 [sys.maxsize](https://docs.python.org/2/library/sys.html#sys.maxsize)。如果对象的长度比 [sys.maxsize](https://docs.python.org/2/library/sys.html#sys.maxsize) 大，一些特性 (如 [len()](https://docs.python.org/2/library/functions.html#len)) 可能抛出 [OverflowError](https://docs.python.org/2/library/exceptions.html#exceptions.OverflowError)。为避免真值测试中抛出 [OverflowError](https://docs.python.org/2/library/exceptions.html#exceptions.OverflowError)，一个对象必须定义一个 [\_\_nonzero\_\_()](https://docs.python.org/2/reference/datamodel.html#object.__nonzero__) 方法。
-
 # Anaconda
 **Windows平台**  
 使用conda命令时，建议通过下面的方式打开终端：  
@@ -10149,31 +10055,3 @@ PhantomJS 是一个无界面的、可以用 JavaScript 进行脚本编程的 web
 
 **macOS平台**  
 将phantomjs-2.1.1-macosx.zip解压后，建议直接将bin目录下的phantomjs文件复制到/usr/local/bin目录下。
-
-# vim
-在vim中输入下面的指令，看vim是否支持python或python3，返回1则表示支持
-
-```vim
-:echo has('python') || has('python3')
-```
-
-显示当前文件的文件类型
-
-```vim
-:set ft?
-```
-
-查看你的 `completeopt` 的设置状态
-
-```vim
-:set completeopt?
-```
-
-**查找**  
-在Normal模式下按下`/`，然后输入要查找的字符并按下回车键，vim便会跳转到第一个匹配位置，按`n`查找下一个，按`N`查找上一个。
-
-## vim插件
-### YouCompleteMe
-#### 命令
-**`:YcmDebugInfo`**  
-可以查看用于当前文件的编译命令
