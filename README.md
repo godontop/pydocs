@@ -109,6 +109,11 @@
         * [8.4. try 语句](#84-try-语句)
         * [8.5. with 语句](#85-with-语句)
 * [Python 教程](#python-教程)
+    * [2. 使用Python解释器](#2-使用python解释器)
+        * [2.1. 调用解释器](#21-调用解释器)
+    * [4. 更多控制流工具](#4-更多控制流工具)
+        * [4.3. range() 函数](#43-range-函数)
+        * [4.4. break 和 continue 语句, 和循环中的 else 子句](#44-break-和-continue-语句-和循环中的-else-子句)
     * [5. 数据结构](#5-数据结构)
         * [5.1. 列表的更多特性](#51-列表的更多特性)
     * [6. 模块](#6-模块)
@@ -116,6 +121,9 @@
         * [6.2. 标准模块](#62-标准模块)
         * [6.3. dir() 函数](#63-dir-函数)
         * [6.4. 包](#64-包)
+    * [7. 输入和输出](#7-输入和输出)
+        * [7.2. 读和写文件](#72-读和写文件)
+            * [7.2.1. 文件对象的方法](#721-文件对象的方法)
     * [9. 类](#9-类)
         * [9.1. 名称和对象](#91-名称和对象)
         * [9.2. Python 作用域和命名空间](#92-python-作用域和命名空间)
@@ -4724,6 +4732,142 @@ Python [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) �
 <br>  
 
 # Python 教程
+## 2. 使用Python解释器
+### 2.1. 调用解释器
+Typing an end-of-file character (`Control-D` on Unix, `Control-Z` on Windows) at the primary prompt causes the interpreter to exit with a zero exit status. 如果无效，你可以通过输入下面的命令：`quit()` 退出解释器。
+
+## 4. 更多控制流工具
+Besides the [while](https://docs.python.org/3/reference/compound_stmts.html#while) statement just introduced, Python knows the usual control flow statements known from other languages, with some twists.
+
+### 4.3. range() 函数
+如果你需要遍历一个数字序列，内置函数 [range()](https://docs.python.org/3/library/stdtypes.html#range) 派得上用场。它生成等差数列：
+
+```python
+>>> for i in range(5):
+...     print(i)
+...
+0
+1
+2
+3
+4
+```
+
+给定的结束点永远都不是生成的序列的一部分；一个长度为10的序列的项的合法索引，`range(10)` 生成 10 个值。让 range 以另一个数开始是可能的，或者指定一个不同的增量(即使为负；有时这被称为 ‘step’):
+
+```python
+>>> range(5, 10)
+range(5, 10)
+>>> for i in range(5, 10):
+...     print(i)
+...
+5
+6
+7
+8
+9
+>>> for i in range(0, 10, 3):
+...     print(i)
+...
+0
+3
+6
+9
+>>> for i in range(-10, -100, -30):
+...     print(i)
+...
+-10
+-40
+-70
+```
+
+遍历一个序列的索引，你可以联合 [range()](https://docs.python.org/3/library/stdtypes.html#range) 和 [len()](https://docs.python.org/3/library/functions.html#len) 如下：
+
+```python
+>>> a = ['Mary', 'had', 'a', 'little', 'lamb']
+>>> for i in range(len(a)):
+...     print(i, a[i])
+...
+0 Mary
+1 had
+2 a
+3 little
+4 lamb
+>>>
+```
+
+In most such cases, however, it is convenient to use the [enumerate()](https://docs.python.org/3/library/functions.html#enumerate) function, 请看 [Looping Techniques](https://docs.python.org/3/tutorial/datastructures.html#tut-loopidioms)。
+
+如果你仅打印一个range，将发生一件奇怪的事情：
+
+```python
+>>> print(range(0, 10))
+range(0, 10)
+>>>
+```
+
+在很多方面 [range()](https://docs.python.org/3/library/stdtypes.html#range) 返回对象的行为就好像它是一个列表，但实际上它不是。当你遍历它时，它是一个返回预期的序列中的连续的项的对象，但它实际上不制造列表，从而节省空间。
+
+我们说这样的对象是*可迭代的*，也就是说，suitable as a target for functions and constructs that expect something from which they can obtain successive items until the supply is exhausted. 我们已经见过 [for](https://docs.python.org/3/reference/compound_stmts.html#for) 语句就是这样一个*迭代器*。[list()](https://docs.python.org/3/library/stdtypes.html#list) 函数是另一个；它从可迭代对象创建列表：
+
+```python
+>>> list(range(5))
+[0, 1, 2, 3, 4]
+>>>
+```
+
+稍后我们将看到更多返回可迭代对象和使用可迭代对象作为参数的函数。
+
+### 4.4. break 和 continue 语句, 和循环中的 else 子句
+[break](https://docs.python.org/3/reference/simple_stmts.html#break) 语句，与 C 中相似，摆脱封闭它的最内层的 [for](https://docs.python.org/3/reference/compound_stmts.html#for) 或者 [while](https://docs.python.org/3/reference/compound_stmts.html#while) 循环。
+
+循环语句可能含有一个 `else` 子句；当循环通过耗尽列表 (with [for](https://docs.python.org/3/reference/compound_stmts.html#for)) 或者当条件变为 false (with [while](https://docs.python.org/3/reference/compound_stmts.html#while)) 而结束时执行 else 子句，当循环被一个 [break](https://docs.python.org/3/reference/simple_stmts.html#break) 语句终止时则不执行 else 子句。通过下面这个搜索质数的循环来举例说明：
+
+```python
+>>> for n in range(2, 10):
+...     for x in range(2, n):
+...         if n % x == 0:
+...             print(n, 'equals', x, '*', n//x)
+...             break
+...     else:
+...         # loop fell through without finding a factor
+...         print(n, 'is a prime number')
+...
+2 is a prime number
+3 is a prime number
+4 equals 2 * 2
+5 is a prime number
+6 equals 2 * 3
+7 is a prime number
+8 equals 2 * 4
+9 equals 3 * 3
+>>>
+```
+
+(是的，这是正确的代码。仔细看：`else` 子句属于 [for](https://docs.python.org/3/reference/compound_stmts.html#for) 循环，**而不是** [if](https://docs.python.org/3/reference/compound_stmts.html#if) 语句。)
+
+当与循环一起使用时，比起 [if](https://docs.python.org/3/reference/compound_stmts.html#if) 语句中的 `else` 子句，循环中的 `else` 子句与 [try](https://docs.python.org/3/reference/compound_stmts.html#try) 语句中的 `else` 子句有更多的共同点：当没有异常发生时执行 [try](https://docs.python.org/3/reference/compound_stmts.html#try) 语句的 `else` 子句，当没有 `break` 发生时执行循环的 `else` 子句。关于 [try](https://docs.python.org/3/reference/compound_stmts.html#try) 语句和异常的更多信息，请看 [处理异常](https://docs.python.org/3/tutorial/errors.html#tut-handling)。
+
+[continue](https://docs.python.org/3/reference/simple_stmts.html#continue) 语句，也是从 C 借鉴来的，继续循环的下一次迭代：
+
+```python
+>>> for num in range(2, 10):
+...     if num % 2 == 0:
+...         print('Found an even number', num)
+...         continue
+...     print('Found a number', num)
+...
+Found an even number 2
+Found a number 3
+Found an even number 4
+Found a number 5
+Found an even number 6
+Found a number 7
+Found an even number 8
+Found a number 9
+>>>
+```  
+
 ## 5. 数据结构
 ### 5.1. 列表的更多特性
 列表数据类型还有很多的方法。这里是列表对象方法的清单：
@@ -5082,6 +5226,55 @@ from ..filters import equalizer
 包支持另一个特殊属性， [\_\_path\_\_](https://docs.python.org/zh-cn/3/reference/import.html#__path__) 。它被初始化为一个列表，其中包含在执行该文件中的代码之前保存包的文件 `__init__.py` 的目录的名称。这个变量可以修改；这样做会影响将来对包中包含的模块和子包的搜索。
 
 虽然通常不需要此功能，但它可用于扩展程序包中的模块集。
+
+## 7. 输入和输出
+有几种方式呈现一个程序的输出；数据可以被以易于人阅读的形式打印出来，或者写入到一个文件中以备将来使用。这章将讨论一些可能性。
+
+### 7.2. 读和写文件
+[open()](https://docs.python.org/3/library/functions.html#open) 返回一个[文件对象](https://docs.python.org/3/glossary.html#term-file-object)，最常见的用法是带两个参数：`open(filename, mode)`。
+
+```python
+>>> f = open('workfile', 'w')
+```
+
+#### 7.2.1. 文件对象的方法
+这节剩下的例子将假设一个名为 `f` 的文件对象已经被创建。
+
+`f.write(string)` 写入 *string* 的内容到文件中，返回写入的字符数。
+
+```python
+>>> f = open('workfile', 'w')
+>>> f.write('This is a test\n')
+15
+```
+
+其它类型的对象在写入他们以前必须被转换成一个字符串 (文本模式) 或者一个字节对象 (二进制模式)：
+
+```python
+>>> value = ('the answer', 42)
+>>> s = str(value)  # convert the tuple to string
+>>> f.write(s)
+18
+>>> f.closed
+False
+>>> f.close()
+>>> f.closed
+True
+>>> with open('workfile', 'r') as f:
+...     f.read()
+...
+"This is a test\n('the answer', 42)"
+>>> f.closed
+True
+>>> with open('workfile', 'r') as f:
+...     print(f.read())
+...
+This is a test
+('the answer', 42)
+>>> f.closed
+True
+>>>
+```  
 
 ## 9. 类
 类提供了一种组合数据和功能的方法。创建一个新类意味着创建一个新 *类型* 的对象，从而允许创建一个该类型的新 *实例* 。每个类的实例可以拥有保存自己状态的属性。一个类的实例也可以有改变自己状态的（定义在类中的）方法。
