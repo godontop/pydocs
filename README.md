@@ -103,7 +103,8 @@
         * [7.3. assert语句](#73-assert语句)
         * [7.12. global语句](#712-global语句)
     * [8. 复合语句](#8-复合语句)
-        * [8.5. with语句](#85-with语句)
+        * [8.4. try 语句](#84-try-语句)
+        * [8.5. with 语句](#85-with-语句)
 * [Python 教程](#python-教程)
     * [5. 数据结构](#5-数据结构)
         * [5.1. 列表的更多特性](#51-列表的更多特性)
@@ -4544,7 +4545,11 @@ if __debug__:
 [global](https://docs.python.org/3/reference/simple_stmts.html#global) 语句是一个适用于整个当前代码块的公告。它意味着global语句中的identifiers都将被解释为全局变量。
 
 ## 8. 复合语句
-一个复合语句由一个或多个“子句”构成。一个子句由一个头部和一个“套件”构成。一个具体的复合语句的子句头部拥有相同的缩进级别。每个子句头部以一个唯一的标识关键字开始及以一个冒号结尾。一个套件是由一个子句控制的一组语句。一个套件可以是与头部处于同一行且位于头部的冒号之后的一个或多个由分号分隔的简单语句，或者它可以是随后的行中的一个或多个缩进的语句。只有后面这种形式的套件可以包含嵌套的复合语句；下面是非法的，主要是因为接下来的 [else](https://docs.python.org/3/reference/compound_stmts.html#else) 子句属于哪一个 [if](https://docs.python.org/3/reference/compound_stmts.html#if) 子句不清晰：
+复合语句是包含其它语句（语句组）的语句；它们会以某种方式影响或控制其所包含的语句的执行。 通常，复合语句会跨越多行，虽然在某些简单形式下整个复合语句也可能包含于一行之内。  
+
+[if](https://docs.python.org/3.8/reference/compound_stmts.html#if), [while](https://docs.python.org/3.8/reference/compound_stmts.html#while) 和 [for](https://docs.python.org/3.8/reference/compound_stmts.html#for) 语句用来实现传统的控制流结构。 [try](https://docs.python.org/3.8/reference/compound_stmts.html#try) 为一组语句指定异常处理程序 和/或 清理代码，而 [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句允许在一个代码块周围执行初始化和终结代码。 函数和类定义在语法上也属于复合语句。  
+
+一个复合语句由一个或多个“子句”构成。一个子句由一个句头和一个“套件”构成。一个具体的复合语句的子句头拥有相同的缩进级别。每个子句头以一个唯一的标识关键字开始并以一个冒号结尾。一个套件是由一个子句控制的一组语句。一个套件可以是与句头处于同一行且位于句头的冒号之后的一个或多个由分号分隔的简单语句，或者它可以是随后的行中的一个或多个缩进的语句。只有后面这种形式的套件可以包含嵌套的复合语句；下面是非法的，主要是因为接下来的 [else](https://docs.python.org/3/reference/compound_stmts.html#else) 子句属于哪一个 [if](https://docs.python.org/3/reference/compound_stmts.html#if) 子句不清晰：
 
 ```python
 if test1: if test2: print(x)
@@ -4570,13 +4575,233 @@ if x < y < z: print(x); print(y); print(z)
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| [async_funcdef](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-async_funcdef)  
 **suite&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::**=&nbsp;&nbsp;[stmt_list](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-stmt_list) NEWLINE | NEWLINE INDENT [statement](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-statement)+ DEDENT  
 **statement&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::**=&nbsp;&nbsp;[stmt_list](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-stmt_list) NEWLINE | [compound_stmt](https://docs.python.org/3/reference/compound_stmts.html#grammar-token-compound_stmt)  
-**stmt_list&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::**=&nbsp;&nbsp;[simple_stmt](https://docs.python.org/3/reference/simple_stmts.html#grammar-token-simple_stmt) (";" [simple_stmt](https://docs.python.org/3/reference/simple_stmts.html#grammar-token-simple_stmt))* [";"]
+**stmt_list&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::**=&nbsp;&nbsp;[simple_stmt](https://docs.python.org/3/reference/simple_stmts.html#grammar-token-simple_stmt) (";" [simple_stmt](https://docs.python.org/3/reference/simple_stmts.html#grammar-token-simple_stmt))* [";"]  
 
-### 8.5. with语句
-The [with](https://docs.python.org/3.6/reference/compound_stmts.html#with) statement is used to wrap the execution of a block with methods defined by a context manager (参见 [With语句上下文管理器](https://docs.python.org/3.6/reference/datamodel.html#context-managers) 章节).
+请注意语句总是以 `NEWLINE` 结尾，之后可能跟随一个 `DEDENT`。 还要注意可选的后续子句总是以一个不能作为语句开头的关键字作为开始，因此不会产生歧义（‘摇摆的 [else](https://docs.python.org/3.8/reference/compound_stmts.html#else)’问题在 Python 中是通过要求嵌套的 [if](https://docs.python.org/3.8/reference/compound_stmts.html#if) 语句必须缩进来解决的)。  
+
+为了清晰易懂，以下各节中语法规则的格式将每个子句放在单独的行上。  
+<br>  
+
+### 8.4. try 语句
+[try](https://docs.python.org/3.8/reference/compound_stmts.html#try) 语句可为一组语句指定异常处理程序 和/或 清理代码：  
+
+```python
+try_stmt  ::=  try1_stmt | try2_stmt
+try1_stmt ::=  "try" ":" suite
+               ("except" [expression ["as" identifier]] ":" suite)+
+               ["else" ":" suite]
+               ["finally" ":" suite]
+try2_stmt ::=  "try" ":" suite
+               "finally" ":" suite
+```
+
+**注意：**  
+第三行末尾的加号（“+”）的含义同正则表达式中的加号，表示一个 try 子句后面可以跟一个或多个 except 子句。  
+
+The [except](https://docs.python.org/3.8/reference/compound_stmts.html#except) clause(s) specify one or more exception handlers. （clause 后面的 '(s)' 也表明了一个 try 语句后面可以跟多个 except 子句）当 [try](https://docs.python.org/3.8/reference/compound_stmts.html#try) 子句中没有发生异常时，没有任何异常处理程序会被执行。 当 `try` 套件中发生异常时，将启动对异常处理程序的搜索。 此搜索会逐一检查 except 子句直至找到与该异常相匹配的子句。 如果存在无表达式的 except 子句，它必须是最后一个；它将匹配任何异常。 对于带有表达式的 except 子句，该表达式会被求值，如果结果对象与发生的异常“兼容”则该子句将匹配该异常。
+如果对象是异常对象的类或基类，或者包含一个异常对象的类或基类的项的元组，则对象与异常兼容。  
+
+如果没有 except 子句与异常匹配，则在周围的代码和调用堆栈中继续搜索异常处理程序。（异常会被传导至调用堆栈，除非有一个 [finally](https://docs.python.org/3.8/reference/compound_stmts.html#finally) 子句正好引发了另一个异常。 新引发的异常会导致旧异常丢失。）
+
+```python
+>>> import pandas as pd
+>>> import sys
+>>> try:
+...     df = pd.read_csv("JP1 2022MarMonthlyTransaction.csv")
+... except pd.errors.ParserError as e:
+...     print(e)
+... finally:
+...     df = pd.read_csv("JP1 2022MarMonthlyTransaction.csv", encoding="shift_jis")
+...
+Traceback (most recent call last):
+  File "<stdin>", line 2, in <module>
+  File "D:\Program Files\Python310\lib\site-packages\pandas\util\_decorators.py", line 311, in wrapper
+    return func(*args, **kwargs)
+  File "D:\Program Files\Python310\lib\site-packages\pandas\io\parsers\readers.py", line 680, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\Program Files\Python310\lib\site-packages\pandas\io\parsers\readers.py", line 575, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "D:\Program Files\Python310\lib\site-packages\pandas\io\parsers\readers.py", line 933, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "D:\Program Files\Python310\lib\site-packages\pandas\io\parsers\readers.py", line 1235, in _make_engine
+    return mapping[engine](f, **self.options)
+  File "D:\Program Files\Python310\lib\site-packages\pandas\io\parsers\c_parser_wrapper.py", line 75, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas\_libs\parsers.pyx", line 544, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas\_libs\parsers.pyx", line 633, in pandas._libs.parsers.TextReader._get_header
+  File "pandas\_libs\parsers.pyx", line 847, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas\_libs\parsers.pyx", line 1952, in pandas._libs.parsers.raise_parser_error
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x8f in position 8: invalid start byte
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<stdin>", line 6, in <module>
+  File "D:\Program Files\Python310\lib\site-packages\pandas\util\_decorators.py", line 311, in wrapper
+    return func(*args, **kwargs)
+  File "D:\Program Files\Python310\lib\site-packages\pandas\io\parsers\readers.py", line 680, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\Program Files\Python310\lib\site-packages\pandas\io\parsers\readers.py", line 581, in _read
+    return parser.read(nrows)
+  File "D:\Program Files\Python310\lib\site-packages\pandas\io\parsers\readers.py", line 1254, in read
+    index, columns, col_dict = self._engine.read(nrows)
+  File "D:\Program Files\Python310\lib\site-packages\pandas\io\parsers\c_parser_wrapper.py", line 225, in read
+    chunks = self._reader.read_low_memory(nrows)
+  File "pandas\_libs\parsers.pyx", line 805, in pandas._libs.parsers.TextReader.read_low_memory
+  File "pandas\_libs\parsers.pyx", line 861, in pandas._libs.parsers.TextReader._read_rows
+  File "pandas\_libs\parsers.pyx", line 847, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas\_libs\parsers.pyx", line 1960, in pandas._libs.parsers.raise_parser_error
+pandas.errors.ParserError: Error tokenizing data. C error: Expected 1 fields in line 8, saw 28
+
+>>>
+```
+
+```python
+>>> try:
+...     try:
+...         df = pd.read_csv("JP1 2022MarMonthlyTransaction.csv")
+...     except pd.errors.ParserError as e:
+...         print(e)
+...     finally:
+...         df = pd.read_csv("JP1 2022MarMonthlyTransaction.csv", encoding="shift_jis")
+... except:
+...     print("outer print statement\n")
+...     print(sys.exc_info())
+...
+outer print statement
+
+(<class 'pandas.errors.ParserError'>, ParserError('Error tokenizing data. C error: Expected 1 fields in line 8, saw 28\n'), <traceback object at 0x000001E251C93400>)
+>>>
+```
+
+如果在对 except 子句头中的表达式求值时引发了异常，则原来对处理程序的搜索会被取消，并在周边代码和调用堆栈上启动对新异常的搜索（它会被视作是整个 [try](https://docs.python.org/3.8/reference/compound_stmts.html#try) 语句引发了异常）。  
+
+当找到一个匹配的 except 子句时，该异常将被赋值给该 except 子句在 `as` 关键字之后指定的目标，如果存在此关键字的话，并且该 except 子句的套件将被执行。 所有 except 子句都必须有一个可执行的代码块。 当到达这个代码块的末尾时，通常会在整个 try 语句之后继续执行。 （这意味着如果对于同一异常存在着嵌套的两个处理程序，而异常发生于内层处理程序的 try 子句中，则外层处理程序将不会处理该异常。）  
+
+当使用 `as target` 将一个异常赋值给 `target` 时，它将在 except 子句的末尾被清除。 这就好像  
+
+```python
+except E as N:
+    foo
+```  
+
+被转换成  
+
+```python
+except E as N:
+    try:
+        foo
+    finally:
+        del N
+```
+
+这意味着异常必须赋值给一个不同的名称才能在 except 子句之后引用它。 异常被清除是因为附加了回溯的情况下，它们与堆栈帧形成一个引用循环，使该帧中的所有局部变量保持活动状态直到发生下一次垃圾回收。  
+
+在一个 except 子句套件被执行之前，有关异常的详细信息存储在 [sys](https://docs.python.org/3.8/library/sys.html#module-sys) 模块中，可以通过 [sys.exc_info()](https://docs.python.org/3.8/library/sys.html#sys.exc_info) 来访问。
+[sys.exc_info()](https://docs.python.org/3.8/library/sys.html#sys.exc_info) 返回一个由异常类、异常实例和回溯对象（参见[标准类型层次结构](https://docs.python.org/3.8/reference/datamodel.html#types)一节）组成的三元组，用于标识程序中发生异常的点。
+当从处理异常的函数返回时 [sys.exc_info()](https://docs.python.org/3.8/library/sys.html#sys.exc_info) 的值将恢复为之前的值（调用前的）。  
+
+如果控制流离开 [try](https://docs.python.org/3.8/reference/compound_stmts.html#try) 套件时没有引发异常，并且没有 [return](https://docs.python.org/3.8/reference/simple_stmts.html#return), [continue](https://docs.python.org/3.8/reference/simple_stmts.html#continue) 或 [break](https://docs.python.org/3.8/reference/simple_stmts.html#break) 语句被执行 ，则可选的 `else` 子句将被执行。 `else` 语句中的异常不会被之前的 [except](https://docs.python.org/3.8/reference/compound_stmts.html#except) 子句处理。  
+
+如果存在 [finally](https://docs.python.org/3.8/reference/compound_stmts.html#finally)，它将指定一个‘清理’处理程序。 [try](https://docs.python.org/3.8/reference/compound_stmts.html#try) 子句会被执行，包括任何 [except](https://docs.python.org/3.8/reference/compound_stmts.html#except) 和 `else` 子句。 如果在这些子句中发生任何未处理的异常，该异常会被临时保存。 `finally` 子句将被执行。 如果存在被保存的异常，它会在 `finally` 子句的末尾被重新引发。 如果 `finally` 子句引发了另一个异常，被保存的异常会被设为新异常的上下文。 如果 `finally` 子句执行了 [return](https://docs.python.org/3.8/reference/simple_stmts.html#return), [break](https://docs.python.org/3.8/reference/simple_stmts.html#break) 或 [continue](https://docs.python.org/3.8/reference/simple_stmts.html#continue) 语句，则被保存的异常会被丢弃:   
+
+```python
+>>> def f():
+...     try:
+...         1/0
+...     finally:
+...         return 42
+...
+>>> f()
+42
+```
+
+在 [finally](https://docs.python.org/3.8/reference/compound_stmts.html#finally) 子句执行期间，程序不能获取异常信息。  
+
+当在 `try...finally` 语句的 [try](https://docs.python.org/3.8/reference/compound_stmts.html#try) 套件中执行 [return](https://docs.python.org/3.8/reference/simple_stmts.html#return)、[break](https://docs.python.org/3.8/reference/simple_stmts.html#break) 或 [continue](https://docs.python.org/3.8/reference/simple_stmts.html#continue) 语句时，[finally](https://docs.python.org/3.8/reference/compound_stmts.html#finally) 子句在“退出时”也会被执行。  
+
+```python
+>>> def foo():
+...     try:
+...         return 'try'
+...     finally:
+...         print('print finally')
+...
+>>> foo()
+print finally
+'try'
+>>>
+```
+
+函数的返回值是由最后被执行的 [return](https://docs.python.org/3.8/reference/simple_stmts.html#return) 语句所决定的。 由于 [finally](https://docs.python.org/3.8/reference/compound_stmts.html#finally) 子句总是被执行，因此在 `finally` 子句中被执行的 `return` 语句总是最后一个被执行的:  
+
+```python
+>>> def foo():
+...     try:
+...         return 'try'
+...     finally:
+...         return 'finally'
+...
+>>> foo()
+'finally'
+>>>
+```
+
+有关异常的更多信息可以在 [异常](https://docs.python.org/3.8/reference/executionmodel.html#exceptions) 一节找到，有关使用 [raise](https://docs.python.org/3.8/reference/simple_stmts.html#raise) 语句生成异常的信息可以在 [raise 语句](https://docs.python.org/3.8/reference/simple_stmts.html#raise) 一节找到。  
+
+*在 3.8 版本发生改变：* 在 Python 3.8 之前，[continue](https://docs.python.org/3.8/reference/simple_stmts.html#continue) 语句不允许在 [finally](https://docs.python.org/3.8/reference/compound_stmts.html#finally) 子句中使用，这是因为具体实现存在一个问题。  
+<br>  
+
+### 8.5. with 语句
+[with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句用于包装使用上下文管理器 (参见 [with 语句上下文管理器](https://docs.python.org/3.8/reference/datamodel.html#context-managers) 一节) 定义的方法块的执行。 这允许封装常见的 [try](https://docs.python.org/3.8/reference/compound_stmts.html#try)...[except](https://docs.python.org/3.8/reference/compound_stmts.html#except)...[finally](https://docs.python.org/3.8/reference/compound_stmts.html#finally) 使用模式以方便重用。  
 
 **with_stmt ::=**&nbsp;&nbsp;"with" with_item ("," with_item)* ":" [suite](https://docs.python.org/3.6/reference/compound_stmts.html#grammar-token-suite)  
 **with_item ::=**&nbsp;&nbsp;[expression](https://docs.python.org/3.6/reference/expressions.html#grammar-token-expression) \["as" [target](https://docs.python.org/3.6/reference/simple_stmts.html#grammar-token-target)\]
+
+带有一个“项目”的 [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句的执行过程如下:  
+
+1. 对上下文表达式 (在 [with_item](https://docs.python.org/3.8/reference/compound_stmts.html#grammar-token-with-item) 中给出的表达式) 求值以获得一个上下文管理器。  
+2. 载入上下文管理器的 [\_\_enter\_\_()](https://docs.python.org/3.8/reference/datamodel.html#object.__enter__) 以便后续使用。  
+3. 载入上下文管理器的 [\_\_exit\_\_()](https://docs.python.org/3.8/reference/datamodel.html#object.__exit__) 以便后续使用。  
+4. 调用上下文管理器的 [\_\_enter\_\_()](https://docs.python.org/3.8/reference/datamodel.html#object.__enter__) 方法。  
+5. 如果 [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句中包含一个 `target`，[\_\_enter\_\_()](https://docs.python.org/3.8/reference/datamodel.html#object.__enter__) 的返回值将被赋值给它。  
+
+**注意：** [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句会保证如果 [\_\_enter\_\_()](https://docs.python.org/3.8/reference/datamodel.html#object.__enter__) 方法返回时未发生错误，则 [\_\_exit\_\_()](https://docs.python.org/3.8/reference/datamodel.html#object.__exit__) 将总是被调用。 因此，如果在对目标列表赋值期间发生错误，它会将其视为在套件内发生的错误。 参见下面的第 6 步。  
+
+6. 执行套件。
+7. 调用上下文管理器的 [\_\_exit\_\_()](https://docs.python.org/3.8/reference/datamodel.html#object.__exit__) 方法。 如果一个异常导致套件退出，则它的类型、值和回溯将被作为参数传递给 [\_\_exit\_\_()](https://docs.python.org/3.8/reference/datamodel.html#object.__exit__)。 其它情况下，将提供三个 [None](https://docs.python.org/3.8/library/constants.html#None) 参数。  
+
+如果套件的退出是由异常导致的，并且 [\_\_exit\_\_()](https://docs.python.org/3.8/reference/datamodel.html#object.__exit__) 方法的返回值为假，则该异常会被重新引发。 如果返回值为真，则该异常会被抑制，并会继续执行 [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句之后的语句。
+
+如果套件因异常以外的任何原因退出，则来自 [\_\_exit\_\_()](https://docs.python.org/3.8/reference/datamodel.html#object.__exit__) 的返回值会被忽略，并在正常位置继续执行所采取的退出类型。  
+
+下面的代码：  
+
+```python
+with EXPRESSION as TARGET:
+    SUITE
+```
+
+在语义上等价于:  
+
+```python
+manager = (EXPRESSION)
+enter = type(manager).__enter__
+exit = type(manager).__exit__
+value = enter(manager)
+hit_except = False
+
+try:
+    TARGET = value
+    SUITE
+except:
+    hit_except = True
+    if not exit(manager, *sys.exc_info()):
+        raise
+finally:
+    if not hit_except:
+        exit(manager, None, None, None)
+```
 
 当不止一个 with_item 时，上下文管理器的处理就好像有多个 [with](https://docs.python.org/3.6/reference/compound_stmts.html#with) 语句嵌套似的。
 
@@ -4585,7 +4810,7 @@ with A() as a, B() as b:
     suite
 ```
 
-等同于
+在语义上等同于
 
 ```python
 with A() as a:
@@ -4594,6 +4819,12 @@ with A() as a:
 ```
 
 *在版本3.1中发生变化：* 支持多个上下文表达式。  
+
+**另请参考：**
+
+**[PEP 343](https://www.python.org/dev/peps/pep-0343) - "with" 语句**  
+Python [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句的技术规范、背景和示例。  
+<br>  
 
 # Python 教程
 ## 5. 数据结构
