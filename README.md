@@ -1,4 +1,7 @@
-* [导航](#导航)
+# Python 文档
+主要是我平时使用 Python 时遇到问题后查阅官方文档，之后翻译相应的部分，有些会补充相应的代码。翻译的文档主要来源于 Python 标准库、Python 语言参考、Python 教程及 Pandas 等 Python 第三方库的官方文档。  
+
+* [Windows](#windows)
 * [Markdown](#markdown)
 * [HTML](#html)
 * [Python](#python)
@@ -208,112 +211,6 @@
 	* [vim插件](#vim插件)
 		* [YouCompleteMe](#youcompleteme)
 
-# 导航
-Anaconda  
-官方网站：[https://www.anaconda.com](https://www.anaconda.com)
-
-Anaconda Distribution  
-世界上最流行的 Python/R 数据科学平台
-
-Apache  
-[Apache软件基金会SVN仓库](http://svn.apache.org/repos/asf/)
-
-Apache Hadoop  
-[https://hadoop.apache.org](https://hadoop.apache.org)
-
-Apache Hadoop 文档  
-[http://hadoop.apache.org/docs/current/](http://hadoop.apache.org/docs/current/)
-
-Apache Subversion  
-[https://subversion.apache.org](https://subversion.apache.org)
-
-Apache Tomcat  
-[http://tomcat.apache.org](http://tomcat.apache.org)
-
-DistroWatch  
-[https://distrowatch.com](https://distrowatch.com)  
-Linux发行版排名统计
-
-Eclipse  
-[https://www.eclipse.org](https://www.eclipse.org)  
-开源的Java IDE
-
-IANA  
-[https://www.iana.org](https://www.iana.org)  
-IANA（Internet Assigned Numbers Authority）是[ICANN](https://www.icann.org)的一个职能机构，一个非营利性的美国私有公司，审核全球IP地址的分配，自治系统（AS）号的分配，DNS根域的管理，媒体类型，和其它互联网协议相关的符号及互联网地址。
-
-IANA分配的端口号列表  
-[服务名和传输协议端口号注册表](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xml) 
-
-ICANN  
-[https://www.icann.org](https://www.icann.org)
-
-Java Decompiler  
-[http://jd.benow.ca](http://jd.benow.ca)  
-Java反编译器
-
-Markdonw在线编辑器  
-[https://jbt.github.io/markdown-editor/](https://jbt.github.io/markdown-editor/)
-
-MongoDB文档  
-[https://docs.mongodb.com](https://docs.mongodb.com)
-
-MongoDB Reference  
-[https://docs.mongodb.com/manual/reference/](https://docs.mongodb.com/manual/reference/)
-
-MySQL Workbench  
-[https://dev.mysql.com/downloads/workbench/](https://dev.mysql.com/downloads/workbench/)  
-
-Nginx  
-Nginx官网：[https://nginx.org](https://nginx.org)  
-
-Node.js  
-Node.js官网：[http://nodejs.org/](http://nodejs.org/)
-
-Node.js 包索引网站：[https://www.npmjs.com](https://www.npmjs.com)
-
-Visual C++ Redistributable for Visual Studio 2015是安装MySQL Workbench的前置条件。  
-[Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/zh-CN/download/details.aspx?id=48145)
-
-Oracle数据库文档  
-[https://docs.oracle.com/en/database/oracle/oracle-database/index.html](https://docs.oracle.com/en/database/oracle/oracle-database/index.html)
-
-PyMongo  
-[http://api.mongodb.com/python/current/index.html](http://api.mongodb.com/python/current/index.html)
-
-Ruby  
-官网：[https://www.ruby-lang.org/zh_cn/](https://www.ruby-lang.org/zh_cn/)  
-发明者：松本行弘（Yukihiro “Matz” Matsumoto）
-
-Ruby 经常位于全球编程语言成长和流行度指数的前十名（比如[TIOBE](http://www.tiobe.com/index.php/content/paperinfo/tpci/index.html)）。造成 Ruby 如此快速成长的原因很大程度上是因为使用 Ruby 编写的 Web 框架 [Ruby on Rails](http://rubyonrails.org/) 非常受欢迎。
-
-**Ruby MRI**  
-以 Ruby 的创造者 Yukihiro Matsumoto ("Matz") 命名的 **Matz's Ruby Interpreter** 或 **Ruby MRI** (也称 **CRuby**) 是 Ruby 程序设计语言的参考实现。直到2011年 Ruby 语言的技术规范，MRI 实现被认为是事实上的参考，特别是因为试图创建一个独立的技术规范 ([RubySpec](https://en.wikipedia.org/wiki/RubySpec)) 失败后。从 Ruby 1.9，及后续的 Ruby 2.x 及以上，官方的 Ruby 解释器已经变为 [YARV](https://en.wikipedia.org/wiki/YARV) ("Yet Another Ruby VM")。
-
-**Ruby 的其他实现**  
-作为一门语言，Ruby 有不同的实现。这里讨论的是推荐的实现，社区通常称之为 **MRI**（“Matz’s Ruby Interpreter”）或 **CRuby**（因为是用 C 语言写的）。不过，还有一些别的实现。其他实现通常在特定的场合中有用，集成了其他语言或环境，或者有 MRI 不具有的特性。
-
-下面列出一些其他实现：
-
-* [JRuby](http://jruby.org/) 是基于 JVM（Java Virtual Machine）的 Ruby 实现，利用了 JVM 中优秀的 JIT 编译器、垃圾回收程序、并发线程、工具生态系统和大量的库。
-* [Rubinius](http://rubini.us/) 是用“Ruby 编写的 Ruby”。构建于 LLVM 之上，Rubinius 跑在一个很灵活的虚拟机上，别的语言也可以构建于这个虚拟机上。
-* [MacRuby](http://www.macruby.org/) 是一个与苹果 Mac OS X 上 Cocoa 库紧密集成的实现，可以让你轻易地写出桌面应用程序。
-* [mruby](http://www.mruby.org/) 是 Ruby 语言的轻量级实现，可以链接或嵌入到程序之中。mruby 由 Ruby 的创建者松本行弘（Matz）领导开发。
-* [IronRuby](http://www.ironruby.net/) 是一个“与 .NET 框架紧密集成”的实现。
-* [MagLev](http://maglev.github.io/) 是“一个快速、稳定的 Ruby 实现，支持集成对象持久化和分布式共享缓存”。
-* [Cardinal](https://github.com/parrot/cardinal) 是一个“为 [Parrot](http://parrot.org/) 虚拟机 （Perl 6）编写的 Ruby 编译器”。
-
-StackEdit  
-[https://stackedit.io/app](https://stackedit.io/app)  
-支持GFM的Markdown在线编辑器
-
-w3schools.com  
-[https://www.w3schools.com](https://www.w3schools.com)  
-世界上最大的WEB开发者站点
-
-w3school 在线教程  
-[http://www.w3school.com.cn](http://www.w3school.com.cn)  
-中文版的w3school
 
 # Windows  
 计算机系统硬件类  
