@@ -22,6 +22,7 @@
         * [集合类型 --- set, frozenset](#集合类型-----set-frozenset)
         * [映射类型 — 字典](#映射类型--字典)
             * [字典视图对象](#字典视图对象)
+        * [上下文管理器类型](#上下文管理器类型)
         * [特殊属性](#特殊属性)
     * [内置异常](#内置异常)
         * [基类](#基类)
@@ -1184,6 +1185,26 @@ dict_values([2, 1, 1, 500])
 
 ### 上下文管理器类型
 Python 的 [with](https://docs.python.org/3/reference/compound_stmts.html#with) 语句支持由上下文管理器定义的运行时上下文的概念。 这是使用一对允许用户定义的类定义运行时上下文的方法实现的，该运行时上下文在语句体执行之前进入并在语句结束时退出：  
+
+contextmanager.**\_\_enter\_\_()**  
+进入运行时上下文并返回此对象或关联到该运行时上下文的其他对象。 此方法的返回值会绑定到使用此上下文管理器的 [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句的 `as` 子句中的标识符。  
+
+一个返回其自身的上下文管理器的例子是 [文件对象](https://docs.python.org/3.8/glossary.html#term-file-object)。 文件对象会从 \_\_enter\_\_() 返回其自身，以允许 [open()](https://docs.python.org/3.8/library/functions.html#open) 被用作 [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句中的上下文表达式。  
+
+一个返回关联对象的上下文管理器的例子是 [decimal.localcontext()](https://docs.python.org/3.8/library/decimal.html#decimal.localcontext) 所返回的对象。 这些管理器会将活动的 decimal 上下文设为原始 decimal 上下文的一个副本并返回该副本。 这允许对 [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句体中的当前 decimal 上下文进行更改，而不会影响 `with` 语句以外的代码。  
+
+contextmanager.**\_\_exit\_\_(**_exc_type, exc_val, exc_tb_**)**  
+退出运行时上下文并返回一个布尔值标识来表明所发生的任何异常是否应当被抑制。 如果在执行 [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句体期间发生了异常，则参数会包含异常的类型、值以及回溯信息。 在其他情况下三个参数均为 `None`。  
+
+从这个方法返回一个真值将导致 [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句抑制该异常并继续执行紧随在 `with` 语句之后的语句。 否则该异常将在此方法结束执行后继续传播。 在此方法执行期间发生的异常将会取代 `with` 语句体中发生的任何异常。
+
+传入的异常绝对不应当被显式地重新引发 —— 相反地，此方法应当返回一个假值以表明此方法已成功完成并且不希望抑制被引发的异常。 这允许上下文管理代码方便地检测 [\_\_exit\_\_()](https://docs.python.org/3.8/library/stdtypes.html#contextmanager.__exit__) 方法是否确实已失败。
+
+Python 定义了几个上下文管理器来支持简单的线程同步、文件或其他对象的快速关闭，以及更方便地操作活动十进制算术上下文。 除了上下文管理协议的实现之外，不会对特定类型进行特殊处理。 请参阅 [contextlib](https://docs.python.org/3.8/library/contextlib.html#module-contextlib) 模块查看相关的示例。  
+
+Python 的[生成器](https://docs.python.org/3.8/glossary.html#term-generator) 和 [contextlib.contextmanager](https://docs.python.org/3.8/library/contextlib.html#contextlib.contextmanager) 装饰器提供了实现这些协议的便捷方式。 如果使用 [contextlib.contextmanager](https://docs.python.org/3.8/library/contextlib.html#contextlib.contextmanager) 装饰器来装饰一个生成器函数，它将返回一个实现了必要的 [\_\_enter\_\_()](https://docs.python.org/3.8/reference/datamodel.html#object.__enter__) 和 [\_\_exit\_\_()](https://docs.python.org/3.8/reference/datamodel.html#object.__exit__) 方法的上下文管理器，而不再是由一个未经装饰的生成器函数所产生的迭代器。  
+
+请注意，Python/C API 中 Python 对象的类型结构中并没有这些方法的特定槽位。 想要定义这些方法的扩展类型必须将它们作为普通的 Python 可访问方法来提供。 与设置运行时上下文的开销相比，单个类字典查找的开销可以忽略不计。  
 
 ### 特殊属性
 The implementation adds a few special read-only attributes to several object types, where they are relevant. 其中有些不被内置函数[dir()](https://docs.python.org/3.6/library/functions.html#dir) 报道。
