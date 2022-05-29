@@ -2428,7 +2428,31 @@ Raises an [auditing event](https://docs.python.org/zh-cn/3/library/sys.html#audi
 高层次的路径名操作被定义在 [os.path](https://docs.python.org/3.6/library/os.path.html#module-os.path) 模块中。
 
 os.**sep**  
-操作系统用来分隔路径名组件的字符。POSIX 为 `'/'` 而 Windows 为 `'\\'`。Note that knowing this is not sufficient to be able to parse or concatenate pathnames — 使用 [os.path.split()](https://docs.python.org/3.6/library/os.path.html#os.path.split) 和 [os.path.join()](https://docs.python.org/3.6/library/os.path.html#os.path.join) — 但它偶尔是有用的。Also available via [os.path](https://docs.python.org/3.6/library/os.path.html#module-os.path)。
+操作系统用来分隔路径名组件的字符。POSIX 为 `'/'` 而 Windows 为 `'\\'`。Note that knowing this is not sufficient to be able to parse or concatenate pathnames — 使用 [os.path.split()](https://docs.python.org/3.6/library/os.path.html#os.path.split) 和 [os.path.join()](https://docs.python.org/3.6/library/os.path.html#os.path.join) — 但它偶尔是有用的。Also available via [os.path](https://docs.python.org/3.6/library/os.path.html#module-os.path)。  
+
+```python
+>>> import platform
+>>> import os
+>>> platform.system()
+'Windows'
+>>> os.sep
+'\\'
+>>> print(os.sep) 
+\
+>>> print('\\')
+\
+>>> 
+```
+
+```python
+>>> import tushare as ts
+>>> pro = ts.pro_api()
+>>> df1 = pro.hk_hold(trade_date='20220527', exchange='SH')
+>>> df2 = pro.hk_hold(trade_date='20220527', exchange='SZ')
+>>> df1.to_excel('C:\\Users\\WHY\\Downloads\\SH.xlsx')  # 标准 Windows 路径分隔符
+>>> df2.to_excel('C:/Users/WHY/Downloads/SZ.xlsx')      # 类 Unix 路径分隔符
+>>>
+```
 
 ### time — 时间的访问和转化
 这个模块提供了各种各样的时间相关的函数。相关的功能 (functionality)，请参见 [datetime](https://docs.python.org/3/library/datetime.html#module-datetime) 和 [calendar](https://docs.python.org/3/library/calendar.html#module-calendar) 模块。
