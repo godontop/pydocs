@@ -1,7 +1,7 @@
 # Python 文档
 主要是我平时使用 Python 时遇到问题后查阅官方文档，之后翻译相应的部分，有些会补充相应的代码。翻译的文档主要来源于 Python 标准库、Python 语言参考、Python 教程及 Pandas 等 Python 第三方库的官方文档。  
 
-pypi.md  
+[pypi.md](https://github.com/godontop/pydocs/blob/master/pypi.md)  
 通过 pip 安装的 Python 包的相关文档及代码。  
 <br>  
 
@@ -201,6 +201,7 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 |          |            |                  |          |type()    |
 |          |            |                  |range()   |          |
 |          |getattr()   |                  |          |          |
+|          |globals()   |                  |          |          |
 |complex() |hasattr()   |                  |          |          |
 
 **abs**(*x*)  
@@ -267,6 +268,31 @@ def enumerate(sequence, start=0):
 
 **getattr**(*object, name*__[__*, default*__]__)  
 返回 *object* 的 *name* 属性的值。*name* 必须是一个字符串。如果这个字符串是这个对象的一个属性的名称，则结果为那个属性的值。例如，`getattr(x, 'foobar')` 等同于 `x.foobar`。如果名称属性不存在，则返回 *default* 如果有提供的话，否则抛出 [AttributeError](https://docs.python.org/3/library/exceptions.html#AttributeError)。
+
+```python
+>>> class Obj():
+...     pass
+... 
+>>> obj = Obj()
+>>> obj.aurows = 7
+>>> getattr(obj, 'aurows')
+7
+>>>
+```
+
+**globals()**  
+返回实现当前模块命名空间的字典。 对于函数内的代码，这是在定义函数时设置的，并且无论在哪里调用函数都保持不变。  
+
+```python
+>>> globals()
+{'__name__': '__main__', '__doc__': None, '__package__': None, '__loader__': <class '_frozen_importlib.BuiltinImporter'>, '__spec__': None, '__annotations__': {}, '__builtins__': <module 'builtins' (built-in)>}
+>>> aurows = 7
+>>> globals()
+{'__name__': '__main__', '__doc__': None, '__package__': None, '__loader__': <class '_frozen_importlib.BuiltinImporter'>, '__spec__': None, '__annotations__': {}, '__builtins__': <module 'builtins' (built-in)>, 'aurows': 7}
+>>> globals()['aurows']
+7
+>>>
+```  
 
 **hasattr**(*object, name*)  
 参数是一个对象和一个字符串。如果字符串是对象的某个属性的名称则结果为 `True` ，否则返回 `False` 。(这是通过调用 `getattr(object, name)` 并看它是否抛出一个 [AttributeError](https://docs.python.org/3.6/library/exceptions.html#AttributeError) 来实现的。  
