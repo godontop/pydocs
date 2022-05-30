@@ -1,7 +1,10 @@
 * [PyPI](#pypi)
     * [aiohttp](#aiohttp)
     * [Beautiful Soup](#beautiful-soup)
+        * [输出](#输出)
+            * [Pretty-printing](#pretty-printing)
     * [chardet](#chardet)
+    * [cssselect](#cssselect)
     * [Django](#django)
         * [settings.py](#settingspy)
     * [Flask](#flask)
@@ -11,6 +14,10 @@
             * [安装IPython内核](#安装ipython内核)
                 * [Kernels for Python 2 and 3](#kernels-for-python-2-and-3)
     * [lxml](#lxml)
+        * [lxml.html](#lxmlhtml)
+            * [解析HTML](#解析html)
+                * [解析HTML片段](#解析html片段)
+            * [HTML元素方法](#html元素方法)
     * [matplotlib](#matplotlib)
     * [mitmproxy](#mitmproxy)
     * [MySQL-python](#mysql-python)
@@ -158,6 +165,45 @@ html5lib  |BeautifulSoup(markup, "html5lib")  |<ul><li>最好的容错性</li><l
 >>>         
 ```
 
+## 输出
+### Pretty-printing
+`prettify()` 方法将Beautiful Soup的文档树格式化后以Unicode编码输出,每个XML/HTML标签都独占一行
+
+```python
+>>> from bs4 import BeautifulSoup
+>>> html = '<a href="http://example.com/">I linked to <i>example.com</i></a>'
+>>> soup = BeautifulSoup(html, 'lxml')
+>>> print(soup.prettify())
+<html>
+ <body>
+  <a href="http://example.com/">
+   I linked to
+   <i>
+    example.com
+   </i>
+  </a>
+ </body>
+</html>
+>>>
+```
+
+`BeautifulSoup` 对象和它的tag节点都可以调用 `prettify()` 方法:
+
+```python
+>>> print(soup.a.prettify())
+<a href="http://example.com/">
+ I linked to
+ <i>
+  example.com
+ </i>
+</a>
+>>> print(soup.i.prettify())
+<i>
+ example.com
+</i>
+>>>
+```  
+
 ## chardet
 官方文档：[https://chardet.readthedocs.io/en/latest/index.html](https://chardet.readthedocs.io/en/latest/index.html)
 
@@ -185,6 +231,17 @@ print(chardet.detect(page.read()))
 ```
 {'encoding': 'ISO-8859-1', 'confidence': 0.73, 'language': ''}
 ```
+
+# cssselect
+cssselect: 适用于Python的CSS选择器  
+[https://cssselect.readthedocs.io/en/latest/](https://cssselect.readthedocs.io/en/latest/)
+
+*cssselect* 解析 [CSS3 选择器](https://www.w3.org/TR/selectors-3/) 并将它们转换成 [XPath 1.0](https://www.w3.org/TR/xpath/) 表达式。这些表达式可以被用在 [lxml](http://lxml.de/) 或另一个 XPath 引擎中，用于在XML或HTML文档中查找匹配的元素。
+
+在它被提取出来作为一个独立的项目以前，这个模块过去一直作为 `lxml.cssselect` 存在于lxml中。
+
+安装  
+`pip install cssselect`  
 
 ## Django
 Django官网  
@@ -294,7 +351,7 @@ To Jupyter users: Magics are specific to and provided by the IPython kernel. Whe
 %load temp.py
 ```
 
-### lxml
+## lxml
 官方网站：[https://lxml.de](https://lxml.de)  
 GitHub：[https://github.com/lxml/lxml](https://github.com/lxml/lxml)  
 
@@ -302,6 +359,46 @@ GitHub：[https://github.com/lxml/lxml](https://github.com/lxml/lxml)
 
 ```sh
 $ pip3 install lxml
+```
+
+### lxml.html
+从版本2.0开始，lxml 与一个用于处理 HTML 的独立的 Python 包（lxml.html）一起发布了。它基于 lxml 的 HTML 解析器，但它提供一个特殊的元素API用于 HTML 元素，以及一些用于常见HTML处理任务的工具。
+
+### 解析HTML
+#### 解析HTML片段
+有几个可用于解析HTML的函数：
+
+**fromstring(string):**  
+返回 document_fromstring 或者 fragment_fromstring，基于字符串看起来是否像是一个完整的文档，或者仅仅是一个片段。
+
+### HTML元素方法
+HTML元素除了拥有ElementTree的所有方法，还包含一些额外的方法：
+
+**.text_content():**  
+返回元素及其子元素的内容，且不带标记。
+
+**.cssselect(expr):**  
+使用一个CSS选择器表达式，从这个元素和它的子元素中选择元素。(注意 .xpath(expr) is also available as on all lxml elements.)【该方法返回的是一个由 lxml.html.HtmlElement 类型的元素构成的列表】
+
+```python
+>>> import lxml.html
+>>> from urllib.request import urlopen
+>>> html = urlopen('http://example.webscraping.com/places/default/view/Afghanistan-1').read().decode()
+>>> tree = lxml.html.fromstring(html)
+>>> type(tree)
+<class 'lxml.html.HtmlElement'>
+>>> area = tree.cssselect('table > tr#places_area__row > td.w2p_fw')
+>>> type(area)
+<class 'list'>
+>>> area = tree.cssselect('table > tr#places_area__row > td.w2p_fw')[0]
+>>> type(area)
+<class 'lxml.html.HtmlElement'>
+>>> area = tree.cssselect('table > tr#places_area__row > td.w2p_fw')[0].text_content()
+>>> type(area)
+<class 'lxml.etree._ElementUnicodeResult'>
+>>> print(area)
+647,500 square kilometres
+>>>
 ```
 
 ## matplotlib
