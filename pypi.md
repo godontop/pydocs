@@ -2593,6 +2593,64 @@ Out[1437]: Int64Index([906], dtype='int64')
 >>>
 ```
 
+#### **pandas.DataFrame.reset_index**  
+**DataFrame.reset_index(*level=None, drop=False, inplace=False, col_level=0, col_fill=''*)**  
+重置索引，或它的一个级别。  
+
+重置 DataFrame 的索引，并使用默认索引。 如果 DataFrame 有 MultiIndex，则此方法可以删除一个或多个级别。  
+
+**参数：**  
+**level：** ***int, str, tuple, or list, default None***  
+仅从索引中删除给定的级别。 默认情况下删除所有级别。  
+
+**drop：**  ***bool, 默认值 False***  
+不要试图将索引插入 dataframe 列。 这会将索引重置为默认整数索引。（默认会将索引插入到 dataframe 的第一列，列标签为“index”）  
+
+**inplace：** ***bool, 默认值 False***  
+就地修改 DataFrame（不要创建新对象）。  
+
+**Returns： DataFrame or None**  
+具有新索引的 DataFrame，如果 `inplace=True`，则为 `None`。  
+
+**例子**  
+
+```python
+>>> df = pd.DataFrame([('bird', 389.0),     
+...                    ('bird', 24.0),   
+...                    ('mammal', 80.5),
+...                    ('mammal', np.nan)],
+...                   index=['falcon', 'parrot', 'lion', 'monkey'],
+...                   columns=('class', 'max_speed'))
+>>> df
+         class  max_speed
+falcon    bird      389.0
+parrot    bird       24.0
+lion    mammal       80.5
+monkey  mammal        NaN
+```
+
+当我们重置索引时，旧索引被作为列添加，并使用新的顺序索引：  
+
+```python
+>>> df.reset_index()
+    index   class  max_speed
+0  falcon    bird      389.0
+1  parrot    bird       24.0
+2    lion  mammal       80.5
+3  monkey  mammal        NaN
+```
+
+我们可以使用 *drop* 参数来避免将旧索引添加为列：  
+
+```python
+>>> df.reset_index(drop=True)
+    class  max_speed
+0    bird      389.0
+1    bird       24.0
+2  mammal       80.5
+3  mammal        NaN
+```
+
 #### pandas.DataFrame.sort_values
 DataFrame.**sort_values**(*by, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last', ignore_index=False, key=None*)  
 沿任一轴按值排序。
