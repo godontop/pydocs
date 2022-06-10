@@ -27,7 +27,16 @@ HTML `<ul>` 标签
   <li>Coffee</li>
   <li>Tea</li>
   <li>Milk</li>
-</ul>
+</ul>  
+
+## HTML 注释  
+注释标签 \<!-- 与 --> 用于在 HTML 插入注释。  
+
+**实例**  
+
+```html
+<!-- 在此处写注释 -->
+```
 
 # Markdown
 要在Markdown中显示`<`和`>`，必须使用使用转义字符`&lt;`和`&gt;`。
