@@ -3012,7 +3012,7 @@ GitHub：[https://github.com/PyMySQL/PyMySQL](https://github.com/PyMySQL/PyMySQL
 $ pip3 install pymysql
 ```
 
-### pyquery
+## pyquery
 GitHub：[https://github.com/gawel/pyquery](https://github.com/gawel/pyquery)  
 官方文档：[https://pyquery.readthedocs.io/en/latest/](https://pyquery.readthedocs.io/en/latest/)  
 
@@ -3020,6 +3020,18 @@ GitHub：[https://github.com/gawel/pyquery](https://github.com/gawel/pyquery)
 
 ```sh
 $ pip3 install pyquery
+```
+
+### 使用伪类  
+**:gt()**  
+匹配索引超过给定索引的所有元素（**索引是从 0 开始的**）：  
+
+```python
+>>> from pyquery import PyQuery
+>>> d = PyQuery('<div><h1 class="first"/><h1 class="last"/></div>')
+>>> d('h1:gt(0)')
+[<h1.last>]
+>>>
 ```
 
 ### pyspider
