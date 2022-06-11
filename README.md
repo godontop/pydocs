@@ -194,13 +194,13 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 |          |            |hex()             |          |          |
 |          |            |id()              |object()  |          |
 |          |enumerate() |                  |          |          |
-|          |            |int()             |open()    |          |
+|          |eval()      |int()             |open()    |          |
 |          |            |isinstance()      |ord()     |          |
 |          |            |issubclass()      |pow()     |super()   |
 |          |            |                  |print()   |          |
 |          |            |                  |          |type()    |
 |          |            |                  |range()   |          |
-|          |getattr()   |                  |          |          |
+|          |getattr()   |                  |repr()    |          |
 |          |globals()   |                  |          |          |
 |complex() |hasattr()   |                  |          |          |
 
@@ -265,6 +265,28 @@ def enumerate(sequence, start=0):
         yield n, elem
         n += 1
 ```
+
+**eval(**_expression_**[**, _globals_**[**, _locals_**]]**)  
+实参是一个字符串，以及可选的 globals 和 locals。如果提供，*globals* 必须是一个字典。如果提供，*locals* 可以是任何映射对象。  
+
+*expression* 参数会作为一个 Python 表达式（从技术上说是一个条件列表）被解析并求值，使用 *globals* 和 *locals* 字典作为全局和局部命名空间。 如果 *globals* 字典存在且不包含键 `__builtins__` 的值，则会在解析 *expression* 之前在该键下插入对内置模块 [builtins](https://docs.python.org/3.9/library/builtins.html#module-builtins) 字典的引用。 这意味着 *expression* 通常具有对标准 [builtins](https://docs.python.org/3.9/library/builtins.html#module-builtins) 模块的完全访问权限且受限的环境会被传播。 如果省略 *locals* 字典则其默认值为 *globals* 字典。 如果两个字典同时省略，则表达式执行时会使用 [eval()](https://docs.python.org/3.9/library/functions.html#eval) 被调用的环境中的 *globals* 和 *locals*。 请注意，*eval()* 无法访问封闭环境中的[嵌套范围](https://docs.python.org/3.9/glossary.html#term-nested-scope)（非局部）。  
+
+返回值就是表达式的求值结果。 语法错误将作为异常被报告。 例如：  
+
+```python
+>>> x = 1
+>>> eval('x + 1')
+2
+>>>
+```
+
+这个函数也可以用来执行任何代码对象（如 [compile()](https://docs.python.org/3.9/library/functions.html#compile) 创建的那些）。这种情况下，参数是代码对象，而不是字符串。如果编译该对象时的 *mode* 参数是 `'exec'`，那么 [eval()](https://docs.python.org/3.9/library/functions.html#eval) 的返回值为 `None` 。  
+
+**提示：** [exec()](https://docs.python.org/3.9/library/functions.html#exec) 函数支持动态执行语句。 [globals()](https://docs.python.org/3.9/library/functions.html#globals) 和 [locals()](https://docs.python.org/3.9/library/functions.html#locals) 函数各自返回当前的全局和本地字典，这对于传递给 [eval()](https://docs.python.org/3.9/library/functions.html#eval) 或 [exec()](https://docs.python.org/3.9/library/functions.html#exec) 使用可能很有用。  
+
+另外可以参阅 [ast.literal_eval()](https://docs.python.org/3.9/library/ast.html#ast.literal_eval)，该函数可以安全执行仅包含文字的表达式字符串。  
+
+以代码对象作为参数引发[审计事件](https://docs.python.org/3.9/library/sys.html#auditing) `exec`。 也可能引发代码编译事件。    
 
 **getattr**(*object, name*__[__*, default*__]__)  
 返回 *object* 的 *name* 属性的值。*name* 必须是一个字符串。如果这个字符串是这个对象的一个属性的名称，则结果为那个属性的值。例如，`getattr(x, 'foobar')` 等同于 `x.foobar`。如果名称属性不存在，则返回 *default* 如果有提供的话，否则抛出 [AttributeError](https://docs.python.org/3/library/exceptions.html#AttributeError)。
@@ -639,6 +661,25 @@ _在版本3.3中发生变化：_ 增加了 *flush* 关键字参数。
 2
 1
 >>> 
+```
+
+**repr(**_object_**)**  
+返回一个包含一个对象的可打印表示形式的字符串。 对于许多类型来说，该函数会尝试返回一个字符串，该字符串在被传递给 [eval()](https://docs.python.org/3.9/library/functions.html#eval) 时会产生具有相同值的对象，在其他情况下表示形式会是一个括在尖括号中的字符串，其中包含对象类型的名称和通常包括对象名称和地址的附加信息。 类可以通过定义 [\_\_repr\_\_()](https://docs.python.org/3.9/reference/datamodel.html#object.__repr__) 方法来控制此函数为它的实例所返回的内容。  
+
+```python
+>>> a = 'string' 
+>>> repr(a) 
+"'string'"
+>>> eval(repr(a)) 
+'string'
+>>> eval(repr(a)) == a
+True
+>>> lis = [1, 2, 3]   
+>>> repr(lis) 
+'[1, 2, 3]'
+>>> eval(repr(lis)) == lis
+True
+>>>
 ```
 
 **super**([*type*__[__*, object-or-type*__]]__)  
