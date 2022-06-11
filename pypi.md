@@ -35,6 +35,7 @@
     * [PyMongo](#pymongo)
     * [PyMySQL](#pymysql)
     * [pyquery](#pyquery)
+        * [使用伪类](#使用伪类)
     * [pyspider](#pyspider)
     * [redis-py](#redis-py)
     * [Requests](#requests)
@@ -80,6 +81,7 @@ $ pip3 install aiodns
 ### Beautiful Soup
 官方文档：[https://www.crummy.com/software/BeautifulSoup/bs4/doc](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)  
 中文文档：[https://www.crummy.com/software/BeautifulSoup/bs4/doc.zh](https://www.crummy.com/software/BeautifulSoup/bs4/doc.zh/)  
+中文文档里有很多错误，而且代码的输出都是基于Python 2的输出。建议直接参考英文文档。    
 
 安装Beautiful Soup  
 
@@ -163,6 +165,62 @@ html5lib  |BeautifulSoup(markup, "html5lib")  |<ul><li>最好的容错性</li><l
 
    
 >>>         
+```
+
+#### .descendants  
+`.contents` 和 `.children` 属性仅包含tag的直接子节点.例如,\<head>标签只有一个直接子节点\<title>  
+
+```python
+html_doc = """<html><head><title>The Dormouse's story</title></head>
+<body>
+<p class="title"><b>The Dormouse's story</b></p>
+
+<p class="story">Once upon a time there were three little sisters; and their names were
+<a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>,
+<a href="http://example.com/lace" class="sister" id="link2">Lacie</a> and
+<a href="http://example.com/tillie" class="sister" id="link3">Tillie</a>;
+and they lived at the bottom of a well.</p>
+
+<p class="story">...</p>
+"""
+from bs4 import BeautifulSoup
+soup = BeautifulSoup(html_doc, "html.parser")
+```
+
+```python
+>>> head_tag = soup.head
+>>> head_tag.contents
+[<title>The Dormouse's story</title>]
+>>>
+```
+
+但是\<title>标签本身也有一个子节点:字符串 “The Dormouse’s story”。这种情况下字符串 “The Dormouse’s story”也属于\<head>标签的子孙节点. `.descendants` 属性可以让你对所有tag的子孙节点进行递归遍历：其直接子节点，直接子节点的子孙节点，等等：  
+
+```python
+>>> for child in head_tag.descendants:
+...     print(child)
+... 
+<title>The Dormouse's story</title>
+The Dormouse's story
+>>>
+```
+
+`.descendants` 的返回类型是生成器。  
+
+```python
+>>> type(soup.descendants) 
+<class 'generator'>
+>>>
+```
+
+上面的例子中, \<head>标签只有一个子节点,但是有2个子孙节点:\<title>节点和\<title>的子节点, `BeautifulSoup` 对象仅有一个直接子节点(\<html>节点),却有很多子孙节点:  
+
+```python
+>>> len(list(soup.children))
+1
+>>> len(list(soup.descendants)) 
+26
+>>>
 ```
 
 ## 输出
