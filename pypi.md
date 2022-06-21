@@ -7,6 +7,7 @@
     * [cssselect](#cssselect)
     * [Django](#django)
         * [settings.py](#settingspy)
+    * [Flake8](#flake8)
     * [Flask](#flask)
     * [Gerapy](#gerapy)
     * [IPython](#ipython)
@@ -342,6 +343,48 @@ $ python3 manage.py startapp web
 创建应用后需要修改项目的urls.py文件，将新应用添加到urlpatterns中。  
 
 {% 和 {{ 标签是 Django 模板语言的一部分。
+## Flake8
+GitHub：[https://github.com/pycqa/flake8](https://github.com/pycqa/flake8)  
+官方文档：[https://flake8.pycqa.org/en/latest/](https://flake8.pycqa.org/en/latest/)  
+
+### 使用 Flake8  
+#### 选择和忽略违规
+##### 使用 Flake8 忽略违规  
+**行内忽略错误**  
+在某些情况下，我们可能不想忽略整个项目的错误代码（或错误代码类别）。 相反，我们可能希望忽略特定行上的特定错误代码。 让我们以这样的一行为例  
+
+```python
+example = lambda: 'example'
+```
+
+有时我们真的需要这么简单的东西。 我们可以代替像往常一样定义一个函数。请注意，在某些情况下，这会使人从实际发生的事情上分心。 在这些情况下，我们还可以这样做：  
+
+```python
+example = lambda: 'example'  # noqa: E731
+```
+
+这只会忽略 pycodestyle 检查 lambda 赋值并生成 `E731` 的错误。 如果行内还有其他错误，则会报告这些错误。 `# noqa` 不区分大小写，如果没有冒号，`# noqa` 之后的部分将被忽略。  
+
+**注意**  
+如果我们想要禁用 **Flake8** 遵守 `#noqa` 注释，我们可以引用 `flake8 --disable-noqa`。  
+
+如果我们希望忽略多个错误，我们可以列出所有错误，并用逗号分隔它们：  
+
+```python
+# noqa: E731,E123
+```
+
+最后，如果我们有一个特别糟糕的代码行，我们可以简单地使用 `#noqa`，后面没有任何内容，忽略每个错误。  
+
+`# noqa: ...` 部分之前和之后的内容将被忽略，因此多条注释可能会出现在一行上。 这里有几个例子：  
+
+```python
+# mypy requires `# type: ignore` to appear first
+x = 5  # type: ignore  # noqa: ABC123
+
+# can use to add useful user information to a noqa comment
+y = 6  # noqa: ABC456  # TODO: will fix this later
+```
 
 ### Flask
 GitHub：[https://github.com/pallets/flask](https://github.com/pallets/flask)  
@@ -3080,6 +3123,46 @@ GitHub：[https://github.com/gawel/pyquery](https://github.com/gawel/pyquery)
 $ pip3 install pyquery
 ```
 
+```python
+from pyquery import PyQuery as pq
+```
+
+pyquery.PyQuery 实际上引用的是 pyquery.pyquery.PyQuery。    
+
+```sh
+➜  site-packages git:(master) tree pyquery
+pyquery
+├── cssselectpatch.py
+├── __init__.py
+├── openers.py
+├── __pycache__
+│   ├── cssselectpatch.cpython-39.pyc
+│   ├── __init__.cpython-39.pyc
+│   ├── openers.cpython-39.pyc
+│   ├── pyquery.cpython-39.pyc
+│   └── text.cpython-39.pyc
+├── pyquery.py
+└── text.py
+
+1 directory, 10 files
+➜  site-packages git:(master) cat pyquery/__init__.py |grep -v ^# |grep -v ^$
+from .pyquery import PyQuery  # NOQA
+➜  site-packages git:(master) cat pyquery/pyquery.py |grep -A 2 'class PyQuery'
+class PyQuery(list):
+    """The main class
+    """
+➜  site-packages git:(master) 
+```
+
+通过上面的输出可以看到，pyquery 包下的 \_\_init\_\_.py 文件只有一行代码行，其内容是从 pyquery 包的 pyquery.py 模块中导入 PyQuery 类。  
+
+```python
+>>> import pyquery
+>>> pyquery.PyQuery == pyquery.pyquery.PyQuery
+True
+>>>
+```
+
 ### 使用伪类  
 **:gt()**  
 匹配索引超过给定索引的所有元素（**索引是从 0 开始的**）：  
@@ -3091,6 +3174,47 @@ $ pip3 install pyquery
 [<h1.last>]
 >>>
 ```
+
+### pyquery – PyQuery 完整 API
+*class* pyquery.pyquery.**PyQuery(**_\*args, \*\*kwargs_)  
+主类  
+
+**items(**_selector=None_**)**  
+遍历元素。返回由 PyQuery 对象构成的生成器：  
+
+```python
+>>> d = PyQuery('<div><span>foo</span><span>bar</span></div>')
+>>> [i.text() for i in d.items('span')]
+['foo', 'bar']
+>>> [i.text() for i in d('span').items()]
+['foo', 'bar']
+>>> list(d.items('span')) == list(d('span').items())  
+True
+>>> for i in d.items('span'):
+...     print(type(i))
+... 
+<class 'pyquery.pyquery.PyQuery'>
+<class 'pyquery.pyquery.PyQuery'>
+>>> type(d.items('span'))
+<class 'generator'>
+>>>
+```
+
+**text(**_value=<NoDefault>, \*\*kwargs_)  
+获取或设置子节点的文本形式。  
+
+获取文本值：  
+
+```python
+>>> doc = PyQuery('<div><span>toto</span><span>tata</span></div>')
+>>> print(doc.text())
+tototata
+>>> doc = PyQuery('''<div><span>toto</span> 
+...               <span>tata</span></div>''')
+>>> print(doc.text())
+toto tata
+```
+<br>  
 
 ### pyspider
 官方文档：[http://docs.pyspider.org/en/latest/](http://docs.pyspider.org/en/latest/)  
