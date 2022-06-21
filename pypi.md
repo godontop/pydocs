@@ -37,6 +37,7 @@
     * [PyMySQL](#pymysql)
     * [pyquery](#pyquery)
         * [使用伪类](#使用伪类)
+        * [pyquery – PyQuery 完整 API](#pyquery--pyquery-完整-api)
     * [pyspider](#pyspider)
     * [redis-py](#redis-py)
     * [Requests](#requests)
