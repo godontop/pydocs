@@ -50,6 +50,10 @@
         * [itertools -- 为高效循环创建迭代器的函数](#itertools----为高效循环创建迭代器的函数)
     * [文件和目录访问](#文件和目录访问)
         * [os.path — 通用路径名操作](#ospath--通用路径名操作)
+    * [文件格式](#文件格式)
+        * [csv — CSV文件读写](#csv--csv文件读写)
+            * [模块内容](#模块内容)
+            * [Writer对象](#writer对象)
     * [通用操作系统服务](#通用操作系统服务)
         * [os --- 各种各样的操作系统接口](#os-----各种各样的操作系统接口)
             * [进程参数](#进程参数)
@@ -2351,6 +2355,157 @@ os.path.**join**(_path, *paths_)
 在 Windows 平台，当遇到一个绝对路径组件 (如，`r'\foo'`) 时驱动器号不重置。如果一个组件包含一个驱动器号，则所有前面的组件被丢弃且驱动器号被重置。注意，因为每个驱动器都有一个当前目录，`os.path.join("c:", "foo")` represents a path relative to the current directory on drive `C:` (`c:foo`), not `c:\foo`。
 
 *在版本3.6中发生变化：* *path* 和 *paths* 接受 [path-like object](https://docs.python.org/3.6/glossary.html#term-path-like-object)。
+
+## 文件格式
+本章描述的模块解析各种既不是标记语言也与e-mail无关的其它文件格式。
+
+### csv — CSV文件读写
+**源代码：** [Lib/csv.py](https://github.com/python/cpython/tree/3.7/Lib/csv.py)
+
+所谓的 CSV (Comma Separated Values) 格式是表和数据库最常见的导入和导出格式。
+
+csv 模块的 [reader](https://docs.python.org/3/library/csv.html#csv.reader) 和 [writer](https://docs.python.org/3/library/csv.html#csv.writer) 对象读和写序列。程序员也可以使用 [DictReader](https://docs.python.org/3/library/csv.html#csv.DictReader) 和 [DictWriter](https://docs.python.org/3/library/csv.html#csv.DictWriter) 类来读写字典形式中的数据。
+
+#### 模块内容
+[csv](https://docs.python.org/3/library/csv.html#module-csv) 模块定义了下列函数：
+
+csv.**reader**(*csvfile, dialect='excel', \*\*fmtparams*)  
+返回一个将遍历给定的 *csvfile* 文件中的行的 reader 对象。*csvfile* 可以是支持[迭代器](https://docs.python.org/3/glossary.html#term-iterator)协议及每次调用它的 `__next__()` 方法都返回一个字符串的任意对象 — [文件对象](https://docs.python.org/3/glossary.html#term-file-object) 和列表对象都是适合的。如果 *csvfile* 是一个文件对象，打开它时必须带有 `newline=''`。（如果没有指定 `newline=''`，新行嵌入引用字段后将不能被正确解释，且在以 `\r\n` 作为行结束符的平台会写入一个额外的 `\r`。总是指定 `newline=''` 应该是安全的，因为 csv 模块执行自己的 ([universal](https://docs.python.org/3/glossary.html#term-universal-newlines)) 新行处理方法。）
+
+```sh
+$ cat club.csv
+113,菲比酒吧
+114,哥弟KTV
+```
+
+```python
+>>> import csv
+>>> with open('club.csv', newline='') as csvfile:
+...     content = csv.reader(csvfile)
+...     for item in content:
+...         print(item)
+...
+['113', '菲比酒吧']
+['114', '哥弟KTV']
+>>>
+```
+
+```python
+>>> import csv
+>>> with open('club.csv', newline='') as csvfile:
+...     content = csv.reader(csvfile)
+...     for id, name in content:
+...         print(name)
+...
+菲比酒吧
+哥弟KTV
+>>>
+```
+
+```python
+>>> _list = ['a', 'b', 'c']
+>>> content = csv.reader(_list)
+>>> for item in content:
+...     print(item)
+...
+['a']
+['b']
+['c']
+>>>
+```
+
+csv.**writer**(_csvfile, dialect='excel', \*\*fmtparams_)  
+Return a writer object responsible for converting the user’s data into delimited strings on the given file-like object. *csvfile* 可以是带有一个 `write()` 方法的任意对象。如果 *csvfile* 是一个文件对象，打开它时必须带有 `newline=''`。（如果没有指定 `newline=''`，新行嵌入引用字段后将不能被正确解释，且在以 `\r\n` 作为行结束符的平台会写入一个额外的 `\r`。总是指定 `newline=''` 应该是安全的，因为 csv 模块执行自己的 ([universal](https://docs.python.org/3/glossary.html#term-universal-newlines)) 新行处理方法。）
+
+```python
+>>> import csv
+>>> with open('school.csv', 'w', newline='') as csvfile:
+...     writer = csv.writer(csvfile)
+...     writer.writerow(['班级', '姓名', '学号'])
+...     writer.writerow([181, '成龙', 20181801])
+...     writer.writerow([181, '李连杰', 20181802])
+...
+10
+17
+18
+>>>
+```
+
+[csv](https://docs.python.org/zh-cn/3.9/library/csv.html#module-csv) 模块定义了以下类：
+
+*class* csv.**DictReader(**_f, fieldnames=None, restkey=None, restval=None, dialect='excel', \*args, \*\*kwds_**)**  
+创建一个对象，该对象在操作上类似于常规 reader，但是将每行中的信息映射到一个 [字典](https://docs.python.org/zh-cn/3.9/library/stdtypes.html#dict)，该字典的键由 *fieldnames* 可选参数给出。
+
+*fieldnames* 参数是一个 [序列](https://docs.python.org/zh-cn/3.9/glossary.html#term-sequence)。如果省略 *fieldnames*，则文件 *f* 第一行中的值将用作字段名。无论字段名是如何确定的，字典都将保留其原始顺序。
+
+如果某一行中的字段多于字段名，则剩余数据会被放入一个列表，并与 *restkey* 所指定的字段名 (默认为 `None`) 一起保存。 如果某个非空白行的字段少于字段名，则缺失的值会使用 *restval* 的值来填充 (默认为 `None`)。
+
+所有其他可选或关键字参数都传递给底层的 [reader](https://docs.python.org/zh-cn/3.9/library/csv.html#csv.reader) 实例。
+
+*在 3.6 版更改:* 返回的行现在的类型是 OrderedDict。
+
+*在 3.8 版更改:* 现在，返回的行是 [字典](https://docs.python.org/zh-cn/3.9/library/stdtypes.html#dict) 类型。
+
+一个简短的用法示例:
+
+```python
+>>> import csv
+>>> with open('names.csv', newline='') as csvfile:
+...     reader = csv.DictReader(csvfile)
+...     for row in reader:
+...         print(row['first_name'], row['last_name'])
+... 
+Baked Beans
+Lovely Spam
+Wonderful Spam
+>>> print(row)
+{'first_name': 'Wonderful', 'last_name': 'Spam'}
+```
+
+*class* csv.**DictWriter(**_f, fieldnames, restval='', extrasaction='raise', dialect='excel', \*args, \*\*kwds_**)**  
+创建一个对象，该对象在操作上类似常规 writer，但会将字典映射到输出行。 *fieldnames* 参数是由键组成的 [序列](https://docs.python.org/zh-cn/3.9/library/collections.abc.html#module-collections.abc)，它指定字典中值的顺序，这些值会按指定顺序传递给 `writerow()` 方法并写入文件 *f*。 如果字典缺少 *fieldnames* 中的键，则可选参数 *restval* 用于指定要写入的值。 如果传递给 `writerow()` 方法的字典的某些键在 *fieldnames* 中找不到，则可选参数 *extrasaction* 用于指定要执行的操作。 如果将其设置为默认值 `'raise'`，则会引发 [ValueError](https://docs.python.org/zh-cn/3.9/library/exceptions.html#ValueError)。 如果将其设置为 `'ignore'`，则字典中多余的值将被忽略。 所有其他可选或关键字参数都传递给底层的 [writer](https://docs.python.org/zh-cn/3.9/library/csv.html#csv.writer) 实例。
+
+注意，与 [DictReader](https://docs.python.org/zh-cn/3.9/library/csv.html#csv.DictReader) 类不同，[DictWriter](https://docs.python.org/zh-cn/3.9/library/csv.html#csv.DictWriter) 类的 *fieldnames* 参数不是可选参数。
+
+一个简短的用法示例:
+
+```python
+import csv
+
+with open('names.csv', 'w', newline='') as csvfile:
+    fieldnames = ['first_name', 'last_name']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+    writer.writeheader()
+    writer.writerow({'first_name': 'Baked', 'last_name': 'Beans'})
+    writer.writerow({'first_name': 'Lovely', 'last_name': 'Spam'})
+    writer.writerow({'first_name': 'Wonderful', 'last_name': 'Spam'})
+```
+
+#### Writer对象
+`Writer` 对象 ([DictWriter](https://docs.python.org/3/library/csv.html#csv.DictWriter) 实例和 [writer()](https://docs.python.org/3/library/csv.html#csv.writer) 函数返回的对象) 具有下列公共方法。对于 `Writer` 对象，*行* 必须是一组可迭代的字符串或数字。对于 [DictWriter](https://docs.python.org/3.9/library/csv.html#csv.DictWriter) 对象，*行* 必须是一个字典，这个字典将字段名映射为字符串或数字（数字要先经过 [str()](https://docs.python.org/3.9/library/stdtypes.html#str) 转换类型）。请注意，输出的复数会有括号包围。这可能导致其他程序读取 CSV 文件时会有一些问题（假设它们完全支持复数）。
+
+csvwriter.**writerow**(*row*)  
+将 *row* 参数写入到 writer 的文件对象中，并根据当前的 [Dialect](https://docs.python.org/3.9/library/csv.html#csv.Dialect) 进行格式化。
+
+*在版本3.5中发生变化：* 支持任意可迭代对象。  
+
+csvwriter.**writerows(**_rows_**)**  
+将 *rows*（即上面描述的能迭代 *row* 的对象）中的所有元素写入 writer 的文件对象，并根据当前的 dialect 进行格式化。
+
+Writer 对象具有以下公共属性：
+
+csvwriter.**dialect**  
+一个只读的 dialect 描述，供 writer 使用。
+
+DictWriter 对象具有以下公共方法：
+
+DictWriter.**writeheader()**  
+在 writer 的文件对象中，写入一行字段名称（字段名称在构造函数中指定），并根据当前的 dialect 进行格式化。本方法的返回值就是内部调用的 [csvwriter.writerow()](https://docs.python.org/3.9/library/csv.html#csv.csvwriter.writerow) 的返回值。
+
+*3.2 新版功能.*  
+
+*在 3.8 版更改:* 现在 [writeheader()](https://docs.python.org/3.9/library/csv.html#csv.DictWriter.writeheader) 也返回其内部使用的 [csvwriter.writerow()](https://docs.python.org/3.9/library/csv.html#csv.csvwriter.writerow) 方法的返回值。  
 
 ## 通用操作系统服务
 这章描述的模块提供在（几乎）所有操作系统上都可用的操作系统特征接口，如文件和时钟。这些接口通常是根据 Unix 或 C 接口仿写的，但它们在大多数其它系统下也是可用的。这里是一个概述：
