@@ -52,7 +52,7 @@
         * [os.path — 通用路径名操作](#ospath--通用路径名操作)
     * [文件格式](#文件格式)
         * [csv — CSV文件读写](#csv--csv文件读写)
-            * [模块内容](#模块内容)
+            * [模块内容](#模块内容-1)
             * [Writer对象](#writer对象)
     * [通用操作系统服务](#通用操作系统服务)
         * [os --- 各种各样的操作系统接口](#os-----各种各样的操作系统接口)
@@ -60,6 +60,13 @@
             * [文件和目录](#文件和目录)
             * [进程管理](#进程管理)
             * [各种各样的系统信息](#各种各样的系统信息)
+        * [io --- 处理流的核心工具](#io-----处理流的核心工具)
+            * [高阶模块接口](#高阶模块接口)
+            * [类层次结构](#类层次结构)
+                * [I/O 基类](#io-基类)
+                * [原始文件 I/O](#原始文件-io)
+                * [缓冲流](#缓冲流)
+                * [文本 I/O](#文本-io)
         * [time — 时间的访问和转化](#time--时间的访问和转化)
             * [函数](#函数)
         * [platform --- 获取底层平台的标识数据](#platform-----获取底层平台的标识数据)
@@ -2633,6 +2640,138 @@ os.**sep**
 >>> df2.to_excel('C:/Users/WHY/Downloads/SZ.xlsx')      # 类 Unix 路径分隔符
 >>>
 ```
+
+### io --- 处理流的核心工具
+**源代码:** [Lib/io.py](https://github.com/python/cpython/tree/3.9/Lib/io.py)  
+
+#### 高阶模块接口
+io.**open(**_file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None_**)**  
+这是内置的 [open()](https://docs.python.org/zh-cn/3.9/library/functions.html#open) 函数的别名。
+
+`open` 附带参数 `path`、`mode` 和 `flags` 会引发 [审计事件](https://docs.python.org/zh-cn/3.9/library/sys.html#auditing)。`mode` 和 `flags` 参数可能已被修改或从原始调用中推断出来。
+
+**另请参见：**
+
+[sys](https://docs.python.org/3/library/sys.html#module-sys)  
+包含标准IO流：[sys.stdin](https://docs.python.org/3/library/sys.html#sys.stdin)，[sys.stdout](https://docs.python.org/3/library/sys.html#sys.stdout)，和 [sys.stderr](https://docs.python.org/3/library/sys.html#sys.stderr)。
+
+#### 类层次结构
+![class hierarchy](/img/tpsl_16_2_3_class_hierarchy.png)
+
+##### I/O 基类
+
+*class* io.**IOBase**  
+所有 I/O 类的抽象基类，作用于字节流。没有公共构造函数（constructor）。
+
+从一个文件读取或写入二进制数据的基本类型是 [bytes](https://docs.python.org/3.6/library/stdtypes.html#bytes)。其它 [bytes-like object](https://docs.python.org/3.6/glossary.html#term-bytes-like-object) 也可以作为方法参数被接受。在某些情况下，例如 [readinto()](https://docs.python.org/3.6/library/io.html#io.RawIOBase.readinto)，要求一个可写的对象如 [bytearray](https://docs.python.org/3.6/library/stdtypes.html#bytearray)。文本 I/O 类对 [str](https://docs.python.org/3.6/library/stdtypes.html#str) 数据有效。
+
+[IOBase](https://docs.python.org/3.6/library/io.html#io.IOBase) 也是一个上下文管理器，因此支持 [with](https://docs.python.org/3.6/reference/compound_stmts.html#with) 声明。在这个例子中，*file* is closed after the [with](https://docs.python.org/3.6/reference/compound_stmts.html#with) statement’s suite is finished——即使出现异常：
+
+```python
+>>> with open('spam.txt', 'w') as file:
+...     file.write('Spam and eggs!')
+...
+14
+>>> file.closed
+True
+```
+
+[IOBase](https://docs.python.org/3.6/library/io.html#io.IOBase) 提供这些数据属性和方法：
+
+**closed**  
+如果流是关闭的，则返回 `True`。
+
+*class* io.**RawIOBase**  
+原始二进制 I/O 的基类。它继承 [IOBase](https://docs.python.org/3.6/library/io.html#io.IOBase)。没有公共构造函数。
+
+除了从 [IOBase](https://docs.python.org/3.6/library/io.html#io.IOBase) 继承的属性和方法，[RawIOBase](https://docs.python.org/3.6/library/io.html#io.RawIOBase) 还提供下面的方法：
+
+**read**(*size=-1*)  
+Read up to *size* bytes from the object and return them. 为了方便起见，如果 *size* 没有指定或者为 -1, all bytes until EOF are returned. Otherwise, only one system call is ever made. Fewer than *size* bytes may be returned if the operating system call returns fewer than *size* bytes.
+
+如果返回 0 字节，且 *size* 不是 0，this indicates end of file. If the object is in non-blocking mode and no bytes are available, `None` is returned.
+
+默认实现遵守 [readall()](https://docs.python.org/3.6/library/io.html#io.RawIOBase.readall) 和 [readinto()](https://docs.python.org/3.6/library/io.html#io.RawIOBase.readinto)。
+
+*class* io.**BufferedIOBase**  
+支持某种缓冲的二进制流的基类。它继承 [IOBase](https://docs.python.org/3.6/library/io.html#io.IOBase)。没有公共构造函数。
+
+除了那些从 [IOBase](https://docs.python.org/3.6/library/io.html#io.IOBase) 继承的方法和属性，[BufferedIOBase](https://docs.python.org/3.6/library/io.html#io.BufferedIOBase) 还提供或重写了这些方法和属性：
+
+**read**(*size=-1*)  
+Read and return up to *size* bytes. If the argument is omitted, `None`, or negative, data is read and returned until EOF is reached. An empty [bytes](https://docs.python.org/3.6/library/stdtypes.html#bytes) object is returned if the stream is already at EOF.
+
+##### 原始文件 I/O
+*class* io.**FileIO**(*name, mode='r', closefd=True, opener=None*)  
+[FileIO](https://docs.python.org/3.6/library/io.html#io.FileIO) 代表一个包含字节数据的操作系统级别的文件。它实现了 [RawIOBase](https://docs.python.org/3.6/library/io.html#io.RawIOBase) 接口 (因此也实现了 [IOBase](https://docs.python.org/3.6/library/io.html#io.IOBase) 接口)。
+
+除了从 [IOBase](https://docs.python.org/3.6/library/io.html#io.IOBase) 和 [RawIOBase](https://docs.python.org/3.6/library/io.html#io.RawIOBase) 继承的属性和方法，[FileIO](https://docs.python.org/3.6/library/io.html#io.FileIO) 还提供下面的数据属性：
+
+**mode**  
+构造函数中指定的模式。
+
+##### 缓冲流
+缓冲 I/O 流比原始 I/O 流为 I/O 设备提供了一个更高层次的接口。
+
+*class* io.**BytesIO**(**[**_initial_bytes_**]**)  
+使用内存中的一个字节缓冲区实现一个流。它继承 [BufferedIOBase](https://docs.python.org/3/library/io.html#io.BufferedIOBase)。当 [close()](https://docs.python.org/3/library/io.html#io.IOBase.close) 方法被调用时缓冲区被丢弃。
+
+可选参数 *initial_bytes* 是一个包含初始化数据的 [bytes-like 对象](https://docs.python.org/3/glossary.html#term-bytes-like-object)。
+
+除了那些从 [BufferedIOBase](https://docs.python.org/3/library/io.html#io.BufferedIOBase) 和 [IOBase](https://docs.python.org/3/library/io.html#io.IOBase) 继承的方法，[BytesIO](https://docs.python.org/3/library/io.html#io.BytesIO) 提供或重写了这些方法：
+
+*class* io.**BufferedReader**(*raw, buffer_size=DEFAULT_BUFFER_SIZE*)  
+除了那些从 [BufferedIOBase](https://docs.python.org/3.6/library/io.html#io.BufferedIOBase) 和 [IOBase](https://docs.python.org/3.6/library/io.html#io.IOBase) 继承的方法，[BufferedReader](https://docs.python.org/3.6/library/io.html#io.BufferedReader) 还提供或重写了这些方法：
+
+**read**([*size*])  
+读取并返回 *size* 字节，或者如果 *size* 没有给出或者是负数，until EOF or if the read call would block in non-blocking mode.
+
+*class* io.**BufferedWriter**(*raw, buffer_size=DEFAULT_BUFFER_SIZE*)  
+一个为可写的，连续的 [RawIOBase](https://docs.python.org/3.6/library/io.html#io.RawIOBase) 对象提供更高层次访问的缓冲区。它继承 [BufferedIOBase](https://docs.python.org/3.6/library/io.html#io.BufferedIOBase)。当向这个对象写数据时，数据通常被放进一个内部缓冲区。缓冲区在多种条件下将被写到底层的 [RawIOBase](https://docs.python.org/3.6/library/io.html#io.RawIOBase) 对象，包括：
+
+* 对所有挂起的数据来说，当缓冲区太小时；
+* 当 [flush()](https://docs.python.org/3.6/library/io.html#io.BufferedWriter.flush) 被调用时；
+* 当 seek() 被请求时(对于 [BufferedRandom](https://docs.python.org/3.6/library/io.html#io.BufferedRandom) 对象);
+* 当 [BufferedWriter](https://docs.python.org/3.6/library/io.html#io.BufferedWriter) 对象被关闭或者销毁时。 
+
+除了那些从 [BufferedIOBase](https://docs.python.org/3.6/library/io.html#io.BufferedIOBase) 和 [IOBase](https://docs.python.org/3.6/library/io.html#io.IOBase) 继承的方法，[BufferedWriter](https://docs.python.org/3.6/library/io.html#io.BufferedWriter) 还提供或重写了这些方法：
+
+**write**(*b*)  
+写入 [bytes-like 对象](https://docs.python.org/3.6/glossary.html#term-bytes-like-object) *b*，并返回写入的字节数。When in non-blocking mode, a [BlockingIOError](https://docs.python.org/3.6/library/exceptions.html#BlockingIOError) is raised if the buffer needs to be written out but the raw stream blocks.
+
+*class* io.**BufferedRandom**(*raw, buffer_size=DEFAULT_BUFFER_SIZE*)  
+一个随机访问流的缓冲区接口。它继承 [BufferedReader](https://docs.python.org/3.6/library/io.html#io.BufferedReader) 和 [BufferedWriter](https://docs.python.org/3.6/library/io.html#io.BufferedWriter), and further supports seek() and tell() functionality.
+
+The constructor creates a reader and writer for a seekable raw stream, given in the first argument. 如果 *buffer_size* 被省略，则它默认为 [DEFAULT_BUFFER_SIZE](https://docs.python.org/3.6/library/io.html#io.DEFAULT_BUFFER_SIZE)。
+
+[BufferedRandom](https://docs.python.org/3.6/library/io.html#io.BufferedRandom) 可以做任何 [BufferedReader](https://docs.python.org/3.6/library/io.html#io.BufferedReader) 或者 [BufferedWriter](https://docs.python.org/3.6/library/io.html#io.BufferedWriter) 能做的事。
+
+```python
+>>> import io
+>>> issubclass(io.BufferedRandom, io.BufferedReader)
+False
+>>> issubclass(io.BufferedRandom, io.BufferedWriter)
+False
+```
+
+Python官方文档里说 `io.BufferedRandom` 继承 `io.BufferedReader` 和 `io.BufferedWriter`，但不知为何 `issubclass(io.BufferedRandom, io.BufferedReader)` 和 `issubclass(io.BufferedRandom, io.BufferedWriter)` 的返回结果都是 `False`。
+
+##### 文本 I/O
+*class* io.**TextIOBase**  
+文本流的基类。This class provides a character and line based interface to stream I/O. There is no readinto() method because Python’s character strings are immutable. 它继承 [IOBase](https://docs.python.org/3.6/library/io.html#io.IOBase)。没有公共构造函数。
+
+除了那些从 [IOBase](https://docs.python.org/3.6/library/io.html#io.IOBase) 继承的属性和方法，[TextIOBase](https://docs.python.org/3.6/library/io.html#io.TextIOBase) 提供或重写了这些数据属性和方法：
+
+**read**(*size*)  
+从流中读取并返回至多 *size* 个字符作为一个单一 [str](https://docs.python.org/3.6/library/stdtypes.html#str)。如果 *size* 是负数或者 `None`, reads until EOF.
+
+*class* io.**TextIOWrapper**(*buffer, encoding=None, errors=None, newline=None, line_buffering=False, write_through=False*)  
+A buffered text stream over a [BufferedIOBase](https://docs.python.org/3.6/library/io.html#io.BufferedIOBase) binary stream. 它继承 [TextIOBase](https://docs.python.org/3.6/library/io.html#io.TextIOBase)。
+
+*class* io.**StringIO**(*initial_value='', newline='\n'*)  
+一个用于文本I/O的内存中的流。当 [close()](https://docs.python.org/3/library/io.html#io.IOBase.close) 方法被调用时文本缓冲区被丢弃。
+
+缓冲区的初始值可以通过提供的 *initial_value* 参数继续设置。如果新行转化被启用，newlines will be encoded as if by [write()](https://docs.python.org/3/library/io.html#io.TextIOBase.write)。流被放在缓冲区的起始位置。  
 
 ### time — 时间的访问和转化
 这个模块提供了各种各样的时间相关的函数。相关的功能 (functionality)，请参见 [datetime](https://docs.python.org/3/library/datetime.html#module-datetime) 和 [calendar](https://docs.python.org/3/library/calendar.html#module-calendar) 模块。
