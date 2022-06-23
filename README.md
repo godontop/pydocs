@@ -69,6 +69,11 @@
                 * [文本 I/O](#文本-io)
         * [time — 时间的访问和转化](#time--时间的访问和转化)
             * [函数](#函数)
+        * [getopt — C-风格的命令行选项解析器](#getopt--c-风格的命令行选项解析器)
+        * [logging --- Python 的日志记录工具](#logging-----python-的日志记录工具)
+            * [日志级别](#日志级别)
+            * [LogRecord属性](#logrecord属性)
+            * [模块级别的函数](#模块级别的函数)
         * [platform --- 获取底层平台的标识数据](#platform-----获取底层平台的标识数据)
     * [并发执行](#并发执行)
         * [threading — 基于线程的并行](#threading--基于线程的并行)
@@ -2909,6 +2914,81 @@ time.**time()** → float
 请注意，即使时间总是作为浮点数返回，但并非所有系统都提供高于1秒的精度。虽然此函数通常返回非递减值，但如果在两次调用之间设置了系统时钟，则它可以返回比先前调用更低的值。
 
 返回的数字 [time()](https://docs.python.org/zh-cn/3/library/time.html#time.time) 可以通过将其传递给 [gmtime()](https://docs.python.org/zh-cn/3/library/time.html#time.gmtime) 函数或转换为UTC中更常见的时间格式（即年、月、日、小时等）或通过将它传递给 [localtime()](https://docs.python.org/zh-cn/3/library/time.html#time.localtime) 函数获得本地时间。在这两种情况下都返回一个 [struct_time](https://docs.python.org/zh-cn/3/library/time.html#time.struct_time) 对象，日历日期组件可以从中作为属性访问。
+
+### getopt — C-风格的命令行选项解析器
+**Source code:** [Lib/getopt.py](https://github.com/python/cpython/tree/3.6/Lib/getopt.py)
+
+这个模块提供2个函数和1个异常：
+
+getopt.**getopt**(*args, shortopts, longopts=[]*)  
+分析命令行选项和参数列表。*args* 是被分析的参数列表，不包含首部的正在运行的程序引用。通常，这意为 `sys.argv[1:]`。*shortopts* 是脚本想要识别的选项字母字符串，要求一个参数的选项后面跟随一个冒号(`':'`；也就是，Unix getopt() 使用的相同的格式)。
+
+**注意：** 和 GUN `getopt()` 不同，在一个非选项参数之后，所有更远的参数也都被认为是非选项。这和非GUN Unix系统的工作方式相似。
+
+*longopts*，如果指定，必须是一个应该被支持的长选项名称的字符串列表。前导字符 `'--'` 不应该包含在选项名中。要求一个参数的长选项后面应该跟随一个等号(`'='`)。不支持可选参数。如果仅接受长选项，则 *shortopts* 应该是一个空串。命令行中的长选项只要它们提供的选项名前缀可以精确地匹配一个可以接受的选项就能够被识别。例如，如果 *longopts* 是 `['foo', 'frob']`，则选项 `--fo` 将匹配为 `--foo`，但 `--f` 就不能唯一匹配了，所以将抛出 [GetoptError](https://docs.python.org/3.6/library/getopt.html#getopt.GetoptError)异常。
+
+返回值由2个元素组成：the first is a list of `(option, value)` pairs; 第二个是选项列表被截取后余下的程序参数列表(这是 *args* 的尾部切片)。对于每一个返回的 option-and-value pair，选项作为它的第一个元素，用一个连字符作为短选项的前缀(例如, `'-x'`)或者两个连字符作为长选项的前缀(例如, `'--long-option'`)，选项参数作为它的第二个元素，如果选项没有参数，则用一个空串。选项出现在列表中的顺序与它们被发现的顺序相同，因此允许多次出现。长选项和短选项可以混合。
+
+### logging --- Python 的日志记录工具
+**源代码：** [Lib/logging/\_\_init\_\_.py](https://github.com/python/cpython/tree/3.9/Lib/logging/__init__.py)
+
+**重要**  
+
+此页面仅包含 API 参考信息。教程信息和更多高级用法的讨论，请参阅
+
+* [基础教程](https://docs.python.org/3.9/howto/logging.html#logging-basic-tutorial)  
+* [进阶教程](https://docs.python.org/3.9/howto/logging.html#logging-advanced-tutorial)  
+* [日志操作手册](https://docs.python.org/3.9/howto/logging-cookbook.html#logging-cookbook)  
+
+这个模块为应用与库实现了灵活的事件日志系统的函数与类。
+
+使用标准库模块提供的日志记录 API 的主要好处是所有 Python 模块都可以参与日志记录，因此您的应用程序日志可以包含您自己的消息与来自第三方模块的消息集成。
+
+这个模块提供许多强大而灵活的功能。如果你对 logging 不太熟悉，掌握它最好的方式就是查看它对应的教程。
+
+#### 日志级别
+日志级别的数值已在下表给出。如果你想自定义级别这将是你最感兴趣的，它们必须有相对于预定义级别的特定的值。如果你使用相同的数值定义一个级别，它将覆盖预定义的值，且预定义的名称也将丢失。
+
+|Level       |Numeric value  |
+|------------|---------------|
+|`CRITICAL`  |50             |
+|`ERROR`     |40             |
+|`WARNING`   |30             |
+|`INFO`      |20             |
+|`DEBUG`     |10             |
+|`NOTSET`    |0              |
+
+#### LogRecord属性
+LogRecord有许多属性，大多数来源于构造函数的参数。(注意，LogRecord构造函数的参数名称与LogRecord属性名称之间并非总是正确对应。)这些属性可以用来合并由记录转换成格式化字符串的数据。下表列出了（按字母顺序）属性名称，它们的意义以及对应的 %-style 格式化字符串占位符。
+
+如果你使用 {}-formatting ([str.format()](https://docs.python.org/3.6/library/stdtypes.html#str.format)), 那么在格式化字符串中你可以使用 `{attrname}` 作为占位符。如果你使用 \$-formatting ([string.Template](https://docs.python.org/3.6/library/string.html#string.Template)), 那么使用 `${attrname}` 形式。在这两种情况下，当然，用你实际要用的属性名称替换 `attrname`。
+
+在使用 {}-formatting 的情况下，你可以通过在属性名称之后指定格式化标志，用冒号(:)分隔。例如：`{msecs:03d}` 占位符将格式化毫秒值 `4` 为 `004`。关于可用选项的全部细节请参考 [str.format()](https://docs.python.org/3.6/library/stdtypes.html#str.format) 文档。
+
+|Attribute name  |Format                     |Description                     |
+|----------------|---------------------------|--------------------------------|
+|args            |你不必自己格式化这个          |参数元组结合 `msg` 以产生 `message`，或者一个字典的值用来结合<br> `msg`（当仅有一个参数，且它是一个字典）。
+|levelname       |`%(levelname)s`            |消息的文本日志级别(`'DEBUG'`, `'INFO'`, `'WARNING'`, `'ERROR'`, `'CRITICAL'`)                                |
+|message         |`%(message)s`              |记录的消息，计算 `msg % args`。当 [Formatter.format()](https://docs.python.org/3.6/library/logging.html#logging.Formatter.format) 被<br>调用时，这个属性被设置。
+|msg             |你不必自己格式化这个          |传递给原始日志调用的格式化字符串。与 `args` 合并以产生 <br>`message`，或者一个任意对象（参考[使用任意对象作为消息](https://docs.python.org/3.6/howto/logging.html#arbitrary-object-messages)）。    
+
+#### 模块级别的函数
+除了上面描述的类，还有一些模块级别的函数。
+
+logging.**basicConfig**(_\*\*kwargs_)  
+通过创建一个带一个默认 [Formatter](https://docs.python.org/3.6/library/logging.html#logging.Formatter) 的 [StreamHandler](https://docs.python.org/3.6/library/logging.handlers.html#logging.StreamHandler) 来为日志系统做基本配置，并将其添加到根记录器。如果没有为根记录器定义处理器，则函数 [debug()](https://docs.python.org/3.6/library/logging.html#logging.debug), [info()](https://docs.python.org/3.6/library/logging.html#logging.info), [warning()](https://docs.python.org/3.6/library/logging.html#logging.warning), [error()](https://docs.python.org/3.6/library/logging.html#logging.error) 和 [critical()](https://docs.python.org/3.6/library/logging.html#logging.critical) 将自动调用
+[basicConfig()](https://docs.python.org/3.6/library/logging.html#logging.basicConfig)。
+
+如果已经为根记录器配置了处理器，则这个函数什么也不做。
+
+**注意：** 这个函数应该在其它线程启动以前由main线程调用。在Python版本2.7.1和3.2以前，如果这个函数被多线程调用，可能（尽管这种情况很少出现）会使处理器（handler）被多次添加到根记录器，这将导致意外结果，如日志中的消息重复。
+
+支持下列关键字参数（keyword arguments）。  
+
+|Format     |Description    |
+|-----------|---------------|
+`format`    |为处理器使用指定的格式化字符串  
+`level`     |设置根记录器级别为指定的级别  
 
 ### platform --- 获取底层平台的标识数据
 **源代码：** [Lib/platform.py](https://github.com/python/cpython/tree/3.8/Lib/platform.py)
