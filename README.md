@@ -75,6 +75,10 @@
             * [LogRecord属性](#logrecord属性)
             * [模块级别的函数](#模块级别的函数)
         * [platform --- 获取底层平台的标识数据](#platform-----获取底层平台的标识数据)
+        * [ctypes --- Python 的外部函数库](#ctypes-----python-的外部函数库)
+            * [ctypes reference](#ctypes-reference)
+                * [查找共享库](#查找共享库)
+                * [实用函数](#实用函数)
     * [并发执行](#并发执行)
         * [threading — 基于线程的并行](#threading--基于线程的并行)
             * [线程对象](#线程对象)
@@ -3066,6 +3070,80 @@ platform.**system()**
 'Linux'
 >>>
 ```
+
+### ctypes --- Python 的外部函数库
+[ctypes](https://docs.python.org/3.9/library/ctypes.html#module-ctypes) 是 Python 的外部函数库。它提供了与 C 兼容的数据类型，并允许调用 DLL 或共享库中的函数。可使用该模块以纯 Python 形式对这些库进行封装。
+
+#### ctypes reference
+##### 查找共享库
+当用编译语言编程时，当编译或者链接一个程序及当程序运行时，共享库被访问。
+
+The purpose of the find_library() function is to locate a library in a way similar to what the compiler or runtime loader does (在一个共享库有几个版本的平台上应该加载最新版本), while the ctypes library loaders act like when a program is run, and call the runtime loader directly.
+
+ctypes.util 模块提供了一个函数可以帮助检测要加载的库。
+
+ctypes.util.**find_library**(*name*)  
+尝试查找一个库并返回一个路径名。*name* 是不带任何前缀像 `lib`，后缀像 `.so`，`.dylib` 或版本号的库名 (this is the form used for the posix linker option -l). 如果不能找到库则返回 `None`。
+
+准确的功能依赖于系统。
+
+在Linux中，find_library() 尝试运行外部程序 (`/sbin/ldconfig`, `gcc`, `objdump` 和 `ld`) 查找库文件。它返回库文件的文件名。
+
+*在版本3.6中发生变化：* 在Linux中，当搜索库时环境变量 `LD_LIBRARY_PATH` 的值被使用，如果一个库不能通过任何其它方法找到。
+
+这里有一些例子：  
+在Linux上：
+
+```python
+>>> from ctypes.util import find_library
+>>> find_library("m")
+'libm.so.6'
+>>> find_library("c")
+'libc.so.6'
+>>> find_library("bz2")
+'libbz2.so.1.0'
+```
+
+在macOS上，find_library() 尝试几个预定义的名称方案和路径以定位库，并返回一个完整的路径名如果成功的话：
+
+```python
+>>> from ctypes.util import find_library
+>>> find_library("c")
+'/usr/lib/libc.dylib'
+>>> find_library("m")
+'/usr/lib/libm.dylib'
+>>> find_library("bz2")
+'/usr/lib/libbz2.dylib'
+>>> find_library("AGL")
+'/System/Library/Frameworks/AGL.framework/AGL'
+>>>
+```
+
+在Windows上, find_library() 沿着系统搜索路径搜索，并返回完整的路径名，但因为没有预定义的名称方案一个像 `find_library("c")` 的调用将失败并返回 `None`。
+
+```python
+>>> from ctypes.util import find_library
+>>> find_library("c")
+>>> find_library("m")
+>>> find_library("bz2")
+>>> find_library("apphelp")
+'C:\\WINDOWS\\system32\\apphelp.dll'
+>>> find_library("aphostclient")
+'C:\\WINDOWS\\system32\\aphostclient.dll'
+>>> find_library("APHostClient")
+'C:\\WINDOWS\\system32\\APHostClient.dll'
+>>> find_library("xinstaller")
+'C:\\WINDOWS\\xinstaller.dll'
+>>>
+```
+
+If wrapping a shared library with [ctypes](https://docs.python.org/3/library/ctypes.html#module-ctypes), it *may* be better to determine the shared library name at development time, and hardcode that into the wrapper module instead of using find_library() to locate the library at runtime.
+
+##### 实用函数
+ctypes.util.**find_library**(*name*)  
+尝试查找一个库并返回一个路径名。*name* 是不带任何前缀像 `lib`，后缀像 `.so`，`.dylib` 或版本号的库名 (this is the form used for the posix linker option -l). 如果不能找到库则返回 `None`。
+
+准确的功能依赖于系统。
 
 ## 并发执行
 ### threading — 基于线程的并行
