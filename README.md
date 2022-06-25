@@ -939,6 +939,45 @@ str.**encode**(*encoding="utf-8", errors="strict"*)
 str.**endswith**(*suffix*[, *start*[, *end*]])  
 如果字符串以指定的 *suffix* 结尾返回 `True`，否则返回 `False`。*suffix* can also be a tuple of suffixes to look for. With optional *start*, test beginning at that position. With optional *end*, stop comparing at that position.
 
+str.**format(**_\*args, \*\*kwargs_**)**  
+执行字符串格式化操作。 调用此方法的字符串可以包含文字文本或由大括号 `{}` 界定的替换字段。每个替换字段包含一个位置参数的数字索引，或者一个关键字参数的名称。返回的字符串副本中每个替换字段都会被替换为对应参数的字符串值。
+
+```python
+>>> "The sum of 1 + 2 is {0}".format(1+2)
+'The sum of 1 + 2 is 3'
+```
+
+```python
+>>> 'translate {table} {keys} {values}'.format(table='biao', keys='jian', values='zhi')
+'translate biao jian zhi'
+```
+
+```python
+>>> data = {'id': '1001', 'name': 'Jack', 'age': 22}
+>>> data.keys()
+dict_keys(['id', 'name', 'age'])
+>>> data.values()
+dict_values(['1001', 'Jack', 22])
+>>> table = 'students'
+>>> keys = ', '.join(data.keys())
+>>> keys
+'id, name, age'
+>>> ['%s'] * 3           
+['%s', '%s', '%s']
+>>> values = ', '.join(['%s'] * len(data))  # str.join(iterable) 如果 iterable 中有任何非字符串值则抛出一个 TypeError
+>>> values
+'%s, %s, %s'
+>>> 'INSERT INTO {table} ({keys}) VALUES ({values})'.format(table=table, keys=keys, values=values)
+'INSERT INTO students (id, name, age) VALUES (%s, %s, %s)'
+>>>
+```
+
+请参阅 [格式化字符串语法](https://docs.python.org/3/library/string.html#formatstrings) 了解有关可以在格式化字符串中指定的各种格式化选项的说明。
+
+**注意：** 当使用 `n` 类型 (例如: `'{:n}'.format(1234)`) 来格式化数字 ([int](https://docs.python.org/3/library/functions.html#int), [float](https://docs.python.org/3/library/functions.html#float), [complex](https://docs.python.org/3/library/functions.html#complex), [decimal.Decimal](https://docs.python.org/3/library/decimal.html#decimal.Decimal) 及其子类) 的时候，该函数会临时性地将 `LC_CTYPE` 区域设置为 `LC_NUMERIC` 区域以解码 `localeconv()` 的 `decimal_point` 和 `thousands_sep` 字段，如果它们是非 ASCII 字符或长度超过 1 字节，并且 `LC_NUMERIC` 区域与 `LC_CTYPE` 区域不一致时。 这个临时更改会影响其他线程。
+
+*在 3.7 版更改:* 当使用 `n` 类型格式化数字时，该函数在某些情况下会临时性地将 `LC_CTYPE` 区域设置为 `LC_NUMERIC` 区域。
+
 str.**join**(*iterable*)  
 返回一个由 *iterable* 中的字符串串联而成的字符串。如果 *iterable* 中有任何非字符串值则抛出一个 [TypeError](https://docs.python.org/3.6/library/exceptions.html#TypeError)，包括 [bytes](https://docs.python.org/3.6/library/stdtypes.html#bytes) 对象。元素之间的分隔符是提供这个方法的字符串。
 
