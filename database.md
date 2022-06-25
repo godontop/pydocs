@@ -1957,6 +1957,12 @@ INSERT INTO table_name
 VALUES (value1, value2, value3, ...);
 ```
 
+一次性插入多行数据：  
+
+```sql
+MariaDB [spiders]> insert into students (id, name, age) values ('20120001', 'Bob', 25), ('20120002', 'Mary', 21), ('20120003', 'Mike', 20), ('20120004', 'James', 22);
+```
+
 ### 13.2.10 SELECT语法
 
 ```sql
