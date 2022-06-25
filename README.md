@@ -972,6 +972,16 @@ dict_values(['1001', 'Jack', 22])
 >>>
 ```
 
+```python
+>>> data = {'id': '1001', 'name': 'Jack', 'age': 22}
+>>> [key for key in data] 
+['id', 'name', 'age']
+>>> [" {key} = %s".format(key=key) for key in data] 
+[' id = %s', ' name = %s', ' age = %s']
+>>> ','.join([" {key} = %s".format(key=key) for key in data])
+' id = %s, name = %s, age = %s'
+```
+
 请参阅 [格式化字符串语法](https://docs.python.org/3/library/string.html#formatstrings) 了解有关可以在格式化字符串中指定的各种格式化选项的说明。
 
 **注意：** 当使用 `n` 类型 (例如: `'{:n}'.format(1234)`) 来格式化数字 ([int](https://docs.python.org/3/library/functions.html#int), [float](https://docs.python.org/3/library/functions.html#float), [complex](https://docs.python.org/3/library/functions.html#complex), [decimal.Decimal](https://docs.python.org/3/library/decimal.html#decimal.Decimal) 及其子类) 的时候，该函数会临时性地将 `LC_CTYPE` 区域设置为 `LC_NUMERIC` 区域以解码 `localeconv()` 的 `decimal_point` 和 `thousands_sep` 字段，如果它们是非 ASCII 字符或长度超过 1 字节，并且 `LC_NUMERIC` 区域与 `LC_CTYPE` 区域不一致时。 这个临时更改会影响其他线程。
