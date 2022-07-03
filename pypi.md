@@ -34,6 +34,7 @@
             * [DataFrame](#dataframe)
     * [pip](#pip)
     * [PyMongo](#pymongo)
+        * [collection – 集合级操作](#collection--集合级操作)
     * [PyMySQL](#pymysql)
     * [pyquery](#pyquery)
         * [使用伪类](#使用伪类)
@@ -3085,9 +3086,10 @@ Install to the Python user install directory for your platform. 通常是 `~/.lo
 -U, --upgrade  
 升级所有指定的包到最新的可用版本。依赖的处理依赖于使用的升级策略。
 
-### PyMongo
+## PyMongo
+pymongo – 用于 MongoDB 的 Python 驱动程序  
 GitHub：[https://github.com/mongodb/mongo-python-driver](https://github.com/mongodb/mongo-python-driver)  
-官方文档：[https://api.mongodb.com/python/current](https://api.mongodb.com/python/current/)  
+官方文档：[https://pymongo.readthedocs.io/en/stable/api/pymongo/index.html](https://pymongo.readthedocs.io/en/stable/api/pymongo/index.html)  
 
 安装PyMongo  
 
@@ -3095,14 +3097,63 @@ GitHub：[https://github.com/mongodb/mongo-python-driver](https://github.com/mon
 $ pip3 install pymongo
 ```
 
-使用 [find_one()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one) 获取一个单一的文档
+pymongo.**version**    
+PyMongo 的当前版本。  
 
-在MongoDB中可以被执行的最基本的查询类型是 [find_one()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one)。这个方法返回一个匹配查询的单一的文档 (或者 `None` 如果没有文档被匹配)。这很有用当你知道那里仅有一个匹配文档，或者仅对第一个匹配有兴趣。
+在MongoDB中可以被执行的最基本的查询类型是 [find_one()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one)。这个方法返回一个匹配查询的单一的文档 (或者 `None` 如果没有文档被匹配)。这很有用当你知道那里仅有一个匹配文档，或者仅对第一个匹配有兴趣。  
 
-**find_and_modify**(*query={}, update=None, upsert=False, sort=None, full_response=False, manipulate=False, \*\*kwargs*)  
-更新并返回一个对象。
+**子模块：**  
 
-**弃用** - 使用 [find_one_and_delete()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one_and_delete), [find_one_and_replace()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one_and_replace), 或者 [find_one_and_update()](http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find_one_and_update) 代替。
+* collection – 集合级操作  
+
+### collection – 集合级操作  
+Mongo 的集合级实用程序。  
+
+*class* pymongo.collection.**Collection(**_database, name, create=False, \*\*kwargs_**)**  
+获取/创建 一个 Mongo 集合。  
+
+*在版本 4.0 中发生变化：* 删除了 reindex, map_reduce, inline_map_reduce, parallel_scan, initialize_unordered_bulk_op, initialize_ordered_bulk_op, group, count, insert, save, update, remove, find_and_modify, 以及 ensure_index 方法。参阅 [PyMongo 4 迁移指南](https://pymongo.readthedocs.io/en/stable/migrate-to-pymongo4.html#pymongo4-migration-guide)。  
+
+**count_documents(**_filter: Mapping[str, Any], session: Optional[ClientSession] = None, comment: Optional[Any] = None, \*\*kwargs: Any_**)** → int  
+计算此集合中的文档数。  
+
+**注意：** 快速计算集合中的文档总数请参阅 [estimated_document_count()](https://pymongo.readthedocs.io/en/stable/api/pymongo/collection.html#pymongo.collection.Collection.estimated_document_count)。  
+
+事务中支持 [count_documents()](https://pymongo.readthedocs.io/en/stable/api/pymongo/collection.html#pymongo.collection.Collection.count_documents) 方法。  
+
+**参数：**  
+* _filter_ (必需的): 一个查询文档，用于选择要在集合中计数的文档。 可以是一个空文档来统计所有文档。  
+
+*在版本 3.7 中新增。*  
+
+查询 collection 集合中的文档总数。  
+
+```python
+collection.count_documents({})
+```
+
+**find_one(**_filter=None, \*args, \*\*kwargs_**)**  
+从数据库获取一个单一的文档。  
+
+**insert_many(**_documents: Iterable[Union[MutableMapping[str, Any], RawBSONDocument]], ordered: bool = True, bypass_document_validation: bool = False, session: Optional[ClientSession] = None, comment: Optional[Any] = None_**)** → pymongo.results.InsertManyResult  
+Insert an iterable of documents.  
+
+**insert_one(**_document: Union[MutableMapping[str, Any], RawBSONDocument], bypass_document_validation: bool = False, session: Optional[ClientSession] = None, comment: Optional[Any] = None_**)** → pymongo.results.InsertOneResult  
+插入一个单一的文档。  
+
+**update_one(**_filter: Mapping[str, Any], update: Union[Mapping[str, Any], Sequence[Mapping[str, Any]]], upsert: bool = False, bypass_document_validation: bool = False, collation: Optional[Union[Mapping[str, Any], Collation]] = None, array_filters: Optional[Sequence[Mapping[str, Any]]] = None, hint: Optional[Union[str, Sequence[Tuple[str, Union[int, str, Mapping[str, Any]]]]]] = None, session: Optional[ClientSession] = None, let: Optional[Mapping[str, Any]] = None, comment: Optional[Any] = None_**)** → pymongo.results.UpdateResult  
+更新一个与过滤器匹配的单个文档。  
+
+```python
+collection.update_one({'name': 'Mike'}, {'$set': student})
+```
+
+**参数：**  
+* *filter:* 与要更新的文档匹配的查询。  
+* *update:* 要应用的修改，*update* 参数必须是 $ 开头的操作符。  
+
+**返回值：**  
+一个 [UpdateResult](https://pymongo.readthedocs.io/en/stable/api/pymongo/results.html#pymongo.results.UpdateResult) 的实例。  
 
 ### PyMySQL
 GitHub：[https://github.com/PyMySQL/PyMySQL](https://github.com/PyMySQL/PyMySQL)  
