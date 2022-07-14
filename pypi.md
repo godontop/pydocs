@@ -42,6 +42,8 @@
     * [pyspider](#pyspider)
     * [redis-py](#redis-py)
     * [Requests](#requests)
+        * [快速上手](#快速上手)
+        * [API 参考](#api-参考)
     * [SciPy](#scipy)
     * [Scrapy](#scrapy)
     * [Scrapy-Redis](#scrapy-redis)
@@ -3470,11 +3472,10 @@ GitHub：[https://github.com/andymccurdy/redis-py](https://github.com/andymccurd
 $ pip3 install redis
 ```
 
-### Requests
-GitHub地址：[https://github.com/kennethreitz/requests](https://github.com/kennethreitz/requests)  
+## Requests
+GitHub地址：[https://github.com/psf/requests](https://github.com/psf/requests)  
 Pypi地址：[https://pypi.org/project/requests/](https://pypi.org/project/requests/)  
-官方文档：[https://2.python-requests.org/en/master/](https://2.python-requests.org/en/master/)  
-中文文档：[http://docs.python-requests.org/zh_CN/latest/](http://docs.python-requests.org/zh_CN/latest/)  
+官方文档：[https://requests.readthedocs.io/en/latest/](https://requests.readthedocs.io/en/latest/)  
 
 **安装requests**  
 
@@ -3482,8 +3483,8 @@ Pypi地址：[https://pypi.org/project/requests/](https://pypi.org/project/reque
 $ pip3 install requests
 ```
 
-#### 快速上手
-##### 定制请求头
+### 快速上手
+#### 定制请求头
 如果你想为请求添加 HTTP 头部，只要简单地传递一个 `dict` 给 `headers` 参数就可以了。
 
 ```python
@@ -3515,7 +3516,93 @@ proxies = {
 
 使用 `socks5` 方案会导致 DNS 解析发生在客户端，而不是在代理服务器上。这和 curl 是一致的，curl 使用协议方案来决定是在客户端还是在代理上做 DNS 解析。如果你想在代理服务器上做域名解析，使用 `socks5h` 作为协议方案。
 
-### SciPy 
+### API 参考
+### 开发者接口
+这部分文档涵盖了 Requests 的所有接口。 对于 Requests 依赖于外部库的部分，我们在此处记录最重要的部分并提供指向权威文档的链接。  
+
+#### 主要接口
+Requests 的所有功能都可以通过这 7 种方法访问。 它们都返回 **Response** 对象的一个实例。  
+
+requests.**get(**_url, params=None, \*\*kwargs_**)**  
+发送一个 GET 请求。  
+
+**参数：**  
+* **url** – 新请求对象的 URL。  
+* **params** – (可选的) Dictionary, list of tuples or bytes to send in the query string for the **Request**.  
+* **\*\*kwargs** – `request` 接受的可选参数。  
+
+**Returns：** **Response** 对象  
+**返回类型：** [requests.Response](https://requests.readthedocs.io/en/stable/api/#requests.Response)  
+
+#### 异常
+*exception* requests.**ConnectionError(**_\*args, \*\*kwargs_**)**  
+发生一个连接错误。  
+
+#### Lower-Level Classes
+*class* requests.**Response**  
+**Response** 对象，其中包含服务器对一个 HTTP 请求的响应。  
+
+**json(**_\*\*kwargs_**)**  
+返回响应的 json 编码的内容，如果有的话。  
+
+**参数：** **\*\*kwargs** – `json.loads` 接受的可选参数。  
+**Raises：** **requests.exceptions.JSONDecodeError** – 如果响应正文不包含有效的 json。  
+
+**status_code**  
+响应的 HTTP 状态的整数代码，例如 404 或 200。  
+
+*property* **text**  
+响应的内容，以 unicode 表示。  
+
+如果 Response.encoding 是 None, 将使用 `charset_normalizer` 或 `chardet` 猜测编码。  
+
+响应内容的编码仅根据 HTTP 头信息确定，严格遵循 RFC 2616。 如果您可以利用非 HTTP 的知识更好地猜测编码，则您应在访问此属性之前适当地设置 `r.encoding`。    
+
+requests.Response 实际上指向的是 requests.models.Response 。  
+
+```python
+>>> import requests
+>>> requests.Response == requests.models.Response
+True
+>>>
+```
+
+```sh
+➜  requests git:(master) tree -L 1
+.
+├── adapters.py
+├── api.py
+├── auth.py
+├── certs.py
+├── compat.py
+├── cookies.py
+├── exceptions.py
+├── help.py
+├── hooks.py
+├── __init__.py
+├── _internal_utils.py
+├── models.py
+├── packages.py
+├── __pycache__
+├── sessions.py
+├── status_codes.py
+├── structures.py
+├── utils.py
+└── __version__.py
+
+1 directory, 18 files
+➜  requests git:(master) cat __init__.py |grep Response
+from .models import Request, Response, PreparedRequest
+➜  requests git:(master) cat models.py |grep -A 2 'class Response'
+class Response(object):
+    """The :class:`Response <Response>` object, which contains a
+    server's response to an HTTP request.
+➜  requests git:(master) 
+```  
+
+<br>  
+
+## SciPy 
 官方网站：[https://scipy.org](https://scipy.org)  
 
 SciPy 是一个基于 Python 的用于数学，科学以及工程学的开源软件生态系统。特别地，这些是一些核心包：  
