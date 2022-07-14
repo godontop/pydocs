@@ -4259,6 +4259,37 @@ fragment   | 1     |分片标识符        |空串
 
 *在版本3.2中发生变化：* 结果是一个结构化的对象而不是一个简单的2-元组。
 
+#### URL 转码
+URL 转码函数专注于获取程序数据并通过转码特殊字符和适当地编码非 ASCII 文本使其安全地用作 URL 组件。它们还支持逆转此操作以便从作为 URL 组成部分的内容中重建原始数据，如果上述的 URL 解析函数还未覆盖此功能的话。
+
+urllib.parse.**urlencode(**_query, doseq=False, safe='', encoding=None, errors=None, quote_via=quote_plus_**)**  
+将一个包含有 [str](https://docs.python.org/3/library/stdtypes.html#str) 或 [bytes](https://docs.python.org/3/library/stdtypes.html#bytes) 对象的映射对象或二元组序列转换为以百分号编码的 ASCII 文本字符串。 如果所产生的字符串要被用作 [urlopen()](https://docs.python.org/3/library/urllib.request.html#urllib.request.urlopen) 函数的 POST 操作的 *data*，则它应当被编码为字节串，否则它将导致 [TypeError](https://docs.python.org/3/library/exceptions.html#TypeError)。
+
+结果字符串是一系列 `key=value` 对，由 `'&'` 字符进行分隔，其中 *key* 和 *value* 都已使用 *quote_via* 函数转码。 在默认情况下，会使用 [quote_plus()](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.quote_plus) 来转码值，这意味着空格会被转码为 `'+'` 字符而 '/' 字符会被转码为 `%2F`，即遵循 GET 请求的标准 (`application/x-www-form-urlencoded`)。 另一个可以作为 *quote_via* 传入的替代函数是 [quote()](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.quote)，它将把空格转码为 `%20` 并且不编码 '/' 字符。 为了最大程序地控制要转码的内容，请使用 `quote` 并指定 *safe* 的值。
+
+当使用二元组序列作为 *query* 参数时，每个元组的第一个元素为键而第二个元素为值。 值元素本身也可以为一个序列，在那种情况下，如果可选的参数 *doseq* 的值为 `True`，则为键的值序列的每个元素生成单独的 `key=value` 对，以 `'&'` 分隔。 被编码的字符串中的参数顺序将与序列中的参数元组的顺序相匹配。
+
+*safe*, *encoding* 和 *errors* 参数会被传递给 *quote_via* (*encoding* 和 *errors* 参数仅在查询元素为 [str](https://docs.python.org/3/library/stdtypes.html#str) 时才会被传递)。
+
+为了反向执行这个编码过程，此模块提供了 [parse_qs()](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.parse_qs) 和 [parse_qsl()](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.parse_qsl) 来将查询字符串解析为 Python 数据结构。
+
+请参考 [urllib 示例](https://docs.python.org/3/library/urllib.request.html#urllib-examples) 来了解如何使用 [urllib.parse.urlencode()](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlencode) 方法来生成 URL 的查询字符串或 POST 请求的数据。
+
+*在 3.2 版更改:* *query* 支持字节和字符串对象。
+
+*3.5 新版功能:* *quote_via* 参数。
+
+```python
+>>> from urllib.parse import urlencode
+>>> params = {'since_id': '4774091682746723'}
+>>> urlencode(params)
+'since_id=4774091682746723'
+>>> params = {'containerid': '1076032830678474', 'since_id': '4774091682746723'}
+>>> urlencode(params)
+'containerid=1076032830678474&since_id=4774091682746723'
+>>>
+```
+
 ### urllib.error — urllib.request抛出的异常类
 **Source code:** [Lib/urllib/error.py](https://github.com/python/cpython/tree/3.6/Lib/urllib/error.py)
 
