@@ -99,6 +99,7 @@
             * [OpenerDirector对象](#openerdirector对象)
         * [urllib.parse — 将URLs解析为组件](#urllibparse--将urls解析为组件)
             * [URL解析](#url解析)
+            * [URL 转码](#url-转码)
         * [urllib.error — urllib.request抛出的异常类](#urlliberror--urllibrequest抛出的异常类)
         * [urllib.robotparser — 解析robots.txt](#urllibrobotparser--解析robotstxt)
     * [Python运行时服务](#python运行时服务)
@@ -2716,6 +2717,15 @@ io.**open(**_file, mode='r', buffering=-1, encoding=None, errors=None, newline=N
 #### 类层次结构
 ![class hierarchy](/img/tpsl_16_2_3_class_hierarchy.png)
 
+下表总结了 [io](https://docs.python.org/3/library/io.html#module-io) 模块提供的抽象基类：  
+
+抽象基类  |继承      |Stub Methods      |Mixin Methods and Properties  
+---------|----------|------------------|----------------------------  
+[IOBase](https://docs.python.org/3/library/io.html#io.IOBase)  |   |`fileno`, `seek` 和 `truncate`  |`close`, `closed`, `__enter__`, `__exit__`, `flush`, `isatty`, `__iter__`, `__next__`, `readable`, `readline`, `readlines`, `seekable`, `tell`, `writable`, 和 `writelines`  
+[RawIOBase](https://docs.python.org/3/library/io.html#io.RawIOBase)  |[IOBase](https://docs.python.org/3/library/io.html#io.IOBase)  |`readinto` 和 `write`  |继承 [IOBase](https://docs.python.org/3/library/io.html#io.IOBase) 方法，`read`, 和 `readall`  
+[BufferedIOBase](https://docs.python.org/3/library/io.html#io.BufferedIOBase)  |[IOBase](https://docs.python.org/3/library/io.html#io.IOBase)  |`detach`, `read`, `read1`, 和 `write`  |继承 [IOBase](https://docs.python.org/3/library/io.html#io.IOBase) 方法，`readinto`, 和 `readinto1`  
+[TextIOBase](https://docs.python.org/3/library/io.html#io.TextIOBase)  |[IOBase](https://docs.python.org/3/library/io.html#io.IOBase)  |`detach`, `read`, `readline`, 和 `write`  |继承 [IOBase](https://docs.python.org/3/library/io.html#io.IOBase) 方法，`encoding`, `errors`, 和 `newlines`  
+
 ##### I/O 基类
 
 *class* io.**IOBase**  
@@ -2822,6 +2832,9 @@ Python官方文档里说 `io.BufferedRandom` 继承 `io.BufferedReader` 和 `io.
 
 **read**(*size*)  
 从流中读取并返回至多 *size* 个字符作为一个单一 [str](https://docs.python.org/3.6/library/stdtypes.html#str)。如果 *size* 是负数或者 `None`, reads until EOF.
+
+**write(**_s, /_**)**  
+将字符串 *s* 写入流并返回写入的字符数。  
 
 *class* io.**TextIOWrapper**(*buffer, encoding=None, errors=None, newline=None, line_buffering=False, write_through=False*)  
 A buffered text stream over a [BufferedIOBase](https://docs.python.org/3.6/library/io.html#io.BufferedIOBase) binary stream. 它继承 [TextIOBase](https://docs.python.org/3.6/library/io.html#io.TextIOBase)。
@@ -4152,12 +4165,12 @@ OpenerDirector.**add_handler**(*handler*)
 OpenerDirector.**open**(*url, data=None*\[*, timeout*\])  
 打开指定 *url* (可以是一个请求对象或者一个字符串), 可选择传递指定 *data*。Arguments, return values and exceptions raised are the same as those of [urlopen()](https://docs.python.org/3/library/urllib.request.html#urllib.request.urlopen) (which simply calls the [open()](https://docs.python.org/3/library/functions.html#open) method on the currently installed global [OpenerDirector](https://docs.python.org/3/library/urllib.request.html#urllib.request.OpenerDirector)). 可选参数 *timeout* 以秒为单位指定了一个超时时间用于阻断操作，如连接尝试 (如果没有指定，将使用全局的默认超时设置)。实际上超时特性只能用于 HTTP, HTTPS 和 FTP 连接)。
 
-#### urllib.parse — 将URLs解析为组件
+### urllib.parse — 将URLs解析为组件
 **源代码:** [Lib/urllib/parse.py](https://github.com/python/cpython/tree/3.7/Lib/urllib/parse.py)
 
 这个模块定义了一个标准接口将统一资源定位符 (URL) 字符串分解为多个组件 (寻址方案，网络定位，路径等。)，将多个组件合并还原成一个 URL 字符串，以及根据一个给定的“基类URL”将一个“相对URL”转换成一个绝对URL。
 
-##### URL解析
+#### URL解析
 URL解析函数聚焦于将一个URL字符串分成多个组件，或组合URL组件为一个URL字符串。
 
 urllib.parse.**urlparse**(*urlstring, scheme='', allow_fragments=True*)  
