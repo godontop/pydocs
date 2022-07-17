@@ -815,9 +815,10 @@ Operation  |Result          |Notes
 
 下表列出的序列操作按优先级升序排列。下表中，*s* 和 *t* 是相同类型的序列，*n*, *i*, *j* 和 *k* 是整型数，*x* 是符合由 *s* 所限制的类型及值的一个任意对象。
 
-Operation  |Result                      |Notes
------------|----------------------------|------
-`s[i:j]`   |从 *i* 到 *j* 的 *s* 的分片  |(3)(4)
+Operation   |Result                      |Notes
+------------|----------------------------|------
+`s[i:j]`    |从 *i* 到 *j* 的 *s* 的分片  |(3)(4)  
+`s[i:j:k]`  |*s* 从 *i* 到 *j* 且步长为 *k* 的切片  |(3)(5)  
 
 **注意：**
 
@@ -825,7 +826,15 @@ Operation  |Result                      |Notes
 
 2. 
 
-3. 
+3. 如果 *i* 或 *j* 为负值，则索引是相对于序列 *s* 的末端: 索引号会被替换为 `len(s) + i` 或 `len(s) + j`。 但要注意 `-0` 仍然为 `0`。
+
+```python
+>>> s = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+>>> s[2:-2] 
+['c', 'd', 'e']
+>>> s[2:len(s) + (-2)]
+['c', 'd', 'e']
+```
 
 4. 从 *i* 到 *j* 的 *s* 的分片的定义就像序列的元素的索引为 *k* 且 `i <= k < j`。如果 *i* 或 *j* 大于 `len(s)`，使用 `len(s)`。如果 *i* 被忽略或者为 `None`，则使用 `0`。如果 *j* 被忽略或者为 `None`，使用 `len(s)`。如果 `i` 大于或等于 `j`，则分片为空。
 
@@ -843,6 +852,24 @@ Operation  |Result                      |Notes
 ['d', 'e', 'f', 'g']
 >>>
 ```
+
+5. *s* 从 *i* 到 *j* 步长为 *k* 的切片被定义为索引为 `x = i + n*k` 的项组成的序列，其中 `0 <= n < (j-i)/k` 的。 换句话说，索引号为 `i`, `i+k`, `i+2*k`, `i+3*k`，以此类推，当达到 *j* 时停止 (但永远不包括 *j*)。 当 *k* 为正值时，*i* 和 *j* 会被减至 `len(s)` 如果它们比 `len(s)` 大的话。 当 *k* 为负值时，*i* 和 *j* 会被减至 `len(s) - 1` 如果它们比 `len(s)` 更大的话。 如果 *i* 或 *j* 被省略或为 `None`，它们会成为“终止”值 (是哪一端的终止值则取决于 *k* 的符号)。 请注意，*k* 不可为零。 如果 *k* 为 `None`，则当作 `1` 处理。
+
+```python
+>>> s = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+>>> s[4:9:1]
+['e', 'f', 'g']
+>>> s[4:len(s):1] 
+['e', 'f', 'g']
+>>> s[10:4:-1]
+['g', 'f']
+>>> s[len(s) - 1:4:-1]
+['g', 'f']
+>>>
+```
+
+如果 *k* 为正，则 *i* 必须小于 *j* ，否则切片为空。  
+如果 *k* 为负，则 *i* 必须大于 *j* ，否则切片为空。  
 
 #### 可变序列类型
 可变序列定义了下表中的操作。Python 提供的抽象基类 [collections.abc.MutableSequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableSequence) 使自定义序列类型正确地实现这些操作变得更容易。
@@ -908,6 +935,39 @@ range 构造函数的参数必须是整型数(要么是内置 [int](https://docs
 对于负数 *step*, range的内容仍然由公式 `r[i] = start + step*i` 决定，但约束条件是 `i >= 0` 和 `r[i] > stop`。
 
 如果 `r[0]` 不满足值的约束条件则range对象将为空。Ranges do support negative indices, but these are interpreted as indexing from the end of the sequence determined by the positive indices.  
+
+Range 示例：  
+
+```python
+>>> list(range(0, -10, -1))
+[0, -1, -2, -3, -4, -5, -6, -7, -8, -9]
+>>> list(range(0))
+[]
+>>> list(range(1, 0))
+[]
+>>>
+```
+
+**start**  
+*start* 参数的值 (或者 `0` 如果该参数未提供的话)
+
+**stop**  
+*stop* 参数的值
+
+**step**  
+*step* 参数的值 (或者 `1` 如果该参数未提供的话)
+
+```python
+>>> r = range(3, 3)
+>>> len(r)
+0
+>>> r = range(3, -1)
+>>> len(r)
+0
+>>> 
+```
+
+如果 *step* 参数的值为正或者省略，则 *start* 的值应小于 *stop* 的值，否则 range 对象为空。  
 
 ### 文本序列类型 — str
 在Python中，文本数据是通过 [str](https://docs.python.org/3.6/library/stdtypes.html#str) 对象或 *strings* 来处理的。字符串是不可变的Unicode代码点[序列](https://docs.python.org/3.6/library/stdtypes.html#typesseq)。字符串的写法有多种方式：
