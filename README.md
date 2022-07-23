@@ -102,6 +102,11 @@
             * [URL 转码](#url-转码)
         * [urllib.error — urllib.request抛出的异常类](#urlliberror--urllibrequest抛出的异常类)
         * [urllib.robotparser — 解析robots.txt](#urllibrobotparser--解析robotstxt)
+        * [http.client — HTTP协议客户端](#httpclient--http协议客户端)
+            * [HTTPResponse对象](#httpresponse对象)
+        * [socketserver — 一个网络服务器框架](#socketserver--一个网络服务器框架)
+            * [服务器对象](#服务器对象)
+        * [http.server — HTTP 服务器](#httpserver--http-服务器)
     * [Python运行时服务](#python运行时服务)
         * [sys — 系统专用参量和函数](#sys--系统专用参量和函数)
         * [\_\_main\_\_ --- 顶层代码环境](#__main__-----顶层代码环境)
@@ -4133,6 +4138,8 @@ for chunk in json.JSONEncoder().iterencode(bigobject):
 ```
 
 ## 互联网协议与支持
+这章描述的模块实现了互联网协议和相关技术的支持。它们在Python中全被实现了。大多数这些模块都要求系统相关的模块 [socket](https://docs.python.org/3/library/socket.html#module-socket) 存在，目前大多数流行的平台都支持 [socket](https://docs.python.org/3/library/socket.html#module-socket)。下面是一个概述：
+
 #### urllib.request — 打开URLs的可扩展库
 **源代码：** [Lib/urllib/request.py](https://github.com/python/cpython/tree/3.7/Lib/urllib/request.py)
 
@@ -4406,6 +4413,184 @@ This class provides methods to read, parse and answer questions about the `robot
 
 **can_fetch**(*useragent, url*)  
 根据解析的 `robots.txt` 文件中的规则，如果 *useragent* 允许获取 *url* ，则返回 `True`，否则返回 `False`。
+
+### http.client — HTTP协议客户端
+**源代码：** [Lib/http/client.py](https://github.com/python/cpython/tree/3.6/Lib/http/client.py)
+
+这个模块定义实现HTTP和HTTPS协议客户端的类。它通常不被直接使用 — 模块 [urllib.request](https://docs.python.org/3.6/library/urllib.request.html#module-urllib.request) 使用它处理HTTP和HTTPS URLs。
+
+**另请参阅：** 更高层次的HTTP客户端接口推荐 [Requests package](http://docs.python-requests.org/)。
+
+**注意：** 如果Python编译了SSL支持 (通过 [ssl](https://docs.python.org/3.6/library/ssl.html#module-ssl) 模块)，HTTPS支持才可用。
+
+这个模块提供了下面的类：
+
+*class* http.client.**HTTPConnection(**_host, port=None_, **[**_timeout_, **]**_source_address=None, blocksize=8192_**)**  
+一个 [HTTPConnection](https://docs.python.org/3/library/http.client.html#http.client.HTTPConnection) 实例代表与 HTTP 服务器的一个连接事务。 它的实例化应当传入一个主机和可选的端口号。 如果没有传入端口号，如果主机字符串的形式为 `主机:端口` 则会从中提取端口，否则将使用默认的 HTTP 端口（80）。 如果给出了可选的 *timeout* 参数，则阻塞操作（例如连接尝试）将在指定的秒数之后超时（如果未给出，则使用全局默认超时设置）。 可选的 *source_address* 参数可以为一个 (主机, 端口) 元组，用作进行 HTTP 连接的源地址。 可选的 *blocksize* 参数以字节为单位设置缓冲区的大小，用来发送文件类消息体。
+
+举个例子，以下调用都是创建连接到同一主机和端口的服务器的实例：
+
+```python
+>>> h1 = http.client.HTTPConnection('www.python.org')
+>>> h2 = http.client.HTTPConnection('www.python.org:80')
+>>> h3 = http.client.HTTPConnection('www.python.org', 80)
+>>> h4 = http.client.HTTPConnection('www.python.org', 80, timeout=10)
+```
+
+*在 3.2 版更改:* 添加了 *source_address* 参数。
+
+*在 3.4 版更改:* 删除了 *strict* 参数，不再支持 HTTP 0.9 风格的“简单响应”。
+
+*在 3.7 版更改:* 添加了 *blocksize* 参数。
+
+*class* http.client.**HTTPResponse**(*sock, debuglevel=0, method=None, url=None*)  
+Class whose instances are returned upon successful connection. Not instantiated directly by user.
+
+*在版本3.4中发生变化：* *strict* 参量被移除了。HTTP 0.9 风格 “Simple Responses” 不再支持。
+
+#### HTTPConnection 对象
+[HTTPConnection](https://docs.python.org/3/library/http.client.html#http.client.HTTPConnection) 实例拥有下列方法：
+
+HTTPConnection.**request(**_method, url, body=None, headers={}, \*, encode_chunked=False_**)**  
+这会使用 HTTP 请求方法 *method* 和选择器 *url* 向服务器发送请求。
+
+如果给定 *body*，那么给定的数据会在信息头完成之后发送。它可能是一个 [字符串](https://docs.python.org/3/library/stdtypes.html#str)，一个 [bytes-like object](https://docs.python.org/3/glossary.html#term-bytes-like-object)，一个打开的 [文件对象](https://docs.python.org/3/glossary.html#term-file-object)，或者一个可迭代的 [bytes](https://docs.python.org/3/library/stdtypes.html#bytes)。如果 *body* 是字符串，它会按 HTTP 默认的 ISO-8859-1 编码。如果是一个字节类对象，它会按原样发送。如果是 [文件对象](https://docs.python.org/3/glossary.html#term-file-object)，文件的内容会被发送，这个文件对象应该至少支持`read()` 方法。如果这个文件对象是一个 [io.TextIOBase](https://docs.python.org/3/library/io.html#io.TextIOBase) 实例，由 `read()` 方法返回的数据会按 ISO-8859-1 编码，否则由 `read()` 方法返回的数据会按原样发送。如果 *body* 是一个迭代器，迭代器中的元素会被发送，直到迭代器耗尽。
+
+*headers* 参数应该是额外的随请求一起发送的 HTTP 信息头的字典。
+
+如果 *headers* 既不包含 Content-Length 也没有 Transfer-Encoding，但存在请求正文，那么这些头字段中的一个会被自动设定。如果 *body* 是 `None`，那么对于要求 body 的方法 (`PUT`，`POST`，和 `PATCH`)，Content-Length 头会被设为 `0`。如果 *body* 是字符串或者类似字节的对象，并且也不是[文件](https://docs.python.org/3/glossary.html#term-file-object)，Content-Length 头会设为正文的长度。任何其他类型的 *body* （一般是文件或迭代器）会按块编码，这时会自动设定 Transfer-Encoding 头以代替 Content-Length。
+
+在 *headers* 中指定 Transfer-Encoding 时， *encode_chunked* 是唯一相关的参数。如果 *encode_chunked* 为 `False`，HTTPConnection 对象会假定所有的编码都由调用代码处理。如果为 `True`，正文会按块编码。
+
+**注解:** HTTP 协议在 1.1 版中添加了块传输编码。除非明确知道 HTTP 服务器可以处理 HTTP 1.1，调用者要么必须指定 Content-Length，要么必须传入一个 [str](https://docs.python.org/3/library/stdtypes.html#str) 或字节类对象，注意该对象不能是表示 body 的文件。
+
+*3.2 新版功能:* *body* 现在可以是可迭代对象了。
+
+*在 3.6 版更改:* 如果 Content-Length 和 Transfer-Encoding 都没有在 *headers* 中设置，文件和可迭代的 *body* 对象现在会按块编码。添加了 *encode_chunked* 参数。不会尝试去确定文件对象的 Content-Length。
+
+HTTPConnection.**putheader(**_header, argument_**[**, ...**])**  
+向服务器发送一个 RFC 822 格式的头部。它向服务器发送一行由头、一个冒号和一个空格以及第一个参数组成的数据。 如果还给出了其他参数，将在后续行中发送，每行由一个制表符和一个参数组成。
+
+示例：
+
+```python
+HTTPConnection.putheader('Accept', 'text/html')
+```
+
+**源代码细节**  
+header 会采用 ASCII 编码，argument 如果为字符串，则采用 latin-1（即 ISO-8859-1）编码，如果 argument 为 int 的实例，则先将其转换为字符串，再采用 ASCII 编码。  
+
+根据源代码中的细节可知，headers 字典中无论是键还是值都不能包含中文，否则会出现 UnicodeEncodeError。类似于：`UnicodeEncodeError: 'latin-1' codec can't encode characters in position 59-60: ordinal not in range(256)`  
+
+#### HTTPResponse对象
+An [HTTPResponse](https://docs.python.org/3.6/library/http.client.html#http.client.HTTPResponse) instance wraps the HTTP response from the server. It provides access to the request headers and the entity body. The response is an iterable object and can be used in a with statement.
+
+*在版本3.5中发生变化：* 现在实现了 [io.BufferedIOBase](https://docs.python.org/3.6/library/io.html#io.BufferedIOBase) 接口，它的所有的读操作都支持。
+
+HTTPResponse.**read**([*amt*])  
+读取并返回响应正文，或者直到下一个 *amt* 字节。
+
+HTTPResponse.**version**  
+服务器使用的HTTP协议版本。HTTP/1.0 为 10，HTTP/1.1 为 11。
+
+HTTPResponse.**status**  
+服务器返回的状态代码。
+
+实例属性：
+
+**code**  
+返回类型为int，返回HTTP Response状态代码
+
+```python
+>>> import http.client
+>>> import urllib.error
+>>> from urllib.request import urlopen
+>>> dir(http.client.HTTPResponse)
+['__abstractmethods__', '__class__', '__del__', '__delattr__', '__dict__', '__dir__', '__doc__', '__enter__', '__eq__', '__exit__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__next__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '_abc_cache', '_abc_negative_cache', '_abc_negative_cache_version', '_abc_registry', '_checkClosed', '_checkReadable', '_checkSeekable', '_checkWritable', '_check_close', '_close_conn', '_get_chunk_left', '_peek_chunked', '_read1_chunked', '_read_and_discard_trailer', '_read_next_chunk_size', '_read_status', '_readall_chunked', '_readinto_chunked', '_safe_read', '_safe_readinto', 'begin', 'close', 'closed', 'detach', 'fileno', 'flush', 'getcode', 'getheader', 'getheaders', 'geturl', 'info', 'isatty', 'isclosed', 'peek', 'read', 'read1', 'readable', 'readinto', 'readinto1', 'readline', 'readlines', 'seek', 'seekable', 'tell', 'truncate', 'writable', 'write', 'writelines']
+>>> hasattr(http.client.HTTPResponse, 'code')
+False
+>>> type(urlopen('http://example.webscraping.com'))
+<class 'http.client.HTTPResponse'>
+>>> isinstance(urlopen('http://example.webscraping.com'), http.client.HTTPResponse)
+True
+>>> hasattr(urlopen('http://example.webscraping.com'), 'code')
+True
+>>> dir(urlopen('http://example.webscraping.com'))
+['__abstractmethods__', '__class__', '__del__', '__delattr__', '__dict__', '__dir__', '__doc__', '__enter__', '__eq__', '__exit__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__next__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '_abc_cache', '_abc_negative_cache', '_abc_negative_cache_version', '_abc_registry', '_checkClosed', '_checkReadable', '_checkSeekable', '_checkWritable', '_check_close', '_close_conn', '_get_chunk_left', '_method', '_peek_chunked', '_read1_chunked', '_read_and_discard_trailer', '_read_next_chunk_size', '_read_status', '_readall_chunked', '_readinto_chunked', '_safe_read', '_safe_readinto', 'begin', 'chunk_left', 'chunked', 'close', 'closed', 'code', 'debuglevel', 'detach', 'fileno', 'flush', 'fp', 'getcode', 'getheader', 'getheaders', 'geturl', 'headers', 'info', 'isatty', 'isclosed', 'length', 'msg', 'peek', 'read', 'read1', 'readable', 'readinto', 'readinto1', 'readline', 'readlines', 'reason', 'seek', 'seekable', 'status', 'tell', 'truncate', 'url', 'version', 'will_close', 'writable', 'write', 'writelines']
+>>> type(urlopen('http://example.webscraping.com').code)
+<class 'int'>
+>>> urlopen('http://example.webscraping.com').code
+200
+>>> try:
+...     print(urlopen('https://python.org/java').code)
+... except urllib.error.HTTPError as e:
+...     print(e.code)
+...
+404
+>>>
+```
+
+### socketserver — 一个网络服务器框架
+**Source code:** [Lib/socketserver.py](https://github.com/python/cpython/tree/3.6/Lib/socketserver.py)
+
+[socketserver](https://docs.python.org/3.6/library/socketserver.html#module-socketserver) 模块简化了写网络服务器的任务。
+
+有四个基本的具体的服务器类：
+
+*class* socketserver.**TCPServer**(*server_address, RequestHandlerClass, bind_and_activate=True*)  
+这个类使用在客户端与服务器之间提供连续的数据流的互联网TCP协议，如果 *bind_and_activate* 是 true, 则构造函数自动地尝试调用 [server_bind()](https://docs.python.org/3.6/library/socketserver.html#socketserver.BaseServer.server_bind) 和 [server_activate()](https://docs.python.org/3.6/library/socketserver.html#socketserver.BaseServer.server_activate)。其它参数（parameters）被传递给基类 [BaseServer](https://docs.python.org/3.6/library/socketserver.html#socketserver.BaseServer)。
+
+#### 服务器对象
+*class* socketserver.**BaseServer**(*server_address, RequestHandlerClass*)  
+这是模块（socketserver）中所有服务器对象的超类。它定义了接口，如下，但大多数方法都没有实现，方法在子类中实现。两个参数（parameters）被分别存储在 [server_address](https://docs.python.org/3.6/library/socketserver.html#socketserver.BaseServer.server_address) 和 [RequestHandlerClass](https://docs.python.org/3.6/library/socketserver.html#socketserver.BaseServer.RequestHandlerClass) 属性中。
+
+**serve_forever**(*poll_interval=0.5*)  
+处理请求直到一个明确的 [shutdown()](https://docs.python.org/3.6/library/socketserver.html#socketserver.BaseServer.shutdown) 请求。每 *poll_interval* 秒投票关闭。忽略 [timeout](https://docs.python.org/3.6/library/socketserver.html#socketserver.BaseServer.timeout) 属性。它也调用 [service_actions()](https://docs.python.org/3.6/library/socketserver.html#socketserver.BaseServer.service_actions)，`service_actions()` 可能被子类或混入类用来给一个给定的服务提供具体的动作。例如，[ForkingMixIn](https://docs.python.org/3.6/library/socketserver.html#socketserver.ForkingMixIn) 类使用 [service_actions()](https://docs.python.org/3.6/library/socketserver.html#socketserver.BaseServer.service_actions) 清理僵尸子进程。
+
+*在3.3版本中发生变化：* 为 `serve_forever` 方法增加 `service_actions` 调用。
+
+**service_actions()**  
+这在 [serve_forever()](https://docs.python.org/3.6/library/socketserver.html#socketserver.BaseServer.serve_forever) 循环中被调用。这个方法可以被子类或混入类重写以便给一个给定的服务执行特定的动作，例如清理动作。
+
+*版本3.3中新增。*
+
+**shutdown()**  
+Tell the [serve_forever()](https://docs.python.org/3.6/library/socketserver.html#socketserver.BaseServer.serve_forever) loop to stop and wait until it does.
+
+**RequestHandlerClass**  
+用户提供的请求处理程序类；每次请求都会创建一个该类的实例。
+
+**server_address**  
+服务器监听的地址。地址格式的变化依赖于协议族；详细信息请看 [socket](https://docs.python.org/3.6/library/socket.html#module-socket) 模块的文档。对于 Internet protocols (IP), 这是一个包含一个给定地址的字符串和一个整型数端口号的元组：`('127.0.0.1', 80)`, 例如。
+
+### http.server — HTTP 服务器
+**源代码:** [Lib/http/server.py](https://github.com/python/cpython/tree/3.6/Lib/http/server.py)
+
+这个模块定义实现HTTP服务器（Web服务器）的类。
+
+*class* http.server.**SimpleHTTPRequestHandler**(*request, client_address, server*)  
+这个类为当前目录及其子目录下的文件服务，直接映射目录结构到HTTP请求。
+
+很多工作，例如解析请求，由基类 [BaseHTTPRequestHandler](https://docs.python.org/3.6/library/http.server.html#http.server.BaseHTTPRequestHandler) 完成。这个类实现了 [do_GET()](https://docs.python.org/3.6/library/http.server.html#http.server.SimpleHTTPRequestHandler.do_GET) 和 [do_HEAD()](https://docs.python.org/3.6/library/http.server.html#http.server.SimpleHTTPRequestHandler.do_HEAD) 方法。
+
+下面是定义为 [SimpleHTTPRequestHandler](https://docs.python.org/3.6/library/http.server.html#http.server.SimpleHTTPRequestHandler) 类级别的属性：
+
+**extensions_map**  
+一个映射后缀到MIME类型的字典。默认值由空串表明，且被认为是 `application/octet-stream`。映射不区分大小写，所以应该仅包含小写键。
+
+```python
+from http.server import SimpleHTTPRequestHandler
+
+
+SimpleHTTPRequestHandler.extensions_map = {
+    '.html': 'text/html',
+    '.sh': 'test/x-sh',
+    '.js': 'application/javascript',
+    '.pac': 'application/x-ns-proxy-autoconfig',
+    '': 'application/octet/stream',
+}
+
+```
 
 ## Python运行时服务
 ### sys — 系统专用参量和函数
