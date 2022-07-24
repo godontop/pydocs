@@ -3233,6 +3233,22 @@ True
 *class* pyquery.pyquery.**PyQuery(**_\*args, \*\*kwargs_)  
 主类  
 
+获取属性  
+
+```python
+>>> html = '''<a href="https://www.baidu.com">百度</a>'''
+>>> doc = pq(html)
+>>> type(doc)   
+<class 'pyquery.pyquery.PyQuery'>
+>>> doc.attr('href')
+'https://www.baidu.com'
+>>> doc.attr['href'] 
+'https://www.baidu.com'
+>>> doc.attr.href
+'https://www.baidu.com'
+>>>
+```
+
 **items(**_selector=None_**)**  
 遍历元素。返回由 PyQuery 对象构成的生成器：  
 
