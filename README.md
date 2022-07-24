@@ -103,6 +103,7 @@
         * [urllib.error — urllib.request抛出的异常类](#urlliberror--urllibrequest抛出的异常类)
         * [urllib.robotparser — 解析robots.txt](#urllibrobotparser--解析robotstxt)
         * [http.client — HTTP协议客户端](#httpclient--http协议客户端)
+            * [HTTPConnection 对象](#httpconnection-对象)
             * [HTTPResponse对象](#httpresponse对象)
         * [socketserver — 一个网络服务器框架](#socketserver--一个网络服务器框架)
             * [服务器对象](#服务器对象)
@@ -1308,16 +1309,21 @@ bytearray.**decode**(*encoding="utf-8", errors="strict”*)
 >>> dishes = {'eggs': 2, 'sausage': 1, 'bacon': 1, 'spam': 500}
 >>> keys = dishes.keys()
 >>> values = dishes.values()
+>>> items = dishes.items()
 
 >>> keys
 dict_keys(['eggs', 'sausage', 'bacon', 'spam'])
 >>> values
 dict_values([2, 1, 1, 500])
+>>> items
+dict_items([('eggs', 2), ('sausage', 1), ('bacon', 1), ('spam', 500)])
 
 >>> type(keys)
 <class 'dict_keys'>
 >>> type(values)
 <class 'dict_values'>
+>>> type(items) 
+<class 'dict_items'>
 
 >>> # iteration
 ...
@@ -1334,6 +1340,8 @@ dict_values([2, 1, 1, 500])
 ['eggs', 'sausage', 'bacon', 'spam']
 >>> list(values)
 [2, 1, 1, 500]
+>>> list(items)
+[('eggs', 2), ('sausage', 1), ('bacon', 1), ('spam', 500)]
 
 >>> # view objects are dynamic and reflect dict changes
 ...
