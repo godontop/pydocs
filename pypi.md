@@ -43,6 +43,7 @@
     * [redis-py](#redis-py)
     * [Requests](#requests)
         * [快速上手](#快速上手)
+        * [高级用法](#高级用法)
         * [API 参考](#api-参考)
     * [SciPy](#scipy)
     * [Scrapy](#scrapy)
@@ -3510,7 +3511,46 @@ $ pip3 install requests
 >>>
 ```
 
-#### SOCKS
+#### 重定向与历史
+默认情况下，Requests 将对除 HEAD 之外的所有动作执行位置重定向。
+
+我们可以使用 Response 对象的 `history` 属性来跟踪重定向。
+
+**Response.history** 列表包含为完成请求而创建的 **Response** 对象。 该列表按从最早到最近的响应排序。
+
+例如，GitHub 将所有 HTTP 请求重定向到 HTTPS：
+
+```python
+>>> r = requests.get('http://github.com/')
+>>> r.url
+'https://github.com/'
+>>> r.status_code
+200
+>>> r.history
+[<Response [301]>]
+>>> r.history[0].url
+'http://github.com/'
+>>> r.history[0].headers['Location']
+'https://github.com/'
+>>> 
+```
+
+如果您使用 GET、OPTIONS、POST、PUT、PATCH 或 DELETE，您可以使用 `allow_redirects` 参数禁用重定向处理：
+
+```python
+>>> r = requests.get('http://github.com/', allow_redirects=False)
+>>> r.status_code
+301
+>>> r.history
+[]
+>>> r.url
+'http://github.com/'
+>>> 
+```
+
+### 高级用法
+#### 代理
+##### SOCKS
 版本 2.10.0 中新增。
 
 除了基本的 HTTP 代理，Requests 也支持使用 SOCKS 协议的代理。这是一个可选的特性，在使用以前它要求已安装额外的第三方库。
@@ -3558,6 +3598,41 @@ requests.**get(**_url, params=None, \*\*kwargs_**)**
 *class* requests.**Response**  
 **Response** 对象，其中包含服务器对一个 HTTP 请求的响应。  
 
+*property* **content**  
+响应的内容，以字节为单位。  
+适用于下载二进制文件，如图片等。  
+
+**headers**  
+不区分大小写的响应头字典。 例如，`headers['content-encoding']` 将返回 `'Content-Encoding'` 响应头的值。  
+
+**history**  
+来自请求历史的**响应**对象列表。 任何重定向响应都将在这里结束。 该列表按从最早到最近的请求排序。  
+
+```python
+>>> headers = {                                                                                                                            
+...            'cookie': '_S_DPR=1; _S_IPAD=0; MONITOR_WEB_ID=7115666978783053319; tt_webid=7115666978783053319; _S_WIN_WH=1030_610; ttwid=1%7CU2NhjByOr-FVpLkJZJzTqU0Dras7Mzm7WEVeZqPnc-s%7C1658052873%7C876ce7aaf73ab38bc2e1139e7f6fc87669f5f686dfcea4e4177a88a88b286265',
+...            'referer': 'https://so.toutiao.com/search?dvpf=pc&source=input&keyword=%E8%A1%97%E6%8B%8D&page_num=0&pd=synthesis',
+...            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.136 Safari/537.36',}
+>>> r = requests.get("https://so.toutiao.com/search/jump?url=http%3A%2F%2Fwww.toutiao.com%2Fa6979943668211974670%2F%3Fchannel%3D%26source%3Dsearch_tab&aid=undefined&jtoken=e5cb68446a79ba5d6b844e3a2da048e75aa9087eab6f16081202cdc7da59130f5243a8404145a59e05411cf028cb417134c55ec200e5a2581d14943c74341e1e", headers=headers)
+>>> r.url       
+'https://www.toutiao.com/article/6979943668211974670/?channel=&source=search_tab'
+>>> r.history
+[<Response [302]>, <Response [301]>, <Response [301]>]
+>>> r.history[0].url
+'https://so.toutiao.com/search/jump?url=http%3A%2F%2Fwww.toutiao.com%2Fa6979943668211974670%2F%3Fchannel%3D%26source%3Dsearch_tab&aid=undefined&jtoken=e5cb68446a79ba5d6b844e3a2da048e75aa9087eab6f16081202cdc7da59130f5243a8404145a59e05411cf028cb417134c55ec200e5a2581d14943c74341e1e'
+>>> r.history[0].headers['Location']
+'http://www.toutiao.com/a6979943668211974670/?channel=&source=search_tab'
+>>> r.history[1].url
+'http://www.toutiao.com/a6979943668211974670/?channel=&source=search_tab'
+>>> r.history[1].headers['Location']
+'https://www.toutiao.com/a6979943668211974670/?channel=&source=search_tab'
+>>> r.history[2].url
+'https://www.toutiao.com/a6979943668211974670/?channel=&source=search_tab'
+>>> r.history[2].headers['Location']
+'https://www.toutiao.com/article/6979943668211974670/?channel=&source=search_tab'
+>>>
+```
+
 **json(**_\*\*kwargs_**)**  
 返回响应的 json 编码的内容，如果有的话。  
 
@@ -3573,6 +3648,15 @@ requests.**get(**_url, params=None, \*\*kwargs_**)**
 如果 Response.encoding 是 None, 将使用 `charset_normalizer` 或 `chardet` 猜测编码。  
 
 响应内容的编码仅根据 HTTP 头信息确定，严格遵循 RFC 2616。 如果您可以利用非 HTTP 的知识更好地猜测编码，则您应在访问此属性之前适当地设置 `r.encoding`。    
+
+**url**  
+Final URL location of Response.
+
+```python
+>>> r.url == r.history[len(r.history) - 1].headers['Location']
+True
+>>>
+```
 
 requests.Response 实际上指向的是 requests.models.Response 。  
 
