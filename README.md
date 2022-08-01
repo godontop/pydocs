@@ -2457,6 +2457,17 @@ temp.py
 /root/temp.py
 ```
 
+os.path.**basename(**_path_**)**  
+返回路径名 *path* 的基本名称。这是将 *path* 传入函数 [split()](https://docs.python.org/3/library/os.path.html#os.path.split) 之后，返回的一对值中的第二个元素。请注意，此函数的结果与 Unix **basename** 程序不同。**basename** 在 `'/foo/bar/'` 上返回 `'bar'`，而 [basename()](https://docs.python.org/3/library/os.path.html#os.path.basename) 函数返回一个空字符串 `('')`。
+
+*在 3.6 版更改:* 接受一个 [path-like 对象](https://docs.python.org/3/glossary.html#term-path-like-object)。
+
+```python
+>>> os.path.basename('/origin/tos/fbi')
+'fbi'
+>>>  
+```
+
 os.path.**dirname**(*path*)  
 返回路径名 *path* 的目录名。
 
@@ -2700,6 +2711,23 @@ os.**listdir**(*path='.'*)
 *3.3 新版功能:* Added support for specifying an open file descriptor for *path*.
 
 *在 3.6 版更改:* 接受一个 [类路径对象](https://docs.python.org/zh-cn/3/glossary.html#term-path-like-object)。
+
+os.**mkdir(**_path, mode=0o777, \*, dir_fd=None_**)**  
+创建一个名为 *path* 的目录，并应用数字模式 *mode*。
+
+如果目录已经存在， [FileExistsError](https://docs.python.org/3/library/exceptions.html#FileExistsError) 会被引发。如果路径中的父目录不存在，则会引发 [FileNotFoundError](https://docs.python.org/3/library/exceptions.html#FileNotFoundError) 。
+
+某些系统会忽略 *mode*。在使用它的地方，当前的 umask 值首先被屏蔽掉。 如果设置了最后 9 位以外的位（即 *mode* 的八进制表示的最后 3 位数），则它们的含义取决于平台。在某些平台上，它们会被忽略，您应该显式调用 [chmod()](https://docs.python.org/3/library/os.html#os.chmod) 来设置它们。
+
+本函数也支持 [目录描述符的相对路径](https://docs.python.org/3/library/os.html#dir-fd)。
+
+创建临时目录也是可能的，请参阅 [tempfile](https://docs.python.org/3/library/tempfile.html#module-tempfile) 模块的 [tempfile.mkdtemp()](https://docs.python.org/3/library/tempfile.html#tempfile.mkdtemp) 函数。
+
+`os.mkdir` 附带参数 `path`、`mode` 和 `dir_fd` 引发一个 [审计事件](https://docs.python.org/3/library/sys.html#auditing) 。
+
+*3.3 新版功能:* *dir_fd* 参数。
+
+*在 3.6 版更改:* 接受一个 [path-like 对象](https://docs.python.org/3/glossary.html#term-path-like-object)。
 
 os.**rename**(*src, dst, \*, src\_dir\_fd=None, dst\_dir\_fd=None*)  
 将文件或目录 *src* 重命名为 *dst*。如果 *dst* 已存在，the operation will fail with an [OSError](https://docs.python.org/zh-cn/3/library/exceptions.html#OSError) subclass in a number of cases:
