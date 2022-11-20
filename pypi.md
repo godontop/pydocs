@@ -32,6 +32,7 @@
             * [通用函数](#通用函数)
             * [Series](#series)
             * [DataFrame](#dataframe)
+        * [pandas 常见用法](#pandas-常见用法)
     * [pip](#pip)
     * [PyMongo](#pymongo)
         * [collection – 集合级操作](#collection--集合级操作)
@@ -2121,6 +2122,50 @@ __pandas.read_csv(*filepath_or_buffer, sep=NoDefault.no_default, delimiter=None,
 更多帮助可以在 [IO Tools](https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html) 的在线文档中找到。  
 
 **参数：**  
+**sep: _str, default ‘,’_**  
+要使用的分隔符。如果 sep 为 None，C 引擎无法自动检测分隔符，但 Python 解析引擎可以，这意味着后者将被使用并通过 Python 内置的嗅探工具 `csv.Sniffer` 自动检测分隔符。此外，长度超过 1 个字符且不同于 `'\s+'` 的分隔符将被解释为正则表达式，也会强制使用 Python 解析引擎。请注意，正则表达式定界符容易忽略引用的数据。 正则表达式示例：`'\r\t'`。  
+
+```python
+>>> a = '\u202f'
+>>> len(a)
+1
+>>> re.match('\s+', a)
+<re.Match object; span=(0, 1), match='\u202f'>
+>>>
+```
+
+**delimiter: _str, default None_**  
+sep 的别名。  
+
+**engine： _{‘c’, ‘python’, ‘pyarrow’}, 可选的_**  
+要使用的解析引擎。C 和 pyarrow 引擎更快，而 python 引擎当前功能更全面。当前仅 pyarrow 引擎支持多线程。  
+
+***1.4.0 新版功能：*** 添加了 “pyarrow” 引擎作为实验引擎，一些功能不受支持，或者可能无法正常使用该引擎。  
+
+处理法国的千位分隔符时，必须使用 python 引擎，且需同时指定 decimal 和 thousands 参数。  
+
+```python
+>>> df = pd.read_csv("FR02 2022MarMonthlyTransaction.csv", skiprows=7)
+>>> df.iloc[67:70, -3:]
+   autres frais de transaction      autre      total
+67                           0          0      31,11
+68                           0          0      25,98
+69                           0  -1 263,04  -1 263,04
+>>> df = pd.read_csv("FR02 2022MarMonthlyTransaction.csv", skiprows=7, decimal=',', thousands='\u202f')
+>>> df.iloc[67:70, -3:]
+    autres frais de transaction      autre      total
+67                          0.0          0      31,11
+68                          0.0          0      25,98
+69                          0.0  -1 263,04  -1 263,04
+>>> df = pd.read_csv("FR02 2022MarMonthlyTransaction.csv", skiprows=7, decimal=',', thousands='\u202f', engine='python')
+>>> df.iloc[67:70, -3:]
+    autres frais de transaction    autre    total
+67                          0.0     0.00    31.11
+68                          0.0     0.00    25.98
+69                          0.0 -1263.04 -1263.04
+>>>
+```
+
 **skiprows:** __*list-like, int or callable, 可选的*__  
 文件开头要跳过的行号（0-indexed）或要跳过的行数（int）。  
 
@@ -2247,6 +2292,51 @@ xls 或 xlsx 或 ods 文件的路径。
 **mode：** **_{‘w’, ‘a’}, 默认值 ‘w’_**  
 要使用的文件模式（写入或附加）。 附加不适用于 fsspec URLs。  
 
+**if_sheet_exists :** ***{‘error’, ‘new’, ‘replace’, ‘overlay’}, default ‘error’***  
+尝试写入已存在的工作表时的行为方式（仅限追加模式）。  
+
+* error: 抛出一个 ValueError。  
+* new: 创建一个新的工作表，名称由引擎决定。  
+* replace: 写入之前删除已存在的工作表中的内容。  
+* overlay: 写入内容到已存在的工作表且不删除旧的内容。  
+
+*在版本 1.3.0 中新增*。  
+
+*在版本 1.4.0 中发生改变*: 增加 **overlay** 选项。  
+
+```python
+In [44]: df = pd.read_excel("test.xlsx", sheet_name="Sheet1")
+
+In [45]: df
+Out[45]: 
+   a  b    c  d
+0  0  0  NaN  0
+1  0  1  inf  0
+2  1  2  2.0  2
+
+In [46]: df.drop(columns=["c", "d"], inplace=True)
+
+In [47]: df
+Out[47]: 
+   a  b
+0  0  0
+1  0  1
+2  1  2
+
+In [48]: with pd.ExcelWriter("test.xlsx", mode='a', if_sheet_exists="replace") as writer:
+    ...:     df.to_excel(writer, sheet_name="Sheet1", index=False)
+    ...: 
+
+In [49]: df = pd.read_excel("test.xlsx", sheet_name="Sheet1")
+
+In [50]: df
+Out[50]: 
+   a  b
+0  0  0
+1  0  1
+2  1  2
+```
+
 ### 通用函数
 #### pandas.concat  
 pandas.**concat**_(objs: Union[Iterable[‘DataFrame’], Mapping[Label, ‘DataFrame’]], axis='0', join: str = "'outer'", ignore_index: bool = 'False', keys='None', levels='None', names='None', verify_integrity: bool = 'False', sort: bool = 'False', copy: bool = 'True') → ’DataFrame’_  
@@ -2312,6 +2402,28 @@ pandas.**to_numeric**(*arg, errors='raise', downcast=None*)
 [https://pandas.pydata.org/docs/reference/general_functions.html](https://pandas.pydata.org/docs/reference/general_functions.html)  
 
 ### Series
+#### pandas.Series.abs  
+**Series.abs()**  
+返回具有每个元素的绝对数值的 Series/DataFrame。  
+
+此函数仅适用于全是数字的元素。  
+
+**Returns：** **abs**  
+包含每个元素的绝对值的 Series/DataFrame。  
+
+**示例**  
+Series 中的绝对数值。  
+
+```python
+>>> s = pd.Series([-1.00, 2, -3.33, 4])
+>>> s.abs()
+0    1.00
+1    2.00
+2    3.33
+3    4.00
+dtype: float64
+```
+
 #### pandas.Series.all
 **Series.all(*axis=0, bool_only=None, skipna=True, level=None, \*\*kwargs*)**  
 
@@ -2383,6 +2495,22 @@ Can only use .str accessor with string values!
 <class 'pandas.core.series.Series'>
 >>>
 ```
+
+#### pandas.Series.fillna
+**Series.fillna(_value=None, \*, method=None, axis=None, inplace=False, limit=None, downcast=None_)**  
+使用指定方法填充 NA/NaN 值。  
+
+**参数：**  
+**value: _scalar, dict, Series, or DataFrame_**  
+用于填充空缺的值（例如 0），或者一个 dict/Series/DataFrame 的值指定用于每个索引（对于 Series）或列（对于 DataFrame）的值。 不在 dict/Series/DataFrame 中的值将不会被填充。这个值不能是列表。  
+
+**inplace：** ***bool, default False***  
+如果 True, 就地填充。注意：这将修改此对象的任何其他视图（例如，DataFrame 中列的非复制切片）。  
+
+**Returns：**  
+**Series or None**  
+填充了缺失值的对象或者 None，如果 **inplace=True**。  
+<br />
 
 #### pandas.Series.isin
 Series.**isin**(*self, values*)  
@@ -2509,6 +2637,48 @@ Series 的值被动态地替换为其它值。
 **Returns：** **DataFrame 或 Series 或 Index**  
 一个 DataFrame，每个主题字符串一行，每组一列。正则表达式 pat 中的任何捕获组名称都将用于列名称；否则将使用捕获组编号。每个结果列的 dtype 始终是 object，即使没有找到匹配项。如果 **expand=False** 并且 pat 只有一个捕获组，则返回一个 Series （如果主题是系列）或索引（如果主题是索引）。  
 
+#### pandas.Series.to_dict
+**Series.to_dict(_into=<class 'dict'>_)**  
+将 Series 转换为 {label -> value} 字典或类似字典的对象。  
+
+**Returns：**  **collections.abc.Mapping**  
+Series 的键-值表示。  
+
+**示例**  
+
+```python
+>>> df = pd.read_excel("map.xlsx", sheet_name="汇率表CN")
+>>> df
+     汇率    CNY
+0    US  6.330
+1    UK  8.100
+2    EU  6.800
+3    JP  0.049
+4    CA  4.900
+5    AU  4.450
+6    MX  0.290
+7    BR  1.100
+8   SEK  0.600
+9    PL  1.430
+10   TR  0.400
+>>> df.set_index("汇率")
+       CNY
+汇率
+US   6.330
+UK   8.100
+EU   6.800
+JP   0.049
+CA   4.900
+AU   4.450
+MX   0.290
+BR   1.100
+SEK  0.600
+PL   1.430
+TR   0.400
+>>> df.set_index("汇率").CNY.to_dict()
+{'US': 6.33, 'UK': 8.1, 'EU': 6.8, 'JP': 0.049, 'CA': 4.9, 'AU': 4.45, 'MX': 0.29, 'BR': 1.1, 'SEK': 0.6, 'PL': 1.43, 'TR': 0.4}
+```
+
 ### DataFrame
 #### pandas.DataFrame.all
 DataFrame.all(*axis=0, bool_only=None, skipna=True, level=None, \*\*kwargs*)  
@@ -2573,6 +2743,12 @@ dtype: bool
 >>> df.all(axis=None)
 False
 ```
+
+#### pandas.DataFrame.div
+**DataFrame.div(_other, axis='columns', level=None, fill_value=None_)**  
+以元素的方式获取 dataframe 和 other 的浮点数除法结果（二进制运算符 *truediv*）。  
+
+等同于 `dataframe / other`，但支持用 fill_value 替换其中一个输入中的缺失数据。使用反向版本，*rtruediv*。    
 
 #### pandas.DataFrame.drop
 **DataFrame.drop(*labels=None, axis=0, index=None, columns=None, level=None, inplace=False, errors='raise')***  
@@ -2998,6 +3174,77 @@ In [130]: timeit len(df1.index)
 >>> df.north_money[0:3].sum()
 -27010.13
 >>>
+```
+
+### pandas 常见用法
+p1. 除数列中含有0的情况
+
+当两列（Series）相除时，如果除数为0，则结果为inf，如果除数和被除数同时为0，则结果为NaN。  
+
+方法一：  
+使用 Series.div().replace()  
+
+```python
+In [11]: df = pd.DataFrame({'a': [0, 0, 1], 'b': [0, 1, 2]})               
+                                           
+In [12]: df                                              
+Out[12]:         
+   a  b                            
+0  0  0
+1  0  1                    
+2  1  2
+
+In [13]: df['c'] = df['b'] / df['a']
+
+In [14]: df
+Out[14]: 
+   a  b    c
+0  0  0  NaN
+1  0  1  inf
+2  1  2  2.0
+
+In [17]: df['d'] = df['b'].div(df['a']).replace(np.inf, 0)
+
+In [18]: df
+Out[18]: 
+   a  b    c    d
+0  0  0  NaN  NaN
+1  0  1  inf  0.0
+2  1  2  2.0  2.0
+
+In [19]: df['d'].fillna(0, inplace=True)
+
+In [20]: df
+Out[20]: 
+   a  b    c    d
+0  0  0  NaN  0.0
+1  0  1  inf  0.0
+2  1  2  2.0  2.0
+```
+
+方法二：  
+使用 np.where(condition, result, else)，np.where() 的第一个参数表示条件，第二个参数表示结果，第三个参数表示不符合条件时采用的结果。  
+
+```python
+In [21]: df = pd.DataFrame({'a': [0, 0, 1], 'b': [0, 1, 2]})
+
+In [22]: df['c'] = df['b'] / df['a']
+
+In [23]: df
+Out[23]: 
+   a  b    c
+0  0  0  NaN
+1  0  1  inf
+2  1  2  2.0
+
+In [24]: df['d'] = np.where(df['a'] != 0, df['b'] / df['a'], 0)
+
+In [25]: df
+Out[25]: 
+   a  b    c    d
+0  0  0  NaN  0.0
+1  0  1  inf  0.0
+2  1  2  2.0  2.0
 ```
 
 ## pip
@@ -3657,6 +3904,8 @@ Final URL location of Response.
 True
 >>>
 ```
+
+r.history 有为空列表的情况（如当 allow_redirects=False时，访问一个会重定向的网址就会出现 r.history 为空列表），而 r.url 不会出现空串的情况。  
 
 requests.Response 实际上指向的是 requests.models.Response 。  
 
