@@ -220,7 +220,7 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 |all()     |            |                  |          |          |
 |          |            |hex()             |          |          |
 |          |            |id()              |object()  |          |
-|          |enumerate() |                  |          |          |
+|          |enumerate() |input()           |          |          |
 |          |eval()      |int()             |open()    |          |
 |          |            |isinstance()      |ord()     |          |
 |          |            |issubclass()      |pow()     |super()   |
@@ -362,7 +362,7 @@ def enumerate(sequence, start=0):
 **CPython 实现细节：** 这是对象在内存中的地址。  
 
 ```python
->>> class >>> class A:
+>>> class A:
 ...     def __init__(self):
 ...         pass
 ...
@@ -379,6 +379,23 @@ def enumerate(sequence, start=0):
 '0x1E4E5391518'
 >>>
 ```  
+
+**input([_prompt_])**  
+如果存在 *prompt* 实参，则将其写入标准输出，末尾不带换行符。接下来，该函数从输入中读取一行，将其转换为字符串（除去末尾的换行符）并返回。当读取到 EOF 时，则触发 [EOFError](https://docs.python.org/3.7/library/exceptions.html#EOFError)。例如:  
+
+```python
+>>> s = input('--> ')
+--> Monty Python's Flying Circus
+>>> s
+"Monty Python's Flying Circus"
+>>>
+```
+
+如果加载了 [readline](https://docs.python.org/3.10/library/readline.html#module-readline) 模块，[input()](https://docs.python.org/3.10/library/functions.html#input) 将使用它来提供复杂的行编辑和历史记录功能。  
+
+在读取输入之前，引发一个 [审计事件](https://docs.python.org/3.10/library/sys.html#auditing) `builtins.input` 附带参数 `prompt`。  
+
+在成功读取输入之后，引发一个 [审计事件](https://docs.python.org/3.10/library/sys.html#auditing) `builtins.input/result` 附带结果。  
 
 *class* **int**(*x=0*)  
 *class* **int**(*x, base=10*)  
