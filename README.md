@@ -901,7 +901,12 @@ Operation   |Result                      |Notes
 
 Operation                  |Result                |Notes
 ---------------------------|----------------------|-----
-`s.extend(t)` 或 `s += t`  |用 `t` 的内容扩展 `s`  |
+`s.extend(t)` 或 `s += t`  |用 `t` 的内容扩展 `s`  |  
+`s.remove(x)`              |从 *s* 中删除第一个 x，其中 `s[i]` 等于 x  |(3)  
+
+**注意：**  
+
+3. 当在 *s* 中找不到 *x* 时，`remove()` 会引发 [ValueError](https://docs.python.org/3/library/exceptions.html#ValueError)。  
 
 ```python
 >>> s = [1, 2]
@@ -1133,6 +1138,17 @@ str.**split**(*sep=None, maxsplit=-1*)
 
 str.**startswith**(*prefix*[, *start*[, *end*]])  
 如果字符串以指定的 *prefix* 开始则返回 `True`，否则返回 `False`。*prefix* can also be a tuple of prefixes to look for. With optional *start*, test string beginning at that position. With optional *end*, stop comparing string at that position.
+
+str.**title()**  
+返回字符串的首字母大写版本，其中单词以大写字符开头，其余字符为小写。  
+
+示例：  
+
+```python
+>>> 'Hello world'.title()
+'Hello World'
+>>>
+```
 
 str.**upper**()  
 返回一个字符串的副本且将所有的 cased characters（Cased characters are those with general category property being one of “Lu” (Letter, uppercase), “Ll” (Letter, lowercase), or “Lt” (Letter, titlecase).）转换为大写字母。 
@@ -6571,43 +6587,8 @@ In global scope: global spam
 
 请注意 *局部* 赋值（这是默认状态）不会改变 *scope_test* 对 *spam* 的绑定。 [nonlocal](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#nonlocal) 赋值会改变 *scope_test* 对 *spam* 的绑定，而 [global](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#global) 赋值会改变模块层级的绑定。
 
-您还可以在 [global](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#global) 赋值之前看到之前没有 *spam* 的绑定。
-
-scope.py
-
-```python
-def scope_test():
-    def do_local():
-        spam = "local spam"
-
-    def do_nonlocal():
-        nonlocal spam
-        spam = "nonlocal spam"
-
-    def do_global():
-        # global spam
-        spam = "global spam"
-
-    spam = "test spam"
-    do_local()
-    print("After local assignment:", spam)
-    do_nonlocal()
-    print("After nonlocal assignment:", spam)
-    do_global()
-    print("After global assignment:", spam)
-```
-
-运行结果：
-
-```
-After local assignment: test spam
-After nonlocal assignment: nonlocal spam
-After global assignment: nonlocal spam
-Traceback (most recent call last):
-  File "scopes.py", line 23, in <module>
-    print("In global scope:", spam)
-NameError: name 'spam' is not defined
-```
+您还可以在 [global](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#global) 赋值之前看到之前没有 *spam* 的绑定。  
+<br />
 
 ### 9.3. 初探类
 类引入了一些新语法，三种新对象类型和一些新语义。
