@@ -1107,6 +1107,27 @@ str.**replace**(*old*, *new*[, *count*])
 'tppls for windows'
 ```
 
+str.**rstrip([**_chars_**])**  
+返回原字符串的副本，并移除末尾的字符。*chars* 参数是一个指定要移除的字符的集合的字符串。如果省略或为 `None`，则 *chars* 参数默认移除空格。实际上 *chars* 参数并非指定单个后缀；而是会移除参数值的所有组合:  
+
+```python
+>>> '   spacious   '.rstrip()
+'   spacious'
+>>> 'mississippi'.rstrip('ipz')
+'mississ'
+>>>
+```
+
+要删除单个后缀字符串，而不是所有字符的集合，请参见 [str.removesuffix()](https://docs.python.org/3.9/library/stdtypes.html#str.removesuffix) 方法。 例如:  
+
+```python
+>>> 'Monty Python'.rstrip(' Python')
+'M'
+>>> 'Monty Python'.removesuffix(' Python')
+'Monty'
+>>>
+```
+
 str.**split**(*sep=None, maxsplit=-1*)  
 返回字符串中的一个单词列表，使用 *sep* 作为分隔字符串。If *maxsplit* is given, at most *maxsplit* splits are done (thus, the list will have at most `maxsplit+1` elements). If *maxsplit* is not specified or `-1`, then there is no limit on the number of splits (all possible splits are made).
 
