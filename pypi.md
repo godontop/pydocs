@@ -3,6 +3,7 @@
     * [Beautiful Soup](#beautiful-soup)
         * [输出](#输出)
             * [Pretty-printing](#pretty-printing)
+    * [camelot-py](#camelot-py)
     * [chardet](#chardet)
     * [cssselect](#cssselect)
     * [Django](#django)
@@ -33,6 +34,8 @@
             * [Series](#series)
             * [DataFrame](#dataframe)
         * [pandas 常见用法](#pandas-常见用法)
+    * [pdfplumber](#pdfplumber)
+    * [pillow](#pillow)
     * [pip](#pip)
     * [PyMongo](#pymongo)
         * [collection – 集合级操作](#collection--集合级操作)
@@ -268,6 +271,29 @@ The Dormouse's story
 </i>
 >>>
 ```  
+
+## camelot-py
+安装时的包名叫camelot-py，导入时的包名叫 camelot，安装camelot-py时会自动安装pypdfium2，但不会安装pillow，而pillow是完整使用pypdfium2功能所必须的，如安装camelot-py时，需同时安装pillow。  
+
+camelot-py的主要作用之一是将PDF转换为Excel，封装强大，只需很少的代码就能完成任务，但对于那些Excel结构清晰的PDF，即通过Excel转换功能将Excel文件转换成PDF的文件，使用pdfplumber效果更好。 
+
+camelot-py 官方文档：[https://camelot-py.readthedocs.io/en/latest/index.html](https://camelot-py.readthedocs.io/en/latest/index.html) 
+
+安装依赖 ghostscript 
+Debian系统： 
+apt install ghostscript 
+
+安装 camelot-py 
+pip install camelot-py pillow 
+
+将PDF文件转换为Excel文件  
+
+```python
+>>> import camelot
+>>> tables = camelot.read_pdf('documents/2024-2025学年深圳市罗湖区幼儿园办学基本信息表.pdf', pages='all')
+>>> tables.export('documents/幼儿园camelot.xlsx', f='excel')
+>>> 
+```
 
 ## chardet
 官方文档：[https://chardet.readthedocs.io/en/latest/index.html](https://chardet.readthedocs.io/en/latest/index.html)
@@ -2680,6 +2706,25 @@ TR   0.400
 ```
 
 ### DataFrame
+### pandas.DataFrame
+*class* **pandas.DataFrame(**_**data**=None**, index**=None**, columns**=None**, dtype**=None**, copy**=None_**)** 
+二维的、尺寸可变的、潜在异构的表格数据。 
+
+数据结构还包含有标签的轴（行和列）。算术运算会在行标签和列标签上进行对齐。可以将其视为一个类似于字典的容器，用于存储 Series 对象。这是 Pandas 的主要数据结构。 
+
+**参数:** 
+**data：_ndarray (结构化的或同质的), Iterable, dict, 或 DataFrame_** 
+字典可以包含 Series、arrays、常量、dataclass或类列表对象。如果数据是一个字典，列顺序遵循插入顺序。如果字典包含已定义索引的 Series，则会根据其索引进行对齐。如果数据本身就是 Series 或 DataFrame，也会发生这种对齐。对齐是在 Series/DataFrame 输入上完成的。 
+
+如果数据是一个字典列表，列的顺序遵循插入顺序。 
+
+**index：** _**Index 或 array-like**_ 
+用于结果框架（frame）的索引。如果输入数据中没有索引信息且未提供索引，则默认使用范围索引（RangeIndex）。 
+
+**columns：** _**Index 或 array-like**_ 
+当数据没有列标签时，用于结果框架（frame）的列标签，默认为范围索引（RangeIndex，例如 0, 1, 2, …, n）。如果数据中包含列标签，则会执行列选择。 
+
+
 #### pandas.DataFrame.all
 DataFrame.all(*axis=0, bool_only=None, skipna=True, level=None, \*\*kwargs*)  
 返回至少一个轴上的所有元素是否为真。  
@@ -3245,6 +3290,44 @@ Out[25]:
 0  0  0  NaN  0.0
 1  0  1  inf  0.0
 2  1  2  2.0  2.0
+```
+
+## pdfplumber
+pdfplumber 主要用于探测PDF文档的每一个字符、单元格和行的详细信息。将结构清晰的PDF文档转换成Excel效果很好。 
+
+安装pdfplumber 
+pip install pdfplumber 
+
+```python
+import pdfplumber
+import pandas as pd
+
+
+with pdfplumber.open('documents/2024-2025学年深圳市罗湖区幼儿园办学基本信息表.pdf') as pdf:
+    table_data = []
+    for page in pdf.pages:
+        tables = page.extract_tables()
+        for table in tables:
+            df = pd.DataFrame(table[1:], columns=table[0])
+            table_data.append(df)
+
+
+final_df = pd.concat(table_data, ignore_index=True)
+final_df.to_excel('documents/幼儿园pdfplumber.xlsx', index=False)
+
+```
+
+## pillow
+PIL - Pillow (Fork of the Python Imaging Library) 
+pillow安装时的包名叫pillow，导入时的包名叫PIL。 
+
+pillow 官方文档：[https://pillow.readthedocs.io/en/stable/index.html](https://pillow.readthedocs.io/en/stable/index.html) 
+
+安装 pillow 
+pip install pillow 
+
+```python
+import PIL
 ```
 
 ## pip
