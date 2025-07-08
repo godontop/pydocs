@@ -16,6 +16,7 @@
             * [通用序列操作](#通用序列操作)
             * [可变序列类型](#可变序列类型)
             * [列表](#列表)
+            * [元组](#元组)
             * [Ranges](#ranges)
         * [文本序列类型 — str](#文本序列类型--str)
             * [字符串方法](#字符串方法)
@@ -976,6 +977,57 @@ print(letters)
 
 **Result:**  
 ['a', 'b', 'c', 'd', 'e']
+
+#### 元组
+元组是不可变序列，通常用于储存异构数据的多项集（例如由 [enumerate()](https://docs.python.org/zh-cn/3.13/library/functions.html#enumerate) 内置函数所产生的二元组）。 元组也被用于需要同构数据的不可变序列的情况（例如允许存储到 [set](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#set) 或 [dict](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#dict) 的实例）。
+
+_class_ **tuple([**_iterable_**])** 
+可以用多种方式构建元组：
+
+* 使用一对圆括号来表示空元组: `()` 
+* 使用一个后缀的逗号来表示单元组: `a,` 或 `(a,)` 
+* 使用以逗号分隔的多个项: `a, b, c` 或 `(a, b, c)` 
+* 使用内置的 [tuple()](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#tuple): `tuple()` 或 `tuple(iterable)` 
+
+由第二和第三种构建元组的方式可知，构建非空元组的关键在于逗号，而非圆括号。 
+
+```python
+>>> a = ([])
+>>> b = (1)
+>>> c = ([],)
+>>> d = (1,)
+>>> type(a)
+<class 'list'>
+>>> type(b)
+<class 'int'>
+>>> type(c)
+<class 'tuple'>
+>>> type(d)
+<class 'tuple'>
+>>> print(a, b, c, d, sep='\n')
+[]
+1
+([],)
+(1,)
+>>> 
+```
+
+构造器将构造一个元组，其中的项与 _iterable_ 中的项具有相同的值与顺序。 _iterable_ 可以是序列、支持迭代的容器或其他可迭代对象。 如果 _iterable_ 已经是一个元组，会不加改变地将其返回。 例如，`tuple('abc')` 返回 `('a', 'b', 'c')` 而 `tuple( [1, 2, 3] )` 返回 `(1, 2, 3)`。 如果没有给出参数，构造器将创建一个空元组 `()`。
+
+```python
+>>> tuple('abc')
+('a', 'b', 'c')
+>>> tuple([1, 2, 3])
+(1, 2, 3)
+>>> 
+```
+
+请注意决定生成元组的其实是逗号而不是圆括号。 圆括号只是可选的，生成空元组或需要避免语法歧义的情况除外。 例如，`f(a, b, c)` 是在调用函数时附带三个参数，而 `f((a, b, c))` 则是在调用函数时附带一个三元组。
+
+元组实现了所有 [一般](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#typesseq-common) 序列的操作。
+
+对于通过名称访问相比通过索引访问更清晰的异构数据多项集，[collections.namedtuple()](https://docs.python.org/zh-cn/3.13/library/collections.html#collections.namedtuple) 可能是比简单元组对象更为合适的选择。  
+ 
 
 #### Ranges
 [range](https://docs.python.org/3/library/stdtypes.html#range) 类型代表一种不可变的数字序列且通常用于在 [for](https://docs.python.org/3/reference/compound_stmts.html#for) 循环中循环一个特定的次数。
@@ -2537,6 +2589,41 @@ temp.py
 /root/temp.py
 ```
 
+如果需要获取当前文件的路径名，建议使用 `os.path.abspath(__file__)` ，若直接使用 `__file__` ，在 Python3.7 中获取的路径名是相对路径名。 
+
+```sh
+➜  ~ cat temp.py 
+#!/usr/bin/env python3
+import os.path
+
+print(__file__)
+print(os.path.abspath(__file__))
+➜  ~ 
+➜  ~ python3.7 temp.py 
+temp.py
+/home/ywh/temp.py
+➜  ~ 
+➜  ~ python3.11 temp.py 
+/home/ywh/temp.py
+/home/ywh/temp.py
+➜  ~ 
+➜  ~ python3 --version
+Python 3.7.0
+➜  ~ ./temp.py 
+./temp.py
+/home/ywh/temp.py
+➜  ~ 
+➜  ~ pyenv global system
+➜  ~ python3 --version
+Python 3.11.2
+➜  ~ ./temp.py 
+/home/ywh/./temp.py
+/home/ywh/temp.py
+➜  ~ 
+```
+
+从上面的代码可以看出，通过 `__file__` 获取的路径名是变化的，并且很多时候是相对路径名，而通过 `os.path.abspath(__file__)` 获取的路径名始终如一。 
+
 os.path.**basename(**_path_**)**  
 返回路径名 *path* 的基本名称。这是将 *path* 传入函数 [split()](https://docs.python.org/3/library/os.path.html#os.path.split) 之后，返回的一对值中的第二个元素。请注意，此函数的结果与 Unix **basename** 程序不同。**basename** 在 `'/foo/bar/'` 上返回 `'bar'`，而 [basename()](https://docs.python.org/3/library/os.path.html#os.path.basename) 函数返回一个空字符串 `('')`。
 
@@ -2585,6 +2672,28 @@ os.path.**join**(_path, *paths_)
 在 Windows 平台，当遇到一个绝对路径组件 (如，`r'\foo'`) 时驱动器号不重置。如果一个组件包含一个驱动器号，则所有前面的组件被丢弃且驱动器号被重置。注意，因为每个驱动器都有一个当前目录，`os.path.join("c:", "foo")` represents a path relative to the current directory on drive `C:` (`c:foo`), not `c:\foo`。
 
 *在版本3.6中发生变化：* *path* 和 *paths* 接受 [path-like object](https://docs.python.org/3.6/glossary.html#term-path-like-object)。
+
+```sh
+➜  ~ python --version
+Python 3.11.2
+➜  ~ 
+➜  ~ cat temp.py 
+import os.path
+
+print(__file__)
+print(os.path.abspath(__file__))
+DIR_OF_THIS_SCRIPT = os.path.dirname(os.path.abspath(__file__))
+print(DIR_OF_THIS_SCRIPT)
+DIR_OF_GITHUB = os.path.join(DIR_OF_THIS_SCRIPT, 'github')
+print(DIR_OF_GITHUB)
+➜  ~ 
+➜  ~ python temp.py
+/home/pi/temp.py
+/home/pi/temp.py
+/home/pi
+/home/pi/github
+➜  ~ 
+```
 
 ## 文件格式
 本章描述的模块解析各种既不是标记语言也与e-mail无关的其它文件格式。
@@ -2808,6 +2917,39 @@ os.**mkdir(**_path, mode=0o777, \*, dir_fd=None_**)**
 *3.3 新版功能:* *dir_fd* 参数。
 
 *在 3.6 版更改:* 接受一个 [path-like 对象](https://docs.python.org/3/glossary.html#term-path-like-object)。
+
+
+os.**remove(**_path, *, dir_fd=None_**)** 
+移除（删除）文件 _path_。如果 _path_ 是目录，则会引发 [OSError](https://docs.python.org/zh-cn/3.13/library/exceptions.html#OSError)。请使用 [rmdir()](https://docs.python.org/zh-cn/3.13/library/os.html#os.rmdir) 来移除目录。 如果文件不存在，则会引发 [FileNotFoundError](https://docs.python.org/zh-cn/3.13/library/exceptions.html#FileNotFoundError)。
+
+本函数支持 [基于目录描述符的相对路径](https://docs.python.org/zh-cn/3.13/library/os.html#dir-fd)。
+
+在 Windows 上，尝试删除正在使用的文件会抛出异常。而在 Unix 上，虽然该文件的条目会被删除，但分配给文件的存储空间仍然不可用，直到原始文件不再使用为止。
+
+本函数在语义上与 [unlink()](https://docs.python.org/zh-cn/3.13/library/os.html#os.unlink) 相同。
+
+os.remove 包含参数 `path` 和 `dir_fd` 时引发一个 [审计事件](https://docs.python.org/3.13/library/sys.html#auditing)。 
+
+在 3.3 版本发生变更: 添加了 _dir_fd_ 参数。
+
+在 3.6 版本发生变更: 接受一个 [path-like 对象](https://docs.python.org/3.13/glossary.html#term-path-like-object)。 
+
+```sh
+➜  ~ ls
+github  readme.txt  temp.py
+➜  ~ cat temp.py 
+import os.path
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+filename = os.path.join(current_dir, 'readme.txt')
+os.remove(filename)
+➜  ~ 
+➜  ~ python temp.py 
+➜  ~ ls
+github  temp.py
+➜  ~ 
+```
 
 os.**rename**(*src, dst, \*, src\_dir\_fd=None, dst\_dir\_fd=None*)  
 将文件或目录 *src* 重命名为 *dst*。如果 *dst* 已存在，the operation will fail with an [OSError](https://docs.python.org/zh-cn/3/library/exceptions.html#OSError) subclass in a number of cases:
@@ -4947,7 +5089,26 @@ traceback.**print_exception(**_etype, value, tb, limit=None, file=None, chain=Tr
 
 属性赋值更新模块的命名空间字典，例如，`m.x = 1` 等价于 `m.__dict__["x"] = 1`。
 
-预定义的 (可写的) 属性： [\_\_name\_\_](https://docs.python.org/3/reference/import.html#__name__) 是模块的名字；\_\_doc\_\_ 是模块的文档字符串，如不可用则为 `None`；\_\_annotations\_\_ (可选的) 是一个包含模块正文执行期间收集的变量注释的字典；如果模块是从一个文件加载，则 [\_\_file\_\_](https://docs.python.org/3/reference/import.html#__file__) 是该文件的路径名。
+预定义的 (可写) 属性： [\_\_name\_\_](https://docs.python.org/3/reference/import.html#__name__) 是模块的名字；\_\_doc\_\_ 是模块的文档字符串，如果没有则为 `None`；\_\_annotations\_\_ (可选的) 是一个包含模块正文执行期间收集的变量注释的字典；如果模块是从一个文件加载，则 [\_\_file\_\_](https://docs.python.org/3/reference/import.html#__file__) 是模块对应的被加载文件的路径名。某些类型的模块可能没有 `__file__` 属性，例如 C 模块是静态链接到解释器内部的; 对于从一个共享库动态加载的扩展模块来说该属性为该共享库文件的路径名。 
+
+```sh
+➜  ~ cat temp.py                                                                                
+#!/usr/bin/env python3                                                                          
+import os.path                                                                                                                          
+print(__file__)                                                                                 
+print(os.path.abspath(__file__))                                                                
+➜  ~                                                                                            
+➜  ~ python3.7 temp.py                                                                          
+temp.py                                                                                         
+/home/ywh/temp.py                                                                               
+➜  ~  
+➜  ~ python3.11 temp.py         
+/home/ywh/temp.py                                       
+/home/ywh/temp.py
+➜  ~                   
+``` 
+
+在 Python3.7 中，`__file__` 返回的是模块对应的文件的相对路径名，而在 Python3.11 中 `__file__` 返回的是模块对应的文件的绝对路径名。 
 
 特殊的只读属性：[\_\_dict\_\_](https://docs.python.org/3/library/stdtypes.html#object.__dict__) is the module’s namespace as a dictionary object.  
 
@@ -5377,7 +5538,7 @@ import XXX.YYY.ZZZ
 
 还要注意即使是在 `__main__` 对应于一个可导入模块且 `__main__.__spec__` 被相应地设定时，它们仍会被视为 *不同的* 模块。 这是由于以下事实：使用 `if __name__ == "__main__":` 检测来保护的代码块仅会在模块被用来填充 `__main__` 命名空间时而非普通的导入时被执行。  
 
-## 表达式
+## 6. 表达式
 ### 6.14. lambda 表达式
 **lambda_expr** ::= "lambda" [[parameter_list](https://docs.python.org/zh-cn/3.13/reference/compound_stmts.html#grammar-token-python-grammar-parameter_list)] ":" [expression](https://docs.python.org/zh-cn/3.13/reference/expressions.html#grammar-token-python-grammar-expression) 
 
