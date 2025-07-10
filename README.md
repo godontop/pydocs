@@ -93,6 +93,9 @@
                 * [进程和异常](#进程和异常)
                 * [其它](#其它)
         * [subprocess --- 子进程管理](#subprocess-----子进程管理)
+            * [使用 subprocess 模块](#使用-subprocess-模块)
+                * [常用参数](#常用参数)
+            * [较旧的高阶 API](#较旧的高阶-api)
     * [网络和进程间通信](#网络和进程间通信)
         * [socket --- 底层网络接口](#socket-----底层网络接口)
     * [互联网数据处理](#互联网数据处理)
@@ -3971,6 +3974,8 @@ stdout=b'crw-rw-rw- 1 root root 1, 3 Jan 23 16:23 /dev/null\n', stderr=b'')
 *在 3.6 版更改:* 添加了 *encoding* 和 *errors* 形参.
 
 *在 3.7 版更改:* 添加了 *text* 形参, 作为 *universal_newlines* 的一个更好理解的别名. 添加了 *capture_output* 形参.  
+
+*在 3.12 版本发生变更:* 针对 `shell=True` 改变的 Windows shell 搜索顺序。 当前目录和 `%PATH%` 会被替换为 `%COMSPEC%` 和 `%SystemRoot%\System32\cmd.exe`。 因此，在当前目录中投放一个命名为 `cmd.exe` 的恶意程序不会再起作用。 
 </br>
 
 *class* subprocess.**CompletedProcess**  
@@ -4002,6 +4007,101 @@ archlinux
 如果 [returncode](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.CompletedProcess.returncode) 非零, 抛出 [CalledProcessError](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.CalledProcessError).
 
 *3.5 新版功能.*
+<br />
+
+*exception* subprocess**.CalledProcessError** 
+[SubprocessError](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.SubprocessError) 的子类，当一个由 [check_call()](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.check_call), [check_output()](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.check_output) 或 [run()](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.run) (附带 `check=True`) 运行的进程返回了非零退出状态码时将被引发。
+
+**returncode** 
+子进程的退出状态。如果程序由一个信号终止，这将会被设为一个负的信号码。
+
+**cmd** 
+用于创建子进程的指令。
+
+**output** 
+子进程的输出，如果被 [run()](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.run) 或 [check_output()](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.check_output) 捕获。否则为 `None`。
+
+**stdout** 
+对 output 的别名，对应的有 [stderr](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.CalledProcessError.stderr)。
+
+**stderr** 
+子进程的标准错误输出，如果被 [run()](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.run) 捕获。 否则为 `None`。
+
+*在 3.5 版本发生变更:* 添加了 *stdout* 和 *stderr* 属性。
+
+##### 常用参数
+为了支持丰富的使用案例， [Popen](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.Popen) 的构造函数（以及方便的函数）接受大量可选的参数。对于大多数典型的用例，许多参数可以被安全地留以它们的默认值。通常需要的参数有：
+
+*args* 被所有调用需要，应当为一个字符串，或者一个程序参数序列。提供一个参数序列通常更好，它可以更小心地使用参数中的转义字符以及引用（例如允许文件名中的空格）。如果传递一个简单的字符串，则 *shell* 参数必须为 [True](https://docs.python.org/zh-cn/3.13/library/constants.html#True) （见下文）或者该字符串中将被运行的程序名必须用简单的命名而不指定任何参数。
+
+```python
+>>> subprocess.run('uname')
+Linux
+CompletedProcess(args='uname', returncode=0)
+>>> subprocess.run('uname -a')
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/usr/lib/python3.11/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/subprocess.py", line 1024, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.11/subprocess.py", line 1901, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'uname -a'
+>>> subprocess.run('uname -a', shell=True)
+Linux pizero2w 6.12.25+rpt-rpi-v8 #1 SMP PREEMPT Debian 1:6.12.25-1+rpt1 (2025-04-30) aarch64 GNU/Linux
+CompletedProcess(args='uname -a', returncode=0)
+>>> 
+```
+
+从上面的代码可以看出，当 *agrs* 参数是一个简单的字符串时，如果没有 shell=True 参数，那么 subprocess 模块会把整个字符串当成是一个程序名，即有可执行文件的的名称是该字符串，而实际上，在 Linux 平台，没有哪一个命令是包含空格的，所以最终抛出了一个 *FileNotFoundError* 的异常。 
+
+*stdin*, *stdout* 和 *stderr* 分别指定被执行程序的标准输入、标准输出和标准错误文件句柄。 合法的值包括 `None`, [PIPE](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.PIPE), [DEVNULL](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.DEVNULL), 现存的文件描述符（一个正整数），现存的具有合法文件描述符的 [文件对象](https://docs.python.org/zh-cn/3.13/glossary.html#term-file-object)。 当使用默认设置 `None` 时，将不会进行任何重定向。 [PIPE](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.PIPE) 表示应当新建一个连接子进程的管道。 [DEVNULL](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.DEVNULL) 表示将使用特殊文件 [os.devnull](https://docs.python.org/zh-cn/3.13/library/os.html#os.devnull)。 此外，*stderr* 还可以为 [STDOUT](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.STDOUT)，这表示来自子进程的 stderr 数据应当被捕获到与 *stdout* 相同的文件句柄中。
+
+如果指定了 *encoding* 或 *errors*，或者 *text* (也称 *universal_newlines*) 为真，则文件对象 *stdin*、 *stdout* 与 *stderr* 将会使用在此次调用中指定的 *encoding* 和 *errors* 或者 [io.TextIOWrapper](https://docs.python.org/zh-cn/3.13/library/io.html#io.TextIOWrapper) 的默认值以文本模式打开。
+
+当构造函数的 *newline* 参数为 `None` 时。对于 *stdin*， 输入的换行符 `'\n'` 将被转换为默认的换行符 [os.linesep](https://docs.python.org/zh-cn/3.13/library/os.html#os.linesep)。对于 *stdout* 和 *stderr*， 所有输出的换行符都被转换为 `'\n'`。更多信息，查看 [io.TextIOWrapper](https://docs.python.org/zh-cn/3.13/library/io.html#io.TextIOWrapper) 类的文档。
+
+如果文本模式未被使用， *stdin*， *stdout* 和 *stderr* 将会以二进制流模式打开。没有编码与换行符转换发生。
+
+*在 3.6 版本发生变更:* 增加了 *encoding* 和 *errors* 形参。
+
+*在 3.7 版本发生变更:* 添加了 *text* 形参作为 *universal_newlines* 的别名。
+
+**备注：** 文件对象 [Popen.stdin](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.Popen.stdin) 、 [Popen.stdout](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.Popen.stdout) 和 [Popen.stderr](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.Popen.stderr) 的换行符属性不会被 [Popen.communicate()](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.Popen.communicate) 方法更新。
+
+如果 *shell* 设为 `True`，则使用 shell 执行指定的指令。如果您主要使用 Python 增强的控制流（它比大多数系统 shell 提供的强大），并且仍然希望方便地使用其他 shell 功能，如 shell 管道、文件通配符、环境变量展开以及 `~` 展开到用户家目录，这将非常有用。但是，注意 Python 自己也实现了许多类似 shell 的特性（例如 [glob](https://docs.python.org/zh-cn/3.13/library/glob.html#module-glob), [fnmatch](https://docs.python.org/zh-cn/3.13/library/fnmatch.html#module-fnmatch), [os.walk()](https://docs.python.org/zh-cn/3.13/library/os.html#os.walk), [os.path.expandvars()](https://docs.python.org/zh-cn/3.13/library/os.path.html#os.path.expandvars), [os.path.expanduser()](https://docs.python.org/zh-cn/3.13/library/os.path.html#os.path.expanduser) 和 [shutil](https://docs.python.org/zh-cn/3.13/library/shutil.html#module-shutil)）。
+
+*在 3.3 版本发生变更:* 当 *universal_newlines* 被设为 `True`，则类将使用 [locale.getpreferredencoding(False)](https://docs.python.org/zh-cn/3.13/library/locale.html#locale.getpreferredencoding) 编码格式来代替 `locale.getpreferredencoding()`。 关于它们的区别的更多信息，见 [io.TextIOWrapper](https://docs.python.org/zh-cn/3.13/library/io.html#io.TextIOWrapper)。
+
+**备注:** 在使用 `shell=True` 之前， 请阅读 [安全考量](https://docs.python.org/zh-cn/3.13/library/subprocess.html#security-considerations) 段落。
+
+这些选项以及所有其他选项在 [Popen](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.Popen) 构造函数文档中有更详细的描述。 
+<br />
+
+#### 较旧的高阶 API
+在 Python 3.5 之前，这三个函数组成了 subprocess 的高阶 API。 现在你可以在许多情况下使用 [run()](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.run)，但有大量现在代码仍会调用这些函数。 
+
+subprocess**.check_call(**_args, \*, stdin=None, stdout=None, stderr=None, shell=False, cwd=None, timeout=None, \*\*other_popen_kwargs_**)** 
+附带参数运行命令。 等待命令完成。 如果返回码为零则正常返回，否则引发 [CalledProcessError](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.CalledProcessError)。 [CalledProcessError](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.CalledProcessError) 对象将在 [returncode](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.CalledProcessError.returncode) 属性中保存返回码。 如果 [check_call()](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.check_call) 无法开始进程则它将传播已被引发的异常。
+
+需要捕获 stdout 或 stderr 的代码应当改用 [run()](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.run)：
+
+```python
+run(..., check=True)
+```
+
+要屏蔽 stdout 或 stderr，可提供 [DEVNULL](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.DEVNULL) 这个值。
+
+上面显示的参数只是常见的一些。 完整的函数签名与 [Popen](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.Popen) 构造器的相同 —— 此函数会将所提供的 *timeout* 之外的全部参数直接传递给目标接口。
+
+**备注:** 请不要在此函数中使用 `stdout=PIPE` 或 `stderr=PIPE`。 如果子进程向管道生成了足以填满 OS 管理缓冲区的输出而管道还未被读取时它将会阻塞。 
+
+*在 3.3 版本发生变更:* *timeout* 被添加
+
+*在 3.12 版本发生变更:* 针对 `shell=True` 改变的 Windows shell 搜索顺序。 当前目录和 `%PATH%` 会被替换为 `%COMSPEC%` 和 `%SystemRoot%\System32\cmd.exe`。 因此，在当前目录中投放一个命名为 `cmd.exe` 的恶意程序不会再起作用。 
+<br /> 
 
 ## 网络和进程间通信
 ### socket --- 底层网络接口
@@ -5020,6 +5120,18 @@ True
 True
 >>>
 ```
+<br />
+
+sys.**executable** 
+一个字符串，提供 Python 解释器的可执行二进制文件的绝对路径，仅在部分系统中此值有意义。如果 Python 无法获取其可执行文件的真实路径，则 [sys.executable](https://docs.python.org/zh-cn/3.13/library/sys.html#sys.executable) 将为空字符串或 `None`。 
+
+```python
+>>> import sys
+>>> sys.executable
+'/usr/bin/python'
+>>> 
+``` 
+<br />
 
 sys.**exit**([*arg*])  
 退出Python。
