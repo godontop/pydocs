@@ -20,6 +20,7 @@
             * [Ranges](#ranges)
         * [文本序列类型 — str](#文本序列类型--str)
             * [字符串方法](#字符串方法)
+            * [格式化字符串字面值（f-字符串）](#格式化字符串字面值f-字符串)
             * [printf-style 字符串格式化](#printf-style-字符串格式化)
         * [二进制序列类型 — 字节、字节数组、内存视图](#二进制序列类型--字节字节数组内存视图)
             * [字节和字节数组操作](#字节和字节数组操作)
@@ -1254,7 +1255,122 @@ str.**title()**
 ```
 
 str.**upper**()  
-返回一个字符串的副本且将所有的 cased characters（Cased characters are those with general category property being one of “Lu” (Letter, uppercase), “Ll” (Letter, lowercase), or “Lt” (Letter, titlecase).）转换为大写字母。 
+返回一个字符串的副本且将所有的 cased characters（Cased characters are those with general category property being one of “Lu” (Letter, uppercase), “Ll” (Letter, lowercase), or “Lt” (Letter, titlecase).）转换为大写字母。  
+<br />  
+
+#### 格式化字符串字面值（f-字符串）
+**本小结的内容是在Python 3.13的标准库文档中增加的，本节的最后一个 Python 需要3.13及以上版本。** 
+
+*在版本 3.6 中新增。* 
+
+*在 3.7 版本发生变更：* [await](https://docs.python.org/zh-cn/3.13/reference/expressions.html#await) 和 [async for](https://docs.python.org/zh-cn/3.13/reference/compound_stmts.html#async-for) 可在 f-字符串内部的表达式中使用。
+
+*在 3.8 版本发生变更：* 增加了调试运算符 (`=`) 
+
+*在 3.12 版本发生变更：* 许多针对 f-字符串内部的表达式的限制已被移除。 例如，嵌套字符串、注释和反斜杠现在都是允许的。
+
+*f-字符串* (正式名称为 *格式化字符串字面值*) 是带有 `f` 或 `F` 前缀的字符串字面值。 这种类型的字符串字面值允许将任意 Python 表达式嵌入到由花括号 (`{}`) 标记的 *替换字段* 内部。 这些表达式将在运行时被求值，这与 [str.format()](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#str.format) 类似，并被转换为常规的 [str](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#str) 对象。 例如： 
+
+```python
+>>> who = 'nobody'
+>>> nationality = 'Spanish'
+>>> f'{who.title()} expects the {nationality} Inquisition!'
+'Nobody expects the Spanish Inquisition!'
+>>> 
+```
+
+也可以使用包含多行的 f-字符串： 
+
+```py
+>>> f'''This is a string
+... on two lines'''
+'This is a string\non two lines'
+>>> 
+```
+
+一个单独的左花括号，`'{'`，标记一个可包含任意 Python 表达式的 *替换字段*： 
+
+```py
+>>> nationality = 'Spanish'
+>>> f'The {nationality} Inquisition!'
+'The Spanish Inquisition!'
+>>> 
+```
+
+要包括 `{` 或 `}` 字面值，请使用双花括号： 
+
+```py
+>>> x = 42
+>>> f'{{x}} is {x}'
+'{x} is 42'
+>>> 
+```
+
+还可以使用函数，以及 [格式说明符](https://docs.python.org/zh-cn/3.13/library/string.html#formatstrings)： 
+
+```py
+>>> from math import sqrt
+>>> f'√2 \N{ALMOST EQUAL TO} {sqrt(2):.5f}'
+'√2 ≈ 1.41421'
+>>> 
+```
+
+在默认情况下，任何非字符串表达式都将使用 [str()](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#str) 来转换： 
+
+```py
+>>> from fractions import Fraction
+>>> f'{Fraction(1, 3)}'
+'1/3'
+>>> 
+```
+
+要使用显式转换，请使用 `!` (叹号) 运算符，后面跟任意的有效格式说明符，包括： 
+
+转换符|含义 
+-----|-----------------     
+`!a` |[ascii()](https://docs.python.org/zh-cn/3.13/library/functions.html#ascii) 
+`!r` |[repr()](https://docs.python.org/zh-cn/3.13/library/functions.html#repr) 
+`!s` |[str()](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#str) 
+
+例如: 
+
+```py
+>>> from fractions import Fraction
+>>> f'{Fraction(1, 3)!s}'
+'1/3'
+>>> f'{Fraction(1, 3)!r}'
+'Fraction(1, 3)'
+>>> question = '¿Dónde está el Presidente?'
+>>> print(f'{question!a}')
+'\xbfD\xf3nde est\xe1 el Presidente?'
+>>> 
+``` 
+
+在调试期间同时看到表达式和值会很有帮助，具体是在表达式后使用等号 (`=`)。 这将保留花括号内部的空格，并可以使用转换器。 在默认情况下，调试运算符使用 [repr()](https://docs.python.org/zh-cn/3.13/library/functions.html#repr) (`!r`) 转换器。 例如：
+
+```py
+>>> from fractions import Fraction
+>>> calculation = Fraction(1, 3)
+>>> f'{calculation=}'
+'calculation=Fraction(1, 3)'
+>>> f'{calculation = }'
+'calculation = Fraction(1, 3)'
+>>> f'{calculation = !s}'
+'calculation = 1/3'
+>>> 
+```
+
+输出一旦已被求值，就可以用 [格式说明符](https://docs.python.org/zh-cn/3.13/library/string.html#formatstrings) 后面跟一个冒号 (`':'`) 来格式化它。 在表达式已被求值，并可能被转换为字符串之后，就会调用结果的 \_\_format\_\_() 方法并附带该格式说明符，或者如果未给出格式说明符则附带空字符串。 随后将使用已格式化的结果作为替换字段最终的值。 例如： 
+
+```py
+>>> from fractions import Fraction
+>>> f'{Fraction(1, 7):.6f}'    # require Python 3.12 and above
+'0.142857'
+>>> f'{Fraction(1, 7):_^+10}'  # require Python 3.13 and above
+'___+1/7___'
+>>> 
+```  
+<br />  
 
 #### printf-style 字符串格式化
 **注意：** 这里描述的格式化操作展示了一些导致若干常见错误的怪现象 (例如无法正确地显示元组和字典)。使用更新的[格式化字符串文字](https://docs.python.org/3/reference/lexical_analysis.html#f-strings)，[str.format()](https://docs.python.org/3/library/stdtypes.html#str.format) 接口，或者[模板字符串](https://docs.python.org/3/library/string.html#template-strings)可以帮助避免这些错误。这些替代选择每一个都提供了它们自己的权衡及简单，灵活，和/或可扩展性的好处。
@@ -2670,6 +2786,36 @@ Return the system's ctime which, on some systems (like Unix) is the time of the 
 *在 3.6 版更改:* 接受一个 [path-like object](https://docs.python.org/zh-cn/3/glossary.html#term-path-like-object)。  
 <br />
 
+os.path.**isfile(**_path_**)** 
+如果 *path* 是 [现有的](https://docs.python.org/zh-cn/3.13/library/os.path.html#os.path.exists) 常规文件，则返回 `True`。本方法会跟踪符号链接，因此，对于同一路径，[islink()](https://docs.python.org/zh-cn/3.13/library/os.path.html#os.path.islink) 和 [isfile()](https://docs.python.org/zh-cn/3.13/library/os.path.html#os.path.isfile) 都可能为 `True`。 
+
+*在 3.6 版本发生变更：* 接受一个 [path-like object](https://docs.python.org/zh-cn/3.13/glossary.html#term-path-like-object)。  
+
+```python
+>>> import sys
+>>> sys.executable
+'/usr/bin/python'
+>>> import os.path
+>>> os.path.isfile('/usr/bin/python')
+True
+>>> 
+``` 
+<br />  
+
+os.path.**isdir(**_path_**)** 
+如果 *path* 是 [现有的](https://docs.python.org/zh-cn/3.13/library/os.path.html#os.path.exists) 目录，则返回 `True`。本方法会跟踪符号链接，因此，对于同一路径，[islink()](https://docs.python.org/zh-cn/3.13/library/os.path.html#os.path.islink) 和 [isdir()](https://docs.python.org/zh-cn/3.13/library/os.path.html#os.path.isdir) 都可能为 `True`。
+
+*在 3.6 版本发生变更：* 接受一个 [path-like object](https://docs.python.org/zh-cn/3.13/glossary.html#term-path-like-object)。  
+
+```python
+>>> os.path.isdir('/usr/bin/')
+True
+>>> os.path.isdir('/usr/bin')
+True
+>>> 
+``` 
+<br />  
+
 os.path.**join**(_path, *paths_)  
 智能地连接一个或多个路径组件。返回值是 *path* 和所有 _*paths_ 成员的串联，且除了最后一个部分，每一个非空的部分后面都跟着一个正确的目录分隔符 (`os.sep`)，这意味着如果最后一个部分为空则结果将必定以一个分隔符结尾。如果一个组件是一个绝对路径，则所有前面的组件都被丢弃且连接从绝对路径组件继续。
 
@@ -4027,7 +4173,8 @@ archlinux
 **stderr** 
 子进程的标准错误输出，如果被 [run()](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.run) 捕获。 否则为 `None`。
 
-*在 3.5 版本发生变更:* 添加了 *stdout* 和 *stderr* 属性。
+*在 3.5 版本发生变更:* 添加了 *stdout* 和 *stderr* 属性。 
+<br /> 
 
 ##### 常用参数
 为了支持丰富的使用案例， [Popen](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.Popen) 的构造函数（以及方便的函数）接受大量可选的参数。对于大多数典型的用例，许多参数可以被安全地留以它们的默认值。通常需要的参数有：
@@ -4078,7 +4225,7 @@ CompletedProcess(args='uname -a', returncode=0)
 **备注:** 在使用 `shell=True` 之前， 请阅读 [安全考量](https://docs.python.org/zh-cn/3.13/library/subprocess.html#security-considerations) 段落。
 
 这些选项以及所有其他选项在 [Popen](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.Popen) 构造函数文档中有更详细的描述。 
-<br />
+<br /> 
 
 #### 较旧的高阶 API
 在 Python 3.5 之前，这三个函数组成了 subprocess 的高阶 API。 现在你可以在许多情况下使用 [run()](https://docs.python.org/zh-cn/3.13/library/subprocess.html#subprocess.run)，但有大量现在代码仍会调用这些函数。 
@@ -4101,7 +4248,7 @@ run(..., check=True)
 *在 3.3 版本发生变更:* *timeout* 被添加
 
 *在 3.12 版本发生变更:* 针对 `shell=True` 改变的 Windows shell 搜索顺序。 当前目录和 `%PATH%` 会被替换为 `%COMSPEC%` 和 `%SystemRoot%\System32\cmd.exe`。 因此，在当前目录中投放一个命名为 `cmd.exe` 的恶意程序不会再起作用。 
-<br /> 
+<br />  
 
 ## 网络和进程间通信
 ### socket --- 底层网络接口
