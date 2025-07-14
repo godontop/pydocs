@@ -5512,7 +5512,7 @@ traceback.**print_exception(**_etype, value, tb, limit=None, file=None, chain=Tr
 属性                         |含意
 -----------------------------|-----
 function.**\_\_globals\_\_** |对存放该函数中 [全局变量](https://docs.python.org/zh-cn/3.13/reference/executionmodel.html#naming) 的 [字典](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#dict) 的引用 —— 函数定义所在模块的全局命名空间。 
-function.**\_\_closure\_\_** |`None` 或单元的 [tuple](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#tuple)，其中包含了在函数的 [代码对象](https://docs.python.org/3.13/reference/datamodel.html#function.__code__) 的 [co_freevars](https://docs.python.org/3.13/reference/datamodel.html#codeobject.co_freevars) 中对指定名称的绑定。 <br>单元对象具有 `cell_contents` 属性。这可被用来获取以及设置单元的值。 
+function.**\_\_closure\_\_** |`None` 或单元的 [tuple](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#tuple)，其中包含了在函数的 [代码对象](https://docs.python.org/3.13/reference/datamodel.html#function.__code__) 的 [co_freevars](https://docs.python.org/3.13/reference/datamodel.html#codeobject.co_freevars) 中对指定名称的绑定。 <br> 单元对象具有 `cell_contents` 属性。这可被用来获取以及设置单元的值。 
 
 ###### 3.2.8.1.2. 特殊的可写属性
 
