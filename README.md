@@ -119,10 +119,17 @@
         * [sys — 系统专用参量和函数](#sys--系统专用参量和函数)
         * [\_\_main\_\_ --- 顶层代码环境](#__main__-----顶层代码环境)
         * [traceback — 打印或检索堆栈回溯](#traceback--打印或检索堆栈回溯)
-            * [TracebackException 对象](#tracebackException-对象)
+            * [TracebackException 对象](#tracebackexception-对象)
 * [Python语言参考](#python语言参考)
     * [3. 数据模型](#3-数据模型)
         * [3.2. 标准类型层次结构](#32-标准类型层次结构)
+            * [3.2.1. None](#321-none)
+            * [3.2.7. 映射](#327-映射)
+                * [3.2.7.1. 字典](#3271-字典)
+            * [3.2.8. 可调用类型](#328-可调用类型)
+                * [3.2.8.1. 用户定义函数](#3281-用户定义函数)
+                    * [3.2.8.1.1. 特殊的只读属性](#32811-特殊的只读属性)
+                    * [3.2.8.1.2. 特殊的可写属性](#32812-特殊的可写属性)
         * [3.3. 特殊方法名](#33-特殊方法名)
             * [3.3.1. 基本自定义](#331-基本自定义)
             * [3.3.6. 仿真可调用对象](#336-仿真可调用对象)
@@ -1259,7 +1266,7 @@ str.**upper**()
 <br />  
 
 #### 格式化字符串字面值（f-字符串）
-**本小结的内容是在Python 3.13的标准库文档中增加的，本节的最后一个 Python 需要3.13及以上版本。** 
+**本小结的内容是在Python 3.13的标准库文档中增加的，本节的最后一个代码块需要 Python 3.13 及以上版本的。** 
 
 *在版本 3.6 中新增。* 
 
@@ -3100,7 +3107,38 @@ DictWriter.**writeheader()**
 这个模块提供了一种便携的方式使用依赖于操作系统的功能。如果你仅仅只想读或写一个文件请看 [open()](https://docs.python.org/3/library/functions.html#open)，如果你想操作路径，请看 [os.path](https://docs.python.org/3/library/os.path.html#module-os.path) 模块，如果你想在命令行下读取所有文件中的所有行请看 [fileinput](https://docs.python.org/3/library/fileinput.html#module-fileinput) 模块。创建临时文件和目录请看 [tempfile](https://docs.python.org/3/library/tempfile.html#module-tempfile) 模块，高级文件和目录处理请看 [shutil](https://docs.python.org/3/library/shutil.html#module-shutil) 模块。
 
 #### 进程参数
-这些函数和数据项提供了操作当前进程和用户的信息。
+这些函数和数据项提供了操作当前进程和用户的信息。 
+
+os.**environ** 
+一个 [映射](https://docs.python.org/zh-cn/3.13/glossary.html#term-mapping) 对象，其中键值是代表进程环境的字符串。 例如，`environ['HOME']` 是你的主目录（在某些平台上）的路径名，相当于 C 中的 `getenv("HOME")`。
+
+```py
+>>> import os
+>>> os.environ['HOME']
+'/home/pi'
+>>> os.environ.get('HTTP_PROXY')
+'http://192.168.1.170:1081'
+>>> 
+```
+
+通过映射对象的 get() 方法获取环境变量永远不会报错，对于不存在的环境变量会直接返回空值。 
+
+这个映射是在第一次导入 [os](https://docs.python.org/zh-cn/3.13/library/os.html#module-os) 模块时捕获的，通常作为 Python 启动时处理 `site.py` 的一部分。除了通过直接修改 [os.environ](https://docs.python.org/zh-cn/3.13/library/os.html#os.environ) 之外，在此之后对环境所做的更改不会反映在 [os.environ](https://docs.python.org/zh-cn/3.13/library/os.html#os.environ) 中。
+
+该映射除了可以用于查询环境外，还能用于修改环境。当该映射被修改时，将自动调用 [putenv()](https://docs.python.org/zh-cn/3.13/library/os.html#os.putenv)。
+
+在 Unix 系统上，键和值会使用 [sys.getfilesystemencoding()](https://docs.python.org/zh-cn/3.13/library/sys.html#sys.getfilesystemencoding) 和 `'surrogateescape'` 的错误处理。如果你想使用其他的编码，使用 [environb](https://docs.python.org/zh-cn/3.13/library/os.html#os.environb)。
+
+在 Windows 上，这些键会被转换为大写形式。 这也会在获取、设置或删除条目时被应用。 例如，`environ['monty'] = 'python'` 会将键 `'MONTY'` 映射到值 `'python'`。
+
+**备注：** 直接调用 [putenv()](https://docs.python.org/zh-cn/3.13/library/os.html#os.putenv) 并不会影响 [os.environ](https://docs.python.org/zh-cn/3.13/library/os.html#os.environ) ，所以推荐直接修改 [os.environ](https://docs.python.org/zh-cn/3.13/library/os.html#os.environ) 。
+
+**备注：** 在某些平台上，包括 FreeBSD 和 macOS 等，设置 `environ` 可能会导致内存泄漏。 请参阅有关 `putenv()` 的系统文档。 
+
+可以删除映射中的元素来删除对应的环境变量。当从 [os.environ](https://docs.python.org/zh-cn/3.13/library/os.html#os.environ) 删除元素时，以及调用 pop() 或 clear() 之一时，将自动调用 [unsetenv()](https://docs.python.org/zh-cn/3.13/library/os.html#os.unsetenv)。
+
+*在 3.9 版本发生变更：* 已更新并支持了 [PEP 584](https://peps.python.org/pep-0584/) 的合并 (`|`) 和更新 (`|=`) 运算符。  
+<br />  
 
 os.**getpid()**  
 返回当前的进程id。
@@ -5438,7 +5476,47 @@ traceback.**print_exception(**_etype, value, tb, limit=None, file=None, chain=Tr
 
 # Python语言参考
 ## 3. 数据模型
-### 3.2. 标准类型层次结构
+### 3.2. 标准类型层次结构 
+以下是 Python 内置类型的列表。扩展模块 (具体实现会以 C, Java 或其他语言编写) 可以定义更多的类型。未来版本的 Python 可能会加入更多的类型 (例如有理数、高效存储的整型数组等等)，不过新增类型往往都是通过标准库来提供的。
+
+以下部分类型的描述中包含有 '特殊属性列表' 段落。这些属性提供对具体实现的访问而非通常使用。它们的定义在未来可能会改变。 
+
+#### 3.2.1. None
+此类型只有一种取值。是一个具有此值的单独对象。此对象通过内置名称 `None` 访问。在许多情况下它被用来表示空值，例如未显式指明返回值的函数将返回 None。它的逻辑值为假。  
+<br />  
+
+#### 3.2.7. 映射 
+此类对象表示由任意索引集合所索引的对象的集合。通过下标 `a[k]` 可在映射 `a` 中选择索引为 `k` 的条目；这可以在表达式中使用，也可作为赋值或 [del](https://docs.python.org/zh-cn/3.13/reference/simple_stmts.html#del) 语句的目标。内置函数 [len()](https://docs.python.org/zh-cn/3.13/library/functions.html#len) 可返回一个映射中的条目数。
+
+目前只有一种内生映射类型:
+
+##### 3.2.7.1. 字典
+此类对象表示由几乎任意值作为索引的有限个对象的集合。唯一不能作为键的值的类型是那些包含列表、字典或其他按值比较而不是按对象身份比较的可变类型的值。原因是字典的有效实现需要键的哈希值保持不变。用作键的数字类型遵循正常的数字比较规则: 如果两个数字相等 (例如 `1` 和 `1.0`) 则它们均可来用来索引同一个字典条目。
+
+字典会保留插入顺序，这意味着键将以它们被添加的顺序在字典中依次产生。 替换某个现有的键不会改变其顺序，但是移除某个键再重新插入则会将其添加到末尾而不会保留其原有位置。
+
+字典是可变对象；它们可通过 `{}` 符号来创建（参见 [字典显示](https://docs.python.org/zh-cn/3.13/reference/expressions.html#dict) 一节）。
+
+扩展模块 [dbm.ndbm](https://docs.python.org/zh-cn/3.13/library/dbm.html#module-dbm.ndbm) 和 [dbm.gnu](https://docs.python.org/zh-cn/3.13/library/dbm.html#module-dbm.gnu) 提供了额外的映射类型示例，[collections](https://docs.python.org/zh-cn/3.13/library/collections.html#module-collections) 模块也是如此。
+
+*在 3.7 版本发生变更：* 在 Python 3.6 版之前字典不会保留插入顺序。 在 CPython 3.6 中插入顺序会被保留，但这在当时被当作是一个实现细节而非确定的语言特性。  
+<br />  
+
+#### 3.2.8. 可调用类型
+此类型可以被应用于函数调用操作 (参见 [调用](https://docs.python.org/zh-cn/3.13/reference/expressions.html#calls) 小节):
+
+##### 3.2.8.1. 用户定义函数
+用户定义函数对象可通过函数定义来创建 (参见 [函数定义](https://docs.python.org/zh-cn/3.13/reference/compound_stmts.html#function) 小节)。它被调用时应附带一个参数列表，其中包含的条目应与函数所定义的形参列表一致。
+
+###### 3.2.8.1.1. 特殊的只读属性
+属性                         |含意
+-----------------------------|-----
+function.**\_\_globals\_\_** |对存放该函数中 [全局变量](https://docs.python.org/zh-cn/3.13/reference/executionmodel.html#naming) 的 [字典](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#dict) 的引用 —— 函数定义所在模块的全局命名空间。 
+function.**\_\_closure\_\_** |`None` 或单元的 [tuple](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#tuple)，其中包含了在函数的 [代码对象](https://docs.python.org/3.13/reference/datamodel.html#function.__code__) 的 [co_freevars](https://docs.python.org/3.13/reference/datamodel.html#codeobject.co_freevars) 中对指定名称的绑定。<br>单元对象具有 `cell_contents` 属性。这可被用来获取以及设置单元的值。 
+
+###### 3.2.8.1.2. 特殊的可写属性
+
+
 **模块**  
 　　模块是 Python 代码的基本组织单元，模块由 [import](https://docs.python.org/3/reference/simple_stmts.html#import) 语句 (参见 [import](https://docs.python.org/3/reference/simple_stmts.html#import))，或通过调用函数如 [importlib.import_module()](https://docs.python.org/3/library/importlib.html#importlib.import_module) 和内置的 [\_\_import\_\_()](https://docs.python.org/3/library/functions.html#__import__) 调用 [导入系统](https://docs.python.org/3/reference/import.html#importsystem) 所创建。每个模块对象都有一个通过一个字典对象实现的命名空间 (这就是模块中定义的函数的 `__globals__` 属性所引用的字典)。属性引用被转换为在字典中查找，例如，`m.x` 等同于 `m.__dict__["x"]`。模块对象不包含用于初始化模块的代码对象 (因为一旦初始化完成就不需要它了)。
 
