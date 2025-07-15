@@ -5512,10 +5512,44 @@ traceback.**print_exception(**_etype, value, tb, limit=None, file=None, chain=Tr
 属性                         |含意
 -----------------------------|-----
 function.**\_\_globals\_\_** |对存放该函数中 [全局变量](https://docs.python.org/zh-cn/3.13/reference/executionmodel.html#naming) 的 [字典](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#dict) 的引用 —— 函数定义所在模块的全局命名空间。 
-function.**\_\_closure\_\_** |`None` 或单元的 [tuple](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#tuple)，其中包含了在函数的 [代码对象](https://docs.python.org/3.13/reference/datamodel.html#function.__code__) 的 [co_freevars](https://docs.python.org/3.13/reference/datamodel.html#codeobject.co_freevars) 中对指定名称的绑定。<br><br>单元对象具有 `cell_contents` 属性。这可被用来获取以及设置单元的值。 
+function.**\_\_closure\_\_** |`None` 或单元的 [tuple](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#tuple)，其中包含了在函数的 [代码对象](https://docs.python.org/3.13/reference/datamodel.html#function.__code__) 的 [co_freevars](https://docs.python.org/3.13/reference/datamodel.html#codeobject.co_freevars) 属性中对指定名称的绑定。<br><br>单元对象具有 `cell_contents` 属性。这可被用来获取以及设置单元的值。 
 
 ###### 3.2.8.1.2. 特殊的可写属性
+这些属性大多会检查赋值的类型：
 
+属性                              |含义 
+----------------------------------|------------------------- 
+function.**\_\_doc\_\_**          |函数的文档字符串，或者如果不可用则为 `None`。 
+function.**\_\_name\_\_**         |函数的名称。 另请参阅: [\_\_name\_\_](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#definition.__name__) 属性。 
+function.**\_\_qualname\_\_**     |函数的 [qualified name](https://docs.python.org/zh-cn/3.13/glossary.html#term-qualified-name)。 另请参阅: [\_\_qualname\_\_](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#definition.__qualname__) 属性。<br><br>*在版本 3.3 中增加。* 
+function.**\_\_module\_\_**       |该函数所属模块的名称，没有则为 `None`。 
+function.**\_\_defaults\_\_**     |由具有默认值的形参的默认 [parameter](https://docs.python.org/zh-cn/3.13/glossary.html#term-parameter) 值组成的 [tuple](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#tuple)，或者如果无任何形参具有默认值则为 `None`。 
+function.**\_\_code\_\_**         |代表已编译的函数体的 [代码对象](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#code-objects)。 
+function.**\_\_dict\_\_**         |命名空间支持任意函数属性。 另请参阅: [\_\_dict\_\_](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#object.__dict__) 属性。 
+function.**\_\_annotations\_\_**  |一个包含 [参数](https://docs.python.org/zh-cn/3.13/glossary.html#term-parameter) 注释的字典。字典的键是参数名称，而 `'return'` 对应 return 的注释，如果提供的话。另请参见：[注解最佳实践](https://docs.python.org/zh-cn/3.13/howto/annotations.html#annotations-howto)。 
+function.**\_\_kwdefaults\_\_**   |一个仅包含关键字 [形参](https://docs.python.org/3.13/glossary.html#term-parameter) 默认值的 [字典](https://docs.python.org/3.13/library/stdtypes.html#dict)。 
+function.**\_\_type\_params\_\_** |一个包含 [通用函数](https://docs.python.org/3.13/reference/compound_stmts.html#generic-functions) [类型形参](https://docs.python.org/3.13/reference/compound_stmts.html#type-params) 的 [元组](https://docs.python.org/3.13/library/stdtypes.html#tuple)。<br><br>*在版本 3.12 中新增。* 
+
+函数对象也支持获取和设置任意属性，举例来说，这可被用于将元数据关联到函数。 通常使用带点号的属性标注来获取和设置这样的属性。 
+
+CPython 目前的实现仅支持用户自定义函数上的函数属性。 未来可能会支持 [内置函数](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#builtin-functions) 上的函数属性。 
+
+```py
+>>> sys.version_info
+sys.version_info(major=3, minor=11, micro=2, releaselevel='final', serial=0)
+>>> len.__doc__
+'Return the number of items in a container.'
+>>> len.__module__
+'builtins'
+>>> len.__annotations__
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: 'builtin_function_or_method' object has no attribute '__annotations__'
+>>> 
+``` 
+
+有关函数定义的额外信息可以从其 [代码对象](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#code-objects) 中提取（可通过 [\_\_code\_\_](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#function.__code__) 属性来访问）。 
+<br>  
 
 **模块**  
 　　模块是 Python 代码的基本组织单元，模块由 [import](https://docs.python.org/3/reference/simple_stmts.html#import) 语句 (参见 [import](https://docs.python.org/3/reference/simple_stmts.html#import))，或通过调用函数如 [importlib.import_module()](https://docs.python.org/3/library/importlib.html#importlib.import_module) 和内置的 [\_\_import\_\_()](https://docs.python.org/3/library/functions.html#__import__) 调用 [导入系统](https://docs.python.org/3/reference/import.html#importsystem) 所创建。每个模块对象都有一个通过一个字典对象实现的命名空间 (这就是模块中定义的函数的 `__globals__` 属性所引用的字典)。属性引用被转换为在字典中查找，例如，`m.x` 等同于 `m.__dict__["x"]`。模块对象不包含用于初始化模块的代码对象 (因为一旦初始化完成就不需要它了)。
