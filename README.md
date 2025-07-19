@@ -130,6 +130,7 @@
                 * [3.2.8.1. 用户定义函数](#3281-用户定义函数)
                     * [3.2.8.1.1. 特殊的只读属性](#32811-特殊的只读属性)
                     * [3.2.8.1.2. 特殊的可写属性](#32812-特殊的可写属性)
+                * [3.2.8.2. 实例方法](#3282-实例方法)
         * [3.3. 特殊方法名](#33-特殊方法名)
             * [3.3.1. 基本自定义](#331-基本自定义)
             * [3.3.6. 仿真可调用对象](#336-仿真可调用对象)
@@ -5548,8 +5549,36 @@ AttributeError: 'builtin_function_or_method' object has no attribute '__annotati
 >>> 
 ``` 
 
-有关函数定义的额外信息可以从其 [代码对象](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#code-objects) 中提取（可通过 [\_\_code\_\_](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#function.__code__) 属性来访问）。 
+有关函数定义的额外信息可以从其 [代码对象](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#code-objects) 中提取（可通过 [\_\_code\_\_](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#function.__code__) 属性来访问）。  
 <br>  
+
+##### 3.2.8.2. 实例方法
+实例方法用于结合类、类实例和任何可调用对象 (通常为用户定义函数)。 
+
+特殊的只读属性：
+
+属性                      |含义 
+--------------------------|---------------------------    
+method.**\_\_self\_\_**   |指向方法所 [绑定](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#method-binding) 的类实例对象。 
+method.**\_\_func\_\_**   |指向原本的 [函数对象](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#user-defined-funcs) 
+method.**\_\_doc\_\_**    |方法的文档 (等同于 [method.\_\_func\_\_.\_\_doc\_\_](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#function.__doc__))。 如果原始函数具有文档字符串则为一个 [字符串](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#str)，否则为 `None`。 
+method.**\_\_name\_\_**   |方法名称（与 [method.\_\_func\_\_.\_\_name\_\_](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#function.__name__) 相同） 
+method.**\_\_module\_\_** |方法定义所在模块的名称，如不可用则为 `None`。 
+
+方法还支持读取（但不能设置）下层 [函数对象](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#user-defined-funcs) 的任意函数属性。
+
+当获取一个类的属性时（可能是通过该类的实例）用户自定义方法对象可能会被创建，如果该属性是一个用户自定义[函数对象](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#user-defined-funcs)或者一个 [classmethod](https://docs.python.org/zh-cn/3.13/library/functions.html#classmethod) 对象的话。 
+
+当通过从类的实例获取一个用户自定义 [函数对象](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#user-defined-funcs) 的方式创建一个实例方法对象时，该方法对象的 [\_\_self\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#method.__self__) 属性即为该实例，而该方法对象将被称作已 *绑定*。 该新建方法的 [\_\_func\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#method.__func__) 属性将是原来的函数对象。 
+
+当通过从类或实例获取一个 [classmethod](https://docs.python.org/zh-cn/3.12/library/functions.html#classmethod) 对象的方式创建一个实例方法对象时，该对象的 [\_\_self\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#method.__self__) 属性即为该类本身，而其 [\_\_func\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#method.__func__) 属性将是类方法对应的下层函数对象。
+
+当一个实例方法被调用时，会调用对应的下层函数 ([\_\_func\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#method.__func__))，并将类实例 ([\_\_self\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#method.__self__)) 插入参数列表的开头。 例如，当 C 是一个包含 f() 函数定义的类，而 `x` 是 C 的一个实例，则调用 `x.f(1)` 就等价于调用 `C.f(x, 1)`。
+
+当一个实例方法对象是派生自一个 [classmethod](https://docs.python.org/zh-cn/3.12/library/functions.html#classmethod) 对象时，保存在 [\_\_self\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#method.__self__) 中的“类实例”实际上会是该类本身，因此无论是调用 `x.f(1)` 还是 `C.f(1)` 都等同于调用 `f(C,1)`，其中 `f` 为对应的下层函数。
+
+需要重点关注的是作为类实例的属性的用户自定义函数不会被转换为绑定方法；这 *只会* 在函数是类的属性时才会发生。 
+<br><br>
 
 **模块**  
 　　模块是 Python 代码的基本组织单元，模块由 [import](https://docs.python.org/3/reference/simple_stmts.html#import) 语句 (参见 [import](https://docs.python.org/3/reference/simple_stmts.html#import))，或通过调用函数如 [importlib.import_module()](https://docs.python.org/3/library/importlib.html#importlib.import_module) 和内置的 [\_\_import\_\_()](https://docs.python.org/3/library/functions.html#__import__) 调用 [导入系统](https://docs.python.org/3/reference/import.html#importsystem) 所创建。每个模块对象都有一个通过一个字典对象实现的命名空间 (这就是模块中定义的函数的 `__globals__` 属性所引用的字典)。属性引用被转换为在字典中查找，例如，`m.x` 等同于 `m.__dict__["x"]`。模块对象不包含用于初始化模块的代码对象 (因为一旦初始化完成就不需要它了)。
