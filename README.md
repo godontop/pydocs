@@ -5754,16 +5754,16 @@ module**.\_\_dict\_\_**
 
 属性                          |含义 
 ------------------------------|-------------------------------------
-type**.\_\_name\_\_**         |类的名称。 另请参阅: [\_\_name\_\_ 属性](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#definition.__name__)。 
+type.**\_\_name\_\_**         |类的名称。 另请参阅: [\_\_name\_\_ 属性](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#definition.__name__)。 
 type.**\_\_qualname\_\_**     |类的 [qualified name](https://docs.python.org/zh-cn/3.12/glossary.html#term-qualified-name)。 另请参阅: [\_\_qualname\_\_ 属性](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#definition.__qualname__)。 
-type**.\_\_module\_\_**       |类定义所在模块的名称。 
-type**.\_\_dict\_\_**         |一个提供类的命名空间的只读视图的 [映射代理](https://docs.python.org/zh-cn/3.12/library/types.html#types.MappingProxyType)。 另请参阅: [\_\_dict\_\_ 属性](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#object.__dict__)。 
-type**.\_\_bases\_\_**        |一个包含类的基类的 [tuple](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)，对于定义为 `class X(A, B, C)` 的类，`X.__bases__` 将等于 `(A, B, C)`。 
-type**.\_\_doc\_\_**          |类的文档字符串，如果未定义则为 `None`。 不会被子类继承。 
-type**.\_\_annotations\_\_**  |一个包含在类体执行期间收集的 [变量注释](https://docs.python.org/zh-cn/3.12/glossary.html#term-variable-annotation) 的字典。 有关使用 \_\_annotations\_\_ 的最佳实践，请参阅 [注释最佳实践](https://docs.python.org/zh-cn/3.12/howto/annotations.html#annotations-howto)。<br><br>
-**小心** 当存在元类时直接访问类对象的 \_\_annotations\_\_ 属性可能产生不正确的结果。 此外，对于某些类该属性可能不存在。 请使用 [inspect.get_annotations()](https://docs.python.org/zh-cn/3.12/library/inspect.html#inspect.get_annotations) 来安全地提取类注释。 
-type**.\_\_type\_params\_\_** |一个包含 [通用类](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#generic-classes) 的 [类型形参](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#type-params) 的[元组](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)。<br><br>*在版本 3.12 中新增。* 
-type**.\_\_mro\_\_**          |由在方法解析期间当查找基类时将被纳入考虑的类组成的[元组](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)。 
+type.**\_\_module\_\_**       |类定义所在模块的名称。 
+type.**\_\_dict\_\_**         |一个提供类的命名空间的只读视图的 [映射代理](https://docs.python.org/zh-cn/3.12/library/types.html#types.MappingProxyType)。 另请参阅: [\_\_dict\_\_ 属性](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#object.__dict__)。 
+type.**\_\_bases\_\_**        |一个包含类的基类的 [tuple](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)，对于定义为 `class X(A, B, C)` 的类，`X.__bases__` 将等于 `(A, B, C)`。 
+type.**\_\_doc\_\_**          |类的文档字符串，如果未定义则为 `None`。 不会被子类继承。 
+type.**\_\_annotations\_\_**  |一个包含在类体执行期间收集的 [变量注释](https://docs.python.org/zh-cn/3.12/glossary.html#term-variable-annotation) 的字典。 有关使用 \_\_annotations\_\_ 的最佳实践，请参阅 [注释最佳实践](https://docs.python.org/zh-cn/3.12/howto/annotations.html#annotations-howto)。<br><br>**小心** 当存在元类时直接访问类对象的 \_\_annotations\_\_ 属性可能产生不正确的结果。 此外，对于某些类该属性可能不存在。 请使用 [inspect.get_annotations()](https://docs.python.org/zh-cn/3.12/library/inspect.html#inspect.get_annotations) 来安全地提取类注释。 
+type.**\_\_type\_params\_\_** |一个包含 [通用类](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#generic-classes) 的 [类型形参](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#type-params) 的[元组](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)。<br><br>*在版本 3.12 中新增。* 
+type.**\_\_mro\_\_**          |由在方法解析期间当查找基类时将被纳入考虑的类组成的[元组](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)。 
+
 <br><br>
 
 ##### 3.2.10.2. 特殊方法
