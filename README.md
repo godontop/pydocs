@@ -131,6 +131,20 @@
                     * [3.2.8.1.1. 特殊的只读属性](#32811-特殊的只读属性)
                     * [3.2.8.1.2. 特殊的可写属性](#32812-特殊的可写属性)
                 * [3.2.8.2. 实例方法](#3282-实例方法)
+                * [3.2.8.3. 生成器函数](#3283-生成器函数)
+                * [3.2.8.4. 协程函数](#3284-协程函数)
+                * [3.2.8.5. 异步生成器函数](#3285-异步生成器函数)
+                * [3.2.8.6. 内置函数](#3286-内置函数)
+                * [3.2.8.7. 内置方法](#3287-内置方法)
+                * [3.2.8.8. 类](#3288-类)
+                * [3.2.8.9. 类实例](#3289-类实例)
+            * [3.2.9. 模块](#329-模块)
+                * [3.2.9.1. 模块对象上与导入相关的属性](#3291-模块对象上与导入相关的属性)
+                * [3.2.9.2. 模块对象上的其他可写属性](#3292-模块对象上的其他可写属性)
+                * [3.2.9.3. 模块字典](#3293-模块字典)
+            * [3.2.10. 自定义类](#3210-自定义类)
+                * [3.2.10.1. 特殊属性](#32101-特殊属性)
+                * [3.2.10.2. 特殊方法](#32102-特殊方法)
         * [3.3. 特殊方法名](#33-特殊方法名)
             * [3.3.1. 基本自定义](#331-基本自定义)
             * [3.3.6. 仿真可调用对象](#336-仿真可调用对象)
@@ -5580,10 +5594,196 @@ method.**\_\_module\_\_** |方法定义所在模块的名称，如不可用则�
 需要重点关注的是作为类实例的属性的用户自定义函数不会被转换为绑定方法；这 *只会* 在函数是类的属性时才会发生。 
 <br><br>
 
-**模块**  
-　　模块是 Python 代码的基本组织单元，模块由 [import](https://docs.python.org/3/reference/simple_stmts.html#import) 语句 (参见 [import](https://docs.python.org/3/reference/simple_stmts.html#import))，或通过调用函数如 [importlib.import_module()](https://docs.python.org/3/library/importlib.html#importlib.import_module) 和内置的 [\_\_import\_\_()](https://docs.python.org/3/library/functions.html#__import__) 调用 [导入系统](https://docs.python.org/3/reference/import.html#importsystem) 所创建。每个模块对象都有一个通过一个字典对象实现的命名空间 (这就是模块中定义的函数的 `__globals__` 属性所引用的字典)。属性引用被转换为在字典中查找，例如，`m.x` 等同于 `m.__dict__["x"]`。模块对象不包含用于初始化模块的代码对象 (因为一旦初始化完成就不需要它了)。
+##### 3.2.8.3. 生成器函数
+一个使用 [yield](https://docs.python.org/zh-cn/3.12/reference/simple_stmts.html#yield) 语句（见 [yield 语句](https://docs.python.org/zh-cn/3.12/reference/simple_stmts.html#yield) 章节）的函数或方法被称为 *生成器函数*。 这样的函数在被调用时，总是返回一个可以执行该函数体的 [iterator](https://docs.python.org/zh-cn/3.12/glossary.html#term-iterator) 对象：调用该迭代器的 [iterator.\_\_next\_\_()](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#iterator.__next__) 方法将导致这个函数一直运行直到它使用 yield 语句提供一个值。 当这个函数执行 [return](https://docs.python.org/zh-cn/3.12/reference/simple_stmts.html#return) 语句或到达函数体末尾时，将引发 [StopIteration](https://docs.python.org/zh-cn/3.12/library/exceptions.html#StopIteration) 异常并且该迭代器将到达所返回的值的集合的末尾。
+
+##### 3.2.8.4. 协程函数
+使用 [async def](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#async-def) 来定义的函数或方法就被称为 *协程函数*。这样的函数在被调用时会返回一个 [coroutine](https://docs.python.org/zh-cn/3.12/glossary.html#term-coroutine) 对象。它可能包含 [await](https://docs.python.org/zh-cn/3.12/reference/expressions.html#await) 表达式以及 [async with](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#async-with) 和 [async for](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#async-for) 语句。详情可参见 [协程对象](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#coroutine-objects) 一节。
+
+##### 3.2.8.5. 异步生成器函数
+使用 [async def](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#async-def) 来定义并使用了 [yield](https://docs.python.org/zh-cn/3.12/reference/simple_stmts.html#yield) 语句的函数或方法被称为 *异步生成器函数*。 这样的函数在被调用时，将返回一个 [asynchronous iterator](https://docs.python.org/zh-cn/3.12/glossary.html#term-asynchronous-iterator) 对象，该对象可在 [async for](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#async-for) 语句中被用来执行函数体。
+
+调用异步迭代器的 [aiterator.\_\_anext\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#object.__anext__) 方法将返回一个 [awaitable](https://docs.python.org/zh-cn/3.12/glossary.html#term-awaitable)，此对象会在被等待时执行直到使用 [yield](https://docs.python.org/zh-cn/3.12/reference/simple_stmts.html#yield) 表达式产生一个值。 当函数执行到空的 [return](https://docs.python.org/zh-cn/3.12/reference/simple_stmts.html#return) 语句或函数末尾时，将会引发 [StopAsyncIteration](https://docs.python.org/zh-cn/3.12/library/exceptions.html#StopAsyncIteration) 异常并且异步迭代器也将到达要产生的值集合的末尾。
+<br><br>
+
+##### 3.2.8.6. 内置函数
+内置函数对象是对一个 C 函数的封装。内置函数的例子包括 [len()](https://docs.python.org/zh-cn/3.12/library/functions.html#len) 和 [math.sin()](https://docs.python.org/zh-cn/3.12/library/math.html#math.sin) 等 ([math](https://docs.python.org/zh-cn/3.12/library/math.html#module-math) 是一个标准内置模块)。 参数的数量和类型是由 C 函数确定的。 特殊的只读属性：
+
+* \_\_doc\_\_ 是函数的文档字符串，或者如果不可用则为 `None`。 参见 [function.\_\_doc\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#function.__doc__)。 
+* \_\_name\_\_ 是函数的名称。 参见 [function.\_\_name\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#function.__name__)。 
+* \_\_self\_\_ 被设为 `None` (但请参见下一项)。 
+* \_\_module\_\_ 是函数定义所在模块的名称，或者如果不可用则为 `None`。 参见 [function.\_\_module\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#function.__module__)。
+<br><br>
+
+##### 3.2.8.7. 内置方法
+此类型实际上是内置函数的另一种形式，只不过还包含了一个转入 C 函数的对象作为隐式的额外参数。 内置方法的一个例子是 `alist.append()`，其中 *alist* 是一个列表对象。 在此示例中，特殊的只读属性 \_\_self\_\_ 会被设为 *alist* 所标记的对象。（该属性的语义与 [其他实例方法](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#method.__self__) 的相同。）
+<br><br>
+
+##### 3.2.8.8. 类
+类是可调用对象。 这些对象通常是用作创建自身实例的“工厂”，但类也可以有重载 [\_\_new\_\_()](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#object.__new__) 的变体类型。 调用的参数会传递给 \_\_new\_\_()，并且在通常情况下，也会传递给 [\_\_init\_\_()](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#object.__init__) 来初始化新的实例。
+<br><br>
+
+##### 3.2.8.9. 类实例
+任意类的实例可以通过在其所属类中定义 [\_\_call\_\_()](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#object.__call__) 方法变成可调用对象。
+
+#### 3.2.9. 模块 
+模块是 Python 代码的基本组织单元，由 [导入系统](https://docs.python.org/zh-cn/3.12/reference/import.html#importsystem) 创建，它是通过 [import](https://docs.python.org/3/reference/simple_stmts.html#import) 语句，或是通过调用函数如 [importlib.import_module()](https://docs.python.org/3/library/importlib.html#importlib.import_module) 和内置的 [\_\_import\_\_()](https://docs.python.org/3/library/functions.html#__import__) 等函数来唤起。每个模块对象都有一个通过一个字典对象实现的命名空间 (这就是模块中定义的函数的 `__globals__` 属性所引用的字典)。属性引用被转换为在字典中查找，例如，`m.x` 等同于 `m.__dict__["x"]`。模块对象不包含用于初始化模块的代码对象 (因为一旦初始化完成就不需要它了)。
 
 属性赋值更新模块的命名空间字典，例如，`m.x = 1` 等价于 `m.__dict__["x"] = 1`。
+<br><br>
+
+##### 3.2.9.1. 模块对象上与导入相关的属性
+模块对象具有下列与 [导入系统](https://docs.python.org/zh-cn/3.12/reference/import.html#importsystem) 相关的属性。 当使用关联到导入系统的机制创建模块时，这些属性将在 [loader](https://docs.python.org/zh-cn/3.12/glossary.html#term-loader) 执行和加载模块之前基于模块的 [规格](https://docs.python.org/zh-cn/3.12/glossary.html#term-module-spec) 来填充。
+
+要动态创建模块而非使用导入系统创建，建议使用 [importlib.util.module_from_spec()](https://docs.python.org/zh-cn/3.12/library/importlib.html#importlib.util.module_from_spec)，它会将各种由导入控制的属性设置为适当的值。也可以使用 [types.ModuleType](https://docs.python.org/zh-cn/3.12/library/types.html#types.ModuleType) 构造器直接创建模块，但这种方法更容易出错，因为在使用这种方法时，必须在创建模块对象后手动设置其大部分属性。
+
+**小心:** 对 [\_\_name\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#module.__name__) 以外的用例，**强烈** 建议使用 [\_\_spec\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#module.__spec__) 及其属性，而非此处列出的其他单独属性。请注意更新 \_\_spec\_\_ 上的属性时不会连带更新模块本身的同名属性。
+
+```py
+>>> import typing
+>>> typing.__name__, typing.__spec__.name
+('typing', 'typing')
+>>> typing.__spec__.name = 'spelling'
+>>> typing.__name__, typing.__spec__.name
+('typing', 'spelling')
+>>> typing.__name__ = 'keyboard_smashing'
+>>> typing.__name__, typing.__spec__.name
+('keyboard_smashing', 'spelling')
+>>> 
+```
+
+module.**\_\_name\_\_** 
+用于在导入系统中唯一地标识模块的名称。 对于直接执行的模块，这将被设为 `"__main__"`。
+
+该属性必须被设为模块的完整限定名称。 它应当与 [module.\_\_spec\_\_.name](https://docs.python.org/zh-cn/3.12/library/importlib.html#importlib.machinery.ModuleSpec.name) 的值相匹配。
+
+module.**\_\_spec\_\_** 
+模块与导入系统相关联的状态的记录。
+
+设置为导入模块时使用的 [模块规格](https://docs.python.org/zh-cn/3.12/library/importlib.html#importlib.machinery.ModuleSpec)。 请参阅 [模块规格说明](https://docs.python.org/zh-cn/3.12/reference/import.html#module-specs) 了解详情。
+
+*在版本 3.4 中新增。* 
+
+module.**\_\_package\_\_** 
+模块所属的 [package](https://docs.python.org/zh-cn/3.12/glossary.html#term-package)。
+
+如果一个模块是顶层模块（不是任何包的一部分），该属性应被设置为空字符串 `''`。否则，它应被设置为模块所属包的名字（如果模块本身是一个包，它可以是 [module.\_\_name\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#module.__name__) 的值）。详见 [PEP 366](https://peps.python.org/pep-0366/)。
+
+在为主模块计算显式相对导入时，这个属性而非 [\_\_name\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#module.__name__) 被使用。在使用 [types.ModuleType](https://docs.python.org/zh-cn/3.12/library/types.html#types.ModuleType) 构造器动态创建模块时会被默认设为 `None`。要确保这个属性是 [str](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#str)，请使用 [importlib.util.module_from_spec()](https://docs.python.org/zh-cn/3.12/library/importlib.html#importlib.util.module_from_spec)。
+
+**强烈** 建议使用 [module.\_\_spec\_\_.parent](https://docs.python.org/zh-cn/3.12/library/importlib.html#importlib.machinery.ModuleSpec.parent) 而非 module.\_\_package\_\_。 [\_\_package\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#module.__package__) 现在仅作 \_\_spec\_\_.parent 未被设置时的回退路径，且这条回退路径已被弃用。
+
+*在 3.4 版本发生变更:* 对于使用 [types.ModuleType](https://docs.python.org/zh-cn/3.12/library/types.html#types.ModuleType) 构造器动态创建的模块，该属性现在默认为 `None`。先前该属性是可选的。
+
+*在 3.6 版本发生变更:* \_\_package\_\_ 的值应与 [\_\_spec\_\_.parent](https://docs.python.org/zh-cn/3.12/library/importlib.html#importlib.machinery.ModuleSpec.parent) 相同。[\_\_package\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#module.__package__) 现在仅作导入解析期间 \_\_spec\_\_.parent 未被定义时的回退值。
+
+*在 3.10 版本发生变更：* 如果导入解析回退到 \_\_package\_\_ 而非 [\_\_spec\_\_.parent](https://docs.python.org/zh-cn/3.12/library/importlib.html#importlib.machinery.ModuleSpec.parent)，会引发 [ImportWarning](https://docs.python.org/zh-cn/3.12/library/exceptions.html#ImportWarning)。
+
+*在 3.12 版本发生变更：* 在导入解析期间回退到 \_\_package\_\_ 时会引发 [DeprecationWarning](https://docs.python.org/zh-cn/3.12/library/exceptions.html#DeprecationWarning) 而非 [ImportWarning](https://docs.python.org/zh-cn/3.12/library/exceptions.html#ImportWarning)。
+
+module.**\_\_loader\_\_** 
+导入系统用来加载模块的 [loader](https://docs.python.org/zh-cn/3.12/glossary.html#term-loader) 对象。
+
+该属性主要适用于内省，但也可用于额外的加载器专属功能，例如获取与加载器相关联的数据。
+
+对于使用 [types.ModuleType](https://docs.python.org/zh-cn/3.12/library/types.html#types.ModuleType) 构造器动态创建的模块 \_\_loader\_\_ 默认为 `None`；请改用 [importlib.util.module_from_spec()](https://docs.python.org/zh-cn/3.12/library/importlib.html#importlib.util.module_from_spec) 来确保将该属性设为 [loader](https://docs.python.org/zh-cn/3.12/glossary.html#term-loader) 对象。
+
+**强烈** 建议你使用 [module.\_\_spec\_\_.loader](https://docs.python.org/zh-cn/3.12/library/importlib.html#importlib.machinery.ModuleSpec.loader) 来代替 module.\_\_loader\_\_。
+
+*在 3.4 版本发生变更：* 对于使用 [types.ModuleType](https://docs.python.org/zh-cn/3.12/library/types.html#types.ModuleType) 构造器动态创建的模块，该属性现在默认为 `None`。先前该属性是可选的。
+
+*从版本 3.12 开始弃用，将在版本 3.16 中被删除：* 当设置 \_\_spec\_\_.loader 失败时在模块上设置 \_\_loader\_\_ 的做法已被弃用。 在 Python 3.16 中，\_\_loader\_\_ 将不会再被设置或被导入系统或标准库纳入考虑。
+
+module.**\_\_path\_\_** 
+一个（可能为空的）枚举用于查找包的子模块的位置的由字符串组成的 [sequence](https://docs.python.org/zh-cn/3.12/glossary.html#term-sequence)。 非包模块应当没有 \_\_path\_\_ 属性。 详情参见 [模块的 \_\_path\_\_ 属性](https://docs.python.org/zh-cn/3.12/reference/import.html#package-path-rules)。
+
+**强烈** 建议你使用 [module.\_\_spec\_\_.submodule_search_locations](https://docs.python.org/zh-cn/3.12/library/importlib.html#importlib.machinery.ModuleSpec.submodule_search_locations) 来代替 module.\_\_path\_\_。
+
+module.**\_\_file\_\_** 
+module.**\_\_cached\_\_** 
+\_\_file\_\_ 和 \_\_cached\_\_ 都是可设也可不设的可选属性。 两个属性在可用时都应当为 [str](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#str)。
+
+\_\_file\_\_ 指明要载入的模块所在文件的路径名（如果是从文件载入），或者对于从共享库动态载入的扩展模块来说则是共享库文件的路径名。 它对于特定类型的模块来说可能是缺失的，例如静态链接到解释器中的 C 模块，并且 [导入系统](https://docs.python.org/zh-cn/3.12/reference/import.html#importsystem) 也可能会在它没有语法意义时选择不设置它（例如，当一个模块是从数据库导入时）。
+
+如果设置了 \_\_file\_\_ 则 \_\_cached\_\_ 属性也可能会被设置，它是指向任何代码的已编译版本的路径（例如，一个字节码文件）。 设置此属性并不需要存在相应的路径；该路径可以简单地指向已编译文件 *将要* 存在的位置 (参见 [PEP 3147](https://peps.python.org/pep-3147/))。
+
+```py
+>>> import PIL
+>>> print(PIL.__file__)
+/usr/local/lib/python3.11/dist-packages/PIL/__init__.py
+>>> print(PIL.__cached__)
+/usr/local/lib/python3.11/dist-packages/PIL/__pycache__/__init__.cpython-311.pyc
+>>> 
+```
+
+请注意 \_\_cached\_\_ 即使在未设置 \_\_file\_\_ 时也可能会被设置。 不过，那样的场景是非典型的。 最终，[loader](https://docs.python.org/zh-cn/3.12/glossary.html#term-loader) 会是 [finder](https://docs.python.org/zh-cn/3.12/glossary.html#term-finder) (\_\_file\_\_ 和 \_\_cached\_\_ 也是从它派生的) 所提供的模块规格的使用方。 因此如果一个加载器可以从缓存加载模块但是不能从文件加载，那样的非典型场景就是适当的。
+
+**强烈**建议你使用 [module.\_\_spec\_\_.cached](https://docs.python.org/zh-cn/3.12/library/importlib.html#importlib.machinery.ModuleSpec.cached) 来代替 module.\_\_cached\_\_。 
+<br><br>
+
+##### 3.2.9.2. 模块对象上的其他可写属性
+除了上面列出的导入相关属性，模块对象还具有下列可写属性：
+
+module**.\_\_doc\_\_** 
+模块的文档字符串，或者如果不可用则为 `None`。 另请参阅: [\_\_doc\_\_ 属性](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#definition.__doc__)。
+
+module.**\_\_annotations\_\_** 
+包含在模块体执行期间收集的 [变量注释](https://docs.python.org/zh-cn/3.12/glossary.html#term-variable-annotation) 的字典。 有关使用 [\_\_annotations\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#module.__annotations__) 的最佳实践，请参阅 [注释最佳实践](https://docs.python.org/zh-cn/3.12/howto/annotations.html#annotations-howto)。 
+<br><br>
+
+##### 3.2.9.3. 模块字典
+模块对象还具有以下特殊的只读属性：
+
+module**.\_\_dict\_\_** 
+以字典对象表示的模块命名空间。 在此处列出的属性中它很特别，\_\_dict\_\_ 不能从模块内部作为全局变量来访问；它只能作为模块对象上的属性来访问。
+
+由于 CPython 清理模块字典的设定，当模块离开作用域时模块字典将会被清理，即使该字典还有活动的引用。想避免此问题，可复制该字典或保持模块状态以直接使用其字典。 
+<br><br>
+
+#### 3.2.10. 自定义类
+自定义类这种类型一般是通过类定义来创建 (参见 [类定义](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#class) 一节)。 每个类都有一个通过字典对象实现的命名空间。 类属性引用会被转化为在此字典中查找，例如，`C.x` 会被转化为 `C.__dict__["x"]` (不过也存在一些钩子对象允许其他定位属性的方式)。 当未在其中找到某个属性名称时，会继续在基类中查找。这种基类搜索使用 C3 方法解析顺序，即使存在 '钻石形' 继承结构即有多条继承路径连到一个共同祖先也能保持正确的行为。 有关 Python 使用的 C3 MRO 的详情可在 [Python 2.3 方法解析顺序](https://docs.python.org/zh-cn/3.12/howto/mro.html#python-2-3-mro) 查看。
+
+当一个类属性引用 (假设类名为 C) 会产生一个类方法对象时，它将转化为一个 [\_\_self\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#method.__self__) 属性为 C 的实例方法对象。 当它会产生一个 [staticmethod](https://docs.python.org/zh-cn/3.12/library/functions.html#staticmethod) 对象时，它将转换为该静态方法对象所包装的对象。 有关有类的 [\_\_dict\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#object.__dict__) 实际包含内容以外，获取属性的其他方式请参阅 [实现描述器](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#descriptors) 一节。
+
+类属性赋值会更新类的字典，但不会更新基类的字典。
+
+类对象可被调用 (见上文) 以产生一个类实例 (见下文)。 
+<br><br>
+
+##### 3.2.10.1. 特殊属性
+
+属性                          |含义 
+------------------------------|-------------------------------------
+type**.\_\_name\_\_**         |类的名称。 另请参阅: [\_\_name\_\_ 属性](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#definition.__name__)。 
+type.**\_\_qualname\_\_**     |类的 [qualified name](https://docs.python.org/zh-cn/3.12/glossary.html#term-qualified-name)。 另请参阅: [\_\_qualname\_\_ 属性](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#definition.__qualname__)。 
+type**.\_\_module\_\_**       |类定义所在模块的名称。 
+type**.\_\_dict\_\_**         |一个提供类的命名空间的只读视图的 [映射代理](https://docs.python.org/zh-cn/3.12/library/types.html#types.MappingProxyType)。 另请参阅: [\_\_dict\_\_ 属性](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#object.__dict__)。 
+type**.\_\_bases\_\_**        |一个包含类的基类的 [tuple](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)，对于定义为 `class X(A, B, C)` 的类，`X.__bases__` 将等于 `(A, B, C)`。 
+type**.\_\_doc\_\_**          |类的文档字符串，如果未定义则为 `None`。 不会被子类继承。 
+type**.\_\_annotations\_\_**  |一个包含在类体执行期间收集的 [变量注释](https://docs.python.org/zh-cn/3.12/glossary.html#term-variable-annotation) 的字典。 有关使用 \_\_annotations\_\_ 的最佳实践，请参阅 [注释最佳实践](https://docs.python.org/zh-cn/3.12/howto/annotations.html#annotations-howto)。<br><br>
+**小心** 当存在元类时直接访问类对象的 \_\_annotations\_\_ 属性可能产生不正确的结果。 此外，对于某些类该属性可能不存在。 请使用 [inspect.get_annotations()](https://docs.python.org/zh-cn/3.12/library/inspect.html#inspect.get_annotations) 来安全地提取类注释。 
+type**.\_\_type\_params\_\_** |一个包含 [通用类](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#generic-classes) 的 [类型形参](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#type-params) 的[元组](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)。<br><br>*在版本 3.12 中新增。* 
+type**.\_\_mro\_\_**          |由在方法解析期间当查找基类时将被纳入考虑的类组成的[元组](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)。 
+<br><br>
+
+##### 3.2.10.2. 特殊方法
+除了上面介绍的特殊属性，所有的 Python 类还具有以下两个方法：
+
+type**.mro()** 
+此方法可由一个元类来重写以便为其实例定制方法解析顺序。 它会在类实例化时被调用，其结果将存储在 [\_\_mro\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#type.__mro__) 中。
+
+type**.\_\_subclasses\_\_()** 
+每个类都会保存一个由指向其直接子类的弱引用组成的列表。 此方法将返回一个由所有仍然存在的这种引用组成的列表。 列表项将按定义顺序排列。 例如：
+
+```py
+>>> class A: pass
+... 
+>>> class B(A): pass
+... 
+>>> A.__subclasses__()
+[<class '__main__.B'>]
+>>> 
+```
 
 预定义的 (可写) 属性： [\_\_name\_\_](https://docs.python.org/3/reference/import.html#__name__) 是模块的名字；\_\_doc\_\_ 是模块的文档字符串，如果没有则为 `None`；\_\_annotations\_\_ (可选的) 是一个包含模块正文执行期间收集的变量注释的字典；如果模块是从一个文件加载，则 [\_\_file\_\_](https://docs.python.org/3/reference/import.html#__file__) 是模块对应的被加载文件的路径名。某些类型的模块可能没有 `__file__` 属性，例如 C 模块是静态链接到解释器内部的; 对于从一个共享库动态加载的扩展模块来说该属性为该共享库文件的路径名。 
 
