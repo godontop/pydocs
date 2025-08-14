@@ -5765,7 +5765,6 @@ type.**\_\_type\_params\_\_** |一个包含 [通用类](https://docs.python.org/
 type.**\_\_mro\_\_**          |由在方法解析期间当查找基类时将被纳入考虑的类组成的[元组](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)。 
 
 <br><br>
-
 ##### 3.2.10.2. 特殊方法
 除了上面介绍的特殊属性，所有的 Python 类还具有以下两个方法：
 
@@ -7574,7 +7573,66 @@ In global scope: global spam
 请注意 *局部* 赋值（这是默认状态）不会改变 *scope_test* 对 *spam* 的绑定。 [nonlocal](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#nonlocal) 赋值会改变 *scope_test* 对 *spam* 的绑定，而 [global](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#global) 赋值会改变模块层级的绑定。
 
 您还可以在 [global](https://docs.python.org/zh-cn/3/reference/simple_stmts.html#global) 赋值之前看到之前没有 *spam* 的绑定。  
-<br />
+
+**local（局部变量）** 
+含义：在函数内部定义的变量默认是**局部变量**（local variable），只能在该函数内访问。 
+
+```py
+def my_func():
+    x = 10  # x 是局部变量
+    print(x)
+
+my_func()   # 输出：10
+# print(x)  # 错误！NameError: name 'x' is not defined
+```
+
+**global 关键字** 
+含义：使用 `global` 可以在函数内部**声明一个变量为全局变量**，这样就可以在函数中修改全局作用域中的变量。 
+
+```py
+x = 5    # 全局变量
+
+def modify_global():
+    global x
+    x = 10  # 修改全局变量 x
+    print("函数内：", x)
+
+print("修改前：", x)  # 输出：修改前： 5
+modify_global()      # 输出：函数内： 10
+print("修改后：", x)  # 输出：修改后： 10
+```
+
+**nonlocal 关键字** 
+含义：`nonlocal` 用于**嵌套函数中**，表示变量不是局部的，也不是全局的，而是**外层函数中的变量**。它允许内层函数修改外层函数的局部变量。 
+
+```py
+def outer():
+    x = 10          # 外层函数的局部变量
+
+    def inner():
+        nonlocal x  # 声明 x 是外层函数的变量
+        x = 20      # 修改外层的 x
+        print("inner:", x)
+
+    inner()
+    print("outer:", x) # 输出：outer: 20
+
+outer()
+# 输出：
+# inner: 20
+# outer: 20
+```
+
+**对比总结** 
+
+关键字      |作用范围 |使用场景          |是否创建新变量  
+-----------|---------|-----------------|--------------
+`local`    |函数内部  |默认行为         |是（赋值时）  
+`global`   |模块全局  |修改全局变量      |否（引用全局）  
+`nonlocal` |外层函数  |修改闭包中的变量  |否（引用外层）  
+
+local 的作用域是函数内；nonlocal 的作用域是外层函数，仍在最外层函数范围内；global 的作用域是全局，作用域在全局，既包含函数内又包含函数外。 
+<br /><br>
 
 ### 9.3. 初探类
 类引入了一些新语法，三种新对象类型和一些新语义。
