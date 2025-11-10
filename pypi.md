@@ -61,6 +61,7 @@
     * [tesserocr](#tesserocr)
     * [Tornado](#tornado)
     * [tushare](#tushare)
+    * [wand](#wand)
 
 
 ## PyPI
@@ -4140,6 +4141,8 @@ docker run --name splash -p 8050:8050 scrapinghub/splash
 docker run --name splash -d -p 8050:8050 scrapinghub/splash
 ```
 
+Splash 官方 Docker 镜像 scrapinghub/splash 仅支持 AMD64 平台，不支持 ARM64 平台。 
+
 **安装Scrapy-Splash**  
 
 ```sh
@@ -4604,3 +4607,24 @@ netprofit_margin 和 profit_to_gr 对应的都是净利率；
 >>> import tushare as ts
 >>> ts.get_hist_data('600568', start='2019-12-18', end='2020-01-19')
 ```
+
+## wand
+安装 wand 
+pip install wand  
+
+**将 PDF 文档转换为图片：** 
+1.安装 [ImageMagick](https://imagemagick.org/archive/binaries/ImageMagick-7.1.2-7-Q16-HDRI-x64-dll.exe)；【ImageMagick 依赖于 Ghostscript，如果电脑上没有，也需要安装。】 
+2.找到 ImageMagick 的安装目录（如：`D:\Program Files\ImageMagick`），把该目录下的 magick.exe 复制一份，并重命名为 convert.exe（同一目录）。【ImageMagick 7.x 默认把“传统”的 convert.exe、magick.exe 等命令行工具都改成了 magick.exe 一个入口，而 Wand 0.6.x 目前只认旧名称 convert.exe。】 
+3.安装 wand，`pip install wand`；
+4.Python 代码如下： 
+
+```py
+>>> from wand.image import Image
+>>> with Image(filename='照相机封面成长档案.pdf', resolution=96) as img:
+...     img.compression_quality = 95
+...     img.save(filename='照相机封面成长档案_%d.jpg')  # 自动按页编号
+...
+>>>
+```
+
+resolution 的值最好不要超过200，否则 CPU 使用率可能会比较高，速度也较慢。 
