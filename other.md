@@ -1,4 +1,9 @@
 * [HTML](#html)
+* [JS 参考](#js-参考)
+    * [Window](#window)
+        * [Window 对象](#window-对象)
+    * [HTML DOM](#html-dom)
+        * [HTML 元素](#html-元素)
 * [Markdown](#markdown)
 * [Python2](#python2)
     * [Python 2 语言参考](#python-2-语言参考)
@@ -37,6 +42,34 @@ HTML `<ul>` 标签
 ```html
 <!-- 在此处写注释 -->
 ```
+
+# JS 参考
+## Window
+### Window 对象
+**Window 对象** 
+窗口对象表示浏览器中的一个打开的窗口。
+
+如果一个文档包含框架（`<iframe>` 标签），浏览器会为 HTML 文档创建一个窗口对象，并为每个框架创建一个额外的窗口对象。 
+
+**Window 对象方法**  
+方法            |描述        
+---------------|--------------------------------- 
+alert()        |显示一个带有消息和“确定”按钮的警告框 
+scrollTo()     |将文档滚动到指定的坐标 
+
+## HTML DOM
+### HTML 元素
+**元素对象** 
+在 HTML DOM 中，**元素对象** 代表一个 HTML 元素，例如 P、DIV、A、TABLE 或任何其它的 HTML 元素。 
+
+**属性和方法** 
+下面的属性和方法可以被用于所有 HTML 元素：
+
+属性/方法        |描述 
+----------------|------------------------------
+scrollHeight    |返回元素的完整高度，包括 padding 
+scrollWidth     |返回元素的完整宽度，包括 padding 
+
 
 # Markdown
 要在Markdown中显示`<`和`>`，必须使用使用转义字符`&lt;`和`&gt;`。
