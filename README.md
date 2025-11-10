@@ -235,6 +235,8 @@
 * [ChromeDriver](#chromedriver)
 * [GeckoDriver](#geckodriver)
 * [PhantomJS](#phantomjs)
+* [Splash](#splash)
+    * [Splash 脚本参考](#splash-脚本参考)
 
 
 # Python 3 标准库
@@ -254,7 +256,7 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 |          |            |hex()             |          |          |
 |          |            |id()              |object()  |sorted()  |
 |          |enumerate() |input()           |          |          |
-|          |eval()      |int()             |open()    |          |
+|bin()     |eval()      |int()             |open()    |          |
 |          |            |isinstance()      |ord()     |          |
 |          |            |issubclass()      |pow()     |super()   |
 |          |            |                  |print()   |          |
@@ -290,6 +292,32 @@ True
 >>> print(all(c))
 False
 ```
+
+**bin**(_integer, /_) 
+将一个整数转换为带前缀 "0b" 的二进制数字符串。 结果是一个合法的 Python 表达式。 如果 *integer* 不是一个 Python [int](https://docs.python.org/zh-cn/3.14/library/functions.html#int) 对象，则它必须定义返回一个整数的 [\_\_index\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__index__) 方法。 下面是一些例子: 
+
+```py
+>>> bin(3)
+'0b11'
+>>> bin(-10)
+'-0b1010'
+>>> bin(20013)
+'0b100111000101101'
+>>> 
+```
+
+若要控制是否显示前缀“0b”，可以采用以下两种方案： 
+
+```py
+>>> format(14,'#b'), format(14, 'b')
+('0b1110', '1110')
+>>> f'{14:#b}', f'{14:b}'
+('0b1110', '1110')
+>>> 
+```
+
+另见 [format()](https://docs.python.org/zh-cn/3.14/library/functions.html#format) 获取更多信息。 
+<br><br>
 
 *class* **complex([**_real_**[**, _imag_**]])**  
 返回值为 *real* + _imag_\*1j 的复数，或将字符串或数字转换为复数。如果第一个形参是字符串，则它被解释为一个复数，并且函数调用时必须没有第二个形参。第二个形参不能是字符串。每个实参都可以是任意的数值类型（包括复数）。如果省略了 *imag*，则默认值为零，构造函数会像 [int](https://docs.python.org/zh-cn/3/library/functions.html#int) 和 [float](https://docs.python.org/zh-cn/3/library/functions.html#float) 一样进行数值转换。如果两个实参都省略，则返回 `0j`。
@@ -5035,7 +5063,21 @@ fragment   | 1     |分片标识符        |空串
 *在版本3.2中发生变化：* 结果是一个结构化的对象而不是一个简单的2-元组。
 
 #### URL 转码
-URL 转码函数专注于获取程序数据并通过转码特殊字符和适当地编码非 ASCII 文本使其安全地用作 URL 组件。它们还支持逆转此操作以便从作为 URL 组成部分的内容中重建原始数据，如果上述的 URL 解析函数还未覆盖此功能的话。
+URL 转码函数专注于获取程序数据并通过转码特殊字符和适当地编码非 ASCII 文本使其安全地用作 URL 组件。它们还支持逆转此操作以便从作为 URL 组成部分的内容中重建原始数据，如果上述的 URL 解析函数还未覆盖此功能的话。 
+
+urllib.parse.**quote**(_string, safe='/', encoding=None, errors=None_) 
+使用 `%xx` 转义符替换 _string_ 中的特殊字符。 字母、数字和 `'_.-~'` 等字符一定不会被转码。 在默认情况下，此函数只对 URL 的路径部分进行转码。 可选的 _safe_ 形参额外指定不应被转码的 ASCII 字符 --- 其默认值为 `'/'`。 
+
+*string* 可以是 [str](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str) 或 [bytes](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#bytes) 对象。 
+
+**在 3.7 版本发生变更:** 从 [RFC 2396](https://datatracker.ietf.org/doc/html/rfc2396.html) 迁移到 [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986.html) 以转码 URL 字符串。 `"~"` 现在已被包括在非保留字符集中。 
+
+可选的 *encoding* 和 *errors* 形参指明如何处理非 ASCII 字符，与 [str.encode()](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str.encode) 方法所接受的值一样。 *encoding* 默认为 `'utf-8'`。 *errors* 默认为 `'strict'`，表示不受支持的字符将引发 [UnicodeEncodeError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#UnicodeEncodeError)。 如果 *string* 为 [bytes](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#bytes) 则不可提供 *encoding* 和 *errors*，否则将引发 [TypeError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#TypeError)。 
+
+请注意 `quote(string, safe, encoding, errors)` 等价于 `quote_from_bytes(string.encode(encoding, errors), safe)`。 
+
+例如: `quote('/El Niño/')` 将产生 `'/El%20Ni%C3%B1o/'`。  
+<br><br>
 
 urllib.parse.**urlencode(**_query, doseq=False, safe='', encoding=None, errors=None, quote_via=quote_plus_**)**  
 将一个包含有 [str](https://docs.python.org/3/library/stdtypes.html#str) 或 [bytes](https://docs.python.org/3/library/stdtypes.html#bytes) 对象的映射对象或二元组序列转换为以百分号编码的 ASCII 文本字符串。 如果所产生的字符串要被用作 [urlopen()](https://docs.python.org/3/library/urllib.request.html#urllib.request.urlopen) 函数的 POST 操作的 *data*，则它应当被编码为字节串，否则它将导致 [TypeError](https://docs.python.org/3/library/exceptions.html#TypeError)。
@@ -5724,7 +5766,7 @@ module.**\_\_cached\_\_**
 ##### 3.2.9.2. 模块对象上的其他可写属性
 除了上面列出的导入相关属性，模块对象还具有下列可写属性：
 
-module**.\_\_doc\_\_** 
+module.**\_\_doc\_\_** 
 模块的文档字符串，或者如果不可用则为 `None`。 另请参阅: [\_\_doc\_\_ 属性](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#definition.__doc__)。
 
 module.**\_\_annotations\_\_** 
@@ -5734,7 +5776,7 @@ module.**\_\_annotations\_\_**
 ##### 3.2.9.3. 模块字典
 模块对象还具有以下特殊的只读属性：
 
-module**.\_\_dict\_\_** 
+module.**\_\_dict\_\_** 
 以字典对象表示的模块命名空间。 在此处列出的属性中它很特别，\_\_dict\_\_ 不能从模块内部作为全局变量来访问；它只能作为模块对象上的属性来访问。
 
 由于 CPython 清理模块字典的设定，当模块离开作用域时模块字典将会被清理，即使该字典还有活动的引用。想避免此问题，可复制该字典或保持模块状态以直接使用其字典。 
@@ -5743,7 +5785,7 @@ module**.\_\_dict\_\_**
 #### 3.2.10. 自定义类
 自定义类这种类型一般是通过类定义来创建 (参见 [类定义](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#class) 一节)。 每个类都有一个通过字典对象实现的命名空间。 类属性引用会被转化为在此字典中查找，例如，`C.x` 会被转化为 `C.__dict__["x"]` (不过也存在一些钩子对象允许其他定位属性的方式)。 当未在其中找到某个属性名称时，会继续在基类中查找。这种基类搜索使用 C3 方法解析顺序，即使存在 '钻石形' 继承结构即有多条继承路径连到一个共同祖先也能保持正确的行为。 有关 Python 使用的 C3 MRO 的详情可在 [Python 2.3 方法解析顺序](https://docs.python.org/zh-cn/3.12/howto/mro.html#python-2-3-mro) 查看。
 
-当一个类属性引用 (假设类名为 C) 会产生一个类方法对象时，它将转化为一个 [\_\_self\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#method.__self__) 属性为 C 的实例方法对象。 当它会产生一个 [staticmethod](https://docs.python.org/zh-cn/3.12/library/functions.html#staticmethod) 对象时，它将转换为该静态方法对象所包装的对象。 有关有类的 [\_\_dict\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#object.__dict__) 实际包含内容以外，获取属性的其他方式请参阅 [实现描述器](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#descriptors) 一节。
+当一个类属性引用 (假设类名为 C) 会产生一个类方法对象时，它将转化为一个 [\_\_self\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#method.__self__) 属性为 C 的实例方法对象。 当它会产生一个 [staticmethod](https://docs.python.org/zh-cn/3.12/library/functions.html#staticmethod) 对象时，它将转换为该静态方法对象所包装的对象。 不同于那些实际包含在 [\_\_dict\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#object.__dict__) 中的类属性检索方式以外的另一种方式请参考 [实现描述器](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#descriptors) 一节。
 
 类属性赋值会更新类的字典，但不会更新基类的字典。
 
@@ -5768,10 +5810,10 @@ type.**\_\_mro\_\_**          |由在方法解析期间当查找基类时将被�
 ##### 3.2.10.2. 特殊方法
 除了上面介绍的特殊属性，所有的 Python 类还具有以下两个方法：
 
-type**.mro()** 
+type.**mro()** 
 此方法可由一个元类来重写以便为其实例定制方法解析顺序。 它会在类实例化时被调用，其结果将存储在 [\_\_mro\_\_](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#type.__mro__) 中。
 
-type**.\_\_subclasses\_\_()** 
+type.**\_\_subclasses\_\_()** 
 每个类都会保存一个由指向其直接子类的弱引用组成的列表。 此方法将返回一个由所有仍然存在的这种引用组成的列表。 列表项将按定义顺序排列。 例如：
 
 ```py
@@ -8704,3 +8746,140 @@ PhantomJS 是一个无界面的、可以用 JavaScript 进行脚本编程的 web
 
 **macOS平台**  
 将phantomjs-2.1.1-macosx.zip解压后，建议直接将bin目录下的phantomjs文件复制到/usr/local/bin目录下。
+
+
+# Splash
+## Splash 脚本参考
+### 方法
+splash:go
+访问一个网址。这类似于在浏览器地址栏中输入一个网址，按下回车键并等待页面加载。 
+
+**函数签名：** 
+`ok, reason = splash:go{url, baseurl=nil, headers=nil, http_method="GET", body=nil, formdata=nil}` 
+
+**参数：** 
+
+* url - 要加载的 URL； 
+* baseurl - 基础 URL 的使用是可选的。当传递 `baseurl` 参数时，页面仍然从 `url` 加载，但它会被渲染为是从 `baseurl` 加载的：相对资源路径将相对于 `baseurl`，浏览器会认为地址栏中显示的是 `baseurl`。 
+* headers - 一个包含 HTTP 头的 Lua 表，用于在初始请求中添加或替换。 
+* http_method - 可选的，访问网址时使用的 HTTP 方法字符串，默认为 GET，Splash 也支持 POST。 
+* body - 可选的，用于 POST 请求的正文字符串 
+* formdata - 将被转换为 URL 编码的 POST 正文并随头部一起被发送的 Lua 表 `content-type: application/x-www-form-urlencoded` 
+
+**返回值：** 
+`ok、reason` 对。如果 `ok` 是 nil 则意味着页面加载期间发生了错误；`reason` 提供一个关于错误类型的信息。 
+
+**异步：** 是的，除非导航被锁定。 
+
+报告的五种错误类型（`ok` 可以为 `nil` 的五种情况）： 
+
+1.有一个网络错误：主机不存在、服务器丢弃了连接等等。在这种情况下 `reason` 是 `"network<code>"`。可能的错误代码列表可以在 [Qt 文档](http://doc.qt.io/qt-5/qnetworkreply.html#NetworkError-enum) 中找到。例如，`"network3"` 意味着 DNS 错误（无效的主机名）。 
+2.服务器返回一个带有 4xx 或 5xx HTTP 状态代码的响应。在这种情况下 `reason` 是 `"http<code>"`，即对于 HTTP 404 Not Found `reason` 是 `"http404"`。 
+3.导航被锁定（参见 [splash:lock_navigation](https://splash.readthedocs.io/en/stable/scripting-ref.html#splash-lock-navigation)；`reason` 是 `"navigation_locked"`。 
+4.Splash 不能渲染主页（例如：因为第一个请求已被丢弃）——`reason` 是 `render_error`。 
+5.如果 Splash 无法判定是什么导致的错误，则仅返回 `"error"`。 
+
+**splash:go 后面跟的是一对大括号，用圆括号在某些情况下会报错，应始终使用大括号。**  
+
+```lua
+function main(splash, args)
+    local example_urls = {"www.baidu.com", "www.taobao.com", "www.zhihu.com"}
+    local urls = args.urls or example_urls
+    local results = {}
+    for index, url in ipairs(urls) do
+        local ok, reason = splash:go{"https://" .. url}
+        if ok then
+            splash:wait(2)
+            results[url] = splash:png()
+        end
+    end
+    return results
+end
+``` 
+<br>
+
+**splash:get_viewport_size** 
+获取浏览器视窗的大小。 
+
+**函数签名：** 
+`width, height = splash:get_viewport_size()` 
+
+**返回值：** 两个数：视窗的宽度和高度，单位为像素。 
+
+**异步：** 不是。 
+
+Splash v3.5的视窗默认的宽度和高度分别为1024x768。 
+<br> 
+
+**splash:set_viewport_size** 
+设置浏览器视窗的大小。 
+
+**函数签名：** 
+`splash:set_viewport_size(width, height)` 
+
+**参数：** 
+
+* width - 整型数，要求的视窗宽度，按像素； 
+* height - 整型数，要求的视窗高度，按像素。 
+
+**返回值：** nil。（等同于 Python 中的 None）
+
+**异步：** 不是。 
+
+这将改变可见区域的大小及后续的渲染命令，例如，[splash:png](https://splash.readthedocs.io/en/stable/scripting-ref.html#splash-png)，将产生一个指定大小的图像。 
+
+[splash:png](https://splash.readthedocs.io/en/stable/scripting-ref.html#splash-png) 使用视窗大小。 
+
+```lua
+function main(splash, args)
+    width, height = splash:get_viewport_size()
+    assert(splash:go{"https://www.taobao.com"})
+    local sw = splash:evaljs("document.documentElement.scrollWidth")
+    local cw = splash:evaljs("document.documentElement.scrollWidth")
+    --[[
+        print("scrollWidth", sw) 的内容只会出现在容器中，而不会出现在 Splash 的渲染
+        窗口（http://splashserver:8050）中，要想出现在 Splash 的渲染窗口中，需使用
+        return 带回。
+        lua 脚本中的字符串连接符为“--”，等同于 Python 中的“+”。
+    ]]
+    return {
+        png = splash:png(),
+        sw = sw,
+        cw = cw,
+        width = width,
+        height = height,
+        msg = "scrollWidth="..sw.." clientWidth="..cw
+    }
+end
+```
+
+输出： 
+png: ![Image](/img/viewport_default_1024_768.png) (png, 1024x768)
+cw: 1024
+height: 768
+msg: "scrollWidth=1024 clientWidth=1024"
+sw: 1024
+width: 1024
+
+从上面的截图可以看出在默认视窗下右侧还有内容未展现出来，所以必须设置更大的视窗。 
+
+```lua
+function main(splash, args)
+    splash:set_viewport_size(1366, 768)
+    assert(splash:go{"https://www.taobao.com"})
+    local sw = splash:evaljs("document.documentElement.scrollWidth")
+    local cw = splash:evaljs("document.documentElement.scrollWidth")
+    return {
+        png = splash:png(),
+        sw = sw,
+        cw = cw,
+        msg = "scrollWidth="..sw.." clientWidth="..cw
+    }
+end
+```
+
+输出： 
+png: ![Image](/img/viewport_1366_768.png) (png, 1366x768)
+cw: 1366
+msg: "scrollWidth=1024 clientWidth=1024"
+sw: 1366
