@@ -995,6 +995,41 @@ Operation                  |Result                |Notes
 >>>
 ```
 
+**可变序列方法**  
+可变序列类型也支持下面的方法：  
+
+sequence**.clear()**  
+*在版本 3.3 中新增。* 
+
+从序列中删除所有项目。这等同于代码 `del sequence[:]`。  
+
+sequence**.copy()**  
+*在版本 3.3 中新增。*  
+
+创建一个序列的浅拷贝。这等同于代码 `sequence[:]`。  
+
+**提示：** copy() 方法不是 [MutableSequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableSequence) [ABC](https://docs.python.org/3/library/abc.html#abc.ABC) 的一部分，但大多数具体的可变序列类型都提供了该方法。  
+
+sequence.**remove(**_value, /_**)**  
+移除序列中第一个满足 `sequence[i] == value` 的元素。  
+
+如果在序列中没有找到 *value* 则抛出 [ValueError](https://docs.python.org/3/library/exceptions.html#ValueError)。  
+
+remove() 方法的返回值是 None。  
+
+```py
+>>> a = [1, 2, 3, 4]
+>>> type(a.remove(3))
+<class 'NoneType'>
+>>> a
+[1, 2, 4]
+>>> a.remove(4)
+>>> a
+[1, 2]
+>>> 
+```
+<br><br>
+
 #### 列表
 列表是可变序列，通常用于存储同类元素的集合(元素精确的相似度因应用程序而变化).
 
@@ -3194,21 +3229,21 @@ os.**getppid()**
 *在版本3.2中发生变化：* 增加对Windows的支持。
 
 #### 文件和目录
-在一些 Unix 平台，这些函数中的很多支持这些特性中的一个或多个：
+在一些 Unix 平台，这些函数中的很多都支持这些特性中的一个或多个： 
 
-* **指定一个文件描述符：** 对于一些函数，*path* 参数不仅可以是一个指定路径名的字符串，也可以是一个文件描述符。The function will then operate on the file referred to by the descriptor. (For POSIX systems, Python will call the `f...` version of the function.)
+* **指定一个文件描述符：** 通常提供给 [os](https://docs.python.org/zh-cn/3.14/library/os.html#module-os) 模块中函数的 *path* 参数必须是一个指明文件路径的字符串。 不过，某些函数现在可以选择接受一个打开的文件描述符作为其 *path* 参数。 该函数将可对描述符指向的文件进行操作。 对于 POSIX 系统，Python 将调用带有 `f` 前缀的函数变体形式 (例如调用 `fchdir` 而不是 `chdir`)。 
 
-  你可以在你的平台上使用 [os.supports_fd](https://docs.python.org/zh-cn/3/library/os.html?highlight=listdir#os.supports_fd) 来检查是否可以将 *path* 指定为一个文件描述符。如果它不可用，使用它将抛出一个 [NotImplementedError](https://docs.python.org/zh-cn/3/library/exceptions.html#NotImplementedError)。
+  你可以在你的平台上使用 [os.supports_fd](https://docs.python.org/zh-cn/3/library/os.html?highlight=listdir#os.supports_fd) 来检查某个函数是否可以将 *path* 指定为一个文件描述符。如果它不可用，使用它将抛出一个 [NotImplementedError](https://docs.python.org/zh-cn/3/library/exceptions.html#NotImplementedError)。 
 
-  If the function also supports *dir_fd* or *follow_symlinks* arguments, it is an error to specify one of those when supplying *path* as a file descriptor.
+  如果该函数还支持 *dir_fd* 或 *follow_symlinks* 参数，那么在以文件描述符形式提供 *path* 后再指定这些参数之一将被视为一个错误。 
 
-* **paths relative to directory descriptors:** If *dir_fd* is not `None`, it should be a file descriptor referring to a directory, and the path to operate on should be relative; path will then be relative to that directory. 如果路径是绝对的，`dir_fd` 将被忽略。 (For POSIX systems, Python will call the `...at` or `f...at` version of the function.)
+* **相对于目录描述符的路径：** 如果 *dir_fd* 不是 `None`，它应该是一个指向目录的文件描述符，要操作的应该是一个相对路径；path 将是相对于该目录的。 如果 *path* 是绝对路径，*dir_fd* 将被忽略。 对于 POSIX 系统，Python 将调用该函数带有 `at` 后缀并可能带有 `f` 前缀的变体形式（例如调用 `faccessat` 而不是 `access`）。 
 
-  你可以使用 [os.supports_dir_fd](https://docs.python.org/zh-cn/3/library/os.html?highlight=listdir#os.supports_dir_fd) 检查你的平台是否支持 *dir_fd*。如果它是不可用的，使用它将抛出一个 [NotImplementedError](https://docs.python.org/zh-cn/3/library/exceptions.html#NotImplementedError)。
+  你可以在你的平台上使用 [os.supports_dir_fd](https://docs.python.org/zh-cn/3.14/library/os.html#os.supports_dir_fd) 来检查某个函数是否支持 *dir_fd*。如果不支持，使用它将抛出一个 [NotImplementedError](https://docs.python.org/zh-cn/3/library/exceptions.html#NotImplementedError)。 
 
-* **not following symlinks:** If *follow_symlinks* is `False`, and the last element of the path to operate on is a symbolic link, the function will operate on the symbolic link itself instead of the file the link points to. (For POSIX systems, Python will call the `l...` version of the function.)
+* **不跟随符号链接：** 如果 *follow_symlinks* 为 `False`，并且待操作路径的最后一个元素是符号链接，则该函数将在符号链接本身而不是链接所指向的文件上进行操作。 对于 POSIX 系统，Python 将调用该函数的 `l...` 变体形式。 
 
-  你可以使用 [os.supports_follow_symlinks](https://docs.python.org/zh-cn/3/library/os.html?highlight=listdir#os.supports_follow_symlinks) 检查在你的平台上是否支持 *follow_symlinks*。如果它是不可用的，使用它将抛出一个 [NotImplementedError](https://docs.python.org/zh-cn/3/library/exceptions.html#NotImplementedError)。
+  你可以使用 [os.supports_follow_symlinks](https://docs.python.org/zh-cn/3/library/os.html?highlight=listdir#os.supports_follow_symlinks) 检查某个特定的函数在你的平台上是否支持 *follow_symlinks*。如果它不支持，使用它将抛出一个 [NotImplementedError](https://docs.python.org/zh-cn/3/library/exceptions.html#NotImplementedError)。 
 
 os.**listdir**(*path='.'*)  
 返回一个包含 *path* 指定的目录中的条目名称的列表。列表是任意顺序的，且不包括特殊条目 `'.'` 和 `'..'` 即使它们出现在目录中。
@@ -3226,6 +3261,7 @@ os.**listdir**(*path='.'*)
 *3.3 新版功能:* Added support for specifying an open file descriptor for *path*.
 
 *在 3.6 版更改:* 接受一个 [类路径对象](https://docs.python.org/zh-cn/3/glossary.html#term-path-like-object)。
+<br><br>
 
 os.**mkdir(**_path, mode=0o777, \*, dir_fd=None_**)**  
 创建一个名为 *path* 的目录，并应用数字模式 *mode*。
@@ -3243,7 +3279,7 @@ os.**mkdir(**_path, mode=0o777, \*, dir_fd=None_**)**
 *3.3 新版功能:* *dir_fd* 参数。
 
 *在 3.6 版更改:* 接受一个 [path-like 对象](https://docs.python.org/3/glossary.html#term-path-like-object)。
-
+<br><br>
 
 os.**remove(**_path, *, dir_fd=None_**)** 
 移除（删除）文件 _path_。如果 _path_ 是目录，则会引发 [OSError](https://docs.python.org/zh-cn/3.13/library/exceptions.html#OSError)。请使用 [rmdir()](https://docs.python.org/zh-cn/3.13/library/os.html#os.rmdir) 来移除目录。 如果文件不存在，则会引发 [FileNotFoundError](https://docs.python.org/zh-cn/3.13/library/exceptions.html#FileNotFoundError)。
@@ -3275,7 +3311,8 @@ os.remove(filename)
 ➜  ~ ls
 github  temp.py
 ➜  ~ 
-```
+``` 
+<br><br>
 
 os.**rename**(*src, dst, \*, src\_dir\_fd=None, dst\_dir\_fd=None*)  
 将文件或目录 *src* 重命名为 *dst*。如果 *dst* 已存在，the operation will fail with an [OSError](https://docs.python.org/zh-cn/3/library/exceptions.html#OSError) subclass in a number of cases:
@@ -3291,6 +3328,129 @@ If you want cross-platform overwriting of the destination, use [replace()](https
 *3.3 新版功能:* *src_dir_fd* 和 *dst_dir_fd* 参数。
 
 *在 3.6 版更改:* Accepts a [path-like object](https://docs.python.org/zh-cn/3/glossary.html#term-path-like-object) for *src* and *dst*.
+<br><br>
+
+os.**scandir**(_path='.'_)  
+返回一个 [os.DirEntry](https://docs.python.org/zh-cn/3.14/library/os.html#os.DirEntry) 对象的迭代器，它们对应于由 *path* 指定的目录中的条目。 这些条目会以任意顺序生成，并且不包括特殊条目 `'.'` 和 `'..'`。 如果有文件在迭代器创建之后在目录中被移除或添加，是否要包括该文件对应的条目并没有规定。
+
+如果需要文件类型或文件属性信息，使用 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 代替 [listdir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.listdir) 可以大大提高这部分代码的性能，因为如果操作系统在扫描目录时返回的是 [os.DirEntry](https://docs.python.org/zh-cn/3.14/library/os.html#os.DirEntry) 对象，则该对象包含了这些信息。所有 [os.DirEntry](https://docs.python.org/zh-cn/3.14/library/os.html#os.DirEntry) 的方法都可能执行一次系统调用，但是 [is_dir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.DirEntry.is_dir) 和 [is_file()](https://docs.python.org/zh-cn/3.14/library/os.html#os.DirEntry.is_file) 通常只在有符号链接时才执行一次系统调用。[os.DirEntry.stat()](https://docs.python.org/zh-cn/3.14/library/os.html#os.DirEntry.stat) 在 Unix 上始终需要一次系统调用，而在 Windows 上只在有符号链接时才需要。
+
+*path* 可以是 [类路径对象](https://docs.python.org/zh-cn/3.14/glossary.html#term-path-like-object)。如果 *path* 是（直接传入或通过 [PathLike](https://docs.python.org/zh-cn/3.14/library/os.html#os.PathLike) 接口间接传入的） `bytes` 类型，那么每个 [os.DirEntry](https://docs.python.org/zh-cn/3.14/library/os.html#os.DirEntry) 的 [name](https://docs.python.org/zh-cn/3.14/library/os.html#os.DirEntry.name) 和 [path](https://docs.python.org/zh-cn/3.14/library/os.html#os.DirEntry.path) 属性将是 `bytes` 类型，其他情况下是 `str` 类型。
+
+本函数也支持 [指定文件描述符为参数](https://docs.python.org/zh-cn/3.14/library/os.html#path-fd)，其中描述符必须指向目录。
+
+引发一个 [审计事件](https://docs.python.org/zh-cn/3.14/library/sys.html#auditing) `os.scandir` 附带参数 `path`。
+
+[scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 迭代器支持 [上下文管理](https://docs.python.org/zh-cn/3.14/glossary.html#term-context-manager) 协议，并具有以下方法：
+
+scandir.**close()**  
+关闭迭代器并释放占用的资源。  
+
+当迭代器迭代完毕，或垃圾回收，或迭代过程出错时，将自动调用本方法。但仍建议显式调用它或使用 [with](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#with) 语句。
+
+*在版本 3.6 中新增。* 
+
+下面的例子演示了 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的简单用法，用来显示给定 *path* 中所有不以 `'.'` 开头的文件（不包括目录）。`entry.is_file()` 通常不会增加一次额外的系统调用: 
+
+```py
+with os.scandir('/home/pi') as it:
+    for entry in it:
+        if not entry.name.startswith('.') and entry.is_file():
+            print(entry.name)
+```
+
+**备注:** 在基于 Unix 的系统上，[scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 使用系统的 [opendir()](https://pubs.opengroup.org/onlinepubs/009695399/functions/opendir.html) 和 [readdir()](https://pubs.opengroup.org/onlinepubs/009695399/functions/readdir_r.html) 函数。 在 Windows 上，它使用 Win32 [FindFirstFileW](https://msdn.microsoft.com/en-us/library/windows/desktop/aa364418(v=vs.85).aspx) 和 [FindNextFileW](https://msdn.microsoft.com/en-us/library/windows/desktop/aa364428(v=vs.85).aspx) 函数。 
+
+*在版本 3.5 中新增。* 
+
+*在 3.6 版本发生变更：* 增加了对 [上下文管理器](https://docs.python.org/zh-cn/3.14/glossary.html#term-context-manager) 协议和 [close()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir.close) 方法的支持。 如果 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 迭代器没有耗尽也没有被显式地关闭则将在其析构器（destructor）中发出一个 [ResourceWarning](https://docs.python.org/zh-cn/3.14/library/exceptions.html#ResourceWarning)。
+
+本函数接受一个 [类路径对象](https://docs.python.org/zh-cn/3.14/glossary.html#term-path-like-object)。
+
+*在 3.7 版本发生变更：* 在 Unix 上新增支持 [指定文件描述符为参数](https://docs.python.org/zh-cn/3.14/library/os.html#path-fd)。
+<br><br>
+
+*class* os.**DirEntry**  
+&emsp;由 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 生成的对象，用于显示目录内某个条目的文件路径和其他文件属性。
+
+&emsp;[scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 将在不进行额外系统调用的情况下，提供尽可能多的此类信息。每次进行 `stat()` 或 `lstat()` 系统调用时，`os.DirEntry` 对象会将结果缓存下来。
+
+&emsp;`os.DirEntry` 实例不适合存储在长期存在的数据结构中，如果你知道文件元数据已更改，或者自调用 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 以来已经经过了很长时间，请调用 `os.stat(entry.path)` 来获取最新信息。
+
+&emsp;因为 `os.DirEntry` 方法可以进行系统调用，所以它也可能抛出 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError) 异常。如需精确定位错误，可以逐个调用 `os.DirEntry` 中的方法来捕获 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError)，并适当处理。
+
+&emsp;为了能直接用作 [类路径对象](https://docs.python.org/zh-cn/3.14/glossary.html#term-path-like-object)，`os.DirEntry` 实现了 [PathLike](https://docs.python.org/zh-cn/3.14/library/os.html#os.PathLike) 接口。
+
+&emsp;`os.DirEntry` 实例所包含的属性和方法如下：
+
+&emsp;**name**  
+&emsp;&emsp;本条目的基本文件名，是根据 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数得出的相对路径。
+
+&emsp;&emsp;如果 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数是 `bytes` 类型，则 [name](https://docs.python.org/zh-cn/3.14/library/os.html#os.name) 属性也是 `bytes` 类型，否则为 `str`。使用 [fsdecode()](https://docs.python.org/zh-cn/3.14/library/os.html#os.fsdecode) 解码 byte 类型的文件名。
+
+&emsp;**path**  
+&emsp;&emsp;本条目的完整路径：等效于 `os.path.join(scandir_path, entry.name)`，其中 *scandir_path* 就是 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数。仅当 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数为绝对路径时，本路径才是绝对路径。如果 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数是 [文件描述符](https://docs.python.org/zh-cn/3.14/library/os.html#path-fd)，则 [path](https://docs.python.org/zh-cn/3.14/library/os.path.html#module-os.path) 属性与上述 [name](https://docs.python.org/zh-cn/3.14/library/os.html#os.name) 属性相同。
+
+&emsp;&emsp;如果 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数是 `bytes` 类型，则 [path](https://docs.python.org/zh-cn/3.14/library/os.path.html#module-os.path) 属性也是 `bytes` 类型，否则为 `str`。使用 [fsdecode()](https://docs.python.org/zh-cn/3.14/library/os.html#os.fsdecode) 解码 byte 类型的文件名。
+
+&emsp;**inode()**  
+&emsp;&emsp;返回本条目的索引节点号 (inode number)。
+
+&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的，请调用 `os.stat(entry.path, follow_symlinks=False).st_ino` 来获取最新信息。
+
+&emsp;&emsp;一开始没有缓存时，在 Windows 上需要一次系统调用，但在 Unix 上不需要。
+
+&emsp;**is_dir**(_*, follow_symlinks=True_)  
+&emsp;&emsp;如果本条目是目录，或是指向目录的符号链接，则返回 `True`。如果本条目是文件，或指向任何其他类型的文件，或该目录不再存在，则返回 `False`。
+
+&emsp;&emsp;如果 *follow_symlinks* 是 `False`，那么仅当本条目为目录时返回 `True` （不跟踪符号链接），如果本条目是任何类型的文件，或该文件不再存在，则返回 `False`。
+
+&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的，且 *follow_symlinks* 为 `True` 和 `False` 时的缓存是分开的。请调用 [os.stat()](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat) 和 [stat.S_ISDIR()](https://docs.python.org/zh-cn/3.14/library/stat.html#stat.S_ISDIR) 来获取最新信息。
+
+&emsp;&emsp;一开始没有缓存时，大多数情况下不需要系统调用。特别是对于非符号链接，Windows 和 Unix 都不需要系统调用，除非某些 Unix 文件系统（如网络文件系统）返回了 `dirent.d_type == DT_UNKNOWN`。如果本条目是符号链接，则需要一次系统调用来跟踪它（除非 *follow_symlinks* 为 `False`）。
+
+&emsp;&emsp;本方法可能抛出 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError) 异常，如 [PermissionError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#PermissionError) 异常，但 [FileNotFoundError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#FileNotFoundError) 异常会被内部捕获且不会抛出。
+
+&emsp;**is_file**(_*, follow_symlinks=True_)  
+&emsp;&emsp;如果本条目是文件，或是指向文件的符号链接，则返回 `True`。如果本条目是目录，或指向目录，或指向其他非文件条目，或该文件不再存在，则返回 `False`。
+
+&emsp;&emsp;如果 follow_symlinks 是 `False`，那么仅当本条目为文件时返回 `True` （不跟踪符号链接），如果本条目是目录或其他非文件条目，或该文件不再存在，则返回 `False`。
+
+&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的。缓存、系统调用、异常抛出都与 [is_dir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.DirEntry.is_dir) 一致。
+
+&emsp;**is_symlink()**  
+&emsp;&emsp;如果本条目是符号链接（即使是断开的链接），返回 `True`。如果是目录或任何类型的文件，或本条目不再存在，返回 `False`。
+
+&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的，请调用 [os.path.islink()](https://docs.python.org/zh-cn/3.14/library/os.path.html#os.path.islink) 来获取最新信息。
+
+&emsp;&emsp;一开始没有缓存时，大多数情况下不需要系统调用。其实 Windows 和 Unix 都不需要系统调用，除非某些 Unix 文件系统（如网络文件系统）返回了 `dirent.d_type == DT_UNKNOWN`。
+
+&emsp;&emsp;本方法可能抛出 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError) 异常，如 [PermissionError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#PermissionError) 异常，但 [FileNotFoundError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#FileNotFoundError) 异常会被内部捕获且不会抛出。
+
+&emsp;**is_junction()**  
+&emsp;&emsp;如果本条目是接合点（即使已断开）则返回 `True`；如果条目指向常规目录、任何种类的文件、符号链接或者已不存在则返回 `False`。
+
+&emsp;&emsp;结果是缓存在 `os.DirEntry` 对象中的。 调用 [os.path.isjunction()](https://docs.python.org/zh-cn/3.14/library/os.path.html#os.path.isjunction) 来获取更新信息。
+
+> 在版本 3.12 中新增。 
+
+&emsp;**stat**(_*, follow_symlinks=True_)  
+&emsp;&emsp;返回本条目对应的 [stat_result](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat_result) 对象。本方法默认会跟踪符号链接，要获取符号链接本身的 stat，请添加 `follow_symlinks=False` 参数。
+
+&emsp;&emsp;在 Unix 上，本方法需要一次系统调用。在 Windows 上，仅在 *follow_symlinks* 为 `True` 且该条目是一个重解析点（如符号链接或目录结点）时，才需要一次系统调用。
+
+&emsp;&emsp;在 Windows 上，[stat_result](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat_result) 的 `st_ino`、`st_dev` 和 `st_nlink` 属性总是为零。请调用 [os.stat()](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat) 以获得这些属性。
+
+&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的，且 *follow_symlinks* 为 `True` 和 `False` 时的缓存是分开的。请调用 [os.stat()](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat) 来获取最新信息。
+
+&emsp;&emsp;请注意 `os.DirEntry` 和 [pathlib.Path](https://docs.python.org/zh-cn/3.14/library/pathlib.html#pathlib.Path) 的几个属性和方法之间存在很好的对应关系。 具体来说，`name` 属性具有相同的含义，`is_dir()`, `is_file()`, `is_symlink()`, `is_junction()` 和 `stat()` 方法也是如此。
+
+> 在版本 3.5 中新增。
+
+> *在 3.6 版本发生变更：* 添加了对 [PathLike](https://docs.python.org/zh-cn/3.14/library/os.html#os.PathLike) 接口的支持。在 Windows 上添加了对 [bytes](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#bytes) 类型路径的支持。
+
+> *在 3.12 版本发生变更：* 统计结果的 `st_ctime` 属性在 Windows 上已被弃用。 文件创建时间可通过 `st_birthtime` 来访问，在未来 `st_ctime` 可能会改为返回零或元数据的修改时间，如果可用的话。
+<br><br>
 
 #### 进程管理
 这些函数可能被用于创建和管理进程。
@@ -5065,7 +5225,7 @@ fragment   | 1     |分片标识符        |空串
 #### URL 转码
 URL 转码函数专注于获取程序数据并通过转码特殊字符和适当地编码非 ASCII 文本使其安全地用作 URL 组件。它们还支持逆转此操作以便从作为 URL 组成部分的内容中重建原始数据，如果上述的 URL 解析函数还未覆盖此功能的话。 
 
-urllib.parse.**quote**(_string, safe='/', encoding=None, errors=None_) 
+urllib.parse.**quote**(_string, safe='/', encoding=None, errors=None_)  
 使用 `%xx` 转义符替换 _string_ 中的特殊字符。 字母、数字和 `'_.-~'` 等字符一定不会被转码。 在默认情况下，此函数只对 URL 的路径部分进行转码。 可选的 _safe_ 形参额外指定不应被转码的 ASCII 字符 --- 其默认值为 `'/'`。 
 
 *string* 可以是 [str](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str) 或 [bytes](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#bytes) 对象。 
@@ -5379,13 +5539,54 @@ sys.**exit**([*arg*])
 退出Python。
 
 可选参数 *arg* 可以是给出退出状态的整型数 (默认为0)，或者另一种类型的对象。如果它是一个整型数，shells和与shells类似的认为0是"成功终止"，而任何非0的值被认为是"不正常的终止"。大多数系统要求它在0-127的范围内，否则将产生未定义的结果。一些系统对特定的退出代码分配特定的含义有一个约定，但这些通常是非充分开发的；Unix程序通常使用 2 表示命令行语法错误，而 1 表示所有其它类型的错误。如果传递的是另一种类型的对象，`None` 等价于传递 0，而任何其它对象则打印到 [stderr](https://docs.python.org/3.6/library/sys.html#sys.stderr) 并导致一个退出代码 1。特别是，当一个错误发生的时候，`sys.exit("some error message")` 是退出一个程序的一种快速的方式。
+<br><br>
 
 sys.**path**  
-一个指定模块搜索路径的字符串列表。Initialized from the environment variable [PYTHONPATH](https://docs.python.org/3.6/using/cmdline.html#envvar-PYTHONPATH), plus an installation-dependent default.
+一个指定模块搜索路径的字符串列表。初始化自环境变量 [PYTHONPATH](https://docs.python.org/zh-cn/3.14/using/cmdline.html#envvar-PYTHONPATH)，再加上一条与安装有关的默认路径。
 
-As initialized upon program startup, the first item of this list, `path[0]`, is the directory containing the script that was used to invoke the Python interpreter. If the script directory is not available (e.g. if the interpreter is invoked interactively or if the script is read from standard input), `path[0]` is the empty string, which directs Python to search modules in the current directory first. Notice that the script directory is inserted *before* the entries inserted as a result of [PYTHONPATH](https://docs.python.org/3.6/using/cmdline.html#envvar-PYTHONPATH).
+默认情况下，在程序启动时被初始化的时候，一个潜在的不安全的路径会被添加到 [sys.path](https://docs.python.org/3.14/library/sys.html#sys.path) 的开头（在作为 [PYTHONPATH](https://docs.python.org/3.14/using/cmdline.html#envvar-PYTHONPATH) 的结果而被插入的条目之前）：  
 
-程序为了自己的目的可以自由修改这个列表。只有 strings 和 bytes 可以被添加到 [sys.path](https://docs.python.org/3.6/library/sys.html#sys.path)；所有其它数据类型在导入期间被忽略。
+* `python -m module` 命令行：在头部追加当前工作目录。  
+* `python script.py` 命令行：在头部追加脚本所在的目录。如果它是一个符号链接，则解析符号链接。  
+* `python -c code` 和 `python`（REPL）命令行：头部追加一个空字符串，这表示当前工作目录。  
+
+```sh
+➜  python git:(master) ✗ cat temp.py 
+import sys
+print(sys.path)
+➜  python git:(master) ✗ pwd
+/home/pi/github/python
+➜  python git:(master) ✗ python -m temp
+['/home/pi/github/python', '/home/pi/.pyenv/versions/3.13.0/lib/python313.zip', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/lib-dynload', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/site-packages']
+➜  python git:(master) ✗ python temp.py
+['/home/pi/github/python', '/home/pi/.pyenv/versions/3.13.0/lib/python313.zip', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/lib-dynload', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/site-packages']
+➜  python git:(master) ✗ cd ~
+➜  ~ python ~/github/python/temp.py 
+['/home/pi/github/python', '/home/pi/.pyenv/versions/3.13.0/lib/python313.zip', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/lib-dynload', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/site-packages']
+```
+
+```sh
+➜  python git:(master) ✗ python -c "import sys; print(sys.path)"
+['', '/home/pi/.pyenv/versions/3.13.0/lib/python313.zip', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/lib-dynload', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/site-packages']
+```
+
+```sh
+➜  ~ python
+Python 3.13.0 (main, Aug 10 2025, 19:37:38) [GCC 12.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import sys
+>>> sys.path
+['', '/home/pi/.pyenv/versions/3.13.0/lib/python313.zip', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/lib-dynload', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/site-packages']
+>>> 
+```
+
+如果不想在头部追加这个具有潜在不安全性的路径，请使用 [-P](https://docs.python.org/zh-cn/3.14/using/cmdline.html#cmdoption-P) 命令行选项或 [PYTHONSAFEPATH](https://docs.python.org/zh-cn/3.14/using/cmdline.html#envvar-PYTHONSAFEPATH) 环境变量。 
+
+程序可以出于自己的目的随意修改此列表。只有字符串可以被添加到 [sys.path](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.path) 中；所有其他数据类型都将在导入期间被忽略。 
+
+**参见：**  
+* [site](https://docs.python.org/zh-cn/3.14/library/site.html#module-site) 模块，该模块描述了如何使用 .pth 文件来扩展 [sys.path](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.path)。 
+<br><br>
 
 sys.**version_info**  
 一个包含版本号的5个组成部分的元组：*major*, *minor*, *micro*, *releaselevel*, and *serial*. 除了 *releaselevel* 所有值都是整型数；发行版级别是 `'alpha'`, `'beta'`, `'candidate'`, 或者 `'final'`. Python版本2.0对应的 `version_info` 值是 `(2, 0, 0, 'final', 0)`. 组件也可以通过名称来访问，如 `sys.version_info[0]` 等价于 `sys.version_info.major`。
@@ -5529,7 +5730,50 @@ traceback.**print_exception(**_etype, value, tb, limit=None, file=None, chain=Tr
 通常，生成器发出单个字符串； 但是，对于 [SyntaxError](https://docs.python.org/3.8/library/exceptions.html#SyntaxError) 异常，它会发出几行（当打印时）显示有关语法错误发生位置的详细信息。  
 
 指示发生了哪个异常的消息始终是输出中的最后一个字符串。  
-<br>  
+<br><br>  
+
+## 导入模块
+### pkgutil --- 包扩展工具
+**源代码：** [Lib/pkgutil.py](https://github.com/python/cpython/tree/3.14/Lib/pkgutil.py) 
+
+该模块为导入系统提供了工具，尤其是在包支持方面。  
+
+class pkgutil.**ModuleInfo**(_module_finder, name, ispkg_)  
+一个包含模块信息的简短摘要的命名元组。
+
+*在版本 3.6 中新增。*  
+
+pkgutil.**iter_modules**(_path=None, prefix=''_)  
+为 *path* 上的所有子模块产生 [ModuleInfo](https://docs.python.org/zh-cn/3.14/library/pkgutil.html#pkgutil.ModuleInfo)，或者如果 *path* 为 `None`，则为 [sys.path](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.path) 上的所有最高层级模块产生。  
+
+*path* 应当为 `None` 或一个作为查找模块目标的路径的列表。  
+
+*prefix* 是要在输出时输出到每个模块名称之前的字符串。  
+
+```py
+>>> import pkgutil
+>>> import selenium
+>>> pkgutil.iter_modules(selenium.__path__)
+<generator object iter_modules at 0x00000192B28EEAB0>
+>>> for moduleinfo in pkgutil.iter_modules(selenium.__path__):
+...     print(moduleinfo)
+...
+ModuleInfo(module_finder=FileFinder('D:\\Program Files\\Python310\\lib\\site-packages\\selenium'), name='common', ispkg=True)
+ModuleInfo(module_finder=FileFinder('D:\\Program Files\\Python310\\lib\\site-packages\\selenium'), name='types', ispkg=False)
+ModuleInfo(module_finder=FileFinder('D:\\Program Files\\Python310\\lib\\site-packages\\selenium'), name='webdriver', ispkg=True)
+>>> for module_finder, name, ispkg in pkgutil.iter_modules(selenium.__path__):
+...     print(module_finder, name, ispkg)
+...
+FileFinder('D:\\Program Files\\Python310\\lib\\site-packages\\selenium') common True
+FileFinder('D:\\Program Files\\Python310\\lib\\site-packages\\selenium') types False
+FileFinder('D:\\Program Files\\Python310\\lib\\site-packages\\selenium') webdriver True
+>>>
+```
+
+**备注：** 只适用于定义了 `iter_modules()` 方法的 [finder](https://docs.python.org/zh-cn/3.14/glossary.html#term-finder)。 该接口是非标准的，因此本模块还提供了针对 [importlib.machinery.FileFinder](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.machinery.FileFinder) 和 [zipimport.zipimporter](https://docs.python.org/zh-cn/3.14/library/zipimport.html#zipimport.zipimporter) 的实现。  
+
+*在 3.3 版本发生变更:* 更新为直接基于 [importlib](https://docs.python.org/zh-cn/3.14/library/importlib.html#module-importlib) 而不是依赖于包内部的 [PEP 302](https://peps.python.org/pep-0302/) 导入模拟。
+<br><br>
 
 # Python语言参考
 ## 3. 数据模型
@@ -8236,7 +8480,17 @@ python myscript.py
 
 在非交互模式下，会对全部输入先解析再执行。
 
-一个接口选项会终结解释器所读入的选项列表，后续的所有参数将被放入 [sys.argv](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.argv) -- 请注意其中首个元素即第零项 (`sys.argv[0]`) 会是一个表示程序源的字符串。
+一个接口选项会终结解释器所读入的选项列表，后续的所有参数将被放入 [sys.argv](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.argv) -- 请注意其中首个元素即第零项 (`sys.argv[0]`) 会是一个表示程序源的字符串。 
+
+**-c** <command>  
+执行 *command* 中的 Python 代码。 *command* 可以为一条或以换行符分隔的多条语句，其中前导空格像在普通模块代码中一样具有作用。 
+
+如果给出此选项，[sys.argv](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.argv) 的首个元素将为 `"-c"` 并且当前目录将被加入 [sys.path](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.path) 的开头（以允许该目录中的模块作为最高层级模块被导入）。  
+
+```sh
+➜  ~ python -c "import sys; print(sys.path)"
+['', '/home/pi/.pyenv/versions/3.13.0/lib/python313.zip', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/lib-dynload', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/site-packages']
+```
 
 **-m** <module-name>  
 在 [sys.path](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.path) 中搜索指定名称的模块并将其内容作为 [\_\_main\_\_](https://docs.python.org/zh-cn/3.7/library/__main__.html#module-__main__) 模块来执行。
