@@ -3311,7 +3311,7 @@ os.remove(filename)
 ➜  ~ ls
 github  temp.py
 ➜  ~ 
-``` 
+```
 <br><br>
 
 os.**rename**(*src, dst, \*, src\_dir\_fd=None, dst\_dir\_fd=None*)  
@@ -3371,85 +3371,190 @@ with os.scandir('/home/pi') as it:
 <br><br>
 
 *class* os.**DirEntry**  
-&emsp;由 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 生成的对象，用于显示目录内某个条目的文件路径和其他文件属性。
+&emsp;&emsp;由 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 生成的对象，用于显示目录内某个条目的文件路径和其他文件属性。
 
-&emsp;[scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 将在不进行额外系统调用的情况下，提供尽可能多的此类信息。每次进行 `stat()` 或 `lstat()` 系统调用时，`os.DirEntry` 对象会将结果缓存下来。
+&emsp;&emsp;[scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 将在不进行额外系统调用的情况下，提供尽可能多的此类信息。每次进行 `stat()` 或 `lstat()` 系统调用时，`os.DirEntry` 对象会将结果缓存下来。
 
-&emsp;`os.DirEntry` 实例不适合存储在长期存在的数据结构中，如果你知道文件元数据已更改，或者自调用 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 以来已经经过了很长时间，请调用 `os.stat(entry.path)` 来获取最新信息。
+&emsp;&emsp;`os.DirEntry` 实例不适合存储在长期存在的数据结构中，如果你知道文件元数据已更改，或者自调用 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 以来已经经过了很长时间，请调用 `os.stat(entry.path)` 来获取最新信息。
 
-&emsp;因为 `os.DirEntry` 方法可以进行系统调用，所以它也可能抛出 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError) 异常。如需精确定位错误，可以逐个调用 `os.DirEntry` 中的方法来捕获 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError)，并适当处理。
+&emsp;&emsp;因为 `os.DirEntry` 方法可以进行系统调用，所以它也可能抛出 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError) 异常。如需精确定位错误，可以逐个调用 `os.DirEntry` 中的方法来捕获 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError)，并适当处理。
 
-&emsp;为了能直接用作 [类路径对象](https://docs.python.org/zh-cn/3.14/glossary.html#term-path-like-object)，`os.DirEntry` 实现了 [PathLike](https://docs.python.org/zh-cn/3.14/library/os.html#os.PathLike) 接口。
+&emsp;&emsp;为了能直接用作 [类路径对象](https://docs.python.org/zh-cn/3.14/glossary.html#term-path-like-object)，`os.DirEntry` 实现了 [PathLike](https://docs.python.org/zh-cn/3.14/library/os.html#os.PathLike) 接口。
 
-&emsp;`os.DirEntry` 实例所包含的属性和方法如下：
+&emsp;&emsp;`os.DirEntry` 实例所包含的属性和方法如下：
 
-&emsp;**name**  
-&emsp;&emsp;本条目的基本文件名，是根据 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数得出的相对路径。
+&emsp;&emsp;**name**  
+&emsp;&emsp;&emsp;&emsp;本条目的基本文件名，是根据 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数得出的相对路径。
 
-&emsp;&emsp;如果 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数是 `bytes` 类型，则 [name](https://docs.python.org/zh-cn/3.14/library/os.html#os.name) 属性也是 `bytes` 类型，否则为 `str`。使用 [fsdecode()](https://docs.python.org/zh-cn/3.14/library/os.html#os.fsdecode) 解码 byte 类型的文件名。
+&emsp;&emsp;&emsp;&emsp;如果 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数是 `bytes` 类型，则 [name](https://docs.python.org/zh-cn/3.14/library/os.html#os.name) 属性也是 `bytes` 类型，否则为 `str`。使用 [fsdecode()](https://docs.python.org/zh-cn/3.14/library/os.html#os.fsdecode) 解码 byte 类型的文件名。
 
-&emsp;**path**  
-&emsp;&emsp;本条目的完整路径：等效于 `os.path.join(scandir_path, entry.name)`，其中 *scandir_path* 就是 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数。仅当 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数为绝对路径时，本路径才是绝对路径。如果 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数是 [文件描述符](https://docs.python.org/zh-cn/3.14/library/os.html#path-fd)，则 [path](https://docs.python.org/zh-cn/3.14/library/os.path.html#module-os.path) 属性与上述 [name](https://docs.python.org/zh-cn/3.14/library/os.html#os.name) 属性相同。
+&emsp;&emsp;**path**  
+&emsp;&emsp;&emsp;&emsp;本条目的完整路径：等效于 `os.path.join(scandir_path, entry.name)`，其中 *scandir_path* 就是 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数。仅当 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数为绝对路径时，本路径才是绝对路径。如果 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数是 [文件描述符](https://docs.python.org/zh-cn/3.14/library/os.html#path-fd)，则 [path](https://docs.python.org/zh-cn/3.14/library/os.path.html#module-os.path) 属性与上述 [name](https://docs.python.org/zh-cn/3.14/library/os.html#os.name) 属性相同。
 
-&emsp;&emsp;如果 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数是 `bytes` 类型，则 [path](https://docs.python.org/zh-cn/3.14/library/os.path.html#module-os.path) 属性也是 `bytes` 类型，否则为 `str`。使用 [fsdecode()](https://docs.python.org/zh-cn/3.14/library/os.html#os.fsdecode) 解码 byte 类型的文件名。
+&emsp;&emsp;&emsp;&emsp;如果 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 的 *path* 参数是 `bytes` 类型，则 [path](https://docs.python.org/zh-cn/3.14/library/os.path.html#module-os.path) 属性也是 `bytes` 类型，否则为 `str`。使用 [fsdecode()](https://docs.python.org/zh-cn/3.14/library/os.html#os.fsdecode) 解码 byte 类型的文件名。
 
-&emsp;**inode()**  
-&emsp;&emsp;返回本条目的索引节点号 (inode number)。
+&emsp;&emsp;**inode()**  
+&emsp;&emsp;&emsp;&emsp;返回本条目的索引节点号 (inode number)。
 
-&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的，请调用 `os.stat(entry.path, follow_symlinks=False).st_ino` 来获取最新信息。
+&emsp;&emsp;&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的，请调用 `os.stat(entry.path, follow_symlinks=False).st_ino` 来获取最新信息。
 
-&emsp;&emsp;一开始没有缓存时，在 Windows 上需要一次系统调用，但在 Unix 上不需要。
+&emsp;&emsp;&emsp;&emsp;一开始没有缓存时，在 Windows 上需要一次系统调用，但在 Unix 上不需要。
 
-&emsp;**is_dir**(_*, follow_symlinks=True_)  
-&emsp;&emsp;如果本条目是目录，或是指向目录的符号链接，则返回 `True`。如果本条目是文件，或指向任何其他类型的文件，或该目录不再存在，则返回 `False`。
+&emsp;&emsp;**is_dir**(_*, follow_symlinks=True_)  
+&emsp;&emsp;&emsp;&emsp;如果本条目是目录，或是指向目录的符号链接，则返回 `True`。如果本条目是文件，或指向任何其他类型的文件，或该目录不再存在，则返回 `False`。
 
-&emsp;&emsp;如果 *follow_symlinks* 是 `False`，那么仅当本条目为目录时返回 `True` （不跟踪符号链接），如果本条目是任何类型的文件，或该文件不再存在，则返回 `False`。
+&emsp;&emsp;&emsp;&emsp;如果 *follow_symlinks* 是 `False`，那么仅当本条目为目录时返回 `True` （不跟踪符号链接），如果本条目是任何类型的文件，或该文件不再存在，则返回 `False`。
 
-&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的，且 *follow_symlinks* 为 `True` 和 `False` 时的缓存是分开的。请调用 [os.stat()](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat) 和 [stat.S_ISDIR()](https://docs.python.org/zh-cn/3.14/library/stat.html#stat.S_ISDIR) 来获取最新信息。
+&emsp;&emsp;&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的，且 *follow_symlinks* 为 `True` 和 `False` 时的缓存是分开的。请调用 [os.stat()](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat) 和 [stat.S_ISDIR()](https://docs.python.org/zh-cn/3.14/library/stat.html#stat.S_ISDIR) 来获取最新信息。
 
-&emsp;&emsp;一开始没有缓存时，大多数情况下不需要系统调用。特别是对于非符号链接，Windows 和 Unix 都不需要系统调用，除非某些 Unix 文件系统（如网络文件系统）返回了 `dirent.d_type == DT_UNKNOWN`。如果本条目是符号链接，则需要一次系统调用来跟踪它（除非 *follow_symlinks* 为 `False`）。
+&emsp;&emsp;&emsp;&emsp;一开始没有缓存时，大多数情况下不需要系统调用。特别是对于非符号链接，Windows 和 Unix 都不需要系统调用，除非某些 Unix 文件系统（如网络文件系统）返回了 `dirent.d_type == DT_UNKNOWN`。如果本条目是符号链接，则需要一次系统调用来跟踪它（除非 *follow_symlinks* 为 `False`）。
 
-&emsp;&emsp;本方法可能抛出 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError) 异常，如 [PermissionError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#PermissionError) 异常，但 [FileNotFoundError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#FileNotFoundError) 异常会被内部捕获且不会抛出。
+&emsp;&emsp;&emsp;&emsp;本方法可能抛出 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError) 异常，如 [PermissionError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#PermissionError) 异常，但 [FileNotFoundError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#FileNotFoundError) 异常会被内部捕获且不会抛出。
 
-&emsp;**is_file**(_*, follow_symlinks=True_)  
-&emsp;&emsp;如果本条目是文件，或是指向文件的符号链接，则返回 `True`。如果本条目是目录，或指向目录，或指向其他非文件条目，或该文件不再存在，则返回 `False`。
+&emsp;&emsp;**is_file**(_*, follow_symlinks=True_)  
+&emsp;&emsp;&emsp;&emsp;如果本条目是文件，或是指向文件的符号链接，则返回 `True`。如果本条目是目录，或指向目录，或指向其他非文件条目，或该文件不再存在，则返回 `False`。
 
-&emsp;&emsp;如果 follow_symlinks 是 `False`，那么仅当本条目为文件时返回 `True` （不跟踪符号链接），如果本条目是目录或其他非文件条目，或该文件不再存在，则返回 `False`。
+&emsp;&emsp;&emsp;&emsp;如果 follow_symlinks 是 `False`，那么仅当本条目为文件时返回 `True` （不跟踪符号链接），如果本条目是目录或其他非文件条目，或该文件不再存在，则返回 `False`。
 
-&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的。缓存、系统调用、异常抛出都与 [is_dir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.DirEntry.is_dir) 一致。
+&emsp;&emsp;&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的。缓存、系统调用、异常抛出都与 [is_dir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.DirEntry.is_dir) 一致。
 
-&emsp;**is_symlink()**  
-&emsp;&emsp;如果本条目是符号链接（即使是断开的链接），返回 `True`。如果是目录或任何类型的文件，或本条目不再存在，返回 `False`。
+&emsp;&emsp;**is_symlink()**  
+&emsp;&emsp;&emsp;&emsp;如果本条目是符号链接（即使是断开的链接），返回 `True`。如果是目录或任何类型的文件，或本条目不再存在，返回 `False`。
 
-&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的，请调用 [os.path.islink()](https://docs.python.org/zh-cn/3.14/library/os.path.html#os.path.islink) 来获取最新信息。
+&emsp;&emsp;&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的，请调用 [os.path.islink()](https://docs.python.org/zh-cn/3.14/library/os.path.html#os.path.islink) 来获取最新信息。
 
-&emsp;&emsp;一开始没有缓存时，大多数情况下不需要系统调用。其实 Windows 和 Unix 都不需要系统调用，除非某些 Unix 文件系统（如网络文件系统）返回了 `dirent.d_type == DT_UNKNOWN`。
+&emsp;&emsp;&emsp;&emsp;一开始没有缓存时，大多数情况下不需要系统调用。其实 Windows 和 Unix 都不需要系统调用，除非某些 Unix 文件系统（如网络文件系统）返回了 `dirent.d_type == DT_UNKNOWN`。
 
-&emsp;&emsp;本方法可能抛出 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError) 异常，如 [PermissionError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#PermissionError) 异常，但 [FileNotFoundError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#FileNotFoundError) 异常会被内部捕获且不会抛出。
+&emsp;&emsp;&emsp;&emsp;本方法可能抛出 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError) 异常，如 [PermissionError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#PermissionError) 异常，但 [FileNotFoundError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#FileNotFoundError) 异常会被内部捕获且不会抛出。
 
-&emsp;**is_junction()**  
-&emsp;&emsp;如果本条目是接合点（即使已断开）则返回 `True`；如果条目指向常规目录、任何种类的文件、符号链接或者已不存在则返回 `False`。
+&emsp;&emsp;**is_junction()**  
+&emsp;&emsp;&emsp;&emsp;如果本条目是接合点（即使已断开）则返回 `True`；如果条目指向常规目录、任何种类的文件、符号链接或者已不存在则返回 `False`。
 
-&emsp;&emsp;结果是缓存在 `os.DirEntry` 对象中的。 调用 [os.path.isjunction()](https://docs.python.org/zh-cn/3.14/library/os.path.html#os.path.isjunction) 来获取更新信息。
+&emsp;&emsp;&emsp;&emsp;结果是缓存在 `os.DirEntry` 对象中的。 调用 [os.path.isjunction()](https://docs.python.org/zh-cn/3.14/library/os.path.html#os.path.isjunction) 来获取更新信息。
 
 > 在版本 3.12 中新增。 
 
-&emsp;**stat**(_*, follow_symlinks=True_)  
-&emsp;&emsp;返回本条目对应的 [stat_result](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat_result) 对象。本方法默认会跟踪符号链接，要获取符号链接本身的 stat，请添加 `follow_symlinks=False` 参数。
+&emsp;&emsp;**stat**(_*, follow_symlinks=True_)  
+&emsp;&emsp;&emsp;&emsp;返回本条目对应的 [stat_result](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat_result) 对象。本方法默认会跟踪符号链接，要获取符号链接本身的 stat，请添加 `follow_symlinks=False` 参数。
 
-&emsp;&emsp;在 Unix 上，本方法需要一次系统调用。在 Windows 上，仅在 *follow_symlinks* 为 `True` 且该条目是一个重解析点（如符号链接或目录结点）时，才需要一次系统调用。
+&emsp;&emsp;&emsp;&emsp;在 Unix 上，本方法需要一次系统调用。在 Windows 上，仅在 *follow_symlinks* 为 `True` 且该条目是一个重解析点（如符号链接或目录结点）时，才需要一次系统调用。
 
-&emsp;&emsp;在 Windows 上，[stat_result](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat_result) 的 `st_ino`、`st_dev` 和 `st_nlink` 属性总是为零。请调用 [os.stat()](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat) 以获得这些属性。
+&emsp;&emsp;&emsp;&emsp;在 Windows 上，[stat_result](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat_result) 的 `st_ino`、`st_dev` 和 `st_nlink` 属性总是为零。请调用 [os.stat()](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat) 以获得这些属性。
 
-&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的，且 *follow_symlinks* 为 `True` 和 `False` 时的缓存是分开的。请调用 [os.stat()](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat) 来获取最新信息。
+&emsp;&emsp;&emsp;&emsp;这一结果是缓存在 `os.DirEntry` 对象中的，且 *follow_symlinks* 为 `True` 和 `False` 时的缓存是分开的。请调用 [os.stat()](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat) 来获取最新信息。
 
-&emsp;&emsp;请注意 `os.DirEntry` 和 [pathlib.Path](https://docs.python.org/zh-cn/3.14/library/pathlib.html#pathlib.Path) 的几个属性和方法之间存在很好的对应关系。 具体来说，`name` 属性具有相同的含义，`is_dir()`, `is_file()`, `is_symlink()`, `is_junction()` 和 `stat()` 方法也是如此。
+&emsp;&emsp;&emsp;&emsp;请注意 `os.DirEntry` 和 [pathlib.Path](https://docs.python.org/zh-cn/3.14/library/pathlib.html#pathlib.Path) 的几个属性和方法之间存在很好的对应关系。 具体来说，`name` 属性具有相同的含义，`is_dir()`, `is_file()`, `is_symlink()`, `is_junction()` 和 `stat()` 方法也是如此。
 
 > 在版本 3.5 中新增。
 
 > *在 3.6 版本发生变更：* 添加了对 [PathLike](https://docs.python.org/zh-cn/3.14/library/os.html#os.PathLike) 接口的支持。在 Windows 上添加了对 [bytes](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#bytes) 类型路径的支持。
 
 > *在 3.12 版本发生变更：* 统计结果的 `st_ctime` 属性在 Windows 上已被弃用。 文件创建时间可通过 `st_birthtime` 来访问，在未来 `st_ctime` 可能会改为返回零或元数据的修改时间，如果可用的话。
+
+<br><br>
+
+os.**walk**(_top, topdown=True, onerror=None, followlinks=False_)  
+生成目录树中的文件名，方式是按上->下或下->上顺序浏览目录树。对于以 *top* 为根的目录树中的每个目录（包括 *top* 本身），它都会生成一个三元组 `(dirpath, dirnames, filenames)`。
+
+*dirpath* 是一个字符串，表示目录的路径。 *dirnames* 是由 *dirpath* 中的子目录名称组成的列表 (包括指向目录的符号链接，不包括 `'.'` 和 `'..'`)。 *filenames* 是由 *dirpath* 中非目录文件名称组成的列表。 请注意列表中的名称不包含路径部分。 要获取 *dirpath* 中文件或目录的完整路径 (以 *top* 打头，请执行 `os.path.join(dirpath, name)`。 列表是否排序取决于具体文件系统。 如果有文件在列表生成期间被移除或添加到 *dirpath*，是否要包括该文件的名称并没有规定。
+
+如果可选参数 *topdown* 为 `True` 或未指定，则在所有子目录的三元组之前生成父目录的三元组（目录是自上而下生成的）。如果 *topdown* 为 `False`，则在所有子目录的三元组生成之后再生成父目录的三元组（目录是自下而上生成的）。无论 *topdown* 为何值，在生成目录及其子目录的元组之前，都将检索全部子目录列表。
+
+当 *topdown* 为 `True` 时，调用者可以就地修改 *dirnames* 列表（也许用到了 [del](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#del) 或切片），而 [walk()](https://docs.python.org/zh-cn/3.14/library/os.html#os.walk) 将仅仅递归到仍保留在 *dirnames* 中的子目录内。这可用于减少搜索、加入特定的访问顺序，甚至可在继续 [walk()](https://docs.python.org/zh-cn/3.14/library/os.html#os.walk) 之前告知 [walk()](https://docs.python.org/zh-cn/3.14/library/os.html#os.walk) 由调用者新建或重命名的目录的信息。当 *topdown* 为 `False` 时，修改 *dirnames* 对 walk 的行为没有影响，因为在自下而上模式中，*dirnames* 中的目录是在 *dirpath* 本身之前生成的。
+
+默认将忽略 [scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 调用中的错误。如果指定了可选参数 *onerror*，它应该是一个函数。出错时它会被调用，参数是一个 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError) 实例。它可以报告错误然后继续遍历，或者抛出异常然后中止遍历。注意，可以从异常对象的 `filename` 属性中获取出错的文件名。
+
+当给 os.walk() 传递一个不存在的路径时，默认情况下 os.walk() 不会报错，最终会返回一个空迭代器。这是因为 os.walk() 调用 os.scandir() 时默认会忽略错误，并返回空，要想在遇到错误时抛出异常，可以为 *onerror* 参数定义一个函数： 
+
+```py
+>>> def get_error(e):
+...     raise e                                               
+...       
+>>> for root, dirs, files in os.walk('/home/pi/Downloa'):     
+...     for file in files:
+...         print(file)
+...         
+>>> for root, dirs, files in os.walk('/home/pi/Downloa', onerror=get_error):    
+...     for file in files:
+...         print(file)  
+...         
+Traceback (most recent call last):                            
+  File "<python-input-30>", line 1, in <module>               
+    for root, dirs, files in os.walk('/home/pi/Downloa', onerror=get_error):
+                             ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^         
+  File "<frozen os>", line 371, in walk                       
+  File "<python-input-27>", line 2, in get_error              
+    raise e                  
+  File "<frozen os>", line 368, in walk                       
+FileNotFoundError: [Errno 2] No such file or directory: '/home/pi/Downloa'
+>>>   
+```
+
+[walk()](https://docs.python.org/zh-cn/3.14/library/os.html#os.walk) 默认不会递归进指向目录的符号链接。可以在支持符号链接的系统上将 *followlinks* 设置为 `True`，以访问符号链接指向的目录。
+
+**备注:** 注意，如果链接指向自身的父目录，则将 *followlinks* 设置为 `True` 可能导致无限递归。[walk()](https://docs.python.org/zh-cn/3.14/library/os.html#os.walk) 不会记录它已经访问过的目录。
+
+**备注:** 如果传入的是相对路径，请不要在恢复 [walk()](https://docs.python.org/zh-cn/3.14/library/os.html#os.walk) 之间更改当前工作目录。[walk()](https://docs.python.org/zh-cn/3.14/library/os.html#os.walk) 不会更改当前目录，并假定其调用者也不会更改当前目录。
+
+下面的例子显示了起始目录下的每个子目录内非目录文件所占用的字节数，例外情况是它不会在任何 `__pycache__` 子目录内进行查找： 
+
+```py
+import os
+from os.path import join, getsize
+for root, dirs, files in os.walk("D:\\Program Files\\Python310\\Lib\\xml"):
+    print(root, "consumes", end=" ")
+    print(sum(getsize(join(root, name)) for name in files), end=" ")
+    print("bytes in", len(files), "non-directory files")
+    if '__pycache__' in dirs:
+        dirs.remove('__pycache__')  # 不访问 __pycache__ 目录
+```
+
+**注意：** 
+Windows 上的路径分隔符必须使用“\\”或“/”，使用“\”会报类似如下错误： 
+`SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 30-31: truncated \xXX escape` 
+
+在 Windows 平台上，path 参数的路径分隔符只能使用“\\”或“/”，其中“\\”是 Windows 上的标准路径分隔符，而 “/” 是类 Unix 路径分隔符。 
+
+在下一个示例（[shutil.rmtree()](https://docs.python.org/zh-cn/3.14/library/shutil.html#shutil.rmtree) 的简单实现）中，必须使树自下而上遍历，因为 [rmdir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.rmdir) 只允许在目录为空时删除目录： 
+
+```py
+# 删除可以从“top”目录进入的所有东西，
+# 假定其中没有符号链接。
+# 注意：这很危险！例如，如果 top == '/'，
+# 它可能删除你所有的磁盘文件。
+import os
+for root, dirs, files in os.walk(top, topdown=False):
+    for name in files:
+        os.remove(os.path.join(root, name))
+    for name in dirs:
+        os.rmdir(os.path.join(root, name))
+os.rmdir(top)
+```
+
+引发一个 [审计事件](https://docs.python.org/zh-cn/3.14/library/sys.html#auditing) `os.walk` 并附带参数 `top`, `topdown`, `onerror`, `followlinks`。 
+
+上述代码实际上可以更简洁，因为第一次迭代发生在目录树第一条路径的最内层目录，删除完目录内的文件后是可以直接删除该目录的，因为最内层目录是绝对没有子目录的（有子目录的话就不能叫最内层目录了），而文件均已被删除，此时最内层目录就是一个空目录，是可以被删除的。而上述代码删除最内层目录时，是发生在第二次迭代的时候，此时目录为空，其父目录为 root。 
+
+```py
+>>> import subprocess
+>>> import os
+>>> print(subprocess.run(["ls", "/home/pi/Downloads"], capture_output=True, text=True).stdout.strip())                                                         
+httpbin.base64                                                
+httpbin.png              
+xml   
+>>> for root, dirs, files in os.walk('/home/pi/Downloads/xml', topdown=False):
+...     for file in files:                                    
+...         os.remove(os.path.join(root, file))               
+...     os.rmdir(root)                                                                          
+...     
+>>> print(subprocess.run(["ls", "/home/pi/Downloads"], capture_output=True, text=True).stdout.strip())                                                          
+httpbin.base64                                                
+httpbin.png              
+```
+
+*在 3.5 版本发生变更：* 现在，本函数调用的是 [os.scandir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.scandir) 而不是 [os.listdir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.listdir)，从而减少了调用 [os.stat()](https://docs.python.org/zh-cn/3.14/library/os.html#os.stat) 的次数而变得更快。 
+
+*在 3.6 版本发生变更：* 接受一个 [类路径对象](https://docs.python.org/zh-cn/3.14/glossary.html#term-path-like-object)。
 <br><br>
 
 #### 进程管理
