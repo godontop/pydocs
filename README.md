@@ -151,6 +151,9 @@
             * [3.2.10. 自定义类](#3210-自定义类)
                 * [3.2.10.1. 特殊属性](#32101-特殊属性)
                 * [3.2.10.2. 特殊方法](#32102-特殊方法)
+            * [3.2.13. 内部类型](#3213-内部类型)
+                * [3.2.13.1. 代码对象](#32131-代码对象)
+                    * [3.2.13.1.1. 特殊的只读属性](#321311-特殊的只读属性)
         * [3.3. 特殊方法名](#33-特殊方法名)
             * [3.3.1. 基本自定义](#331-基本自定义)
             * [3.3.6. 仿真可调用对象](#336-仿真可调用对象)
@@ -2680,8 +2683,8 @@ hex_codec  |hex     |将操作数转换为十六进制表示，每个字节有�
 </br>
 
 *class* collections.abc.**Iterator**  
-提供了 [\_\_iter\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__iter__) 和 [\_\_next\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__next__) 方法的抽象基类。参见 [iterator](https://docs.python.org/zh-cn/3/glossary.html#term-iterator) 的定义。  
-</br><br>
+提供了 [\_\_iter\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__iter__) 和 [\_\_next\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__next__) 方法的抽象基类。参见 [iterator](https://docs.python.org/zh-cn/3/glossary.html#term-iterator) 的定义。
+<br><br>
 
 ### pprint --- 数据美化输出
 **源代码：** [Lib/pprint.py](https://github.com/python/cpython/tree/3.14/Lib/pprint.py)
@@ -6279,10 +6282,57 @@ temp.py
 
 在 Python3.7 中，`__file__` 返回的是模块对应的文件的相对路径名，而在 Python3.11 中 `__file__` 返回的是模块对应的文件的绝对路径名。 
 
-特殊的只读属性：[\_\_dict\_\_](https://docs.python.org/3/library/stdtypes.html#object.__dict__) is the module’s namespace as a dictionary object.  
+特殊的只读属性：[\_\_dict\_\_](https://docs.python.org/3/library/stdtypes.html#object.__dict__) is the module’s namespace as a dictionary object。
+<br><br>
 
-#### 3.3. 特殊方法名
-##### 3.3.1. 基本自定义
+#### 3.2.13. 内部类型
+某些由解释器内部使用的类型也被暴露给用户。它们的定义可能随未来解释器版本的更新而变化，为内容完整起见在此处一并介绍。
+
+##### 3.2.13.1. 代码对象
+代码对象表示 *编译为字节的* 可执行 Python 代码，或称 [bytecode](https://docs.python.org/zh-cn/3.14/glossary.html#term-bytecode)。代码对象和函数对象的区别在于函数对象包含对函数全局对象 (函数所属的模块) 的显式引用，而代码对象不包含上下文；而且默认参数值会存放于函数对象而不是代码对象内 (因为它们表示在运行时算出的值)。与函数对象不同，代码对象不可变，也不包含对可变对象的引用 (不论是直接还是间接)。
+
+###### 3.2.13.1.1. 特殊的只读属性
+
+特殊只读属性                        |含义 
+-----------------------------------|-------- 
+codeobject.**co_name**             |函数名 
+codeobject.**co_qualname**         |完整限定函数名<br><br>*在版本 3.11 中新增。* 
+codeobject.**co_argcount**         |函数的位置 [形参](https://docs.python.org/zh-cn/3.14/glossary.html#term-parameter) 的总数（包括仅限位置形参和具有默认值的形参） 
+codeobject.**co_posonlyargcount**  |函数的仅限位置 [形参](https://docs.python.org/zh-cn/3.14/glossary.html#term-parameter) 的总数（包括具有默认值的参数） 
+codeobject.**co_kwonlyargcount**   |函数的仅限关键字 [形参](https://docs.python.org/zh-cn/3.14/glossary.html#term-parameter) 的数量（包括具有默认值的参数） 
+codeobject.**co_nlocals**          |函数使用的 [局部变量](https://docs.python.org/zh-cn/3.14/reference/executionmodel.html#naming) 的数量（包括形参） 
+codeobject.**co_varnames**         |一个 [tuple](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#tuple)，其中包含函数中局部变量的名称（从形参名称开始） 
+codeobject.**co_cellvars**         |包含被函数内至少一个 [nested scope](https://docs.python.org/zh-cn/3.14/glossary.html#term-nested-scope) 所引用的 [局部变量](https://docs.python.org/zh-cn/3.14/reference/executionmodel.html#naming) 的名称的 [元组](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#tuple)。 
+codeobject.**co_freevars**         |一个 [元组](https://docs.python.org/3.14/library/stdtypes.html#tuple)，其中包含某个 [nested scope](https://docs.python.org/3.14/glossary.html#term-nested-scope) 在外部作用域中引用的 [自由（闭包）变量](https://docs.python.org/3.14/glossary.html#term-closure-variable) 的名称。 另请参阅 [function.\_\_closure\_\_](https://docs.python.org/3.14/reference/datamodel.html#function.__closure__)。<br><br>注意：对全局和内置名称的引用 *不会* 被包括在内。 
+codeobject.**co_code**             |一个表示函数中的 [bytecode](https://docs.python.org/3.14/glossary.html#term-bytecode) 指令序列的字符串 
+codeobject.**co_consts**           |一个包含函数中的 [bytecode](https://docs.python.org/3.14/glossary.html#term-bytecode) 所使用的字面值的元组 
+codeobject.**co_names**            |一个包含函数中的 [bytecode](https://docs.python.org/zh-cn/3.14/glossary.html#term-bytecode) 所使用的名称的元组 
+codeobject.**co_filename**         |被编译代码所在文件的名称 
+codeobject.**co_firstlineno**      |函数第一行所对应的行号 
+codeobject.**co_lnotab**           |一个编码了从 [bytecode](https://docs.python.org/zh-cn/3.14/glossary.html#term-bytecode) 偏移量到行号的映射的字符串。要获取更多细节，请查看解释器的源代码。<br><br>*自 3.12 版本弃用：* 代码对象的这个属性已被弃用，并可能在 Python 3.15 中移除。 
+codeobject.**co_stacksize**        |需要的代码对象栈大小 
+codeobject.**co_flags**            |用于对一系列解释器标识进行编码的整数。 
+
+以下是针对 [co_flags](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#codeobject.co_flags) 定义的标识位：如果函数使用 `*arguments` 语法来接受任意数量的位置参数则设置 `0x04` 位；如果函数使用 `**keywords` 语法来接受任意数量的关键字参数则设置 `0x08` 位；如果函数是一个生成器则设置 `0x20` 位。 请参阅 [代码对象位标志](https://docs.python.org/zh-cn/3.14/library/inspect.html#inspect-module-co-flags) 可能出现的每个标识的语义详情。 
+
+未来特性声明 (例如 `from __future__ import division`) 也使用 [co_flags](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#codeobject.co_flags) 中的比特位来指明代码对象在编译时是否启用了某个特性。 参见 [compiler_flag](https://docs.python.org/zh-cn/3.14/library/__future__.html#future__._Feature.compiler_flag)。
+
+[co_flags](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#codeobject.co_flags) 中的其他位被保留供内部使用。
+
+如果一个代码对象代表函数并且具有文档字符串，则会在 [co_flags](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#codeobject.co_flags) 中设置 [CO_HAS_DOCSTRING](https://docs.python.org/zh-cn/3.14/library/inspect.html#inspect.CO_HAS_DOCSTRING) 比特位并且 [co_consts](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#codeobject.co_consts) 中的第一个条目将是该函数的文档字符串。
+<br><br>
+
+### 3.3. 特殊方法名
+一个类可以通过定义具有特殊名称的方法来实现由特殊语法来唤起的特定操作（例如算术运算或抽取与切片）。 这是 Python 实现 *运算符重载* 的方式，允许每个类自行定义基于该语言运算符的特定行为。 举例来说，如果一个类定义了名为 [\_\_getitem\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__getitem__) 的方法，并且 `x` 是该类的一个实例，则 `x[i]` 基本就等价于 `type(x).__getitem__(x, i)`。 除非有说明例外情况，在没有定义适当方法的时候尝试执行某种操作将引发一个异常 (通常为 [AttributeError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#AttributeError) 或 [TypeError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#TypeError))。
+
+将一个特殊方法设为 `None` 表示对应的操作不可用。 例如，如果一个类将 [\_\_iter\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__iter__) 设为 `None`，则该类就是不可迭代的，因此对其实例调用 [iter()](https://docs.python.org/zh-cn/3.14/library/functions.html#iter) 将引发一个 [TypeError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#TypeError) (而不会回退至 [\_\_getitem\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__getitem__))。 [2]
+
+[2] [\_\_hash\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__hash__), [\_\_iter\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__iter__), [\_\_reversed\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__reversed__), [\_\_contains\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__contains__), [\_\_class_getitem\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__class_getitem__) 和 [\_\_fspath\_\_()](https://docs.python.org/zh-cn/3.14/library/os.html#os.PathLike.__fspath__) 方法对此有特殊处理。 其他方法仍然会引发 [TypeError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#TypeError)，但可能会依赖 `None` 是不可调用对象的行为来做到这一点。
+
+在实现模拟任何内置类型的类时，很重要的一点是模拟的实现程度对于被模拟对象来说应当是有意义的。例如，提取单个元素的操作对于某些序列来说是适宜的，但提取切片可能就没有意义。(这种情况的一个实例是 W3C 的文档对象模型中的 [NodeList](https://docs.python.org/zh-cn/3.14/library/xml.dom.html#dom-nodelist-objects) 接口。)
+<br><br>
+
+#### 3.3.1. 基本自定义
 object.**\_\_init\_\_**(*self*__[__, ...__]__)  
 当实例被创建（通过 [\_\_new\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__new__)）之后调用，但在实例返回调用者之前。参数是传递给类构造函数表达式的那些。如果基类有一个 [\_\_init\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__init__) 方法，衍生类的 [\_\_init\_\_()](https://docs.python.org/3/reference/datamodel.html#object.__init__) 方法，如果有的话，必须明确地调用它以确保正确地初始化实例的基类部分；例如： `super().__init__([args...])`。
 
@@ -6317,6 +6367,13 @@ TypeError: __init__() should return None, not 'str'
 >>> t = Test()
 >>>
 ```
+<br><br>
+
+object.**\_\_repr\_\_**(_self_)  
+由 [repr()](https://docs.python.org/zh-cn/3.14/library/functions.html#repr) 内置函数调用以输出一个对象的“官方”字符串表示。如果可能，这应类似一个有效的 Python 表达式，能被用来重建具有相同取值的对象（只要有适当的环境）。如果这不可能，则应返回形式如 `<...some useful description...>` 的字符串。返回值必须是一个字符串对象。如果一个类定义了 [\_\_repr\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__repr__) 但未定义 [\_\_str\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__str__)，则在需要该类的实例的“非正式”字符串表示时也会使用 [\_\_repr\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__repr__)。
+
+此方法通常被用于调试，因此确保其表示的内容包含丰富信息且无歧义是很重要的。 [object](https://docs.python.org/zh-cn/3.14/library/functions.html#object) 类本身提供了一个默认实现。
+<br><br>
 
 object.**\_\_str\_\_**(*self*)  
 由 [str(object)](https://docs.python.org/3/library/stdtypes.html#str) 调用，然后内置函数 [format()](https://docs.python.org/3/library/functions.html#format) 及 [print()](https://docs.python.org/3/library/functions.html#print) 计算 “通俗的” 或令人满意地可打印的代表一个对象的字符串。返回值必须是一个[字符串](https://docs.python.org/3/library/stdtypes.html#textseq)对象。
