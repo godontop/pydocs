@@ -48,6 +48,8 @@
     * [数据类型](#数据类型)
         * [collections --- 容器数据类型](#collections-----容器数据类型)
         * [collections.abc --- 容器的抽象基类](#collectionsabc-----容器的抽象基类)
+        * [pprint --- 数据美化输出](#pprint-----数据美化输出)
+            * [函数](#函数)
     * [函数式编程模块](#函数式编程模块)
         * [itertools -- 为高效循环创建迭代器的函数](#itertools----为高效循环创建迭代器的函数)
     * [文件和目录访问](#文件和目录访问)
@@ -72,7 +74,7 @@
                 * [缓冲流](#缓冲流)
                 * [文本 I/O](#文本-io)
         * [time — 时间的访问和转化](#time--时间的访问和转化)
-            * [函数](#函数)
+            * [函数](#函数-1)
         * [getopt — C-风格的命令行选项解析器](#getopt--c-风格的命令行选项解析器)
         * [logging --- Python 的日志记录工具](#logging-----python-的日志记录工具)
             * [日志级别](#日志级别)
@@ -120,6 +122,10 @@
         * [\_\_main\_\_ --- 顶层代码环境](#__main__-----顶层代码环境)
         * [traceback — 打印或检索堆栈回溯](#traceback--打印或检索堆栈回溯)
             * [TracebackException 对象](#tracebackexception-对象)
+        * [inspect --- 检查活对象](#inspect-----检查活对象)
+            * [检索源代码](#检索源代码)
+    * [导入模块](#导入模块)
+        * [pkgutil --- 包扩展工具](#pkgutil-----包扩展工具)
 * [Python语言参考](#python语言参考)
     * [3. 数据模型](#3-数据模型)
         * [3.2. 标准类型层次结构](#32-标准类型层次结构)
@@ -2675,7 +2681,53 @@ hex_codec  |hex     |将操作数转换为十六进制表示，每个字节有�
 
 *class* collections.abc.**Iterator**  
 提供了 [\_\_iter\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__iter__) 和 [\_\_next\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__next__) 方法的抽象基类。参见 [iterator](https://docs.python.org/zh-cn/3/glossary.html#term-iterator) 的定义。  
-</br>
+</br><br>
+
+### pprint --- 数据美化输出
+**源代码：** [Lib/pprint.py](https://github.com/python/cpython/tree/3.14/Lib/pprint.py)
+
+[pprint](https://docs.python.org/zh-cn/3.14/library/pprint.html#module-pprint) 模块提供了“美化打印”任意 Python 数据结构的功能，这种美化形式可用作对解释器的输入。 如果经格式化的结构包含非基本 Python 类型的对象，则其美化形式可能无法被加载。 包含文件、套接字或类对象，以及许多其他不能用 Python 字面值来表示的对象都有可能导致这样的结果。
+
+已格式化的表示形式会在可能的情况下将对象放在单行中，而当它们不能在允许宽度中被容纳时将其分为多行，允许宽度可由默认为 80 个字符的 *width* 形参加以调整。
+
+*在 3.9 版本发生变更：* 添加了对美化打印 [types.SimpleNamespace](https://docs.python.org/zh-cn/3.14/library/types.html#types.SimpleNamespace) 的支持。
+
+*在 3.10 版本发生变更：* 添加了对美化打印 [dataclasses.dataclass](https://docs.python.org/zh-cn/3.14/library/dataclasses.html#dataclasses.dataclass) 的支持。
+
+#### 函数
+pprint.**pp**(_object, stream=None, indent=1, width=80, depth=None, *, compact=False, sort_dicts=False, underscore_numbers=False_) 
+打印 object 的格式化表示形式，末尾加一个换行符。 此函数可以在交互式解释器中代替 [print()](https://docs.python.org/zh-cn/3.14/library/functions.html#print) 函数用于检查对象值。 提示：你可以执行重赋值 `print = pprint.pp` 以在指定作用域内使用。
+
+**参数：**  
+* **object** -- 要打印的对象。  
+* **stream** ([file-like object](https://docs.python.org/zh-cn/3.14/glossary.html#term-file-like-object) | None) -- 一个文件型对象，可通过调用其 write() 方法将输出写入该对象。 如为 `None` (默认值 )，则使用 [sys.stdout](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.stdout)。  
+* **indent** ([*int*](https://docs.python.org/zh-cn/3.14/library/functions.html#int)) -- 要为每个嵌套层级添加的缩进量。  
+* **width** ([*int*](https://docs.python.org/zh-cn/3.14/library/functions.html#int)) -- 输出中每行所允许的最大字符数。 如果一个结构无法在宽度限制内被格式化，则将尽可能的接近。  
+* **depth** ([*int*](https://docs.python.org/zh-cn/3.14/library/functions.html#int) | *None*) -- 可被打印的嵌套层级数量。 如果要打印的数据结构具有过深的层级，则其包含的下一层级将用 `...` 替换。 如为 `None` (默认值)，则不会限制被格式化对象的层级深度。  
+* **compact** ([*bool*](https://docs.python.org/zh-cn/3.14/library/functions.html#bool)) -- 控制长 [序列](https://docs.python.org/zh-cn/3.14/glossary.html#term-sequence) 的格式化方式。 如为 `False` (默认值)，则序列的每一项将被格式化为单独的行，否则在格式化每个输出行时将根据 *width* 限制容纳尽可能多的条目。  
+* **sort_dicts** ([*bool*](https://docs.python.org/zh-cn/3.14/library/functions.html#bool)) -- 如为 `True`，则在格式化字典时将基于键进行排序，否则将按插入顺序显示它们（默认）。  
+* **underscore_numbers** ([*bool*](https://docs.python.org/zh-cn/3.14/library/functions.html#bool)) -- 如为 `True`，则在格式化整数时将使用 `_` 字符作为千位分隔符，否则将不显示下划线（默认）。 
+
+```py
+>>> import pprint
+>>> stuff = ['spam', 'eggs', 'lumberjack', 'knights', 'ni']
+>>> stuff.insert(0, stuff)
+>>> pprint.pp(stuff)
+[<Recursion on list with id=548006164160>,
+ 'spam',
+ 'eggs',
+ 'lumberjack',
+ 'knights',
+ 'ni']
+>>> 
+```
+
+*在版本 3.8 中新增。*
+<br><br>
+
+pprint.**pprint**(_object, stream=None, indent=1, width=80, depth=None, *, compact=False, sort_dicts=True, underscore_numbers=False_)  
+默认将 *sort_dicts* 设为 `True` 的 [pp()](https://docs.python.org/zh-cn/3.14/library/pprint.html#pprint.pp) 的别名，它将自动按字典的键进行排序，你也可以选择使用该参数默认为 `False` 的 [pp()](https://docs.python.org/zh-cn/3.14/library/pprint.html#pprint.pp)。
+<br><br>
 
 ## 函数式编程模块
 ### itertools -- 为高效循环创建迭代器的函数
@@ -3510,10 +3562,10 @@ for root, dirs, files in os.walk("D:\\Program Files\\Python310\\Lib\\xml"):
 ```
 
 **注意：** 
-Windows 上的路径分隔符必须使用“\\”或“/”，使用“\”会报类似如下错误： 
+Windows 上的路径分隔符必须使用 `“\\”` 或 `“/”`，使用 `“\”` 会报类似如下错误： 
 `SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 30-31: truncated \xXX escape` 
 
-在 Windows 平台上，path 参数的路径分隔符只能使用“\\”或“/”，其中“\\”是 Windows 上的标准路径分隔符，而 “/” 是类 Unix 路径分隔符。 
+在 Windows 平台上，path 参数的路径分隔符只能使用 `“\\”` 或 `“/”`，其中 `“\\”` 是 Windows 上的标准路径分隔符，而 `“/”` 是类 Unix 路径分隔符。 
 
 在下一个示例（[shutil.rmtree()](https://docs.python.org/zh-cn/3.14/library/shutil.html#shutil.rmtree) 的简单实现）中，必须使树自下而上遍历，因为 [rmdir()](https://docs.python.org/zh-cn/3.14/library/os.html#os.rmdir) 只允许在目录为空时删除目录： 
 
@@ -5836,6 +5888,37 @@ traceback.**print_exception(**_etype, value, tb, limit=None, file=None, chain=Tr
 
 指示发生了哪个异常的消息始终是输出中的最后一个字符串。  
 <br><br>  
+
+### inspect --- 检查活对象
+**源代码：** [Lib/inspect.py](https://github.com/python/cpython/tree/3.14/Lib/inspect.py) 
+
+[inspect](https://docs.python.org/zh-cn/3.14/library/inspect.html#module-inspect) 模块提供了一些有用的函数帮助获取活对象的信息，例如模块、类、方法、函数、回溯、帧对象以及代码对象。例如它可以帮助你检查类的内容，获取某个方法的源代码，取得并格式化某个函数的参数列表，或者获取你需要显示的回溯的详细信息。
+
+该模块提供了 4 种主要的功能：类型检查、检索源代码、检查类与函数、检查解释器的调用堆栈。 
+
+#### 检索源代码
+inspect.**getsource**(_object_)  
+返回对象的源代码文本。 参数可以是一个模块、类、方法、函数、回溯帧或代码对象。 源代码将以单个字符串的形式被返回。 如果源代码无法被获取则会引发 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError)。 如果对象是一个内置模块、类或函数则会引发 [TypeError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#TypeError)。 
+
+如果模块被冻结，也是无法获取模块中函数的源代码的。 
+
+```py
+>>> import sys
+>>> import os
+>>> import inspect
+>>> sys.version_info
+sys.version_info(major=3, minor=13, micro=0, releaselevel='final', serial=0)
+>>> try:
+...     print(inspect.getsource(os.walk))
+... except OSError:
+...     if os.__spec__.origin == 'frozen':
+...         print("module os is frozen, can't get source for os.walk.")
+...         
+module os is frozen, can't get source for os.walk. 
+>>>
+```
+
+*在 3.3 版本发生变更：* 现在会引发 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError) 而不是 [IOError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#IOError)，后者现在是前者的一个别名。
 
 ## 导入模块
 ### pkgutil --- 包扩展工具
@@ -9199,7 +9282,7 @@ function main(splash, args)
         print("scrollWidth", sw) 的内容只会出现在容器中，而不会出现在 Splash 的渲染
         窗口（http://splashserver:8050）中，要想出现在 Splash 的渲染窗口中，需使用
         return 带回。
-        lua 脚本中的字符串连接符为“--”，等同于 Python 中的“+”。
+        lua 脚本中的字符串连接符为“..”，等同于 Python 中的“+”。
     ]]
     return {
         png = splash:png(),
