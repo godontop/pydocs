@@ -123,6 +123,7 @@
         * [traceback — 打印或检索堆栈回溯](#traceback--打印或检索堆栈回溯)
             * [TracebackException 对象](#tracebackexception-对象)
         * [inspect --- 检查活对象](#inspect-----检查活对象)
+            * [类型和成员](#类型和成员)
             * [检索源代码](#检索源代码)
     * [导入模块](#导入模块)
         * [pkgutil --- 包扩展工具](#pkgutil-----包扩展工具)
@@ -5898,6 +5899,105 @@ traceback.**print_exception(**_etype, value, tb, limit=None, file=None, chain=Tr
 [inspect](https://docs.python.org/zh-cn/3.14/library/inspect.html#module-inspect) 模块提供了一些有用的函数帮助获取活对象的信息，例如模块、类、方法、函数、回溯、帧对象以及代码对象。例如它可以帮助你检查类的内容，获取某个方法的源代码，取得并格式化某个函数的参数列表，或者获取你需要显示的回溯的详细信息。
 
 该模块提供了 4 种主要的功能：类型检查、检索源代码、检查类与函数、检查解释器的调用堆栈。 
+
+#### 类型和成员
+[getmembers()](https://docs.python.org/zh-cn/3.14/library/inspect.html#inspect.getmembers) 函数获取对象如类或模块的成员。 名称以“is”打头的函数主要是作为传给 [getmembers()](https://docs.python.org/zh-cn/3.14/library/inspect.html#inspect.getmembers) 的第二个参数的便捷选项提供的。 它们还可帮助你确定你是否能找到下列特殊属性（请参阅 [模块对象上与导入相关的属性](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#import-mod-attrs) 了解有关模块属性的详情）:
+
+类型                |属性              |描述 
+-------------------|------------------|------------ 
+class -- 类        |`__doc__`         |文档字符串 
+&nbsp;             |`__name__`        |类定义时所使用的名称 
+&nbsp;             |`__qualname__`    |qualified name -- 限定名称 
+&nbsp;             |`__module__`      |该类型被定义时所在的模块的名称 
+&nbsp;             |`__type_params__` |一个包含泛型类的 [类型形参](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#type-params) 的元组 
+method -- 方法     |`__doc__`         |文档字符串 
+&nbsp;             |`__name__`        |该方法定义时所使用的名称 
+&nbsp;             |`__qualname__`    |qualified name -- 限定名称 
+&nbsp;             |`__func__`        |实现该方法的函数对象 
+&nbsp;             |`__self__`        |该方法被绑定的实例，若没有绑定则为 `None` 
+&nbsp;             |`__module__`      |定义此方法的模块的名称 
+function -- 函数   |`__doc__`         |文档字符串 
+&nbsp;             |`__name__`        |用于定义此函数的名称 
+&nbsp;             |`__qualname__`    |qualified name -- 限定名称 
+&nbsp;             |`__code__`        |包含已编译函数的代码对象 bytecode 
+&nbsp;             |`__defaults__`    |所有位置或关键字参数的默认值的元组 
+&nbsp;             |`__kwdefaults__`  |仅关键字形参的所有默认值的映射 
+&nbsp;             |`__globals__`     |此函数定义所在的全局命名空间 
+&nbsp;             |`__builtins__`    |builtins 命名空间 
+&nbsp;             |`__annotations__` |参数名称到注解的映射；保留键 "return" 用于返回值注解。 
+&nbsp;             |`__type_params__` |一个包含泛型函数的 [类型形参](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#type-params) 的元组 
+&nbsp;             |`__module__`      |此函数定义所在的模块名称 
+traceback -- 回溯  |`tb_frame`        |此层的帧对象 
+&nbsp;             |`tb_lasti`        |在字节码中最后尝试的指令的索引 
+&nbsp;             |`tb_lineno`       |当前行在 Python 源代码中的行号 
+&nbsp;             |`tb_next`         |下一个内部回溯对象（由本层调用） 
+frame -- 帧        |`f_back`          |下一个外部帧对象（此帧的调用者） 
+&nbsp;             |`f_builtins`      |此帧可见的 builtins 命名空间 
+&nbsp;             |`f_code`          |在此帧中执行的代码对象 
+&nbsp;             |`f_globals`       |此帧执行时所在的全局命名空间 
+&nbsp;             |`f_lasti`         |在字节码中最后尝试的指令的索引 
+&nbsp;             |`f_lineno`        |当前行在 Python 源代码中的行号 
+&nbsp;             |`f_locals`        |此帧所看到的局部命名空间 
+&nbsp;             |`f_generator`     |返回拥有该帧的生成器或协程对象，或者 `None` 如果该帧是一个常规函数 
+&nbsp;             |`f_trace`         |此帧的追踪函数，或 `None` 
+&nbsp;             |`f_trace_lines`   |指明一个追踪事件是否针对每个源代码行触发 
+&nbsp;             |`f_trace_opcodes` |指示是否请求每个操作码事件 
+&nbsp;             |`clear()`         |用于清除对局部变量的所有引用 
+code -- 代码       |`co_argcount`     |参数数量（不包括仅关键字参数、* 或 ** 参数） 
+&nbsp;             |`co_code`         |字符串形式的原始编译字节码 
+&nbsp;             |`co_cellvars`     |单元变量名称的元组（通过包含作用域引用） 
+&nbsp;             |`co_consts`       |字节码中使用的常量元组 
+&nbsp;             |`co_filename`     |创建此代码对象的文件的名称 
+&nbsp;             |`co_firstlineno`  |第一行在 Python 源代码中的行号 
+&nbsp;             |`co_flags`        |`CO_*` 标志的位图，详见 [此处](https://docs.python.org/zh-cn/3.14/library/inspect.html#inspect-module-co-flags) 
+&nbsp;             |`co_lnotab`       |编码的行号到字节码索引的映射 
+&nbsp;             |`co_freevars`     |自由变量的名字组成的元组（通过函数闭包引用） 
+&nbsp;             |`co_posonlyargcount` |仅限位置参数的数量 
+&nbsp;             |`co_kwonlyargcount`  |仅限关键字参数的数量（不包括 ** 参数） 
+&nbsp;             |`co_name`         |定义此代码对象的名称 
+&nbsp;             |`co_qualname`     |定义此代码对象的完整限定名称 
+&nbsp;             |`co_names`        |除参数和函数局部变量之外的名称元组 
+&nbsp;             |`co_nlocals`      |局部变量的数量 
+&nbsp;             |`co_stacksize`    |要求的虚拟机堆栈空间 
+&nbsp;             |`co_varnames`     |参数名和局部变量的元组 
+&nbsp;             |`co_lines()`      |返回产生连续字节码范围的迭代器 
+&nbsp;             |`co_positions()`  |返回每个字节码指令的源代码位置的迭代器 
+&nbsp;             |`replace()`       |返回具有新值的代码对象的副本 
+generator -- 生成器 |`__name__`        |名称 
+&nbsp;             |`__qualname__`    |限定名称 
+&nbsp;             |`gi_frame`        |帧 
+&nbsp;             |`gi_running`      |生成器在运行吗？ 
+&nbsp;             |`gi_suspended`    |生成器暂停了吗？ 
+&nbsp;             |`gi_code`         |代码 
+&nbsp;             |`gi_yieldfrom`    |通过 `yield from` 迭代的对象，或 `None` 
+异步生成器          |`__name__`        |名称 
+&nbsp;             |`__qualname__`    |限定名称 
+&nbsp;             |`ag_await`        |正在等待的对象，或 `None` 
+&nbsp;             |`ag_frame`        |帧 
+&nbsp;             |`ag_running`      |这个生成器正在运行吗？ 
+&nbsp;             |`ag_code`         |代码 
+coroutine -- 协程  |`__name__`        |名称 
+&nbsp;             |`__qualname__`    |限定名称 
+&nbsp;             |`cr_await`        |正在等待的对象，或 `None` 
+&nbsp;             |`cr_frame`        |帧 
+&nbsp;             |`cr_running`      |这个协程正在运行吗？ 
+&nbsp;             |`cr_code`         |代码 
+&nbsp;             |`cr_origin`       |协程被创建的位置，或 `None`。参见 [sys.set_coroutine_origin_tracking_depth()](https://docs.python.org/3.14/library/sys.html#sys.set_coroutine_origin_tracking_depth) 
+builtin            |`__doc__`         |文档字符串 
+&nbsp;             |`__name__`        |此函数或方法的原始名称 
+&nbsp;             |`__qualname__`    |限定名称 
+&nbsp;             |`__self__`        |方法绑定到的实例，或 `None` 
+
+*在 3.5 版本发生变更：* 为生成器添加 `__qualname__` 和 `gi_yieldfrom` 属性。
+
+生成器的 `__name__` 属性现在由函数名称设置，而不是代码对象名称，并且现在可以被修改。
+
+*在 3.7 版本发生变更：* 为协程添加 `cr_origin` 属性。
+
+*在 3.10 版本发生变更：* 为函数添加 `__builtins__` 属性。
+
+*在 3.14 版本发生变更：* 为帧添加 `f_generator` 属性。
+<br><br>
 
 #### 检索源代码
 inspect.**getsource**(_object_)  
