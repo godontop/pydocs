@@ -127,6 +127,11 @@
             * [检索源代码](#检索源代码)
     * [导入模块](#导入模块)
         * [pkgutil --- 包扩展工具](#pkgutil-----包扩展工具)
+        * [importlib --- import 的实现](#importlib-----import-的实现)
+            * [概述](#概述)
+            * [函数](#函数-3)
+            * [importlib.abc —— 关于导入的抽象基类](#importlibabc--关于导入的抽象基类)
+            * [importlib.machinery —— 导入器和路径钩子](#importlibmachinery--导入器和路径钩子)
 * [Python语言参考](#python语言参考)
     * [3. 数据模型](#3-数据模型)
         * [3.2. 标准类型层次结构](#32-标准类型层次结构)
@@ -6024,6 +6029,10 @@ module os is frozen, can't get source for os.walk.
 *在 3.3 版本发生变更：* 现在会引发 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError) 而不是 [IOError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#IOError)，后者现在是前者的一个别名。
 
 ## 导入模块
+本章中描述的模块提供了导入其他Python模块和挂钩以自定义导入过程的新方法。
+
+本章描述的完整模块列表如下：
+
 ### pkgutil --- 包扩展工具
 **源代码：** [Lib/pkgutil.py](https://github.com/python/cpython/tree/3.14/Lib/pkgutil.py) 
 
@@ -6064,6 +6073,242 @@ FileFinder('D:\\Program Files\\Python310\\lib\\site-packages\\selenium') webdriv
 **备注：** 只适用于定义了 `iter_modules()` 方法的 [finder](https://docs.python.org/zh-cn/3.14/glossary.html#term-finder)。 该接口是非标准的，因此本模块还提供了针对 [importlib.machinery.FileFinder](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.machinery.FileFinder) 和 [zipimport.zipimporter](https://docs.python.org/zh-cn/3.14/library/zipimport.html#zipimport.zipimporter) 的实现。  
 
 *在 3.3 版本发生变更:* 更新为直接基于 [importlib](https://docs.python.org/zh-cn/3.14/library/importlib.html#module-importlib) 而不是依赖于包内部的 [PEP 302](https://peps.python.org/pep-0302/) 导入模拟。
+<br><br>
+
+### importlib --- import 的实现
+> *在版本 3.1 中新增。* 
+
+**源代码：** [Lib/importlib/__init__.py](https://github.com/python/cpython/tree/3.14/Lib/importlib/__init__.py)
+
+#### 概述
+[importlib](https://docs.python.org/zh-cn/3.14/library/importlib.html#module-importlib) 包具有三重目标。
+
+一是在 Python 源代码中提供 [import](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#import) 语句的实现（并且因此而扩展 [\_\_import\_\_()](https://docs.python.org/zh-cn/3.14/library/functions.html#import__) 函数）。 这提供了一个可移植到任何 Python 解释器的 import 实现。 与使用 Python 以外的编程语言实现的方式相比这一实现也更易于理解。
+
+第二个目的是实现 [import](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#import) 的部分被公开在这个包中，使得用户更容易创建他们自己的自定义对象 (通常被称为 [importer](https://docs.python.org/zh-cn/3.14/glossary.html#term-importer)) 来参与到导入过程中。
+
+三，这个包也包含了对外公开用于管理 Python 包的各个方面的附加功能的模块：
+
+* [importlib.metadata](https://docs.python.org/zh-cn/3.14/library/importlib.metadata.html#module-importlib.metadata) 代表对来自第三方发行版的元数据的访问。
+
+* [importlib.resources](https://docs.python.org/zh-cn/3.14/library/importlib.resources.html#module-importlib.resources) 提供了用于对来自 Python 包的非代码“资源”的访问的例行程序。
+
+**参见：** 
+[import 语句](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#import)  
+[import](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#import) 语句的语言参考
+
+[包规格说明](https://www.python.org/doc/essays/packages/) 
+包的初始规范。自从编写这个文档开始，一些语义已经发生改变了（比如基于 [sys.modules](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.modules) 中 `None` 的重定向）。
+
+[\_\_import\_\_()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.__import__) **函数**  
+[import](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#import) 语句是这个函数的语法糖。
+
+[sys.path](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.path) 模块搜索路径的初始化 
+[sys.path](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.path) 的初始化。
+
+[PEP 235](https://peps.python.org/pep-0235/) 
+在忽略大小写的平台上进行导入
+
+[PEP 263](https://peps.python.org/pep-0263/) 
+定义 Python 源代码编码
+
+[PEP 302](https://peps.python.org/pep-0302/) 
+新导入钩子
+
+[PEP 328](https://peps.python.org/pep-0328/) 
+导入：多行和绝对/相对
+
+[PEP 366](https://peps.python.org/pep-0366/) 
+主模块显式相对导入
+
+[PEP 420](https://peps.python.org/pep-0420/) 
+隐式命名空间包
+
+[PEP 451](https://peps.python.org/pep-0451/) 
+导入系统的一个模块规范类型
+
+[PEP 488](https://peps.python.org/pep-0488/) 
+消除PYO文件
+
+[PEP 489](https://peps.python.org/pep-0489/) 
+多阶段扩展模块初始化
+
+[PEP 552](https://peps.python.org/pep-0552/) 
+确定性的 pyc 文件
+
+[PEP 3120](https://peps.python.org/pep-3120/) 
+使用 UTF-8 作为默认的源编码
+
+[PEP 3147](https://peps.python.org/pep-3147/) 
+PYC 仓库目录
+
+#### 函数
+importlib.**\_\_import\_\_**(_name, globals=None, locals=None, fromlist=(), level=0_) 
+内置 [__import__()](https://docs.python.org/zh-cn/3.14/library/functions.html#import__) 函数的实现。
+
+**备注：** 程序式地导入模块应该使用 [import_module()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.import_module) 而不是这个函数。
+<br><br>
+
+importlib.**import_module**(_name, package=None_) 
+导入一个模块。 参数 *name* 指定了以绝对或相对导入方式导入什么模块 (比如要么像这样 `pkg.mod` 或者这样 `..mod`)。 如果参数 *name* 使用相对导入的方式来指定，那么 *package* 参数必须设置为那个包名，这个包名作为解析这个包名的锚点 (比如 `import_module('..mod', 'pkg.subpkg')` 将会导入 `pkg.mod`)。
+
+[import_module()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.import_module) 函数是一个对 [importlib.\_\_import\_\_()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.__import__) 进行简化的包装器。 这意味着该函数的所有语义都来自于 [importlib.\_\_import\_\_()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.__import__)。 这两个函数之间最重要的不同点在于 [import_module()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.import_module) 返回指定的包或模块 (例如 `pkg.mod`)，而 [\_\_import\_\_()](https://docs.python.org/zh-cn/3.14/library/functions.html#import__) 返回最高层级的包或模块 (例如 `pkg`)。
+
+如果动态导入一个自解释器开始执行以来被创建的模块（即创建了一个 Python 源代码文件），为了让导入系统知道这个新模块，可能需要调用 [invalidate_caches()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.invalidate_caches)。
+
+*在 3.3 版本发生变更：* 父包会被自动导入。
+<br><br>
+
+#### importlib.abc —— 关于导入的抽象基类
+**源代码：** [Lib/importlib/abc.py](https://github.com/python/cpython/tree/3.14/Lib/importlib/abc.py)
+
+[importlib.abc](https://docs.python.org/zh-cn/3.14/library/importlib.html#module-importlib.abc) 模块包含了 [import](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#import) 使用到的所有核心抽象基类。在实现核心的 ABCs 中，核心抽象基类的一些子类也提供了帮助。
+
+ABC 类的层次结构：
+
+```
+object
+ +-- MetaPathFinder
+ +-- PathEntryFinder
+ +-- Loader
+      +-- ResourceLoader --------+
+      +-- InspectLoader          |
+           +-- ExecutionLoader --+
+                                 +-- FileLoader
+                                 +-- SourceLoader
+```
+
+#### importlib.machinery —— 导入器和路径钩子
+**源代码：** [Lib/importlib/machinery.py](https://github.com/python/cpython/tree/3.14/Lib/importlib/machinery.py)
+
+Python 3.10 machinery.py 的部分内容： 
+[Lib/importlib/machinery.py] 
+
+```py
+from ._bootstrap import ModuleSpec
+from ._bootstrap import BuiltinImporter
+from ._bootstrap import FrozenImporter
+from ._bootstrap_external import SourceFileLoader
+```
+
+从上面的内容可知，类 ModuleSpec、BuiltinImporter 和 FrozenImporter 均来自 \_bootstrap 模块，而 SourceFileLoader 类来自于 \_bootstrap_external 模块。 
+
+```py
+>>> importlib.machinery.ModuleSpec is importlib._bootstrap.ModuleSpec
+True
+>>> importlib.machinery.BuiltinImporter is importlib._bootstrap.BuiltinImporter
+True
+>>> importlib.machinery.FrozenImporter is importlib._bootstrap.FrozenImporter
+True
+>>> importlib.machinery.SourceFileLoader is importlib._bootstrap_external.SourceFileLoader
+True
+>>> 
+```
+
+```py
+>>> import _frozen_importlib
+>>> import _frozen_importlib_external
+>>> _frozen_importlib is importlib._bootstrap
+True
+>>> _frozen_importlib_external is importlib._bootstrap_external
+True
+>>> 
+```
+
+\_frozen_importlib 是 importlib.\_bootstrap 的冻结版；\_frozen_importlib_external 是 importlib.\_bootstrap_external 的冻结版。（来源：[Lib/importlib/\_bootstrap.py] 和 [Lib/importlib/\_bootstrap_external.py] 文件的注释。） 
+
+本模块包含多个对象，以帮助 [import](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#import) 查找并加载模块。
+
+*class* importlib.machinery.**BuiltinImporter**  
+用于导入内置模块的 [importer](https://docs.python.org/zh-cn/3.14/glossary.html#term-importer)。 所有已知的内置模块都已列入 [sys.builtin_module_names](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.builtin_module_names)。 此类实现了 [importlib.abc.MetaPathFinder](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.abc.MetaPathFinder) 和 [importlib.abc.InspectLoader](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.abc.InspectLoader) 抽象基类。
+
+```py
+>>> import importlib
+>>> import importlib.abc
+>>> issubclass(importlib.machinery.BuiltinImporter, importlib.abc.MetaPathFinder)
+True
+>>> issubclass(importlib.machinery.BuiltinImporter, importlib.abc.InspectLoader)
+True
+>>> 
+```
+
+此类只定义类的方法，以减轻实例化的开销。
+
+*在 3.5 版本发生变更：* 作为 [PEP 489](https://peps.python.org/pep-0489/) 的一部分，现在内置模块导入器实现了 Loader.create_module() 和 Loader.exec_module()。
+<br><br>
+
+*class* importlib.machinery.**FrozenImporter**  
+用于已冻结模块的 [importer](https://docs.python.org/zh-cn/3.14/glossary.html#term-importer)。 此类实现了 [importlib.abc.MetaPathFinder](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.abc.MetaPathFinder) 和 [importlib.abc.InspectLoader](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.abc.InspectLoader) 抽象基类。 
+
+```py
+>>> issubclass(importlib.machinery.FrozenImporter, importlib.abc.MetaPathFinder)
+True
+>>> issubclass(importlib.machinery.FrozenImporter, importlib.abc.InspectLoader)
+True
+>>>
+```
+
+此类只定义类的方法，以减轻实例化的开销。
+
+*在 3.4 版本发生变更：* 有了 create_module() 和 exec_module() 方法。
+<br><br>
+
+*class* importlib.machinery.**SourceFileLoader**(_fullname, path_) 
+通过继承 [importlib.abc.FileLoader](https://docs.python.org/3.14/library/importlib.html#importlib.abc.FileLoader) 并提供其他方法的具体实现来实现 [importlib.abc.SourceLoader](https://docs.python.org/3.14/library/importlib.html#importlib.abc.SourceLoader) 的具体实现。 
+
+*在版本 3.3 中新增。*
+
+**name** 
+该加载器将要处理的模块名称。
+
+**path** 
+源文件的路径
+
+**is_package**(_fullname_) 
+如果 [path](https://docs.python.org/3.14/library/importlib.html#importlib.machinery.SourceFileLoader.path) 看似是包的路径，则返回 `True`。
+
+**path_stats**(_path_) 
+[importlib.abc.SourceLoader.path_stats()](https://docs.python.org/3.14/library/importlib.html#importlib.abc.SourceLoader.path_stats) 的具体实现。
+
+**set_data**(_path, data_) 
+[importlib.abc.SourceLoader.set_data()](https://docs.python.org/3.14/library/importlib.html#importlib.abc.SourceLoader.set_data) 的具体实现。
+
+**load_module**(_name=None_) 
+&emsp;&emsp;[importlib.abc.Loader.load_module()](https://docs.python.org/3.14/library/importlib.html#importlib.abc.Loader.load_module) 的具体实现，其中要加载的模块名是可选的。
+
+&emsp;&emsp;从版本 3.6 开始被弃用，将在版本 3.15 中被删除：改用 [importlib.abc.Loader.exec_module()](https://docs.python.org/3.14/library/importlib.html#importlib.abc.Loader.exec_module)。
+<br><br>
+
+*class* importlib.machinery.**ModuleSpec**(_name, loader, *, origin=None, loader_state=None, is_package=None_)  
+模块的导入系统相关状态的规格说明。 这通常是作为模块的 [\_\_spec\_\_](https://docs.python.org/3.14/reference/datamodel.html#module.__spec__) 属性对外公开。 这类属性中有许多在模块上也直接可用：例如，`module.__spec__.origin == module.__file__`。 但是请注意，虽然这两个属性的 *值* 通常是相等的，但它们也可以因为两个对象之间没有进行同步而不相等。 举例来说，有可能在运行时更新模块的 [\_\_file\_\_](https://docs.python.org/3.14/reference/datamodel.html#module.__file__) 而这将不会自动反映在模块的 [\_\_spec\_\_.origin](https://docs.python.org/3.14/library/importlib.html#importlib.machinery.ModuleSpec.origin) 中，反之亦然。
+
+*在版本 3.4 中新增。* 
+
+**name** 
+模块的完整限定名称 (参见 [module.\_\_name\_\_](https://docs.python.org/3.14/reference/datamodel.html#module.__name__))。 [finder](https://docs.python.org/3.14/glossary.html#term-finder) 应当总是将该属性设为一个非空字符串。
+
+**loader** 
+用于加载模块的 [loader](https://docs.python.org/3.14/glossary.html#term-loader) (参见 [module.\_\_loader\_\_](https://docs.python.org/3.14/reference/datamodel.html#module.__loader__))。 [finder](https://docs.python.org/3.14/glossary.html#term-finder) 应当总是设置该属性。
+
+**origin** 
+应当被 [loader](https://docs.python.org/3.14/glossary.html#term-loader) 用于加载模块的位置 (参见 [module.\_\_file\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#module.__file__))。 例如，对于从一个 `.py` 文件加载的模块来说这将为文件名。 [finder](https://docs.python.org/zh-cn/3.14/glossary.html#term-finder) 应当总是将此属性设为一个有意义的值以供 [loader](https://docs.python.org/zh-cn/3.14/glossary.html#term-loader) 使用。 在没有可用值的少数情况下（如命名空间包），它应当被设为 `None`。
+
+**submodule_search_locations** 
+一个（可能为空的）枚举查找包的子模块的位置的字符串 [序列](https://docs.python.org/zh-cn/3.14/glossary.html#term-sequence) (参见 [module.\_\_path\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#module.__path__))。 在大多数时候该列表中都将只有一个目录。
+
+[finder](https://docs.python.org/zh-cn/3.14/glossary.html#term-finder) 应当将此属性设为一个序列，甚至可以为空序列，以向导入系统提示该模块是一个包。 对于非包模块它应当被设为 `None`。 对于命名空间包它会在稍后被自动设为一个特殊对象。
+
+**loader_state** 
+[finder](https://docs.python.org/zh-cn/3.14/glossary.html#term-finder) 可以将此属性设为一个包含额外的模块专属数据的对象以供加载模块时使用。 在其他情况下应将其设为 `None`。
+
+**cached** 
+模块代码的已编译版本的文件名 (参见 [module.\_\_cached\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#module.__cached__))。 [finder](https://docs.python.org/zh-cn/3.14/glossary.html#term-finder) 应当总是设置此属性但对于不需要存储已编译代码的模块来说它可以为 `None`。
+
+**parent** 
+（只读）模块所在的包的完整限定名称（或者对于最高层级模块来说则为空字符串）。 参见[module.\_\_package\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#module.__package__)。 如果模块是一个包则它将与 [name](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.machinery.ModuleSpec.name) 相同。
+
+**has_location** 
+如果 spec 的 [origin](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.machinery.ModuleSpec.origin) 指向一个可加载的位置则为 `True`，否则为 `False`。 该值将影响如何解释 origin 以及如何填充模块的 [\_\_file\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#module.__file__)。
 <br><br>
 
 # Python语言参考
