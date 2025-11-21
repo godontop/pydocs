@@ -1129,10 +1129,19 @@ _class_ **tuple([**_iterable_**])**
 
 请注意决定生成元组的其实是逗号而不是圆括号。 圆括号只是可选的，生成空元组或需要避免语法歧义的情况除外。 例如，`f(a, b, c)` 是在调用函数时附带三个参数，而 `f((a, b, c))` 则是在调用函数时附带一个三元组。
 
+```py
+>>> d = {'a': 1, 'b': 2, 'c': 3}
+>>> tuple(d)
+('a', 'b', 'c')
+>>> 
+```
+
+tuple(dict) 返回的是一个由字典的键构成的元组。
+
 元组实现了所有 [一般](https://docs.python.org/zh-cn/3.13/library/stdtypes.html#typesseq-common) 序列的操作。
 
-对于通过名称访问相比通过索引访问更清晰的异构数据多项集，[collections.namedtuple()](https://docs.python.org/zh-cn/3.13/library/collections.html#collections.namedtuple) 可能是比简单元组对象更为合适的选择。  
- 
+对于通过名称访问相比通过索引访问更清晰的异构数据多项集，[collections.namedtuple()](https://docs.python.org/zh-cn/3.13/library/collections.html#collections.namedtuple) 可能是比简单元组对象更为合适的选择。
+<br><br>
 
 #### Ranges
 [range](https://docs.python.org/3/library/stdtypes.html#range) 类型代表一种不可变的数字序列且通常用于在 [for](https://docs.python.org/3/reference/compound_stmts.html#for) 循环中循环一个特定的次数。
@@ -1650,7 +1659,26 @@ bytearray.**decode**(*encoding="utf-8", errors="strict”*)
 返回一个字典的键的新的视图。请看[视图对象的文档](https://docs.python.org/3.6/library/stdtypes.html#dict-views)。
 
 **values()**  
-返回一个字典的值的新的视图。请看[视图对象的文档](https://docs.python.org/3.6/library/stdtypes.html#dict-views)。
+返回一个字典的值的新的视图。请看[视图对象的文档](https://docs.python.org/3.6/library/stdtypes.html#dict-views)。 
+
+```py
+>>> d = {'a': 1, 'b': 2, 'c': 3}
+>>> for i in d:
+...     print(i)
+...     
+a
+b
+c
+>>> for i, j in d.items():
+...     print(i, j)
+...     
+a 1
+b 2
+c 3
+>>> 
+```
+
+字典默认是迭代键，如果要迭代键值对，需要使用字典的 items() 方法，即 dict.items()。  
 
 #### 字典视图对象
 [dict.keys()](https://docs.python.org/3.6/library/stdtypes.html#dict.keys), [dict.values()](https://docs.python.org/3.6/library/stdtypes.html#dict.values) 和 [dict.items()](https://docs.python.org/3.6/library/stdtypes.html#dict.items) 返回的对象是 *视图对象*。它们提供了一个关于字典条目的动态视图，这意味着当字典变化的时候，视图将反映这些变化。
@@ -5707,6 +5735,26 @@ sys.**exit**([*arg*])
 可选参数 *arg* 可以是给出退出状态的整型数 (默认为0)，或者另一种类型的对象。如果它是一个整型数，shells和与shells类似的认为0是"成功终止"，而任何非0的值被认为是"不正常的终止"。大多数系统要求它在0-127的范围内，否则将产生未定义的结果。一些系统对特定的退出代码分配特定的含义有一个约定，但这些通常是非充分开发的；Unix程序通常使用 2 表示命令行语法错误，而 1 表示所有其它类型的错误。如果传递的是另一种类型的对象，`None` 等价于传递 0，而任何其它对象则打印到 [stderr](https://docs.python.org/3.6/library/sys.html#sys.stderr) 并导致一个退出代码 1。特别是，当一个错误发生的时候，`sys.exit("some error message")` 是退出一个程序的一种快速的方式。
 <br><br>
 
+sys.**modules**  
+这是一个字典，它将模块名称映射到已经被加载的模块。 这可以被操纵来强制重新加载模块和其他技巧。然而，替换这个字典不一定会像预期的那样工作，从字典中删除重要的项目可能会导致 Python 出错。 如果你想对这个全局字典进行迭代，一定要使用 `sys.modules.copy()` 或 `tuple(sys.modules)` 来避免异常，因为它的大小在迭代过程中可能会因为其他线程中的代码或活动的副作用而改变。
+
+```py
+>>> d = {'a': 1, 'b': 2, 'c': 3}
+>>> tuple(d)
+('a', 'b', 'c')
+>>> import sys
+>>> for i in tuple(sys.modules):
+...     if '_frozen' in i:
+...         print(i)
+...         
+_frozen_importlib
+_frozen_importlib_external
+>>> 
+```
+
+tuple(dict) 返回的是一个由字典的键构成的元组。
+<br><br>
+
 sys.**path**  
 一个指定模块搜索路径的字符串列表。初始化自环境变量 [PYTHONPATH](https://docs.python.org/zh-cn/3.14/using/cmdline.html#envvar-PYTHONPATH)，再加上一条与安装有关的默认路径。
 
@@ -6216,6 +6264,41 @@ True
 ```
 
 \_frozen_importlib 是 importlib.\_bootstrap 的冻结版；\_frozen_importlib_external 是 importlib.\_bootstrap_external 的冻结版。（来源：[Lib/importlib/\_bootstrap.py] 和 [Lib/importlib/\_bootstrap_external.py] 文件的注释。） 
+
+```py
+➜  ~ /bin/python3                                                                               
+Python 3.11.2 (main, Apr 28 2025, 14:11:48) [GCC 12.2.0] on linux                               
+Type "help", "copyright", "credits" or "license" for more information.                     
+>>> import sys
+>>> for k, v in sorted(sys.modules.copy().items()):
+...     if '_frozen_importlib' in repr(v):
+...         print(f"{k:30} {v}")
+... 
+_frozen_importlib              <module '_frozen_importlib' (frozen)>
+_frozen_importlib_external     <module '_frozen_importlib_external' (frozen)>
+importlib._bootstrap           <module '_frozen_importlib' (frozen)>
+importlib._bootstrap_external  <module '_frozen_importlib_external' (frozen)>
+>>> import pprint
+>>> pprint.pprint(globals())
+{'__annotations__': {},
+ '__builtins__': <module 'builtins' (built-in)>,
+ '__doc__': None,
+ '__loader__': <class '_frozen_importlib.BuiltinImporter'>,
+ '__name__': '__main__',
+ '__package__': None,
+ '__spec__': None,
+ 'k': 'zipimport',
+ 'pprint': <module 'pprint' from '/usr/lib/python3.11/pprint.py'>,
+ 'sys': <module 'sys' (built-in)>,
+ 'v': <module 'zipimport' (frozen)>}
+>>> k
+'zipimport'
+>>> v
+<module 'zipimport' (frozen)>
+>>>
+```
+
+从上面的输出可以清楚地看到模块名称 \_frozen_importlib 和 importlib.\_bootstrap 加载的都是模块 <module '_frozen_importlib' (frozen)>；模块名称 \_frozen_importlib_external 和 importlib.\_bootstrap_external 加载的都是模块 <module '_frozen_importlib_external' (frozen)>；由此可知模块 \_frozen_importlib 就是 importlib.\_bootstrap 模块的冻结版；模块 \_frozen_importlib_external 就是 importlib.\_bootstrap_external 模块的冻结版。另外，从上面的输出还可知道，已加载的模块并未出现在全局命名空间中，除非显示地用 import 语句导入。 
 
 本模块包含多个对象，以帮助 [import](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#import) 查找并加载模块。
 
