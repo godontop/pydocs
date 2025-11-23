@@ -125,6 +125,7 @@
         * [inspect --- 检查活对象](#inspect-----检查活对象)
             * [类型和成员](#类型和成员)
             * [检索源代码](#检索源代码)
+        * [site --- 站点专属的配置钩子](#site-----站点专属的配置钩子)
     * [导入模块](#导入模块)
         * [pkgutil --- 包扩展工具](#pkgutil-----包扩展工具)
         * [importlib --- import 的实现](#importlib-----import-的实现)
@@ -2019,14 +2020,29 @@ BaseException
 这章描述的模块提供了广泛的字符串操作运算和其它的文本处理服务。
 
 ### string — 通用字符串操作
-**源代码：** [Lib/string.py](https://github.com/python/cpython/tree/3.7/Lib/string.py)
+**源代码：** [Lib/string/\__init__.py](https://github.com/python/cpython/tree/3.14/Lib/string/__init__.py)
 
-**另请参阅：** [Text Sequence Type — str](https://docs.python.org/3/library/stdtypes.html#textseq)
+**另请参阅：** [文本序列类型 — str](https://docs.python.org/3/library/stdtypes.html#textseq)
 
 [字符串方法](https://docs.python.org/3/library/stdtypes.html#string-methods)
 
 #### 格式化字符串语法
-[str.format()](https://docs.python.org/3/library/stdtypes.html#str.format) 方法和 [Formatter](https://docs.python.org/3/library/string.html#string.Formatter) 类共享相同的格式化字符串语法 (尽管在 [Formatter](https://docs.python.org/3/library/string.html#string.Formatter) 的情况下，子类可以定义它们自己的格式化字符串语法)。The syntax is related to that of [formatted string literals](https://docs.python.org/3.6/reference/lexical_analysis.html#f-strings), 但有不同。
+[str.format()](https://docs.python.org/3/library/stdtypes.html#str.format) 方法和 [Formatter](https://docs.python.org/3/library/string.html#string.Formatter) 类共享相同的格式化字符串语法 (不过对于 [Formatter](https://docs.python.org/3/library/string.html#string.Formatter) 而言，其子类可以定义它们自己的格式化字符串语法)。该语法与 [格式字符串字面值](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#f-strings) 和 [模板字符串字面值](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#t-strings) 有关联，但复杂度较低，具体而言是不支持在插值中使用任意表达式。
+
+格式字符串包含有以花括号 `{}` 括起来的“替换字段”。 不在花括号之内的内容被视为字面文本，会不加修改地复制到输出中。 如果你需要在字面文本中包含花括号字符，可以通过双重大括号来转义: `{{` 和 `}}`。
+
+替换字段的语法如下：
+
+替换字段                  |语法  
+-------------------------|-----------------  
+**replacement\_field:**  |"{" \[[field_name](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-field_name)] \["!" [conversion](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-conversion)] \[":" [format_spec](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-format_spec)] "}"  
+**field\_name:**         |[arg_name](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-arg_name) ("." [attribute_name](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-attribute_name) | "[" [element_index](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-element_index) "]")\*  
+**arg\_name:**           |\[[identifier](https://docs.python.org/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier) | [digit](https://docs.python.org/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-digit)+]  
+**attribute\_name:**     |[identifier](https://docs.python.org/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier)  
+**element\_index:**      |[digit](https://docs.python.org/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-digit)+ | [index_string](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-index_string)  
+**index\_string:**       |<any source character except "]"> +  
+**conversion:**          |"r" | "s" | "a"  
+**format\_spec:**        |[format-spec:format_spec](https://docs.python.org/3.14/library/string.html#grammar-token-format-spec-format_spec)  
 
 *在版本3.1中发生变化：* [str.format()](https://docs.python.org/3/library/stdtypes.html#str.format) 的位置参数说明符可以被省略，所以 `'{} {}'.format(a, b)` 相当于 `'{0} {1}'.format(a, b)`。
 
@@ -5691,6 +5707,15 @@ sys.**argv**
 传递给Python脚本的命令行参数列表。`argv[0]` 是脚本的名字 (是否是full pathname依赖于操作系统)。If the command was executed using the [-c](https://docs.python.org/3.6/using/cmdline.html#cmdoption-c) command line option to the interpreter, `argv[0]` 将被设置为字符串 `'-c'`。如果没有脚本名称传递给Python解释器，则 `argv[0]` 是空串。
 
 循环处理（loop over）标准输入，或者命令行中给出的文件列表，参考 [fileinput](https://docs.python.org/3.6/library/fileinput.html#module-fileinput) 模块。
+<br><br>
+
+sys.**builtin_module_names**  
+一个包含所有被编译进 Python 解释器的模块的名称的字符串元组。 （此信息无法通过任何其他办法获取 --- `modules.keys()` 仅会列出导入的模块。）
+
+sys.builtin_module_names 的值在生成 Python 解释器的那一刻就已被固定。 
+
+另请参阅 [sys.stdlib_module_names](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.stdlib_module_names) 列表。
+<br><br>
 
 sys.**exc_info()**  
 本函数返回的元组包含三个值，它们给出当前正在处理的异常的信息。返回的信息仅限于当前线程和当前堆栈帧。如果当前堆栈帧没有正在处理的异常，则信息将从下级被调用的堆栈帧或上级调用者等位置获取，依此类推，直到找到正在处理异常的堆栈帧为止。此处的“处理异常”指的是“执行一个 except 子句”。任何堆栈帧都只能访问当前正在处理的异常的信息。  
@@ -6075,6 +6100,36 @@ module os is frozen, can't get source for os.walk.
 ```
 
 *在 3.3 版本发生变更：* 现在会引发 [OSError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#OSError) 而不是 [IOError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#IOError)，后者现在是前者的一个别名。
+<br><br>
+
+### site --- 站点专属的配置钩子
+**源代码：** [Lib/site.py](https://github.com/python/cpython/tree/3.13/Lib/site.py)
+
+**这个模块将在初始化时被自动导入。**此自动导入可以通过使用解释器的 [-S](https://docs.python.org/zh-cn/3.13/using/cmdline.html#cmdoption-S) 选项来屏蔽。
+
+正常导入此模块将会把站点专属的路径添加到模块搜索路径并将一些 [可调用对象](https://docs.python.org/zh-cn/3.13/library/constants.html#site-consts)，包括 [help()](https://docs.python.org/zh-cn/3.13/library/functions.html#help) 添加到内置命名空间。 不过，Python 启动选项 [-S](https://docs.python.org/zh-cn/3.13/using/cmdline.html#cmdoption-S) 会阻止此行为且此模块可被安全地导入而不会自动修改模块搜索路径或添加内置对象。 要显式地触发通常的站点专属附加项，请调用 [main()](https://docs.python.org/zh-cn/3.13/library/site.html#site.main) 函数。
+
+*在 3.3 版本发生变更：* 在之前即便使用了 [-S](https://docs.python.org/zh-cn/3.13/using/cmdline.html#cmdoption-S)，导入此模块仍然会触发路径操纵。
+
+它会以一个头部和尾部来构造至多四个目录作为起点。 对于头部，它将使用 `sys.prefix` 和 `sys.exec_prefix`；空的头部会被跳过。 对于尾部，它将使用空字符串然后是 `lib/site-packages` (在 Windows 上) 或 `lib/pythonX.Y[t]/site-packages` (在 Unix 和 macOS 上)。 (可选后缀 "t" 表示 [free threading](https://docs.python.org/zh-cn/3.13/glossary.html#term-free-threading) 构建版，并会在 `"t"` 存在于 [sys.abiflags](https://docs.python.org/zh-cn/3.13/library/sys.html#sys.abiflags) 常量中时被添加。) 对于每个不同的头部-尾部组合，它会查看其是否指向已存在的目录，如果确实如此，则将其添加到 `sys.path` 并且还会检查新添加目录中的配置文件。
+
+```py
+>>> import sys
+>>> sys.prefix
+'/home/pi/.pyenv/versions/3.13.0'
+>>> sys.exec_prefix
+'/home/pi/.pyenv/versions/3.13.0'
+>>> sys.abiflags
+''
+>>> sys.path
+['', '/home/pi/.pyenv/versions/3.13.0/lib/python313.zip', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/lib-dynload', '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/site-packages']
+>>> 
+```
+
+*在 3.5 版本发生变更：* 对 "site-python" 目录的支持已被移除。
+
+*在 3.13 版本发生变更：* 在 Unix 上，[自由线程](https://docs.python.org/zh-cn/3.13/glossary.html#term-free-threading) Python 安装版是在版本专属的目录名称中以 "t" 后缀来标识的，例如 `lib/python3.13t/`。
+<br><br>
 
 ## 导入模块
 本章中描述的模块提供了导入其他Python模块和挂钩以自定义导入过程的新方法。
@@ -6126,7 +6181,7 @@ FileFinder('D:\\Program Files\\Python310\\lib\\site-packages\\selenium') webdriv
 ### importlib --- import 的实现
 > *在版本 3.1 中新增。* 
 
-**源代码：** [Lib/importlib/__init__.py](https://github.com/python/cpython/tree/3.14/Lib/importlib/__init__.py)
+**源代码：** [Lib/importlib/\_\_init\_\_.py](https://github.com/python/cpython/tree/3.14/Lib/importlib/__init__.py)
 
 #### 概述
 [importlib](https://docs.python.org/zh-cn/3.14/library/importlib.html#module-importlib) 包具有三重目标。
@@ -9124,6 +9179,8 @@ g
 ```
 
 # Python安装和使用
+官方链接：[Python安装和使用](https://docs.python.org/zh-cn/3.14/using/index.html)
+
 ## 1. 命令行与环境
 CPython 解析器会扫描命令行与环境用于获取各种设置信息。
 
@@ -9250,6 +9307,10 @@ $
 不要将 [用户 site-packages 目录](https://docs.python.org/zh-cn/3.7/library/site.html#site.USER_SITE) 添加到 [sys.path](https://docs.python.org/zh-cn/3.7/library/sys.html#sys.path)。
 
 **参见：** [PEP 370](https://www.python.org/dev/peps/pep-0370) -- 分用户的 site-packages 目录
+
+**-S**  
+禁用 [site](https://docs.python.org/zh-cn/3.14/library/site.html#module-site) 模块的导入及其对 [sys.path](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.path) 的依赖性操作。 如果 [site](https://docs.python.org/zh-cn/3.14/library/site.html#module-site) 会在稍后被显式地导入也会禁用这些操作 (如果你希望触发它们则应调用 [site.main()](https://docs.python.org/zh-cn/3.14/library/site.html#site.main))。
+<br><br>
 
 ### 1.2. 环境变量
 这些环境变量会影响 Python 的行为，它们是在命令行开关之前被处理的，但 -E 或 -I 除外。 根据约定，当存在冲突时命令行开关会覆盖环境变量的设置。
