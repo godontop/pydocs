@@ -180,6 +180,8 @@
         * [5.7. 包相对导入](#57-包相对导入)
         * [5.8. 有关 \_\_main\_\_ 的特殊事项](#58-有关-__main__-的特殊事项)
     * [6. 表达式](#6-表达式)
+        * [6.1. 算术转换](#61-算术转换)
+        * [6.2. 原子](#62-原子)
         * [6.14. lambda 表达式](#614-lambda-表达式)
     * [7. 简单语句](#7-简单语句)
         * [7.3. assert语句](#73-assert语句)
@@ -6024,7 +6026,14 @@ if __name__ == '__main__':
 
 将尽可能少的语句放在位于 `if __name__ == '__main__'` 之下的代码块中可以提高代码的清晰度和准确度。最常见的方式，是用一个名为 `main` 的函数来封装程序的主要行为： 
 
+```py
+# echo.py
 
+import shlex
+import sys
+
+def echo(phrase: str) -> None:
+```
 
 对软件包来说，通过加入 `__main__.py` 模块可以达到同样的效果，当使用 `-m` 运行模块时，其中的代码会被执行。
 
@@ -7431,6 +7440,34 @@ import XXX.YYY.ZZZ
 还要注意即使是在 `__main__` 对应于一个可导入模块且 `__main__.__spec__` 被相应地设定时，它们仍会被视为 *不同的* 模块。 这是由于以下事实：使用 `if __name__ == "__main__":` 检测来保护的代码块仅会在模块被用来填充 `__main__` 命名空间时而非普通的导入时被执行。  
 
 ## 6. 表达式
+本章将解释 Python 中组成表达式的各种元素的的含义。
+
+**语法注释：** 在本章和后续章节中，会使用扩展 BNF 标注来描述语法而不是词法分析。 当（某种替代的）语法规则具有如下形式
+
+**name:** othername
+
+并且没有给出语义，则这种形式的 `name` 在语义上与 `othername` 相同。
+<br><br>
+
+### 6.1. 算术转换
+如果下面某个算术运算符的描述中使用了“数字参数被转换为普通实数类型”这样的说法，则意味着针对内置类型的运算符实现的作用方式如下：
+
+* 如果两个参数均为复数，则不会执行任何转换；  
+* 如果任一参数为复数或浮点数，另一参数将被转换为浮点数；  
+* 否则，两者应该都为整数且不需要进行转换。  
+
+某些附加规则会作用于特定运算符（例如，字符串作为 '%' 运算符的左运算参数）。 扩展必须定义它们自己的转换行为。
+<br><br>
+
+### 6.2. 原子
+“原子”指表达式的最基本构成元素。 最简单的原子是标识符和字面值。 以圆括号、方括号或花括号包括的形式在语法上也被归类为原子。 原子的语法是：
+
+表达式         |语法   
+---------------|-----------------------------------------  
+**atom:**      |[identifier](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier)  \|  [literal](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-literal)  \|  [enclosure](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-enclosure)  
+**enclosure:** |[parenth_form](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-parenth_form)  \|  [list_display](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-list_display)  \|  [dict_display](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-dict_display)  \|  [set_display](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-set_display)  \|  [generator_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-generator_expression)  \|  [yield_atom](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-yield_atom)  
+
+
 ### 6.14. lambda 表达式
 **lambda_expr** ::= "lambda" [[parameter_list](https://docs.python.org/zh-cn/3.13/reference/compound_stmts.html#grammar-token-python-grammar-parameter_list)] ":" [expression](https://docs.python.org/zh-cn/3.13/reference/expressions.html#grammar-token-python-grammar-expression) 
 
