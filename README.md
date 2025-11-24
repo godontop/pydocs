@@ -272,7 +272,7 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 |all()     |            |                  |          |          |
 |          |            |hex()             |          |          |
 |          |            |id()              |object()  |sorted()  |
-|          |enumerate() |input()           |          |          |
+|ascii()   |enumerate() |input()           |          |          |
 |bin()     |eval()      |int()             |open()    |          |
 |          |            |isinstance()      |ord()     |          |
 |          |            |issubclass()      |pow()     |super()   |
@@ -308,6 +308,22 @@ True
 True
 >>> print(all(c))
 False
+```
+
+**ascii**(_object, /_)  
+与 [repr()](https://docs.python.org/zh-cn/3.14/library/functions.html#repr) 类似，返回一个包含对象的可打印表示形式的字符串，但是使用 `\x`、`\u` 和 `\U` 对 [repr()](https://docs.python.org/zh-cn/3.14/library/functions.html#repr) 返回的字符串中非 ASCII 编码的字符进行转义。生成的字符串和 Python 2 的 [repr()](https://docs.python.org/zh-cn/3.14/library/functions.html#repr) 返回的结果相似。
+
+```py
+>>> a = '中国'
+>>> repr(a)
+"'中国'"
+>>> ascii(a)
+"'\\u4e2d\\u56fd'"
+>>> print('\\u4e2d\\u56fd')
+\u4e2d\u56fd
+>>> print('\u4e2d\u56fd')
+中国
+>>> 
 ```
 
 **bin**(_integer, /_) 
@@ -2099,7 +2115,7 @@ BaseException
 -------------------------------|-----------------------------  
 **format\_spec:**              |\[[options](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-options)\]\[[width_and_precision](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-width_and_precision)\]\[[type](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-type)]  
 **options:**                   |\[\[[fill](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-fill)][align](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-align)]\[[sign](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-sign)]["z"]["#"]["0"]  
-**fill:**                      |<any character>  
+**fill:**                      |\<any character>  
 **align:**                     |"<" \| ">" \| "=" \| "^"  
 **sign:**                      |"+" \| "-" \| " "  
 **width\_and\_precision:**     |\[[width_with_grouping](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-width_with_grouping)]\[[precision_with_grouping](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-precision_with_grouping)]  
@@ -2109,6 +2125,21 @@ BaseException
 **precision:**                 |[digit](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-digit)+  
 **grouping:**                  |"," \| "_"  
 **type:**                      |"b" \| "c" \| "d" \| "e" \| "E" \| "f" \| "F" \| "g"<br>\| "G" \| "n" \| "o" \| "s" \| "x" \| "X" \| "%"  
+
+```py
+>>> import sys
+>>> for k, v in sys.modules.copy().items():
+...     if '_frozen' in k:
+...         print(f"{k:30} {v}")  # k 为替换字段，":" 后面的 30 是格式规格，表示宽度
+...         
+_frozen_importlib              <module '_frozen_importlib' (frozen)>
+_frozen_importlib_external     <module '_frozen_importlib_external' (frozen)>
+>>> 
+
+```
+
+`print(f"{k:30} {v}")` 中的 `{k:30}` 表示字段 k 占据 30 个字符的固定宽度。
+<br><br>
 
 ### re — 正则表达式操作
 **源代码：** [Lib/re.py](https://github.com/python/cpython/tree/3.8/Lib/re.py)
