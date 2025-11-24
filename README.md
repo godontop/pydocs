@@ -37,6 +37,7 @@
     * [文本处理服务](#文本处理服务)
         * [string — 通用字符串操作](#string--通用字符串操作)
             * [格式化字符串语法](#格式化字符串语法)
+                * [格式规格迷你语言](#格式规格迷你语言)
         * [re — 正则表达式操作](#re--正则表达式操作)
             * [正则表达式语法](#正则表达式语法)
             * [模块内容](#模块内容)
@@ -2036,13 +2037,19 @@ BaseException
 替换字段                  |语法  
 -------------------------|-----------------  
 **replacement\_field:**  |"{" \[[field_name](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-field_name)] \["!" [conversion](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-conversion)] \[":" [format_spec](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-format_spec)] "}"  
-**field\_name:**         |[arg_name](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-arg_name) ("." [attribute_name](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-attribute_name) | "[" [element_index](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-element_index) "]")\*  
-**arg\_name:**           |\[[identifier](https://docs.python.org/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier) | [digit](https://docs.python.org/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-digit)+]  
+**field\_name:**         |[arg_name](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-arg_name) ("." [attribute_name](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-attribute_name) \| "[" [element_index](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-element_index) "]")\*  
+**arg\_name:**           |\[[identifier](https://docs.python.org/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier) \| [digit](https://docs.python.org/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-digit)+]  
 **attribute\_name:**     |[identifier](https://docs.python.org/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier)  
-**element\_index:**      |[digit](https://docs.python.org/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-digit)+ | [index_string](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-index_string)  
+**element\_index:**      |[digit](https://docs.python.org/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-digit)+ \| [index_string](https://docs.python.org/3.14/library/string.html#grammar-token-format-string-index_string)  
 **index\_string:**       |<any source character except "]"> +  
-**conversion:**          |"r" | "s" | "a"  
+**conversion:**          |"r" \| "s" \| "a"  
 **format\_spec:**        |[format-spec:format_spec](https://docs.python.org/3.14/library/string.html#grammar-token-format-spec-format_spec)  
+
+用不太正式的术语来描述，替换字段可以用一个 *field_name* 指定要对值进行格式化并取代替换字段被插入到输出结果的对象来开头。*field_name* 之后是可选的 *conversion* 字段，它以一个感叹号 '!' 开头，然后是一个 *format_spec*，它以一个冒号 ':' 开头。 这些为替换值指定了一个非默认的格式。
+
+另请参阅 [格式规格迷你语言](https://docs.python.org/zh-cn/3.14/library/string.html#formatspec) 一节。
+
+*field_name* 本身以一个数字或关键字形式的 *arg_name* 打头。 如果为数字，则它指向一个位置参数，而如果为关键字，则它指向一个命名关键字参数。 如果在字符串上调用 [str.isdecimal()](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str.isdecimal) 会返回真值则 *arg_name* 会被当作数字来处理。 如果格式字段串中的数字 arg_names 为 0, 1, 2, ... 的序列，它们可以全部（而非部分）被省略并且数字 0, 1, 2, ... 将按顺序被自动插入。 由于 *arg_name* 不使用引号分隔，因此无法在格式字符串中指定任意的字典键（例如字符串 `'10'` 或 `':-]'` 等）。 *arg_name* 之后可以跟任意数量的索引或属性表达式。 `'.name'` 形式的表达式会使用 [getattr()](https://docs.python.org/zh-cn/3.14/library/functions.html#getattr) 来选择命名属性，而 `'[index]'` 形式的表达式会使用 [\__getitem__()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__getitem__) 来执行索引查找。
 
 *在版本3.1中发生变化：* [str.format()](https://docs.python.org/3/library/stdtypes.html#str.format) 的位置参数说明符可以被省略，所以 `'{} {}'.format(a, b)` 相当于 `'{0} {1}'.format(a, b)`。
 
@@ -2054,7 +2061,54 @@ BaseException
 "First, thou shalt count to {0}"  # 引用第一个位置参数
 "Bring me a {}"                   # 含蓄地引用第一个位置参数
 "From {} to {}"                   # 等同于 "From {0} to {1}"
+"My quest is {name}"              # 引用关键字参数 'name'
+"Weight in tons {0.weight}"       # 第一个位置参数的 'weight' 属性
+"Units destroyed: {players[0]}"   # 关键字参数 'players' 的第一个元素。
 ```
+
+*conversion* 字段会在格式化之前进行类型强制转换。 通常，格式化一个值的工作是由该值本身的 [\__format__()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__format__) 方法完成的。 但是，在某些情况下最好是强制将类型格式化为一个字符串，覆盖其本身的格式化定义。 通过在调用 [\__format__()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__format__) 之前将值转换为字符串，可以绕过正常的格式化逻辑。
+
+目前支持的转换标志有三种: `'!s'` 会对值调用 [str()](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str)，`'!r'` 调用 [repr()](https://docs.python.org/zh-cn/3.14/library/functions.html#repr) 而 `'!a'` 则调用 [ascii()](https://docs.python.org/zh-cn/3.14/library/functions.html#ascii)。
+
+示例如下：
+
+```py
+"Harold's a clever {0!s}"        # 先在参数上调用 str()
+"Bring out the holy {name!r}"    # 先在参数上调用 repr()
+"More {!a}"                      # 先在参数上调用 ascii()
+```
+
+*format_spec* 字段包含值应如何呈现的规格描述，例如字段宽度、对齐、填充、小数精度等细节信息。 每种值类型可以定义自己的“格式化迷你语言”或对 *format_spec* 的解读方式。
+
+大多数内置类型都支持一种通用的格式化迷你语言，具体描述见下一节。
+
+*format_spec* 字段还可以在其内部包含嵌套的替换字段。 这些嵌套的替换字段可以包括字段名称、转换标识和格式规格描述，但是不允许更深层的嵌套。 format_spec 内部的替换字段会在解释 *format_spec* 字符串之前先被替换。 这将允许动态地指定特定值的格式。
+
+请参阅 [格式示例](https://docs.python.org/zh-cn/3.14/library/string.html#formatexamples) 一节查看相关示例。
+
+##### 格式规格迷你语言
+“格式规格”在格式字符串所包含的替换字段内部使用，用于定义单个值应如何呈现 (参见 [格式化字符串语法](https://docs.python.org/zh-cn/3.14/library/string.html#formatstrings) 、 [f-字符串](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#f-strings) 和 [t-strings](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#t-strings))。 它们也可以被直接传给内置的 [format()](https://docs.python.org/zh-cn/3.14/library/functions.html#format) 函数。 每种可格式化的类型都可以自行定义如何对格式规格进行解释。
+
+大多数内置类型都为格式规格实现了下列选项，不过某些格式化选项只被数值类型所支持。
+
+一般约定空的格式描述将产生与在值上调用 [str()](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str) 相同的结果。 非空格式描述通常会修改此结果。
+
+*标准格式说明符* 的一般形式如下：
+
+格式说明符                      |值  
+-------------------------------|-----------------------------  
+**format\_spec:**              |\[[options](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-options)\]\[[width_and_precision](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-width_and_precision)\]\[[type](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-type)]  
+**options:**                   |\[\[[fill](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-fill)][align](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-align)]\[[sign](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-sign)]["z"]["#"]["0"]  
+**fill:**                      |<any character>  
+**align:**                     |"<" \| ">" \| "=" \| "^"  
+**sign:**                      |"+" \| "-" \| " "  
+**width\_and\_precision:**     |\[[width_with_grouping](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-width_with_grouping)]\[[precision_with_grouping](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-precision_with_grouping)]  
+**width\_with\_grouping:**     |\[[width](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-width)]\[[grouping](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-grouping)]  
+**precision\_with\_grouping:** |"." \[[precision](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-precision)]\[[grouping](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-grouping)] \| "." [grouping](https://docs.python.org/zh-cn/3.14/library/string.html#grammar-token-format-spec-grouping)  
+**width:**                     |[digit](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-digit)+  
+**precision:**                 |[digit](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-digit)+  
+**grouping:**                  |"," \| "_"  
+**type:**                      |"b" \| "c" \| "d" \| "e" \| "E" \| "f" \| "F" \| "g"<br>\| "G" \| "n" \| "o" \| "s" \| "x" \| "X" \| "%"  
 
 ### re — 正则表达式操作
 **源代码：** [Lib/re.py](https://github.com/python/cpython/tree/3.8/Lib/re.py)
