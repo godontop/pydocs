@@ -121,6 +121,9 @@
     * [Python运行时服务](#python运行时服务)
         * [sys — 系统专用参量和函数](#sys--系统专用参量和函数)
         * [\_\_main\_\_ --- 顶层代码环境](#__main__-----顶层代码环境)
+            * [\_\_name\_\_ == '\_\_main\_\_'](#__name__--__main__)
+                * [什么是“顶层代码环境”？](#什么是顶层代码环境)
+                * [惯用法](#惯用法)
         * [traceback — 打印或检索堆栈回溯](#traceback--打印或检索堆栈回溯)
             * [TracebackException 对象](#tracebackexception-对象)
         * [inspect --- 检查活对象](#inspect-----检查活对象)
@@ -5918,15 +5921,110 @@ sys.**version_info**
 *在版本3.1中发生了变化：* 增加了名称组件属性。  
 
 ### \_\_main\_\_ --- 顶层代码环境
+Python 的特殊名 `__main__` 用于两个重要的构造：
+
+* 1.程序的顶层环境的名称，可用表达式 `__name__ == '__main__'` 来检查；以及  
+* 2.Python 包中的 `__main__.py` 文件。
+
+这两个机制都与 Python 模块相关；用户与它们如何交互，及它们之间如何交互。下文详述。教程的 [模块](https://docs.python.org/zh-cn/3.14/tutorial/modules.html#tut-modules) 一节为初学者介绍了 Python 模块。
+
+#### \_\_name\_\_ == '\_\_main\_\_'
+当一个 Python 模块或包被导入时，`__name__` 被设为模块的名称。通常为 Python 文件本身的名称去掉 `.py` 扩展名：
+
+```py
+>>> import configparser
+>>> configparser.__name__
+'configparser'
+>>> 
+```
+
+如果文件是包的一部分，则 `__name__` 还将包括父包的路径：
+
+```py
+>>> from concurrent.futures import process
+>>> process.__name__
+'concurrent.futures.process'
+>>> 
+```
+
+然而，如果模块是在顶层代码环境中执行的，则其 `__name__` 被设为字符串 `'__main__'`。
+
+##### 什么是“顶层代码环境”？
+`__main__` 是顶层代码运行环境的名称。“顶层代码”是指由用户指定的最先开始运行的那个 Python 模块。之所以它是“顶层”，是因为它将导入程序所需的所有其它模块。有时“顶层代码”被称为应用程序的 *入口点*。
+
+顶层代码环境可以是：
+
+* 交互提示符的作用域：
+
+```py
+>>> __name__
+'__main__'
+>>>
+```
+
+* 作为文件参数传递给 Python 解释器的 Python 模块：
+
+```py
+➜  ~ cat temp.py
+print('Hello, world!')
+print(__name__)
+➜  ~ python temp.py 
+Hello, world!
+__main__
+➜  ~ 
+```
+
+* 与 [-m](https://docs.python.org/zh-cn/3.14/using/cmdline.html#cmdoption-m) 一起传递给 Python 解释器的 Python 模块或包：
+
+```py
+➜  ~ cat temp.py
+print('Hello, world!')
+print(__name__)
+➜  ~ python -m temp
+Hello, world!
+__main__
+➜  ~
+```
+
+* Python 解释器从标准输入中读取的 Python 代码：
+
+```sh
+➜  ~ echo "import sys; print(__name__)" | python
+__main__
+```
+
+* 与 [-c](https://docs.python.org/zh-cn/3.14/using/cmdline.html#cmdoption-c) 一起传递给 Python 解释器的 Python 代码：
+
+```sh
+➜  ~ python -c "import urllib; print(__name__)"
+__main__
+➜  ~ 
+```
+
+上述每种情况中的顶层模块的 `__name__` 被设置为 `'__main__'`。
+
+因此，模块可以通过检查自身的 `__name__` 来判断它是否运行在顶层环境。这一机制使得一种常见写法成为可能：当模块不是由 `import` 语句初始化时，可以有条件地执行代码。
+
+```py
+if __name__ == '__main__':
+    # Execute when the module is not initialized from an import satement.
+    ...
+```
+
 `'__main__'` 是顶层代码执行的作用域的名称。模块的 \_\_name\_\_ 在通过标准输入、脚本文件或是交互式命令读入的时候会等于 `'__main__'`。
 
-模块可以通过检查自己的 \_\_name\_\_ 来得知是否运行在 main 作用域中，这使得模块可以在作为脚本或是通过 `python -m` 运行时条件性地执行一些代码，而在被 import 时不会执行。
+模块可以通过检查自己的 \_\_name\_\_ 来得知是否运行在 `__main__` 作用域中，这使得模块可以在作为脚本或是通过 `python -m` 运行时有条件性地执行一些代码，而在被 import 时不会执行。
 
-```python
-if __name__ == "__main__":
-    # execute only if run as a script
-    main()
-```
+**另请参见：** 关于在所有情况下 `__name__` 是被如何设置的，详见教程的 [模块](https://docs.python.org/3.14/tutorial/modules.html#tut-modules) 一节。
+
+##### 惯用法
+有些模块包含了仅供脚本使用的代码，比如解析命令行参数或从标准输入获取数据。 如果这样的模块被从一个不同的模块中导入，例如为了单元测试，脚本代码也会无意中执行。
+
+这就是 `if __name__ == '__main__'` 代码块的用武之地。除非模块在顶层环境中被执行，否则该块内的代码不会运行。
+
+将尽可能少的语句放在位于 `if __name__ == '__main__'` 之下的代码块中可以提高代码的清晰度和准确度。最常见的方式，是用一个名为 `main` 的函数来封装程序的主要行为： 
+
+
 
 对软件包来说，通过加入 `__main__.py` 模块可以达到同样的效果，当使用 `-m` 运行模块时，其中的代码会被执行。
 
