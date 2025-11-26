@@ -182,6 +182,13 @@
     * [6. 表达式](#6-表达式)
         * [6.1. 算术转换](#61-算术转换)
         * [6.2. 原子](#62-原子)
+            * [6.2.1. 标识符（名称）](#621-标识符名称)
+                * [6.2.1.1. 私有名称重整](#6211-私有名称重整)
+            * [6.2.2. 字面值](#622-字面值)
+                * [6.2.2.1. 字符串字面值合并](#6221-字符串字面值合并)
+            * [6.2.3. 带圆括号的形式](#623-带圆括号的形式)
+            * [6.2.4. 列表、集合与字典的显示](#624-列表集合与字典的显示)
+            * [6.2.5. 列表显示](#625-列表显示)
         * [6.14. lambda 表达式](#614-lambda-表达式)
     * [7. 简单语句](#7-简单语句)
         * [7.3. assert语句](#73-assert语句)
@@ -7467,6 +7474,165 @@ import XXX.YYY.ZZZ
 **atom:**      |[identifier](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier)  \|  [literal](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-literal)  \|  [enclosure](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-enclosure)  
 **enclosure:** |[parenth_form](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-parenth_form)  \|  [list_display](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-list_display)  \|  [dict_display](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-dict_display)  \|  [set_display](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-set_display)  \|  [generator_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-generator_expression)  \|  [yield_atom](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-yield_atom)  
 
+<br><br>
+#### 6.2.1. 标识符（名称）
+作为原子出现的标识符叫做名称。 请参见 [名称（标识符和关键字）](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#identifiers) 一节了解词法定义，以及 [命名与绑定](https://docs.python.org/zh-cn/3.14/reference/executionmodel.html#naming) 获取有关命名与绑定的文档。
+
+当名称被绑定到一个对象时，对该原子求值将产生（yield）该对象。 当名称未被绑定时，尝试对其求值将引发 [NameError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#NameError) 异常。
+<br><br>
+
+##### 6.2.1.1. 私有名称重整
+当在类定义中以文本形式出现的标识符以两个或更多下划线字符开头，且不以两个或更多下划线结尾时，它被视为该类的*私有名称*。
+
+**参见：** [类规范](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#class)。
+
+更具体地，私有名称在其字节码生成之前就已被转换为更长的名字。如果转换后的名字长于 255 个字符，则可能被实现按具体策略截断。
+
+这一转换过程和标识符使用的语法上下文无关，仅有以下几种私有标识符会被重整（mangled）：
+
+* 用作被分配或读取的变量的名字的，或者用作被访问的属性的名字的。  
+&emsp;&emsp;但是嵌套的函数、类和类型别名的 [\__name__](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#definition.__name__) 属性不会被重整。  
+
+* 导入的模块的名称，例如 `import __spam` 中的 `__spam`。 若模块属于一个包（即它的名称中有点号），这个名称 *不会* 被重整。比如 `import __foo.bar` 中的 `__foo` 不会被重整。
+
+* 导入的成员的名称，比如 `from spam import __f` 中的 `__f`。
+
+转换规则的定义如下：
+
+* 类名称，先移除全部的开头下划线并插入一个开头下划线，再插入到标识符的前面，例如出现在名为 `Foo`、`_Foo` 或 `__Foo` 类中的标识符 `__spam` 将被转换为 `_Foo__spam`。
+
+* 如果类名称仅由下划线组成，则转换为标识符本身，例如出现在名为 `_` 或 `__` 类中的标识符 `__spam` 将保持原样。
+
+<br><br>
+#### 6.2.2. 字面值
+Python 支持字符串和字节串字面值，以及几种数字字面值:
+
+**literal:**  [strings](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-strings)  |  [NUMBER(https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-NUMBER)
+
+对字面值求值将返回一个该值所对应类型的对象（字符串、字节串、整数、浮点数、复数）。 对于浮点数和虚数（复数）字面值的情况，该值可能为近似值。 详情参见 [字面量](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#literals) 小节。有关 `string` 的详细信息，请参阅 [字符串字面值合并](https://docs.python.org/zh-cn/3.14/reference/expressions.html#string-concatenation) 小节。
+
+所有字面值都对应于不可变数据类型，因此对象标识的重要性不如其实际值。 多次对具有相同值的字面值求值（不论是发生在程序文本的相同位置还是不同位置）可能得到相同对象或是具有相同值的不同对象。
+<br><br>
+
+##### 6.2.2.1. 字符串字面值合并
+允许多个相邻的字符串或字节字面量（以空白符分隔）可以使用不同的引号约定，其含义与将这些字面量拼接后的结果相同：
+
+```py
+>>> "hello" 'world'
+'helloworld'
+>>> 
+```
+
+形式上：
+
+**strings:**  (  [STRING](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-STRING)  |  fstring)+ | tstring+
+
+此特性是在语法层面定义的，因此仅适用于字面量。若要在运行时拼接字符串表达式，可以使用 '+' 运算符：
+
+```py
+>>> greeting = "Hello"
+>>> space = " "
+>>> name = "Blaise"
+>>> print(greeting + space + name)    # 不是：print(greeting space name)
+Hello Blaise
+>>> 
+```
+
+字面量拼接可以自由混合原始字符串、三引号字符串和格式化字符串字面量。例如：
+
+```py
+>>> "Hello" r', ' f"{name}!"
+'Hello, Blaise!'
+>>> 
+```
+
+此特性可用于减少所需的反斜杠数量，方便地将长字符串分割到多行，甚至还能为字符串的特定部分添加注释。例如：
+
+```py
+>>> import re
+>>> re.compile("[A-Za-z_]"        # 字母或下划线
+...            "[A-Za-z0-9_]*"    # 字母、数字或下划线
+...           )
+re.compile('[A-Za-z_][A-Za-z0-9_]*')
+>>> 
+```
+
+不过，字节字面量只能与其他字节字面量组合，不能与任何类型的字符串字面量组合。此外，模板字符串字面量也只能与其他模板字符串字面量组合。
+
+```py
+>>> name = "Blaise"
+>>> t"Hello" t"{name}!"
+Template(strings=('Hello', '!'), interpolations=(Interpolation('Blaise', 'name', None, ''),))
+>>> 
+```
+
+**注意：** 模板字符串是在 Python 3.14 中新增的内容。参考 [Python 3.14 有什么新变化](https://docs.python.org/zh-cn/3/whatsnew/3.14.html#pep-750-template-string-literals)。
+<br><br>
+
+#### 6.2.3. 带圆括号的形式
+带圆括号的形式是包含在圆括号中的可选表达式列表。
+
+**parenth_form:**  "("  [[starred_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-starred_expression)]  ")"
+
+带圆括号的表达式列表将返回该表达式列表所产生的任何东西：如果该列表包含至少一个逗号，它会产生一个元组；否则，它会产生构成该表达式列表的那个单一表达式。
+
+一对内容为空的圆括号将产生一个空的元组对象。 由于元组是不可变的，因此适用与字面值相同的规则（即两次出现的空元组产生的对象可能相同也可能不同）。
+
+请注意元组并不是由圆括号构建的，实际起作用的是逗号。 例外情况是空元组，这时圆括号 *才是* 必须的 --- 允许在表达式中使用不带圆括号的“空”会导致歧义并会造成常见的输入错误无法被捕获。
+
+#### 6.2.4. 列表、集合与字典的显示
+为了构建列表、集合或字典，Python 提供了名为“显示”的特殊语法，每个类型各有两种形式：
+
+* 第一种是显式地列出容器内容  
+* 第二种是通过一组循环和筛选指令计算出来，称为 **推导式**。  
+
+推导式的常用语法元素是：
+
+元素                 |语法  
+---------------------|-------------------- 
+**comprehension:**   |[assignment_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-assignment_expression)  [comp_for](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_for)  
+**comp\_for:**       |["async"]  "for"  [target_list](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-target_list)  "in"  [or_test](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-or_test)  [[comp_iter](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_iter)]  
+**comp\_iter:**      |[comp_for](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_for)  |  [comp_if](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_if)  
+**comp\_if:**        |"if"  [or_test](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-or_test)  [[comp_iter](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_iter)]  
+
+推导式的结构是一个单独表达式后面加至少一个 for 子句以及零个或更多个 for 或 if 子句。 在这种情况下，新容器的元素产生方式是将每个 for 或 if 子句视为一个代码块，按从左至右的顺序嵌套，然后每次到达最内层代码块时就对表达式进行求值以产生一个元素。
+
+不过，除了最左边 for 子句中的可迭代表达式，推导式是在另一个隐式嵌套的作用域内执行的。 这能确保赋给目标列表的名称不会“泄露”到外层的作用域。
+
+最左边的 for 子句中的可迭代对象表达式会直接在外层作用域中被求值，然后作为一个参数被传给隐式嵌套的作用域。 后续的 for 子句以及最左侧 for 子句中的任何筛选条件不能在外层作用域中被求值，因为它们可能依赖于从最左侧可迭代对象中获得的值。 例如: `[x*y for x in range(10) for y in range(x, x+10)]`。
+
+```py
+>>> a = []
+>>> for x in range(10):
+...     for y in range(x, x + 10):
+...         a.append(x*y)
+...         
+>>> b = [x*y for x in range(10) for y in range(x, x+10)]
+>>> a == b
+True
+>>> 
+```
+
+为了确保推导式得出的结果总是一个类型正确的容器，在隐式嵌套作用域内禁止使用 `yield` 和 `yield from` 表达式。
+
+从 Python 3.6 开始，在 [async def](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#async-def) 函数中，可以使用 async for 子句来迭代 [异步迭代器](https://docs.python.org/zh-cn/3.14/glossary.html#term-asynchronous-iterator)。 在 async def 函数中的推导式可以由打头的表达式后跟一个 for 或 async for 子句组成，并可能包含额外的 for 或 async for 子句，还可能使用 [await](https://docs.python.org/zh-cn/3.14/reference/expressions.html#await) 表达式。
+
+如果一个推导式包含 async for 子句，或者如果它在最左侧的 for 子句中的可迭代表达式以外的任何地方包含 await 表达式或其他异步推导式，那它就被称为 *异步推导式*。 异步推导式可能会挂起它所在的协程函数的执行。 另请参阅 [PEP 530](https://peps.python.org/pep-0530/)。
+
+*在版本 3.6 中新增：* 引入了异步推导式。
+
+*在 3.8 版本发生变更：* `yield` 和 `yield from` 在隐式嵌套的作用域中已被禁用。
+
+*在 3.11 版本发生变更:* 现在允许在异步函数的推导式中使用异步推导式。 外部推导式将隐式地转为异步的。
+<br><br>
+
+#### 6.2.5. 列表显示
+列表显示是一个用方括号括起来的可能为空的表达式系列：
+
+**list_display:**  "["  [[flexible_expression_list](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-flexible_expression_list)  |  [comprehension](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comprehension)]  "]"
+
+列表显示会产生一个新的列表对象，其内容通过一系列表达式或一个推导式来指定。 当提供由逗号分隔的一系列表达式时，其元素会从左至右被求值并按此顺序放入列表对象。 当提供一个推导式时，列表会根据推导式所产生的结果元素进行构建。
+<br><br>
 
 ### 6.14. lambda 表达式
 **lambda_expr** ::= "lambda" [[parameter_list](https://docs.python.org/zh-cn/3.13/reference/compound_stmts.html#grammar-token-python-grammar-parameter_list)] ":" [expression](https://docs.python.org/zh-cn/3.13/reference/expressions.html#grammar-token-python-grammar-expression) 
