@@ -7471,8 +7471,8 @@ import XXX.YYY.ZZZ
 
 表达式         |语法   
 ---------------|-----------------------------------------  
-**atom:**      |[identifier](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier)  \|  [literal](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-literal)  \|  [enclosure](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-enclosure)  
-**enclosure:** |[parenth_form](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-parenth_form)  \|  [list_display](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-list_display)  \|  [dict_display](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-dict_display)  \|  [set_display](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-set_display)  \|  [generator_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-generator_expression)  \|  [yield_atom](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-yield_atom)  
+**atom:**      |[identifier](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier)&emsp;\|&emsp;[literal](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-literal)&emsp;\|&emsp;[enclosure](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-enclosure)  
+**enclosure:** |[parenth_form](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-parenth_form)&emsp;\|&emsp;[list_display](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-list_display)&emsp;\|&emsp;[dict_display](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-dict_display)&emsp;\|&emsp;[set_display](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-set_display)&emsp;\|&emsp;[generator_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-generator_expression)&emsp;\|&emsp;[yield_atom](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-yield_atom)
 
 <br><br>
 #### 6.2.1. 标识符（名称）
@@ -7507,7 +7507,7 @@ import XXX.YYY.ZZZ
 #### 6.2.2. 字面值
 Python 支持字符串和字节串字面值，以及几种数字字面值:
 
-**literal:**  [strings](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-strings)  |  [NUMBER(https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-NUMBER)
+**literal:**  [strings](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-strings)&emsp;|&emsp;[NUMBER(https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-NUMBER)
 
 对字面值求值将返回一个该值所对应类型的对象（字符串、字节串、整数、浮点数、复数）。 对于浮点数和虚数（复数）字面值的情况，该值可能为近似值。 详情参见 [字面量](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#literals) 小节。有关 `string` 的详细信息，请参阅 [字符串字面值合并](https://docs.python.org/zh-cn/3.14/reference/expressions.html#string-concatenation) 小节。
 
@@ -7590,10 +7590,10 @@ Template(strings=('Hello', '!'), interpolations=(Interpolation('Blaise', 'name',
 
 元素                 |语法  
 ---------------------|-------------------- 
-**comprehension:**   |[assignment_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-assignment_expression)  [comp_for](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_for)  
-**comp\_for:**       |["async"]  "for"  [target_list](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-target_list)  "in"  [or_test](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-or_test)  [[comp_iter](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_iter)]  
-**comp\_iter:**      |[comp_for](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_for)  |  [comp_if](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_if)  
-**comp\_if:**        |"if"  [or_test](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-or_test)  [[comp_iter](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_iter)]  
+**comprehension:**   |[assignment_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-assignment_expression)&emsp;[comp_for](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_for)  
+**comp\_for:**       |["async"]&emsp;"for"&emsp;[target_list](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-target_list)&emsp;"in"&emsp;[or_test](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-or_test)&emsp;[[comp_iter](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_iter)]  
+**comp\_iter:**      |[comp_for](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_for)&emsp;\|&emsp;[comp_if](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_if)  
+**comp\_if:**        |"if"&emsp;[or_test](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-or_test)&emsp;[[comp_iter](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_iter)]  
 
 推导式的结构是一个单独表达式后面加至少一个 for 子句以及零个或更多个 for 或 if 子句。 在这种情况下，新容器的元素产生方式是将每个 for 或 if 子句视为一个代码块，按从左至右的顺序嵌套，然后每次到达最内层代码块时就对表达式进行求值以产生一个元素。
 
