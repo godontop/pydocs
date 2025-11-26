@@ -255,6 +255,9 @@
         * [常见绊脚石](#常见绊脚石)
             * [文本 Vs. 数据代替 Unicode Vs. 8-bit](#文本-vs-数据代替-unicode-vs-8-bit)
         * [库变化](#库变化)
+* [Python FAQ](#python-faq)
+    * [核心语言](#核心语言)
+        * [函数形参列表中的斜杠（/）是什么意思？](#函数形参列表中的斜杠是什么意思)
 * [Python Snippets](#python-snippets)
     * [proxy.py](#proxypy)
 * [Anaconda](#anaconda)
@@ -7507,7 +7510,7 @@ import XXX.YYY.ZZZ
 #### 6.2.2. 字面值
 Python 支持字符串和字节串字面值，以及几种数字字面值:
 
-**literal:**  [strings](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-strings)&emsp;|&emsp;[NUMBER(https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-NUMBER)
+**literal:**&emsp;[strings](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-strings)&emsp;|&emsp;[NUMBER](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-NUMBER)
 
 对字面值求值将返回一个该值所对应类型的对象（字符串、字节串、整数、浮点数、复数）。 对于浮点数和虚数（复数）字面值的情况，该值可能为近似值。 详情参见 [字面量](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#literals) 小节。有关 `string` 的详细信息，请参阅 [字符串字面值合并](https://docs.python.org/zh-cn/3.14/reference/expressions.html#string-concatenation) 小节。
 
@@ -7629,7 +7632,7 @@ True
 #### 6.2.5. 列表显示
 列表显示是一个用方括号括起来的可能为空的表达式系列：
 
-**list_display:**  "["  [[flexible_expression_list](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-flexible_expression_list)  |  [comprehension](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comprehension)]  "]"
+**list_display:**&ensp;"["&ensp;[[flexible_expression_list](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-flexible_expression_list)&ensp;|&ensp;[comprehension](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comprehension)]&ensp;"]"
 
 列表显示会产生一个新的列表对象，其内容通过一系列表达式或一个推导式来指定。 当提供由逗号分隔的一系列表达式时，其元素会从左至右被求值并按此顺序放入列表对象。 当提供一个推导式时，列表会根据推导式所产生的结果元素进行构建。
 <br><br>
@@ -9932,8 +9935,38 @@ Python 2.7 使用 Visual Studio 2008，Python 3.3 和 3.4 使用 Visual Studio 2
 ### 库变化
 因为时间的限制，这个文档没有详尽地介绍标准库中非常广泛的变化。[PEP 3108](https://www.python.org/dev/peps/pep-3108) 是库的主要变化的参考文献。这是一个简述的回顾：
 
-* Python 2.x 中一个常见的模式是有一个用纯Python实现的模块版本，与一个可选的实现为一个C扩展的加速版本；例如，[pickle](https://docs.python.org/3/library/pickle.html#module-pickle) 和 `cPickle`。这承担每次使用这些模块时导入加速版本及退回到纯Python版本的责任。在 Python 3.0中，加速版本被认为实现了纯Python的细节。用户应该总是导入标准版本，试图导入加速版本会退回到纯Python版本。[pickle](https://docs.python.org/3/library/pickle.html#module-pickle) / `cPickle` 对受到这种待遇。[profile](https://docs.python.org/3/library/profile.html#module-profile) 模块在3.1的清单上。`StringIO` 模块已经变成了 [io](https://docs.python.org/3/library/io.html#module-io) 模块的一个类。  
-<br>  
+* Python 2.x 中一个常见的模式是有一个用纯Python实现的模块版本，与一个可选的实现为一个C扩展的加速版本；例如，[pickle](https://docs.python.org/3/library/pickle.html#module-pickle) 和 `cPickle`。这承担每次使用这些模块时导入加速版本及退回到纯Python版本的责任。在 Python 3.0中，加速版本被认为实现了纯Python的细节。用户应该总是导入标准版本，试图导入加速版本会退回到纯Python版本。[pickle](https://docs.python.org/3/library/pickle.html#module-pickle) / `cPickle` 对受到这种待遇。[profile](https://docs.python.org/3/library/profile.html#module-profile) 模块在3.1的清单上。`StringIO` 模块已经变成了 [io](https://docs.python.org/3/library/io.html#module-io) 模块的一个类。
+<br><br>
+
+# Python FAQ
+[编程 FAQ](https://docs.python.org/3/faq/programming.html#)
+
+## 核心语言
+### 函数形参列表中的斜杠（/）是什么意思？
+函数参数列表中的斜杠表示在它之前的形参都是仅限位置形参。 仅限位置形参没有可供外部使用的名称。 在调用接受仅限位置形参的函数时，参数将只根据其位置被映射到形参上。 例如，[divmod()](https://docs.python.org/zh-cn/3.14/library/functions.html#divmod) 就是一个接受仅限位置形参的函数。 它的文档说明是这样的:
+
+```py
+>>> help(divmod)
+Help on built-in function divmod in module builtins:
+
+divmod(x, y, /)
+    Return the tuple (x//y, x%y).  Invariant: div*y + mod == x.
+```
+
+形参列表尾部的斜杠说明，两个形参都是仅限位置形参。因此，用关键字参数调用 [divmod()](https://docs.python.org/zh-cn/3.14/library/functions.html#divmod) 将会引发错误：
+
+```py
+>>> divmod(x=3, y=4)
+Traceback (most recent call last):
+  File "<python-input-3>", line 1, in <module>
+    divmod(x=3, y=4)
+    ~~~~~~^^^^^^^^^^
+TypeError: divmod() takes no keyword arguments
+>>> divmod(3, 4)
+(0, 3)
+>>> 
+```
+<br><br>
 
 # Python Snippets
 ## proxy.py
