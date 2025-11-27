@@ -49,6 +49,8 @@
     * [数据类型](#数据类型)
         * [collections --- 容器数据类型](#collections-----容器数据类型)
         * [collections.abc --- 容器的抽象基类](#collectionsabc-----容器的抽象基类)
+        * [types --- 动态类型创建和内置类型名称](#types-----动态类型创建和内置类型名称)
+            * [标准解释器类型](#标准解释器类型)
         * [pprint --- 数据美化输出](#pprint-----数据美化输出)
             * [函数](#函数)
     * [函数式编程模块](#函数式编程模块)
@@ -2834,6 +2836,65 @@ hex_codec  |hex     |将操作数转换为十六进制表示，每个字节有�
 
 *class* collections.abc.**Iterator**  
 提供了 [\_\_iter\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__iter__) 和 [\_\_next\_\_()](https://docs.python.org/zh-cn/3/library/stdtypes.html#iterator.__next__) 方法的抽象基类。参见 [iterator](https://docs.python.org/zh-cn/3/glossary.html#term-iterator) 的定义。
+<br><br>
+
+### types --- 动态类型创建和内置类型名称
+**源代码：** [Lib/types.py](https://github.com/python/cpython/tree/3.14/Lib/types.py)
+
+此模块定义了一些工具函数，用于协助动态创建新的类型。
+
+它还为某些对象类型定义了名称，这些名称由标准 Python 解释器所使用，但并不像内置的 [int](https://docs.python.org/zh-cn/3.14/library/functions.html#int) 或 [str](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str) 那样对外公开。
+
+最后，它提供了一些额外的与类型相关的工具类和函数，这些工具类和函数还不够基础，因此没有被内置。
+
+#### 标准解释器类型
+该模块为许多实现 Python 解释器所需的类型提供了名称。 它刻意地避免了包含某些仅在处理过程中偶然出现的类型，例如 `listiterator` 类型。
+
+此种名称的典型应用是 [isinstance()](https://docs.python.org/zh-cn/3.14/library/functions.html#isinstance) 或 [issubclass()](https://docs.python.org/zh-cn/3.14/library/functions.html#issubclass) 检测。
+
+如果你要实例化这些类型中的任何一种，请注意其签名在不同 Python 版本之间可能出现变化。
+
+以下类型有标准名称定义：
+
+types.**NoneType**  
+[None](https://docs.python.org/zh-cn/3.14/library/constants.html#None) 的类型。
+
+*在版本 3.10 中新增。*
+<br><br>
+
+*class* types.**ModuleType**(_name, doc=None_)  
+&emsp;&emsp;[模块](https://docs.python.org/zh-cn/3.14/glossary.html#term-module) 的类型。 构造器接受待创建模块的名称以及其 [docstring](https://docs.python.org/zh-cn/3.14/glossary.html#term-docstring) 作为可选参数。
+
+```py
+>>> import types
+>>> m = types.ModuleType('my_module', doc="My customized module.")
+>>> m.__dict__
+{'__name__': 'my_module', '__doc__': 'My customized module.', '__package__': None, '__loader__': None, '__spec__': None}
+>>> import sys
+>>> 'json' in sys.modules
+False
+>>> exec("import json", m.__dict__)
+>>> 'json' in sys.modules
+True
+>>> 'json' in m.__dict__
+True
+>>> 'json' in globals()
+False
+>>> m.__dict__.keys()
+dict_keys(['__name__', '__doc__', '__package__', '__loader__', '__spec__', '__builtins__', 'json'])
+>>> type(m.__dict__['__builtins__'])
+<class 'dict'>
+>>> type(globals()['__builtins__'])
+<class 'module'>
+>>>
+```
+
+&emsp;&emsp;**参见：**  
+&emsp;&emsp;[模块对象的文档](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#module-objects)  
+&emsp;&emsp;&emsp;&emsp;提供了有关可在 ModuleType 的实例上找到的特殊属性的详情。
+
+&emsp;&emsp;[importlib.util.module_from_spec()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.util.module_from_spec)  
+&emsp;&emsp;&emsp;&emsp;使用 ModuleType 构造器创建的模块在被创建时将有许多特殊属性被取消设置或设为其默认值。 module_from_spec() 提供了一种创建 ModuleType 实的更健壮的方式，可确保各个属性都被正确地设置。
 <br><br>
 
 ### pprint --- 数据美化输出
