@@ -291,7 +291,7 @@ Python解释器内置了许多总是可用的函数和类型。在这里以字�
 |          |            |id()              |object()  |sorted()  |
 |ascii()   |enumerate() |input()           |          |          |
 |bin()     |eval()      |int()             |open()    |          |
-|          |            |isinstance()      |ord()     |          |
+|          |exec()      |isinstance()      |ord()     |          |
 |          |            |issubclass()      |pow()     |super()   |
 |          |            |                  |print()   |          |
 |          |            |                  |          |type()    |
@@ -424,7 +424,58 @@ def enumerate(sequence, start=0):
 
 另外可以参阅 [ast.literal_eval()](https://docs.python.org/3.9/library/ast.html#ast.literal_eval)，该函数可以安全执行仅包含文字的表达式字符串。  
 
-以代码对象作为参数引发[审计事件](https://docs.python.org/3.9/library/sys.html#auditing) `exec`。 也可能引发代码编译事件。    
+以代码对象作为参数引发[审计事件](https://docs.python.org/3.9/library/sys.html#auditing) `exec`。 也可能引发代码编译事件。
+<br><br>
+
+**exec**(_source, /, globals=None, locals=None, *, closure=None_)  
+**警告：** 此函数可执行任意代码。 调用它时使用用户提供的输入可能导致安全弱点。
+
+这个函数支持动态执行 Python 代码。 *source* 必须是字符串或代码对象。 如果是字符串，那么该字符串将被解析为一组 Python 语句并随即被执行（除非发生语法错误）。 [1] 如果是代码对象，那么它将被直接执行。 在所有情况下，被执行的代码都应当是有效的文件输入（见参考手册中的 [文件输入](https://docs.python.org/zh-cn/3.14/reference/toplevel_components.html#file-input) 一节）。 请注意，[nonlocal](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#nonlocal)、[yield](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#yield) 和 [return](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#return) 语句不可以在函数定义以外使用，即使是在传递给 [exec()](https://docs.python.org/zh-cn/3.14/library/functions.html#exec) 函数的代码的上下文中。 函数的返回值为 `None`。
+
+在所有情况下，如果省略了可选部分，代码将在当前作用域中执行。 如果只提供了 *globals*，则它必须是一个字典（并且不能是字典的子类），它将被同时用于全局和局部变量。 如果给出了 *globals* 和 *locals*，它们将被分别用于全局和局部变量。 如果提供了 *locals*，它可以是任何映射对象。 请记住在模块层级上，globals 和 locals 是同一个字典。
+
+**备注：** 当 `exec` 获得两个不同的对象作为 *globals* 和 *locals* 时，代码被执行时就会像是嵌入在一个类定义中那样。 这意味着在被执行代码中定义的函数和类将无法访问在最高层级上赋值的变量（因为“最高层级”变量会被当作是类定义中的类变量来对待）。
+
+如果 *globals* 字典不包含 `__builtins__` 键值，则将为该键插入对内置模块 [builtins](https://docs.python.org/zh-cn/3.14/library/builtins.html#module-builtins) 字典的引用。因此，在将可执行的代码传递给 [exec()](https://docs.python.org/zh-cn/3.14/library/functions.html#exec) 之前，可以通过将自己的 `__builtins__` 字典插入到 *globals* 中来控制被执行的代码可以使用哪些内置对象。
+
+```py
+>>> import types
+>>> m = types.ModuleType("my_module", doc="My customized module.")
+>>> m.__dict__
+{'__name__': 'my_module', '__doc__': 'My customized module.', '__package__': None, '__loader__': None, '__spec__': None}
+>>> exec("import json", globals=m.__dict__)  # 在 globals 字典中插入 '__builtins__' 键值对
+>>> m.__dict__.keys()
+dict_keys(['__name__', '__doc__', '__package__', '__loader__', '__spec__', '__builtins__', 'json'])
+>>> type(m.__dict__['__builtins__'])
+<class 'dict'>
+>>> m.__dict__['__builtins__']['abs']
+<built-in function abs>
+>>> m.__dict__['__builtins__']['abs'](-5)
+5
+>>> globals()['__builtins__']
+<module 'builtins' (built-in)>
+>>>
+```
+
+顶层运行环境中 globals 字典的 `__builtins__` 键绑定的是内置 builtins 模块，而非内置 builtins 模块的字典。 
+
+*closure* 参数指定了一个闭包 —— 一个单元变量的元组。 它只有当 *object* 是一个包含 [自由（闭包）变量](https://docs.python.org/zh-cn/3.14/glossary.html#term-closure-variable) 的代码对象时才有效。 元组的长度必须与代码对象的 [co_freevars](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#codeobject.co_freevars) 属性的长度完全匹配。
+
+引发一个 [审计事件](https://docs.python.org/zh-cn/3.14/library/sys.html#auditing) `exec` 附带代码对象作为参数。 代码编译事件也可能被引发。
+
+**备注：** 内置函数 [globals()](https://docs.python.org/zh-cn/3.14/library/functions.html#globals) 和 [locals()](https://docs.python.org/zh-cn/3.14/library/functions.html#locals) 分别返回当前的全局和局部命名空间，这在用作 [exec()](https://docs.python.org/zh-cn/3.14/library/functions.html#exec) 的第二个和第三个参数进行传递时会很有用处。
+
+**备注：** 默认的 *locals* 行为与下面 [locals()](https://docs.python.org/zh-cn/3.14/library/functions.html#locals) 函数所描述的一样。 如果你需要在 [exec()](https://docs.python.org/zh-cn/3.14/library/functions.html#exec) 返回之后查看代码对 *locals* 的影响可以显式地传入一个 *locals* 字典。
+
+**备注：**  
+[1]解析器只接受 Unix 风格的行结束符。如果您是从文件中读取代码，请确保用换行符转换模式转换 Windows 或 Mac 风格的换行符。
+
+*在 3.11 版本发生变更：* 添加了 *closure* 参数。
+
+*在 3.13 版本发生变更：* 现在可以将 *globals* 和 *locals* 作为关键字参数传入。
+
+*在 3.13 版本发生变更：* 默认 *locals* 命名空间的语义已被调整为与 [locals()](https://docs.python.org/zh-cn/3.14/library/functions.html#locals) 内置函数的描述一致。
+<br><br>
 
 **getattr**(*object, name*__[__*, default*__]__)  
 返回 *object* 的 *name* 属性的值。*name* 必须是一个字符串。如果这个字符串是这个对象的一个属性的名称，则结果为那个属性的值。例如，`getattr(x, 'foobar')` 等同于 `x.foobar`。如果名称属性不存在，则返回 *default* 如果有提供的话，否则抛出 [AttributeError](https://docs.python.org/3/library/exceptions.html#AttributeError)。
