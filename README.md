@@ -6419,7 +6419,7 @@ module os is frozen, can't get source for os.walk.
 ### site --- 站点专属的配置钩子
 **源代码：** [Lib/site.py](https://github.com/python/cpython/tree/3.13/Lib/site.py)
 
-**这个模块将在初始化时被自动导入。**此自动导入可以通过使用解释器的 [-S](https://docs.python.org/zh-cn/3.13/using/cmdline.html#cmdoption-S) 选项来屏蔽。
+**这个模块将在初始化时被自动导入。** 此自动导入可以通过使用解释器的 [-S](https://docs.python.org/zh-cn/3.13/using/cmdline.html#cmdoption-S) 选项来屏蔽。
 
 正常导入此模块将会把站点专属的路径添加到模块搜索路径并将一些 [可调用对象](https://docs.python.org/zh-cn/3.13/library/constants.html#site-consts)，包括 [help()](https://docs.python.org/zh-cn/3.13/library/functions.html#help) 添加到内置命名空间。 不过，Python 启动选项 [-S](https://docs.python.org/zh-cn/3.13/using/cmdline.html#cmdoption-S) 会阻止此行为且此模块可被安全地导入而不会自动修改模块搜索路径或添加内置对象。 要显式地触发通常的站点专属附加项，请调用 [main()](https://docs.python.org/zh-cn/3.13/library/site.html#site.main) 函数。
 
@@ -6560,8 +6560,8 @@ FileFinder('D:\\Program Files\\Python310\\lib\\site-packages\\selenium') webdriv
 PYC 仓库目录
 
 #### 函数
-importlib.**\_\_import\_\_**(_name, globals=None, locals=None, fromlist=(), level=0_) 
-内置 [__import__()](https://docs.python.org/zh-cn/3.14/library/functions.html#import__) 函数的实现。
+importlib.**\_\_import\_\_**(_name, globals=None, locals=None, fromlist=(), level=0_)  
+内置 [\__import__()](https://docs.python.org/zh-cn/3.14/library/functions.html#import__) 函数的实现。
 
 **备注：** 程序式地导入模块应该使用 [import_module()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.import_module) 而不是这个函数。
 <br><br>
@@ -6570,6 +6570,20 @@ importlib.**import_module**(_name, package=None_)
 导入一个模块。 参数 *name* 指定了以绝对或相对导入方式导入什么模块 (比如要么像这样 `pkg.mod` 或者这样 `..mod`)。 如果参数 *name* 使用相对导入的方式来指定，那么 *package* 参数必须设置为那个包名，这个包名作为解析这个包名的锚点 (比如 `import_module('..mod', 'pkg.subpkg')` 将会导入 `pkg.mod`)。
 
 [import_module()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.import_module) 函数是一个对 [importlib.\_\_import\_\_()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.__import__) 进行简化的包装器。 这意味着该函数的所有语义都来自于 [importlib.\_\_import\_\_()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.__import__)。 这两个函数之间最重要的不同点在于 [import_module()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.import_module) 返回指定的包或模块 (例如 `pkg.mod`)，而 [\_\_import\_\_()](https://docs.python.org/zh-cn/3.14/library/functions.html#import__) 返回最高层级的包或模块 (例如 `pkg`)。
+
+```py
+>>> import importlib
+>>> importlib.import_module('posix')
+<module 'posix' (built-in)>
+>>> 'posix' in globals()
+False
+>>> posix = importlib.import_module('posix')
+>>> 'posix' in globals()
+True
+```
+
+**import 和 importlib.import_module() 函数的区别**  
+`import posix` 语句除了加载（或者说导入）模块，还会在当前命名空间中创建一个变量 posix，将其指向 posix 模块。而 `importlib.import_module('posix')` 函数只加载并返回模块对象，不创建变量，如果需要在当前命名空间中直接使用该模块，需显示地将模块绑定到指定名称，通常是模块名。
 
 如果动态导入一个自解释器开始执行以来被创建的模块（即创建了一个 Python 源代码文件），为了让导入系统知道这个新模块，可能需要调用 [invalidate_caches()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.invalidate_caches)。
 
@@ -6973,11 +6987,29 @@ module.**\_\_path\_\_**
 
 **强烈** 建议你使用 [module.\_\_spec\_\_.submodule_search_locations](https://docs.python.org/zh-cn/3.12/library/importlib.html#importlib.machinery.ModuleSpec.submodule_search_locations) 来代替 module.\_\_path\_\_。
 
-module.**\_\_file\_\_** 
-module.**\_\_cached\_\_** 
+module.**\_\_file\_\_**  
+module.**\_\_cached\_\_**  
 \_\_file\_\_ 和 \_\_cached\_\_ 都是可设也可不设的可选属性。 两个属性在可用时都应当为 [str](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#str)。
 
-\_\_file\_\_ 指明要载入的模块所在文件的路径名（如果是从文件载入），或者对于从共享库动态载入的扩展模块来说则是共享库文件的路径名。 它对于特定类型的模块来说可能是缺失的，例如静态链接到解释器中的 C 模块，并且 [导入系统](https://docs.python.org/zh-cn/3.12/reference/import.html#importsystem) 也可能会在它没有语法意义时选择不设置它（例如，当一个模块是从数据库导入时）。
+\_\_file\_\_  指明要载入的模块所在文件的路径名（如果是从文件载入），或者对于从共享库动态载入的扩展模块来说则是共享库文件的路径名。 它对于特定类型的模块来说可能是缺失的，例如静态链接到解释器中的 C 模块，并且 [导入系统](https://docs.python.org/zh-cn/3.12/reference/import.html#importsystem) 也可能会在它没有语法意义时选择不设置它（例如，当一个模块是从数据库导入时）。
+
+静态链接到解释器中的 C 模块即 Python 内置模块，这些模块是用 C 编写的，编译进了 Python 可执行文件本身（静态链接），不需要通过文件加载，故没有 `__file__` 属性。
+
+```py
+>>> import sys
+>>> sys.builtin_module_names
+('_abc', '_ast', '_codecs', '_collections', '_functools', '_imp', '_io', '_locale', '_operator', '_signal', '_sre', '_stat', '_string', '_suggestions', '_symtable', '_sysconfig', '_thread', '_tokenize', '_tracemalloc', '_typing', '_warnings', '_weakref', 'atexit', 'builtins', 'errno', 'faulthandler', 'gc', 'itertools', 'marshal', 'posix', 'pwd', 'sys', 'time')
+>>> sys.modules['time']
+<module 'time' (built-in)>
+>>> hasattr(sys.modules['time'], '__file__')
+False
+>>> import json
+>>> hasattr(json, '__file__')
+True
+>>> json.__file__
+'/home/pi/.pyenv/versions/3.13.0/lib/python3.13/json/__init__.py'
+>>>
+```
 
 如果设置了 \_\_file\_\_ 则 \_\_cached\_\_ 属性也可能会被设置，它是指向任何代码的已编译版本的路径（例如，一个字节码文件）。 设置此属性并不需要存在相应的路径；该路径可以简单地指向已编译文件 *将要* 存在的位置 (参见 [PEP 3147](https://peps.python.org/pep-3147/))。
 
