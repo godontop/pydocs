@@ -128,6 +128,7 @@
                 * [惯用法](#惯用法)
         * [traceback — 打印或检索堆栈回溯](#traceback--打印或检索堆栈回溯)
             * [TracebackException 对象](#tracebackexception-对象)
+        * [gc --- 垃圾回收器接口](#gc-----垃圾回收器接口)
         * [inspect --- 检查活对象](#inspect-----检查活对象)
             * [类型和成员](#类型和成员)
             * [检索源代码](#检索源代码)
@@ -1017,14 +1018,23 @@ Operation  |Result          |Notes
 
 下表列出的序列操作按优先级升序排列。下表中，*s* 和 *t* 是相同类型的序列，*n*, *i*, *j* 和 *k* 是整型数，*x* 是符合由 *s* 所限制的类型及值的一个任意对象。
 
-Operation   |Result                      |Notes
-------------|----------------------------|------
+Operation   |Result                                                 |备注  
+------------|-------------------------------------------------------|------  
+`x in s`    |如果 *s* 中的某项等于 *x* 则结果为 `True`，否则为 `False` |(1)  
+`x not in s` |如果 *s* 中的某项等于 *x* 则结果为 `False`，否则为 `True` |(1)  
+`s[i]`      |*s* 的第 *i* 项，起始为 0（s[0]表示 *s* 的第一个元素）    |(3)(8)  
 `s[i:j]`    |从 *i* 到 *j* 的 *s* 的分片  |(3)(4)  
 `s[i:j:k]`  |*s* 从 *i* 到 *j* 且步长为 *k* 的切片  |(3)(5)  
 
-**注意：**
+**注释：**
 
-1. 
+1. 虽然 `in` 和 `not in` 操作在通常情况下仅被用于简单的成员检测，某些专门的序列 (例如 [str](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str), [bytes](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#bytes) 和 [bytearray](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#bytearray)) 也使用它们进行子序列检测：
+
+```py
+>>> "gg" in "eggs"
+True
+>>>
+```
 
 2. 
 
@@ -1073,6 +1083,17 @@ Operation   |Result                      |Notes
 如果 *k* 为正，则 *i* 必须小于 *j* ，否则切片为空。  
 如果 *k* 为负，则 *i* 必须大于 *j* ，否则切片为空。  
 
+8. 如果 *i* 超出了序列范围则会引发 [IndexError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#IndexError)。
+
+```py
+>>> a = [1, 2, 3, 4, 5]
+>>> a[0]
+1
+>>> a[2]
+3
+>>> 
+```
+
 #### 可变序列类型
 可变序列定义了下表中的操作。Python 提供的抽象基类 [collections.abc.MutableSequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableSequence) 使自定义序列类型正确地实现这些操作变得更容易。
 
@@ -1099,12 +1120,12 @@ Operation                  |Result                |Notes
 **可变序列方法**  
 可变序列类型也支持下面的方法：  
 
-sequence**.clear()**  
+sequence.**clear()**  
 *在版本 3.3 中新增。* 
 
 从序列中删除所有项目。这等同于代码 `del sequence[:]`。  
 
-sequence**.copy()**  
+sequence.**copy()**  
 *在版本 3.3 中新增。*  
 
 创建一个序列的浅拷贝。这等同于代码 `sequence[:]`。  
@@ -6284,6 +6305,78 @@ traceback.**print_exception(**_etype, value, tb, limit=None, file=None, chain=Tr
 
 指示发生了哪个异常的消息始终是输出中的最后一个字符串。  
 <br><br>  
+
+### gc --- 垃圾回收器接口
+此模块提供可选的垃圾回收器的接口，提供的功能包括：关闭收集器、调整收集频率、设置调试选项。它同时提供对回收器找到但是无法释放的不可达对象的访问。由于 Python 使用了带有引用计数的回收器，如果你确定你的程序不会产生循环引用，你可以关闭回收器。可以通过调用 `gc.disable()` 关闭自动垃圾回收。若要调试一个存在内存泄漏的程序，调用 `gc.set_debug(gc.DEBUG_LEAK)` 。需要注意的是，它包含 `gc.DEBUG_SAVEALL` ，使得被垃圾回收的对象会被存放在 gc.garbage 中以待检查。
+
+[gc](https://docs.python.org/zh-cn/3.14/library/gc.html#module-gc) 模块提供下列函数：
+
+gc.**enable()**  
+启用自动垃圾回收
+
+gc.**disable()**  
+停用自动垃圾回收
+
+gc.**isenabled()**  
+如果启用了自动回收则返回 `True`。
+<br><br>
+
+gc.**collect**(_generation=2_)  
+执行回收。可选参数 *generation* 可以是一个整数，指定收集哪一代（从 0 到 2）。如果 generation 值无效将引发 [ValueError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#ValueError)。 返回已回收对象和不可回收对象的总和。
+
+调用 `gc.collect(0)` 将在青年代上执行 GC 收集。
+
+调用 `gc.collect(1)` 将在青年代上执行 GC 收集并叠加老年代。
+
+调用 `gc.collect(2)` 或 `gc.collect()` 将执行一次完整的回收
+
+每当运行完整收集或最高代 (2) 收集时，为多个内置类型所维护的空闲列表会被清空。 由于特定实现特别是 [float](https://docs.python.org/zh-cn/3.14/library/functions.html#float) 的实现，在某些空闲列表中并非所有项都会被释放。
+
+当解释器已经在执行收集任务时调用 `gc.collect()` 的效果是未定义的。
+
+*在 3.14 版本发生变更：* `generation=1` 执行一次增量回收。
+<br><br>
+
+gc.**get_referrers**(_*objs_)  
+返回直接引用任意一个 *objs* 的对象的列表。这个函数只定位支持垃圾回收的容器；引用了其它对象但不支持垃圾回收的扩展类型不会被找到。
+
+需要注意的是，已经解除对 *objs* 引用的对象，但仍存在于循环引用中尚未被垃圾回收器回收时，仍然会被作为引用者出现在返回的列表当中。若要获取当前正在引用 *objs* 的对象，需要调用 [collect()](https://docs.python.org/zh-cn/3.14/library/gc.html#gc.collect) 然后再调用 [get_referrers()](https://docs.python.org/zh-cn/3.14/library/gc.html#gc.get_referrers) 。
+
+```py
+>>> import gc
+>>> import sys
+>>> gc.collect()
+76
+>>> gc.collect()
+0
+>>> len(gc.get_referrers(sys))
+87
+>>> len([d for d in gc.get_referrers(sys) if isinstance(d, dict)])
+35
+>>> len([d for d in gc.get_referrers(sys) if not isinstance(d, dict)])
+52
+>>> [d for d in gc.get_referrers(sys) if not isinstance(d, dict)][0]
+<built-in function addaudithook>  # 引用 sys 的内置函数
+>>> len([d for d in gc.get_referrers(sys) if isinstance(d, dict) and '__name__' in d])
+34
+>>> len([d for d in gc.get_referrers(sys) if isinstance(d, dict) and '__name__' not in d])
+1
+>>> [d.get('__name__') for d in gc.get_referrers(sys) if isinstance(d, dict) and '__name__' in d]
+['importlib._bootstrap_external', 'zipimport', 'codecs', 'site', '__main__', 'os', 'collections.abc', 'posixpath', '_sitebuiltins', '_distutils_hack', 'enum', 'contextlib', 'dis', 'importlib', 'tokenize', 'weakref', 'warnings', '_pyrepl.readline', 'dataclasses', '_colorize', '_pyrepl.simple_interact', '_pyrepl.main', 'runpy', 'importlib._bootstrap', 'encodings', 'inspect', 'ast', 'collections', '_pyrepl.reader', '_pyrepl.console', 'code', 'traceback', 'platform', 'importlib.util']
+>>> sorted([d.get('__name__') for d in gc.get_referrers(sys) if isinstance(d, dict) and '__name__' in d])
+['__main__', '_colorize', '_distutils_hack', '_pyrepl.console', '_pyrepl.main', '_pyrepl.reader', '_pyrepl.readline', '_pyrepl.simple_interact', '_sitebuiltins', 'ast', 'code', 'codecs', 'collections', 'collections.abc', 'contextlib', 'dataclasses', 'dis', 'encodings', 'enum', 'importlib', 'importlib._bootstrap', 'importlib._bootstrap_external', 'importlib.util', 'inspect', 'os', 'platform', 'posixpath', 'runpy', 'site', 'tokenize', 'traceback', 'warnings', 'weakref', 'zipimport']
+>>> [d.get('__spec__') for d in gc.get_referrers(sys) if isinstance(d, dict) and '__name__' in d if d['__name__'] == '__main__']
+[ModuleSpec(name='_pyrepl.__main__', loader=<_frozen_importlib_external.SourceFileLoader object at 0x7f9ccc6b70>, origin='/home/pi/.pyenv/versions/3.13.0/lib/python3.13/_pyrepl/__main__.py')]
+>>> [d.get('__main__') for d in gc.get_referrers(sys) if isinstance(d, dict) and '__name__' not in d]
+[<module '_pyrepl.__main__' from '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/_pyrepl/__main__.py'>]
+```
+
+从上面的代码可以看出引用的 sys 模块的对象列表中，除了字典类型还有内置函数，而字典实际上是模块的命名空间，故引用 sys 模块的模块实际上就是 `[d.get('__name__') for d in gc.get_referrers(sys) if isinstance(d, dict) and '__name__' in d]` 的返回值中的模块，其中模块名 `'__main__'` 对应的是 `[d.get('__main__') for d in gc.get_referrers(sys) if isinstance(d, dict) and '__name__' not in d]` 返回值中的模块，即 `_pyrepl.__main__` 模块。
+
+**警告：** 在使用 [get_referrers()](https://docs.python.org/zh-cn/3.14/library/gc.html#gc.get_referrers) 返回的对象时必须要小心，因为其中一些对象可能仍在构造中因此处于暂时的无效状态。不要把 [get_referrers()](https://docs.python.org/zh-cn/3.14/library/gc.html#gc.get_referrers) 用于调试以外的其它目的。
+
+引发一个 [审计事件](https://docs.python.org/zh-cn/3.14/library/sys.html#auditing) `gc.get_referrers` 附带参数 *objs*。
+<br><br>
 
 ### inspect --- 检查活对象
 **源代码：** [Lib/inspect.py](https://github.com/python/cpython/tree/3.14/Lib/inspect.py) 
