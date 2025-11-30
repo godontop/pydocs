@@ -6063,8 +6063,25 @@ Type "help", "copyright", "credits" or "license" for more information.
 sys.**version_info**  
 一个包含版本号的5个组成部分的元组：*major*, *minor*, *micro*, *releaselevel*, and *serial*. 除了 *releaselevel* 所有值都是整型数；发行版级别是 `'alpha'`, `'beta'`, `'candidate'`, 或者 `'final'`. Python版本2.0对应的 `version_info` 值是 `(2, 0, 0, 'final', 0)`. 组件也可以通过名称来访问，如 `sys.version_info[0]` 等价于 `sys.version_info.major`。
 
-*在版本3.1中发生了变化：* 增加了名称组件属性。  
+*在版本3.1中发生了变化：* 增加了名称组件属性。
+<br><br>
 
+### sys.monitoring --- 执行事件监测
+*在版本 3.12 中新增。* 
+
+**备注：** [sys.monitoring](https://docs.python.org/zh-cn/3.14/library/sys.monitoring.html#module-sys.monitoring) 是 [sys](https://docs.python.org/zh-cn/3.14/library/sys.html#module-sys) 模块内部的一个命名空间，而不是一个独立模块，因此不需要 `import sys.monitoring`，只要简单地 `import sys` 然后使用 `sys.monitoring`。
+
+这个命名空间提供了对激活和控制事件监控所需的函数和常量的访问。
+
+在程序执行过程中，会发生对于监控执行工具来说值得关注的事件。 [sys.monitoring](https://docs.python.org/zh-cn/3.14/library/sys.monitoring.html#module-sys.monitoring) 命名空间提供了在相应事件发生时接收回调的方法。
+
+监控 API 由三个部分组成：
+
+* [工具标识符](https://docs.python.org/zh-cn/3.14/library/sys.monitoring.html#tool-identifiers)  
+* [事件](https://docs.python.org/zh-cn/3.14/library/sys.monitoring.html#events)  
+* [回调](https://docs.python.org/zh-cn/3.14/library/sys.monitoring.html#callbacks)  
+
+<br><br>
 ### \_\_main\_\_ --- 顶层代码环境
 Python 的特殊名 `__main__` 用于两个重要的构造：
 
