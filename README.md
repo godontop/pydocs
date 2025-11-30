@@ -122,6 +122,7 @@
         * [http.server — HTTP 服务器](#httpserver--http-服务器)
     * [Python运行时服务](#python运行时服务)
         * [sys — 系统专用参量和函数](#sys--系统专用参量和函数)
+        * [sys.monitoring --- 执行事件监测](#sysmonitoring-----执行事件监测)
         * [\_\_main\_\_ --- 顶层代码环境](#__main__-----顶层代码环境)
             * [\_\_name\_\_ == '\_\_main\_\_'](#__name__--__main__)
                 * [什么是“顶层代码环境”？](#什么是顶层代码环境)
@@ -6011,6 +6012,82 @@ _frozen_importlib_external
 ```
 
 tuple(dict) 返回的是一个由字典的键构成的元组。
+
+**Python 解释器初始化过程中的模块加载顺序：**  
+1. **sys：** 提供系统特定的参数及函数。这是第一个加载的模块，它设置 `sys.modules`（模块缓存），填充 `sys.path`（模块搜索路径）；  
+2. **builtins：** 内置对象。这是第二个加载的模块，提供所有内置标识符，自动在所有地方可用而无需显示地使用 import 语句；  
+3. **\_frozen_importlib：** 导入系统。这是第三个加载的模块，此模块是导入机制的一部分，待其初始化之后，解释器可以定位及加载其它模块。  
+4. sys.moduels 中的其它模块的顺序则不一定正确。
+
+```py
+>>> import sys
+>>> sys.modules.keys()
+dict_keys(['sys', 'builtins', '_frozen_importlib', '_imp', '_thread', '_warnings', '_weakref', '_io', 'marshal', 'posix', '_frozen_importlib_external', 'time', 'zipimport', '_codecs', 'codecs', 'encodings.aliases', 'encodings', 'encodings.utf_8', '_signal', '_abc', 'abc', 'io', '__main__', '_stat', 'stat', '_collections_abc', 'genericpath', 'posixpath', 'os.path', 'os',
+ '_sitebuiltins', 'encodings.utf_8_sig', '_distutils_hack', 'site', 'readline', 'atexit', 'types', 'enum', '_sre', 're._constants', 're._parser', 're._casefix', 're._compiler', 'itertools', 'keyword', '_operator', 'operator', 'reprlib', '_collections', 'collections', '_functools', 'functools', 'copyreg', 're', '_ast', 'contextlib', 'ast', '_opcode', '_opcode_metadata',
+'opcode', 'dis', 'collections.abc', 'importlib._bootstrap', 'importlib._bootstrap_external', 'importlib', 'importlib.machinery', 'linecache', 'token', '_tokenize', 'tokenize', '_weakrefset', 'weakref', 'inspect', 'warnings', 'rlcompleter', '_pyrepl', '__future__', 'copy', 'dataclasses', '_pyrepl.commands', 'unicodedata', '_pyrepl.input', '_colorize', 'textwrap', 'traceback', 'codeop', 'code', '_pyrepl.console', '_pyrepl.utils', '_pyrepl.trace', '_pyrepl.types', '_pyrepl.reader', '_pyrepl.historical_reader', '_pyrepl.completing_reader', 'errno', 'select', 'signal', '_struct', 'struct', 'termios', 'platform', 'fcntl', '_curses', '_pyrepl.curses', '_pyrepl.fancy_termios', '_pyrepl.keymap', '_pyrepl.unix_eventqueue', '_pyrepl.unix_console', '_pyrepl.readline', '_pyrepl.simple_interact', '_pyrepl.main', 'importlib._abc', 'importlib.util', 'runpy'])
+>>> import types
+>>> [m for m, v in sys.modules['sys'].__dict__.items() if isinstance(v, types.ModuleType)]
+['monitoring']
+>>> sys.monitoring    # sys.monitoring 是 sys 模块内部的一个命名空间，不是一个独立的模块
+<module 'sys.monitoring'>
+>>> [m for m, v in sys.modules['builtins'].__dict__.items() if isinstance(v, types.ModuleType)]
+[]
+>>> [m for m, v in sys.modules['_frozen_importlib'].__dict__.items() if isinstance(v, types.ModuleType)]
+['_thread', '_warnings', '_weakref', '_bootstrap_external', '_imp', 'sys']
+>>> sys.modules['_frozen_importlib'].__dict__.get('_bootstrap_external')
+<module '_frozen_importlib_external' (frozen)>
+>>> [m for m, v in sys.modules['_imp'].__dict__.items() if isinstance(v, types.ModuleType)]
+[]
+>>> [m for m, v in sys.modules['_thread'].__dict__.items() if isinstance(v, types.ModuleType)]
+[]
+>>> [m for m, v in sys.modules['_warnings'].__dict__.items() if isinstance(v, types.ModuleType)]
+[]
+>>> [m for m, v in sys.modules['_weakref'].__dict__.items() if isinstance(v, types.ModuleType)]
+[]
+>>> [m for m, v in sys.modules['_frozen_importlib_external'].__dict__.items() if isinstance(v, types.ModuleType)]
+['_bootstrap', '_imp', '_io', 'sys', '_warnings', 'marshal', '_os']
+>>> sys.modules['_frozen_importlib_external'].__dict__.get('_bootstrap')
+<module '_frozen_importlib' (frozen)>
+>>> [m for m, v in sys.modules['_io'].__dict__.items() if isinstance(v, types.ModuleType)]
+[]
+>>> [m for m, v in sys.modules['marshal'].__dict__.items() if isinstance(v, types.ModuleType)]
+[]
+>>> sys.modules['_frozen_importlib_external'].__dict__.get('_os')    # Windows 平台上返回的是 nt 模块
+<module 'posix' (built-in)>
+>>> [m for m, v in sys.modules['posix'].__dict__.items() if isinstance(v, types.ModuleType)]
+[]
+>>> [m for m, v in sys.modules['zipimport'].__dict__.items() if isinstance(v, types.ModuleType)]
+['_bootstrap_external', '_bootstrap', '_imp', '_io', 'marshal', 'sys', 'time', '_warnings']
+>>> [m for m, v in sys.modules['time'].__dict__.items() if isinstance(v, types.ModuleType)]
+[]
+>>> [m for m, v in sys.modules['_codecs'].__dict__.items() if isinstance(v, types.ModuleType)]
+[]
+>>> [m for m, v in sys.modules['encodings'].__dict__.items() if isinstance(v, types.ModuleType)]
+['codecs', 'sys', 'aliases', 'utf_8', 'utf_8_sig']
+>>> sys.modules['encodings'].__dict__.get('aliases')
+<module 'encodings.aliases' from '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/encodings/aliases.py'>
+>>> sys.modules['encodings'].__dict__.get('utf_8')
+<module 'encodings.utf_8' from '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/encodings/utf_8.py'>
+>>> sys.modules['encodings'].__dict__.get('utf_8_sig')
+<module 'encodings.utf_8_sig' from '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/encodings/utf_8_sig.py'>
+>>> [m for m, v in sys.modules['codecs'].__dict__.items() if isinstance(v, types.ModuleType)]
+['builtins', 'sys']
+>>> [m for m, v in sys.modules['_signal'].__dict__.items() if isinstance(v, types.ModuleType)]
+[]
+>>> [m for m, v in sys.modules['io'].__dict__.items() if isinstance(v, types.ModuleType)]
+['_io', 'abc']
+>>> [m for m, v in sys.modules['_abc'].__dict__.items() if isinstance(v, types.ModuleType)]
+[]
+>>> [m for m, v in sys.modules['abc'].__dict__.items() if isinstance(v, types.ModuleType)]
+[]
+>>> sys.modules['__main__']
+<module '_pyrepl.__main__' from '/home/pi/.pyenv/versions/3.13.0/lib/python3.13/_pyrepl/__main__.py'>
+>>> 
+```
+
+`_frozen_importlib` 模块命名空间中的 `_bootstrap_external` 名称绑定的模块实际上是 `_frozen_importlib_external`；  
+`_frozen_importlib_external` 模块命名空间中的 `_bootstrap` 名称绑定的模块实际上是 `_frozen_importlib`；  
+`_frozen_importlib_external` 模块命名空间中的 `_os` 名称绑定的模块实际上是 `posix`（Windows 平台则为 nt 模块）；
 <br><br>
 
 sys.**path**  
