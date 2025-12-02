@@ -208,6 +208,7 @@
         * [4.4. break 和 continue 语句, 和循环中的 else 子句](#44-break-和-continue-语句-和循环中的-else-子句)
         * [4.9 函数定义详解](#49-函数定义详解)
             * [4.9.6. Lambda 表达式](#496-lambda-表达式)
+            * [4.9.8. 函数注解](#498-函数注解)
     * [5. 数据结构](#5-数据结构)
         * [5.1. 列表的更多特性](#51-列表的更多特性)
     * [6. 模块](#6-模块)
@@ -8443,7 +8444,27 @@ Found a number 9
 >>> 
 ```
 
-pairs 列表有 4 个元素，每个元素是一个元组，`pairs.sort(key=lambda pair: pair[1])` 表示按照元组的第二个元素的字母顺序对 pairs 列表的元素进行排序。 
+pairs 列表有 4 个元素，每个元素是一个元组，`pairs.sort(key=lambda pair: pair[1])` 表示按照元组的第二个元素的字母顺序对 pairs 列表的元素进行排序。
+<br><br>
+
+#### 4.9.8. 函数注解
+[函数注解](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#function) 是可选的用户自定义函数类型的完整元数据信息（详见 [PEP 3107](https://peps.python.org/pep-3107/) 和 [PEP 484](https://peps.python.org/pep-0484/) ）。
+
+[注解](https://docs.python.org/zh-cn/3.14/glossary.html#term-function-annotation) 是以字典形式存放在函数的 [\__annotations__](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__annotations__) 属性中，但对函数的其他部分没有影响。 形参标注的定义方式是在形参名后加一个冒号，后面再跟一个求标注的值的表达式。 返回值标注的定义方式是通过一个字面值 `->`，后面再跟一个表达式，它位于形参列表和表示 [def](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#def) 语句结束的冒号之间。 下面的示例具有加了标注的一个必需参数、一个可选参数以及返回值：
+
+```py
+>>> def f(ham: str, eggs: str = 'eggs') -> str:
+...     print("Annotations:", f.__annotations__)
+...     print("Arguments:", ham, eggs)
+...     return ham + ' and ' + eggs
+... 
+>>> f('spam')
+Annotations: {'ham': <class 'str'>, 'eggs': <class 'str'>, 'return': <class 'str'>}
+Arguments: spam eggs
+'spam and eggs'
+>>>
+```
+<br><br>
 
 ## 5. 数据结构
 ### 5.1. 列表的更多特性
