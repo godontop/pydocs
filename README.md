@@ -120,6 +120,8 @@
         * [socketserver — 一个网络服务器框架](#socketserver--一个网络服务器框架)
             * [服务器对象](#服务器对象)
         * [http.server — HTTP 服务器](#httpserver--http-服务器)
+    * [开发工具](#开发工具)
+        * [typing --- 对类型提示的支持](#typing-----对类型提示的支持)
     * [Python运行时服务](#python运行时服务)
         * [sys — 系统专用参量和函数](#sys--系统专用参量和函数)
         * [sys.monitoring --- 执行事件监测](#sysmonitoring-----执行事件监测)
@@ -964,7 +966,7 @@ True
 **\_\_debug\_\_**  
 如果Python启动时没带 [-O](https://docs.python.org/3/using/cmdline.html#cmdoption-o) 选项则这个常量为真。另请参见 [assert](https://docs.python.org/3/reference/simple_stmts.html#assert) 语句。
 
-**注意：** 名称 [None](https://docs.python.org/3/library/constants.html#None), [False](https://docs.python.org/3/library/constants.html#False), [True](https://docs.python.org/3/library/constants.html#True) 和 [__debug__](https://docs.python.org/3/library/constants.html#__debug__) 不能被再分配 (给它们赋值，哪怕是一个属性名称，也会抛出 [SyntaxError](https://docs.python.org/3/library/exceptions.html#SyntaxError)), 所以它们可以被认为是 “true” 常量。  
+**注意：** 名称 [None](https://docs.python.org/3/library/constants.html#None), [False](https://docs.python.org/3/library/constants.html#False), [True](https://docs.python.org/3/library/constants.html#True) 和 [\_\_debug\_\_](https://docs.python.org/3/library/constants.html#__debug__) 不能被再分配 (给它们赋值，哪怕是一个属性名称，也会抛出 [SyntaxError](https://docs.python.org/3/library/exceptions.html#SyntaxError)), 所以它们可以被认为是 “true” 常量。  
 
 ## 内置类型
 ### 布尔运算 — and, or, not
@@ -2128,7 +2130,7 @@ BaseException
 这章描述的模块提供了广泛的字符串操作运算和其它的文本处理服务。
 
 ### string — 通用字符串操作
-**源代码：** [Lib/string/\__init__.py](https://github.com/python/cpython/tree/3.14/Lib/string/__init__.py)
+**源代码：** [Lib/string/\_\_init__.py](https://github.com/python/cpython/tree/3.14/Lib/string/__init__.py)
 
 **另请参阅：** [文本序列类型 — str](https://docs.python.org/3/library/stdtypes.html#textseq)
 
@@ -2156,7 +2158,7 @@ BaseException
 
 另请参阅 [格式规格迷你语言](https://docs.python.org/zh-cn/3.14/library/string.html#formatspec) 一节。
 
-*field_name* 本身以一个数字或关键字形式的 *arg_name* 打头。 如果为数字，则它指向一个位置参数，而如果为关键字，则它指向一个命名关键字参数。 如果在字符串上调用 [str.isdecimal()](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str.isdecimal) 会返回真值则 *arg_name* 会被当作数字来处理。 如果格式字段串中的数字 arg_names 为 0, 1, 2, ... 的序列，它们可以全部（而非部分）被省略并且数字 0, 1, 2, ... 将按顺序被自动插入。 由于 *arg_name* 不使用引号分隔，因此无法在格式字符串中指定任意的字典键（例如字符串 `'10'` 或 `':-]'` 等）。 *arg_name* 之后可以跟任意数量的索引或属性表达式。 `'.name'` 形式的表达式会使用 [getattr()](https://docs.python.org/zh-cn/3.14/library/functions.html#getattr) 来选择命名属性，而 `'[index]'` 形式的表达式会使用 [\__getitem__()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__getitem__) 来执行索引查找。
+*field_name* 本身以一个数字或关键字形式的 *arg_name* 打头。 如果为数字，则它指向一个位置参数，而如果为关键字，则它指向一个命名关键字参数。 如果在字符串上调用 [str.isdecimal()](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str.isdecimal) 会返回真值则 *arg_name* 会被当作数字来处理。 如果格式字段串中的数字 arg_names 为 0, 1, 2, ... 的序列，它们可以全部（而非部分）被省略并且数字 0, 1, 2, ... 将按顺序被自动插入。 由于 *arg_name* 不使用引号分隔，因此无法在格式字符串中指定任意的字典键（例如字符串 `'10'` 或 `':-]'` 等）。 *arg_name* 之后可以跟任意数量的索引或属性表达式。 `'.name'` 形式的表达式会使用 [getattr()](https://docs.python.org/zh-cn/3.14/library/functions.html#getattr) 来选择命名属性，而 `'[index]'` 形式的表达式会使用 [\_\_getitem\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__getitem__) 来执行索引查找。
 
 *在版本3.1中发生变化：* [str.format()](https://docs.python.org/3/library/stdtypes.html#str.format) 的位置参数说明符可以被省略，所以 `'{} {}'.format(a, b)` 相当于 `'{0} {1}'.format(a, b)`。
 
@@ -2173,7 +2175,7 @@ BaseException
 "Units destroyed: {players[0]}"   # 关键字参数 'players' 的第一个元素。
 ```
 
-*conversion* 字段会在格式化之前进行类型强制转换。 通常，格式化一个值的工作是由该值本身的 [\__format__()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__format__) 方法完成的。 但是，在某些情况下最好是强制将类型格式化为一个字符串，覆盖其本身的格式化定义。 通过在调用 [\__format__()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__format__) 之前将值转换为字符串，可以绕过正常的格式化逻辑。
+*conversion* 字段会在格式化之前进行类型强制转换。 通常，格式化一个值的工作是由该值本身的 [\_\_format\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__format__) 方法完成的。 但是，在某些情况下最好是强制将类型格式化为一个字符串，覆盖其本身的格式化定义。 通过在调用 [\_\_format\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__format__) 之前将值转换为字符串，可以绕过正常的格式化逻辑。
 
 目前支持的转换标志有三种: `'!s'` 会对值调用 [str()](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str)，`'!r'` 调用 [repr()](https://docs.python.org/zh-cn/3.14/library/functions.html#repr) 而 `'!a'` 则调用 [ascii()](https://docs.python.org/zh-cn/3.14/library/functions.html#ascii)。
 
@@ -5933,6 +5935,48 @@ SimpleHTTPRequestHandler.extensions_map = {
 }
 
 ```
+<br><br>
+
+## 开发工具
+本章中介绍的模块可帮助你编写软件。 例如，[pydoc](https://docs.python.org/zh-cn/3.14/library/pydoc.html#module-pydoc) 模块接受一个模块并根据该模块的内容来生成文档。 [doctest](https://docs.python.org/zh-cn/3.14/library/doctest.html#module-doctest) 和 [unittest](https://docs.python.org/zh-cn/3.14/library/unittest.html#module-unittest) 模块包含用于编写自动执行代码并验证是否产生预期的输出的单元测试的框架。
+
+本章中描述的模块列表是：
+
+* typing --- 对类型提示的支持
+<br><br>
+
+### typing --- 对类型提示的支持
+> *在版本 3.5 中新增。*
+
+**源代码：** [Lib/typing.py](https://github.com/python/cpython/tree/3.14/Lib/typing.py)
+
+**备注：** Python 运行时不强制要求函数与变量类型标注。 它们可被 [类型检查器](https://docs.python.org/zh-cn/3.14/glossary.html#term-static-type-checker)、IDE、代码检查工具（linters）等第三方工具使用。
+
+本模块为类型提示提供了运行时支持。
+
+考虑下面的函数：
+
+```py
+def surface_area_of_cube(edge_length: float) -> str:
+    return f"The surface area of the cube is {6 * edge_length ** 2}."
+```
+
+函数 `surface_area_of_cube` 接受一个预期为 [float](https://docs.python.org/zh-cn/3.14/library/functions.html#float) 实例的参数，如 [类型提示](https://docs.python.org/zh-cn/3.14/glossary.html#term-type-hint) `edge_length: float` 所指明的。 该函数预期返回一个 [str](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str) 实例，如 `-> str` 提示所指明的。
+
+类型提示可以是简单的类比如 [float](https://docs.python.org/zh-cn/3.14/library/functions.html#float) 或 [str](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str)，它们也可以更为复杂。 [typing](https://docs.python.org/zh-cn/3.14/library/typing.html#module-typing) 模块提供了一套更高级的类型提示词汇。
+
+新特性被频繁添加到 `typing` 模块中。针对较旧版本的 Python，[typing_extensions](https://pypi.org/project/typing_extensions/) 包提供了这些新特性的向后移植。
+
+**参见：**  
+[类型速查表](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html)  
+关于类型提示的概览（发布于 mypy 文档站点）
+
+[mypy 文档](https://mypy.readthedocs.io/en/stable/index.html) 的 "类型系统参考" 章节  
+Python 类型系统是通过 PEP 来标准化的，因此该参考应当广泛适用于大多数 Python 类型检查器。 （但某些部分仍然是 mypy 专属的。）
+
+[Python 的静态类型](https://typing.python.org/en/latest/)  
+由社区编写的不限定具体类型检查器的文档，详细讲解了类型系统特性，有用的类型相关工具以及类型的最佳实践。
+<br><br>
 
 ## Python运行时服务
 ### sys — 系统专用参量和函数
@@ -6749,7 +6793,7 @@ PYC 仓库目录
 
 #### 函数
 importlib.**\_\_import\_\_**(_name, globals=None, locals=None, fromlist=(), level=0_)  
-内置 [\__import__()](https://docs.python.org/zh-cn/3.14/library/functions.html#import__) 函数的实现。
+内置 [\_\_import\_\_()](https://docs.python.org/zh-cn/3.14/library/functions.html#import__) 函数的实现。
 
 **备注：** 程序式地导入模块应该使用 [import_module()](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.import_module) 而不是这个函数。
 <br><br>
@@ -7826,7 +7870,7 @@ import XXX.YYY.ZZZ
 这一转换过程和标识符使用的语法上下文无关，仅有以下几种私有标识符会被重整（mangled）：
 
 * 用作被分配或读取的变量的名字的，或者用作被访问的属性的名字的。  
-&emsp;&emsp;但是嵌套的函数、类和类型别名的 [\__name__](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#definition.__name__) 属性不会被重整。  
+&emsp;&emsp;但是嵌套的函数、类和类型别名的 [\_\_name\_\_](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#definition.__name__) 属性不会被重整。  
 
 * 导入的模块的名称，例如 `import __spam` 中的 `__spam`。 若模块属于一个包（即它的名称中有点号），这个名称 *不会* 被重整。比如 `import __foo.bar` 中的 `__foo` 不会被重整。
 
@@ -8450,7 +8494,7 @@ pairs 列表有 4 个元素，每个元素是一个元组，`pairs.sort(key=lamb
 #### 4.9.8. 函数注解
 [函数注解](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#function) 是可选的用户自定义函数类型的完整元数据信息（详见 [PEP 3107](https://peps.python.org/pep-3107/) 和 [PEP 484](https://peps.python.org/pep-0484/) ）。
 
-[注解](https://docs.python.org/zh-cn/3.14/glossary.html#term-function-annotation) 是以字典形式存放在函数的 [\__annotations__](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__annotations__) 属性中，但对函数的其他部分没有影响。 形参标注的定义方式是在形参名后加一个冒号，后面再跟一个求标注的值的表达式。 返回值标注的定义方式是通过一个字面值 `->`，后面再跟一个表达式，它位于形参列表和表示 [def](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#def) 语句结束的冒号之间。 下面的示例具有加了标注的一个必需参数、一个可选参数以及返回值：
+[注解](https://docs.python.org/zh-cn/3.14/glossary.html#term-function-annotation) 是以字典形式存放在函数的 [\_\_annotations\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__annotations__) 属性中，但对函数的其他部分没有影响。 形参标注的定义方式是在形参名后加一个冒号，后面再跟一个求标注的值的表达式。 返回值标注的定义方式是通过一个字面值 `->`，后面再跟一个表达式，它位于形参列表和表示 [def](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#def) 语句结束的冒号之间。 下面的示例具有加了标注的一个必需参数、一个可选参数以及返回值：
 
 ```py
 >>> def f(ham: str, eggs: str = 'eggs') -> str:
