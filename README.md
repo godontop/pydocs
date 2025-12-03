@@ -143,6 +143,8 @@
             * [函数](#函数-3)
             * [importlib.abc —— 关于导入的抽象基类](#importlibabc--关于导入的抽象基类)
             * [importlib.machinery —— 导入器和路径钩子](#importlibmachinery--导入器和路径钩子)
+    * [Unix 专属服务](#unix-专属服务)
+        * [shlex --- 简单词法分析](#shlex-----简单词法分析)
 * [Python语言参考](#python语言参考)
     * [3. 数据模型](#3-数据模型)
         * [3.2. 标准类型层次结构](#32-标准类型层次结构)
@@ -7009,6 +7011,34 @@ True
 如果 spec 的 [origin](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.machinery.ModuleSpec.origin) 指向一个可加载的位置则为 `True`，否则为 `False`。 该值将影响如何解释 origin 以及如何填充模块的 [\_\_file\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#module.__file__)。
 <br><br>
 
+## Unix 专属服务
+本章描述的模块提供了 Unix 操作系统独有特性的接口，在某些情况下也适用于它的某些或许多衍生版。 以下为模块概览：
+
+* shlex --- 简单词法分析
+<br><br>
+
+### shlex --- 简单词法分析
+**源代码：** [Lib/shlex.py](https://github.com/python/cpython/tree/3.14/Lib/shlex.py)
+
+[shlex](https://docs.python.org/zh-cn/3.14/library/shlex.html#shlex.shlex) 类使为类似 Unix shell 的简单语法编写词法分析器变得容易。通常可用于编写“迷你语言”（如 Python 应用程序的运行控制文件）或解析带引号的字符串。
+
+[shlex](https://docs.python.org/zh-cn/3.14/library/shlex.html#module-shlex) 模块中定义了以下函数：
+
+shlex.**join**(_split_command_)  
+将列表 *split_command* 中的 tokens 串联起来，并返回一个字符串。本函数是 [split()](https://docs.python.org/zh-cn/3.14/library/shlex.html#shlex.split) 的逆运算。
+
+```py
+>>> from shlex import join
+>>> print(join(['echo', '-n', 'Multiple words']))
+echo -n 'Multiple words'
+>>>
+```
+
+为防止注入漏洞，返回值是经过 shell 转义的（参见 [quote()](https://docs.python.org/zh-cn/3.14/library/shlex.html#shlex.quote) ）。
+
+> *在 3.8 版本中新增。*
+
+<br><br>
 # Python语言参考
 ## 3. 数据模型
 ### 3.2. 标准类型层次结构 
