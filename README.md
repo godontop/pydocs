@@ -129,6 +129,10 @@
             * [\_\_name\_\_ == '\_\_main\_\_'](#__name__--__main__)
                 * [什么是“顶层代码环境”？](#什么是顶层代码环境)
                 * [惯用法](#惯用法)
+                * [打包考量](#打包考量)
+            * [Python 包中的 \_\_main\_\_.py](#python-包中的-__main__.py)
+                * [惯用法](#惯用法-1)
+            * [import \_\_main\_\_](#import-__main__)
         * [traceback — 打印或检索堆栈回溯](#traceback--打印或检索堆栈回溯)
             * [TracebackException 对象](#tracebackexception-对象)
         * [gc --- 垃圾回收器接口](#gc-----垃圾回收器接口)
@@ -6317,9 +6321,40 @@ import shlex
 import sys
 
 def echo(phrase: str) -> None:
+   """一个对 print 的简单包装器。"""
+   # 出于演示目的，你可以想象在此函数内部
+   # 存在有价值且可重用的逻辑
+   print(phrase)
+
+def main() -> int:
+    """将输入参数回显到标准输出"""
+    phrase = shlex.join(sys.argv)
+    echo(phrase)
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())  # 下一节将讲解 sys.exit 的使用
 ```
 
-对软件包来说，通过加入 `__main__.py` 模块可以达到同样的效果，当使用 `-m` 运行模块时，其中的代码会被执行。
+请注意，如果模块没有将代码封装在 `main` 函数内，而是直接放在 `if __name__ == '__main__'` 块内，那么这个 `phrase` 变量对整个模块来说就是全局变量。 这很容易出错，因为模块内的其他函数可能会无意中使用全局变量而不是局部名称。 一个 `main` 函数解决了这个问题。
+
+使用 `main` 函数有一个额外的好处，就是 `echo` 函数本身是孤立的，可以在其他地方导入。当 `echo.py` 被导入时，`echo` 和 `main` 函数将被定义，但它们都不会被调用，因为 `__name__ != '__main__'`。
+<br><br>
+
+##### 打包考量
+`main` 函数经常被用来创建命令行工具，通过把它们指定为控制台脚本的入口点。 当这样做时，[pip](https://pip.pypa.io/) 将函数调用插入到一个模板脚本中，其中 `main` 的返回值被传递到 [sys.exit()](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.exit)。例如：
+
+```py
+sys.exit(main())
+```
+
+由于 `main` 调用被包裹在 [sys.exit()](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.exit) 中，期望你的函数将返回一些可被 [sys.exit()](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.exit) 作为输入而接受的值；通常为一个整数或 `None`（如果你的函数没有返回语句，则隐含返回）。
+
+通过主动遵循这一惯例，我们的模块在直接运行时 (即 `python echo.py`) 将会有相同的行为，如果我们以后把它打包成可用 pip 安装的软件包的控制台脚本入口点，它也会如此。
+
+特别是，要小心从你的 `main` 函数中返回字符串。 [sys.exit()](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.exit) 将把一个字符串参数解释为一条失败信息，所以你的程序将有一个 `1` 的退出代码，表示失败。并且这个字符串将被写入 [sys.stderr](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.stderr) 。 前面的 `echo.py` 例子举例说明了使用 `sys.exit(main())` 的约定。
+
+**参见:** [Python 打包用户指南](https://packaging.python.org/) 包含了一系列关于如何用现代工具分发和安装 Python 包的教程和参考资料。
 
 当没有添加 `if __name__ == "__main__":` 代码块时：
 
@@ -6357,8 +6392,163 @@ import a
 ➜  test$ 
 ```
 
-通过上面的例子可以看出，在 `a.py` 模块中添加 `if __name__ == "__main__":` 代码块后，在其它模块中导入 `a.py` 模块时，`if __name__ == "__main__":` 代码块内的代码不会被执行。  
-<br>  
+通过上面的例子可以看出，在 `a.py` 模块中添加 `if __name__ == "__main__":` 代码块后，在其它模块中导入 `a.py` 模块时，`if __name__ == "__main__":` 代码块内的代码不会被执行。
+<br><br>
+
+#### Python 包中的 \_\_main\_\_.py
+如果你不熟悉Python包，请参阅本教程的 [包](https://docs.python.org/zh-cn/3.14/tutorial/modules.html#tut-packages) 一节。最常见的是， `__main__.py` 文件被用来为一个包提供命令行接口。假设有下面这个虚构的包，"bandclass"：
+
+```
+bandclass
+  ├── __init__.py
+  ├── __main__.py
+  └── student.py
+```
+
+当使用 [-m](https://docs.python.org/zh-cn/3.14/using/cmdline.html#cmdoption-m) 标志从命令行直接调用软件包本身时，将执行 `__main__.py` 。比如说。
+
+```sh
+$ python -m bandclass
+```
+
+这个命令将导致 `__main__.py` 的运行。你如何利用这一机制将取决于你所编写的软件包的性质，但在这个假设的案例中，允许教师搜索学生可能是有意义的：
+
+```py
+# bandclass/__main__.py
+
+import sys
+from .student import search_students
+
+student_name = sys.argv[1] if len(sys.argv) >= 2 else ''
+print(f'Found student: {search_students(student_name)}')
+```
+
+注意，`from .student import search_students` 是一个相对导入的例子。 这种导入方式可以在引用一个包内的模块时使用。 更多细节，请参见教程 [模块](https://docs.python.org/zh-cn/3.14/tutorial/modules.html#tut-modules) 中的 [包内引用](https://docs.python.org/zh-cn/3.14/tutorial/modules.html#intra-package-references) 一节。
+
+```sh
+➜  ~ cat god/__init__.py
+print("execute __init_.py")
+print("In __init__.py __name__ is", __name__)
+➜  ~ cat god/__main__.py
+print("execute __main__.py")
+print("In __main__.py __name__ is", __name__)
+➜  ~ python -m god
+execute __init_.py
+In __init__.py __name__ is god
+execute __main__.py
+In __main__.py __name__ is __main__
+➜  ~
+```
+
+对于包来说，`__main__.py` 是包的可执行入口。`__main__.py` 允许你把整个包变成一个可运行的应用，而不仅仅是导入用的库。
+
+对软件包来说，通过加入 `__main__.py` 模块可以达到同样的效果，当使用 `-m` 运行模块时，其中的代码会被执行。
+<br><br>
+
+##### 惯用法
+`__main__.py` 的内容通常不会用 `if __name__ == '__main__'` 块围起来。 相反，这些文件会保持简短并从其他模块导入函数来执行。 这样其他模块就可以很容易地进行单元测试并可以适当地重用。
+
+如果使用，一个 `if __name__ == '__main__'` 区块仍然会像预期的那样对包内的 `__main__.py` 文件起作用，因为如果导入，它的 `__name__` 属性将包括包的路径：
+
+```py
+>>> import asyncio.__main__
+>>> asyncio.__main__.__name__
+'asyncio.__main__'
+>>>
+```
+
+但这对 `.zip` 文件的根目录中的 `__main__.py` 文件不起作用。 因此，为了保持一致性，建议使用不带 `__name__` 检测的最小化 `__main__.py`。
+
+**参见：** 请参阅 [venv](https://docs.python.org/zh-cn/3.14/library/venv.html#module-venv) 以获取标准库中具有最小化 `__main__.py` 的软件包示例。 它不包含 `if __name__ == '__main__'` 代码块。 你可以用 `python -m venv [directory]` 来调用。
+
+参见 [runpy](https://docs.python.org/zh-cn/3.14/library/runpy.html#module-runpy) 以了解更多关于 [-m](https://docs.python.org/zh-cn/3.14/using/cmdline.html#cmdoption-m) 标志对解释器可执行包的细节。
+
+参见 [zipapp](https://docs.python.org/zh-cn/3.14/library/zipapp.html#module-zipapp) 了解如何运行打包成 `.zip` 文件的应用程序。在这种情况下，Python 会在归档文件的根目录下寻找一个 `__main__.py` 文件。
+<br><br>
+
+#### import \_\_main\_\_
+不管 Python 程序是用哪个模块启动的，在同一个程序中运行的其他模块可以通过导入 `__main__` 模块来导入顶层环境的范围 ( [namespace](https://docs.python.org/zh-cn/3.14/glossary.html#term-namespace) )。这并不是导入一个 `__main__.py` 文件，而是导入使用特殊名称 `'__main__'` 的那个模块。
+
+下面是一个使用 `__main__` 命名空间的模块的例子：
+
+```py
+# namely.py
+
+import __main__
+
+def did_user_define_their_name():
+    return 'my_name' in dir(__main__)
+
+def print_user_name():
+    if not did_user_define_their_name():
+        raise ValueError('Define the variable `my_name`!')
+
+    print(__main__.my_name)
+```
+
+该模块的用法示例如下：
+
+```py
+# start.py
+
+import sys
+
+from namely import print_user_name
+
+# my_name = "Dinsdale"
+
+def main():
+    try:
+        print_user_name()
+    except ValueError as ve:
+        return str(ve)
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+现在，如果我们启动我们的程序，结果会是这样的：
+
+```sh
+$ python start.py
+Define the variable `my_name`!
+```
+
+该程序的退出代码为 1 ，表明有错误。取消对 `my_name = "Dinsdale"` 这一行的注释，就可以修复程序，现在它的退出状态代码为 0 ，表示成功。
+
+```sh
+$ python start.py
+Dinsdale
+```
+
+请注意，导入 `__main__` 不会导致意外执行那些专为脚本用途而编写、并放置在启动模块的 `if __name__ == "__main__"` 代码块中的顶层代码。这是为什么呢？
+
+Python 解释器启动时会在 [sys.modules](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.modules) 中插入一个空的 `__main__` 模块，并通过运行顶层代码来填充它。 在我们的例子中这就是 `start` 模块，它逐行运行并导入 `namely`。 相应地，`namely` 会导入 `__main__` (它实际上就是 `start`)。 这就是一个导入循环！ 幸运的是，由于部分填充的 `__main__` 模块存在于 [sys.modules](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.modules) 中，Python 会将其传递给 `namely`。 请参阅导入系统的参考文档中 [有关 \_\_main\_\_ 的特别考量](https://docs.python.org/zh-cn/3.14/reference/import.html#import-dunder-main) 来了解其中的详情。
+
+Python REPL 是另一个 "顶层环境 "的例子，所以在 REPL 中定义的任何东西都成为 `__main__` 范围的一部分：
+
+```py
+>>> import namely
+>>> namely.did_user_define_their_name()
+False
+>>> namely.print_user_name()
+Traceback (most recent call last):
+  File "<python-input-2>", line 1, in <module>
+    namely.print_user_name()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/pi/github/python/notebooks/namely.py", line 10, in print_user_name
+    raise ValueError('Define the variable `my_name`!')
+ValueError: Define the variable `my_name`!
+>>> my_name = 'Jabberwocky'
+>>> namely.did_user_define_their_name()
+True
+>>> namely.print_user_name()
+Jabberwocky
+>>>
+```
+
+`__main__` 范围用于 [pdb](https://docs.python.org/zh-cn/3.14/library/pdb.html#module-pdb) 和 [rlcompleter](https://docs.python.org/zh-cn/3.14/library/rlcompleter.html#module-rlcompleter) 的实现。
+<br><br>
 
 ### traceback — 打印或检索堆栈回溯
 源代码： [Lib/traceback.py](https://github.com/python/cpython/tree/3.8/Lib/traceback.py)  
