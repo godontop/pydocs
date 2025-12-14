@@ -130,7 +130,7 @@
                 * [什么是“顶层代码环境”？](#什么是顶层代码环境)
                 * [惯用法](#惯用法)
                 * [打包考量](#打包考量)
-            * [Python 包中的 \_\_main\_\_.py](#python-包中的-__main__.py)
+            * [Python 包中的 \_\_main\_\_.py](#python-包中的-__main__py)
                 * [惯用法](#惯用法-1)
             * [import \_\_main\_\_](#import-__main__)
         * [traceback — 打印或检索堆栈回溯](#traceback--打印或检索堆栈回溯)
@@ -260,6 +260,7 @@
         * [安装包](#安装包)
             * [Source Distributions vs Wheels](#source-distributions-vs-wheels)
             * [Requirements files](#requirements-files)
+        * [打包 Python 项目](#打包-python-项目)
     * [指南](#指南)
         * [打包二进制扩展](#打包二进制扩展)
 * [Python 有什么新变化？](#python-有什么新变化)
@@ -1141,6 +1142,37 @@ sequence.**copy()**
 创建一个序列的浅拷贝。这等同于代码 `sequence[:]`。  
 
 **提示：** copy() 方法不是 [MutableSequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableSequence) [ABC](https://docs.python.org/3/library/abc.html#abc.ABC) 的一部分，但大多数具体的可变序列类型都提供了该方法。  
+
+sequence.**pop**(_index=-1, /_)  
+提取位于 *index* 上的条目并从 *sequence* 中将其移除。 在默认情况下，将移除并返回 *sequence* 中的最后一个条目。pop() 接受的参数是索引值，其类型为 [int](https://docs.python.org/zh-cn/3.14/library/functions.html#int)。
+
+```py
+>>> a = ["x", "y", "z"]
+>>> a.pop(2)
+'z'
+>>> a
+['x', 'y']
+>>> a.pop(-1)
+'y'
+>>> a
+['x']
+>>> a.pop()
+'x'
+>>> a
+[]
+>>> b = ["x", "y", "z"]
+>>> b.pop(-3)
+'x'
+>>> b
+['y', 'z']
+>>> b.pop(-2)
+'y'
+>>> b
+['z']
+>>>
+```
+
+索引值 -1 表示倒数第一个项目，-2 表示倒数第二个条目，-3 表示倒数第三个条目，依此类推。
 
 sequence.**remove(**_value, /_**)**  
 移除序列中第一个满足 `sequence[i] == value` 的元素。  
@@ -10485,6 +10517,299 @@ If [pip](https://packaging.python.org/key_projects/#pip) does not find a wheel t
 Install a list of requirements specified in a [Requirements File](https://pip.pypa.io/en/latest/user_guide/#requirements-files).
 
 `pip install -r requirements.txt`
+<br><br>
+
+### 打包 Python 项目
+这份教程详细演示了如何打包一个简单的 Python 项目。它将向你展示如何添加必要的文件和结构以创建包、如何构建包以及如何将包上传到 Python 包索引（PyPI）。
+
+**提示**  
+如果你运行这份教程中的命令遇到了问题，请复制该命令以及它的输出，之后在 GitHub 的 [packaging-problems](https://github.com/pypa/packaging-problems) 提交一个 [issue](https://github.com/pypa/packaging-problems/issues/new?template=packaging_tutorial.yml&title=Trouble+with+the+packaging+tutorial&guide=https://packaging.python.org/tutorials/packaging-projects)。我们将尽最大的努力帮助你！
+
+一些命令要求更新版本的 [pip](https://packaging.python.org/en/latest/key_projects/#pip)，所以在开始前请确保你已安装了最新版本的 pip：
+
+```sh
+$ python3 -m pip install --upgrade pip
+```
+
+#### 一个简单的项目
+这份教程使用一个名为 `example_package_YOUR_USERNAME_HERE` 的简单项目。如果你的用户名是 `me`，则包名为 `example_package_me`；这将确保你拥有一个唯一的包名，不会与遵循这份指南的其他人上传的包冲突。我们建议先使用这个项目按原样完成本教程，然后再去打包你自己的项目。
+
+在本地创建以下文件结构：
+
+```
+packaging_tutorial/
+└── src/
+    └── example_package_YOUR_USERNAME_HERE/
+        ├── __init__.py
+        └── example.py
+```
+
+包含 Python 文件的目录名称应与项目名一致。这样既能简化配置，也能让安装该包的用户一目了然。
+
+推荐创建文件 `__init__.py`，因为存在一个 `__init__.py` 文件将允许把目录当作一个常规包导入，即使（如同这份教程中的情形）`__init__.py` 的内容为空。[1]
+
+`example.py` 是包内的一个示例模块，它可以包含你的包的逻辑（函数、类、常量，等等）。打开该文件并输入如下内容：
+
+```py
+def add_one(number):
+    return number + 1
+```
+
+如果你不熟悉 Python 的[模块](https://packaging.python.org/en/latest/glossary/#term-Module)和[导入包](https://packaging.python.org/en/latest/glossary/#term-Import-Package)，花几分钟读一下 [Python 包和模块的文档](https://docs.python.org/3/tutorial/modules.html#packages)。
+
+一旦你创建了这个结构，你将想要在 `packaging_tutorial` 目录运行这份教程中的所有命令。
+
+#### 创建包文件
+现在你将要添加用于准备分发项目的文件。当你完成该步骤后，项目的结构看起来将像这样：
+
+```
+packaging_tutorial/
+├── LICENSE
+├── pyproject.toml
+├── README.md
+├── src/
+│   └── example_package_YOUR_USERNAME_HERE/
+│       ├── __init__.py
+│       └── example.py
+└── tests/
+```
+
+#### 创建一个测试目录
+`tests/` 是测试文件的占位目录。目前让它为空。
+
+#### 选择一个构建后端
+像 [pip](https://packaging.python.org/en/latest/key_projects/#pip) 和 [build](https://packaging.python.org/en/latest/key_projects/#build) 这样的工具实际上不会将你的源代码转换为一个[分发包](https://packaging.python.org/en/latest/glossary/#term-Distribution-Package)（例如一个 wheel）；这样的工作是由一个[构建后端](https://packaging.python.org/en/latest/glossary/#term-Build-Backend)来执行的。构建后端决定了项目如何声明自身的配置，包括元数据（即项目信息，例如显示在 PyPI 上的名称和标签）以及输入文件。不同构建后端提供的功能各异，例如是否支持构建[扩展模块](https://packaging.python.org/en/latest/glossary/#term-Extension-Module)；你应根据自身需求和偏好进行选择。
+
+你可以从多种后端中任选其一；本教程默认使用 [Hatchling](https://packaging.python.org/en/latest/key_projects/#hatch)，但若换成 [Setuptools](https://packaging.python.org/en/latest/key_projects/#setuptools)、[Flit](https://packaging.python.org/en/latest/key_projects/#flit)、[PDM](https://packaging.python.org/en/latest/key_projects/#pdm) 或其他任何支持 `[project]` 表填写[元数据](https://packaging.python.org/en/latest/tutorials/packaging-projects/#configuring-metadata)的工具，步骤完全一致。
+
+**备注**  
+某些构建后端属于更大型工具的一部分，这些工具提供命令行界面，并附带项目初始化、版本管理、构建、上传和安装包等额外功能。本教程使用的是彼此独立、功能单一的工具。
+
+`pyproject.toml` 的作用是告诉像 [pip](https://packaging.python.org/en/latest/key_projects/#pip) 和 [build](https://packaging.python.org/en/latest/key_projects/#build) 这样的[构建前端](https://packaging.python.org/en/latest/glossary/#term-Build-Frontend)工具：应该为你的项目调用哪一个后端。下面给出了几种常用构建后端的示例，但具体细节仍以各自官方文档为准。
+
+setuptools  
+```toml
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+```
+
+`requires` 键列出的是“构建你的包”所必须的依赖包列表。[前端](https://packaging.python.org/en/latest/glossary/#term-Build-Frontend)在构建你的包时会自动把它们安装好。由于前端通常会在隔离环境中执行构建，如果这里漏写了依赖，就可能导致构建时报错。该列表里应该总是包含你所选的后端包，也可以有其他构建阶段需要的依赖。上面的代码块中给出的最小版本，正是首次支持[新许可证元数据](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license-and-license-files)的版本。
+
+`build-backend` 键列出的是前端将用来执行构建的 Python 对象的名称（即后端的名称）。
+
+这两个值应该由你所用的构建后端的文档给出，或者通过它的命令行接口自动生成，你无需手动去制定这些设置。
+
+构建工具的额外配置将被放在 `pyproject.toml` 文件的 `[tool]` 小节中，或者在一个由构建工具定义的特定文件中。例如，当你使用 `setuptools` 作为你的构建后端，额外的配置可能会被添加到 `setup.py` 或 `setup.cfg` 文件中，在构建配置中指定 `setuptools.build_meta` 将允许该工具自动定位并使用这些配置文件。
+
+**配置元数据**  
+打开 `pyproject.toml` 文件并输入以下内容。修改 `name` 以包含你的用户名；这将确保你拥有一个唯一的包名，而不会与其他跟随这份教程的人上传的包名发生冲突。
+
+```toml
+[project]
+name = "example_package_YOUR_USERNAME_HERE"
+version = "0.0.1"
+authors = [
+  { name="Example Author", email="author@example.com" },
+]
+description = "A small example package"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://github.com/pypa/sampleproject"
+Issues = "https://github.com/pypa/sampleproject/issues"
+```
+
+* `name` 是你的包的分发名称。这可以是任意名称，只要它仅包含字母、数组、`.`、`_` 和 `-`。该名称还不能已在 PyPI 上被占用。请务必在本教程中将其替换为你的用户名，以确保你不会尝试上传一个与已存在包同名的软件包。
+
+* `version` 是包的版本。（一些构建后端允许以另一种方式指定它，例如从一个文件或者 Git tag。）
+
+* `authors` 用于表明包的作者；你可以为每一个作者指定一个名称和邮箱。你也可以以相同的格式列出维护者。
+
+* `description` 是对该软件包的简短的、一句话概括。
+
+* `readme` 是一个包含包的详细描述的文件的路径。该文件的内容会在 PyPI 上该包的详情页中展示。在本例中，描述从 `README.md` 文件加载（这是一种通用模式）。在 [pyproject.toml 指南](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#writing-pyproject-toml) 还描述了一种更高级的表格形式。
+
+* `requires-python` 指出你的项目支持的 Python 版本。像 [pip](https://packaging.python.org/en/latest/key_projects/#pip) 这样的安装程序会回溯查找软件包的旧版本，直到找到一个与当前 Python 版本兼容的版本。
+
+* `classifiers` 为 PyPI 索引和 [pip](https://packaging.python.org/en/latest/key_projects/#pip) 提供有关你软件包的额外元数据。在本例中，该软件包仅兼容 Python 3，并且与操作系统无关。你应始终包含至少一个你的软件包支持的 Python 版本以及可运行的操作系统。完整的分类器列表请参见 [https://pypi.org/classifiers/](https://pypi.org/classifiers/)。
+
+* `license` 是你的[分发归档](https://packaging.python.org/en/latest/glossary/#term-Distribution-Archive)文件所采用的 [SPDX 许可证表达式](https://packaging.python.org/en/latest/glossary/#term-License-Expression)。
+
+* `license-files` 是指向许可证文件的通配符路径列表，这些路径相对于 `pyproject.toml` 所在的目录。
+
+* `urls` 允许你列出任意数量的额外链接，这些链接会显示在 PyPI 上。通常可以包括源代码仓库、文档、问题跟踪器等。
+
+有关这些字段以及其他可在 `[project]` 表中定义的字段的详细信息，请参阅 [pyproject.toml 指南](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#writing-pyproject-toml)。其他常见字段包括用于提升可发现性的 `keywords` 以及安装你的软件包所必需的依赖项（`dependencies`）。
+
+#### 创建 README.md
+打开 `README.md` 文件并输入以下内容。你可以自定义这些内容，如果你想的话。
+
+```markdown
+# Example Package
+
+This is a simple example package. You can use
+[GitHub-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
+to write your content.
+```
+
+#### 创建一个许可证
+为每一个上传到 Python 包索引（PyPI）的[分发归档](https://packaging.python.org/en/latest/glossary/#term-Distribution-Archive)包含一个一个许可证是重要的。这会告知安装你的[分发归档](https://packaging.python.org/en/latest/glossary/#term-Distribution-Archive)文件的用户，他们可以在什么条款下使用该软件。如需帮助选择许可证，请参见 [https://choosealicense.com/](https://choosealicense.com/)。选定许可证后，请打开 `LICENSE` 文件并填入相应的许可证文本。例如，如果你选择了 MIT 许可证：
+
+```
+Copyright (c) 2018 The Python Packaging Authority
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+大多数构建后端会在包中自动包含许可证文件。详情请参见你的后端的文档。如果你在 `pyproject.toml` 文件的 `license-files` 键中包含了指向许可证的路径，并且你的构建后端支持 [PEP 639](https://peps.python.org/pep-0639/)，则许可证文件会自动被包含在包中。
+
+#### 包含其它文件
+上面列出的文件会自动地被包含在你的[源分发](https://packaging.python.org/en/latest/glossary/#term-Source-Distribution-or-sdist)中。如果你想包含额外的文件，请参见你的构建后端的文档。
+
+#### 生成分发归档
+下一步是为包生成[分发包](https://packaging.python.org/en/latest/glossary/#term-Distribution-Package)。这些是上传到 Python 软件包索引（PyPI）的归档文件，可以通过 [pip](https://packaging.python.org/en/latest/key_projects/#pip) 安装。
+
+请确保你已安装最新版本的 PyPA 的 [build](https://packaging.python.org/en/latest/key_projects/#build)：
+
+```sh
+python3 -m pip install --upgrade build
+```
+
+现在请在 `pyproject.toml` 所在的目录运行这个命令：
+
+```sh
+python3 -m build
+```
+
+这个命令应该输出许多文本，并且一旦完成，应该在 `dist` 目录生成 2 个文件：
+
+```
+dist/
+├── example_package_YOUR_USERNAME_HERE-0.0.1-py3-none-any.whl
+└── example_package_YOUR_USERNAME_HERE-0.0.1.tar.gz
+```
+
+`.tar.gz` 文件是[源代码分发包](https://packaging.python.org/en/latest/glossary/#term-Source-Distribution-or-sdist)，而 `.whl` 文件是[构建好的分发包](https://packaging.python.org/en/latest/glossary/#term-Built-Distribution)。较新版本的 pip 会优先安装构建好的分发包，但在必要时会回退到源代码分发包。你应当始终上传源代码分发包，并为你项目所兼容的平台提供相应的构建好的分发包。在本例中，我们的示例包适用于任何平台上的 Python，因此只需提供一个已构建的分发包即可。
+
+#### 上传分发归档
+最后，是时候上传你的包到 Python 软件包索引（PyPI）！
+
+你要做的第一件事是在 TestPyPI 上注册一个账号，TestPyPI 是 Python 软件包索引的一个独立实例，专门用于测试和实验。对于本教程这类场景非常合适，因为我们并不一定希望将包上传到正式的 PyPI 索引。要注册账户，请访问 [https://test.pypi.org/account/register/](https://test.pypi.org/account/register/) 并完成该页面上的注册步骤。在你能够上传任何软件包之前，还需要验证你的邮箱地址。更多详细信息，请参阅[使用 TestPyPI](https://packaging.python.org/en/latest/guides/using-testpypi/)。
+
+要安全地上传你的项目，你需要一个 PyPI [API 令牌](https://test.pypi.org/help/#apitoken)。通过 [https://test.pypi.org/manage/account/#api-tokens](https://test.pypi.org/manage/account/#api-tokens) 创建一个，设置“范围”为“整个账户”。**在复制及保存该令牌以前，不要关闭页面，因为你再也不会看到该令牌了。**
+
+现在，你已注册，你可以使用 [twine](https://packaging.python.org/en/latest/key_projects/#twine) 上传分发包了。你需要安装 Twine：
+
+```sh
+python3 -m pip install --upgrade twine
+```
+
+一旦安装好，运行 Twine 上传 `dist` 下面的所有归档：
+
+```sh
+python3 -m twine upload --repository testpypi dist/*
+```
+
+之后会提示你输入 API 令牌。使用令牌值，需包括 `pypi-` 前缀。注意输入将被隐藏，所以请确保正确地粘贴。
+
+当命令完成之后，你应该会看到类似下面的输出：
+
+```
+Uploading distributions to https://test.pypi.org/legacy/
+Enter your API token:
+Uploading example_package_YOUR_USERNAME_HERE-0.0.1-py3-none-any.whl
+100% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.2/8.2 kB • 00:01 • ?
+Uploading example_package_YOUR_USERNAME_HERE-0.0.1.tar.gz
+100% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.8/6.8 kB • 00:00 • ?
+```
+
+一旦上传完成，你应该可以在 TestPyPI 上看见你的包；例如： `https://test.pypi.org/project/example_package_YOUR_USERNAME_HERE`。
+
+#### 安装你新上传的包
+你可以使用 pip 安装你的包并验证它是否正常工作。创建一个[虚拟环境](https://packaging.python.org/en/latest/tutorials/installing-packages/#creating-and-using-virtual-environments)并从 TestPyPI 安装你的包：
+
+```sh
+python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps example-package-YOUR-USERNAME-HERE
+```
+
+请确保在包名中指定了你的用户名！
+
+pip 应该从 TestPyPI 安装该包并且输出看起来应该像这样：
+
+```
+Looking in indexes: https://test.pypi.org/simple/, https://www.piwheels.org/simple
+Collecting example-package-YOUR-USERNAME-HERE
+  Downloading https://test-files.pythonhosted.org/packages/.../example_package_YOUR_USERNAME_HERE_0.0.1-py3-none-any.whl
+Installing collected packages: example_package_YOUR_USERNAME_HERE
+Successfully installed example_package_YOUR_USERNAME_HERE-0.0.1
+```
+
+**备注**  
+此示例使用 `--index-url` 标志来指定使用 TestPyPI，而非正式的 PyPI。此外，还指定了 `--no-deps` 参数。由于 TestPyPI 上的软件包与正式 PyPI 并不完全相同，尝试安装依赖项时可能会失败，或者意外安装其他内容。尽管我们的示例包没有任何依赖项，但在使用 TestPyPI 时，避免安装依赖项仍是一种良好的实践。
+
+你可以通过导入该包来测试它是否已正确安装。请确保你仍处于虚拟环境中，然后启动 Python：
+
+```sh
+python3
+```
+
+之后导入该包：
+
+```py
+from example_package_YOUR_USERNAME_HERE import example
+example.add_one(2)
+```
+
+#### 下一步
+恭喜，你已经打包并分发了一个 Python 项目！ ✨ 🍰 ✨
+
+请注意，本教程展示的是如何将你的包上传到 Test PyPI，而 Test PyPI 并非永久存储服务。测试系统会不定期删除其中的包和账户。因此，最好仅将 TestPyPI 用于此类教程中的测试和实验。
+
+当你准备好将一个正式的包上传到 Python Package Index（PyPI）时，操作步骤与本教程中所做的非常相似，但有以下几个重要区别：
+
+* 为你的包选择一个好记的、唯一的名称。你不必像本教程一样加上你的用户名，但你不能使用一个已存在的名称。
+
+* 在 [https://pypi.org](https://pypi.org/) 注册一个账号 —— 注意，这是两个不同的服务器，测试服务器与主服务器不共享登录细节。
+
+* 使用 `twine upload dist/*` 上传你的包并输入你在正式的 PyPI 上注册的账号的凭证。现在你要将包上传到生产环境，你不必指定 `--repository`；包默认会被上传到 [https://pypi.org/](https://pypi.org/)。
+
+* 使用 `python3 -m pip install [your-package]` 从正式的 PyPI 安装你的包。
+
+至此，如果你想进一步了解 Python 库的打包，可以考虑以下几件事：
+
+* 阅读有关你所选择的构建后端的高级配置说明：[Hatchling](https://hatch.pypa.io/latest/config/metadata/)、[setuptools](https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html)、[Flit](https://flit.pypa.io/en/stable/pyproject_toml.html) 和 [PDM](https://pdm-project.org/latest/reference/pep621/)。
+
+* 查阅本网站上的[指南](https://packaging.python.org/en/latest/guides/)，获取更深入的实用信息；或阅读相关[讨论](https://packaging.python.org/en/latest/discussions/)，了解特定主题的详细解释和背景知识。
+
+* 可以考虑使用一些提供统一的命令行界面用于项目管理和打包的工具，例如 [Hatch](https://packaging.python.org/en/latest/key_projects/#hatch)、[Flit](https://packaging.python.org/en/latest/key_projects/#flit)、[PDM](https://packaging.python.org/en/latest/key_projects/#pdm) 和 [Poetry](https://packaging.python.org/en/latest/key_projects/#poetry)。
+
+**备注**  
+[1] 技术上，你可以创建一个不带 `__init__.py` 文件的 Python 包，但那被称为[命名空间包](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/)并被认为是一个**高级主题**（未包含在本教程中）。如果你只是刚开始接触 Python 打包，推荐继续使用常规包和 `__init__.py`（即使该文件的内容为空）。
+<br><br>
 
 ## 指南
 ### 打包二进制扩展
