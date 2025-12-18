@@ -106,6 +106,8 @@
         * [socket --- 底层网络接口](#socket-----底层网络接口)
     * [互联网数据处理](#互联网数据处理)
         * [json --- JSON 编码和解码器](#json-----json-编码和解码器)
+        * [base64 --- Base16、Base32、Base64 和 Base85 数据编码](#base64-----Base16Base32Base64-和-Base85-数据编码)
+            * [RFC 4648 编码格式](#rfc-4648-编码格式)
     * [互联网协议与支持](#互联网协议与支持)
         * [urllib.request — 打开URLs的可扩展库](#urllibrequest--打开urls的可扩展库)
             * [OpenerDirector对象](#openerdirector对象)
@@ -5505,6 +5507,47 @@ for chunk in json.JSONEncoder().iterencode(bigobject):
     mysocket.write(chunk)
 ```
 
+### base64 --- Base16、Base32、Base64 和 Base85 数据编码
+**源代码：** [Lib/base64.py](https://github.com/python/cpython/tree/3.14/Lib/base64.py)
+
+此模块提供了将二进制数据编码为可打印的 ASCII 字符以及将这种编码格式解码回二进制数据的函数。 这包括在 [RFC 4648](https://datatracker.ietf.org/doc/html/rfc4648.html) 中 [规定的编码格式](https://docs.python.org/zh-cn/3.14/library/base64.html#base64-rfc-4648)（Base64、Base32 和 Base16）以及非标准的 [Base85 编码格式](https://docs.python.org/zh-cn/3.14/library/base64.html#base64-base-85)。
+
+此模块提供了两个接口。 较新的接口支持将 [类字节对象](https://docs.python.org/zh-cn/3.14/glossary.html#term-bytes-like-object) 编码为 ASCII [bytes](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#bytes)，以及将 [类字节对象](https://docs.python.org/zh-cn/3.14/glossary.html#term-bytes-like-object) 或包含 ASCII 的字符串解码为 [bytes](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#bytes)。 在 [RFC 4648](https://datatracker.ietf.org/doc/html/rfc4648.html) 中定义的几种 base-64 字母表（普通的以及 URL- 和文件系统安全的）都受到支持。
+
+[旧式接口](https://docs.python.org/zh-cn/3.14/library/base64.html#base64-legacy) 不支持对字符串的解码，但它提供了用于编码和解码 [文件对象](https://docs.python.org/zh-cn/3.14/glossary.html#term-file-object) 的函数。 它只支持 Base64 标准字符表，并且按照 [RFC 2045](https://datatracker.ietf.org/doc/html/rfc2045.html) 的规定每 76 个字符增加一个换行符。 请注意如果你要找 [RFC 2045](https://datatracker.ietf.org/doc/html/rfc2045.html) 支持那么你可能应当改用 [email](https://docs.python.org/zh-cn/3.14/library/email.html#module-email) 包。
+
+*在 3.3 版本发生变更：* 新的接口提供的解码函数现在已经支持只包含 ASCII 的 Unicode 字符串。
+
+*在 3.4 版本发生变更：* 这个模块中的所有编码和解码函数现在都接受任何 [类字节对象](https://docs.python.org/zh-cn/3.14/glossary.html#term-bytes-like-object)。添加了对 Ascii85/Base85 的支持。
+
+#### RFC 4648 编码格式
+[RFC 4648](https://datatracker.ietf.org/doc/html/rfc4648.html) 中的编码格式适用于编码二进制数据以便它能安全地通过电子邮件发送、用作 URL 的组成部分，或者被包括在 HTTP POST 请求当中。
+
+base64.**b64decode**(_s, altchars=None, validate=False_)  
+解码 Base64 编码过的 [bytes-like 对象](https://docs.python.org/zh-cn/3.14/glossary.html#term-bytes-like-object) 或 ASCII 字符串 *s* 并返回解码过的 [bytes](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#bytes)。
+
+可选项 *altchars* 必须是一个长度为 2 的 [bytes-like 对象](https://docs.python.org/zh-cn/3.14/glossary.html#term-bytes-like-object) 或 ASCII 字符串，它指定了用于替换 `+` 和 `/` 的字符表。
+
+如果 *s* 被不正确地填充，一个 [binascii.Error](https://docs.python.org/zh-cn/3.14/library/binascii.html#binascii.Error) 异常将被抛出。
+
+如果 *validate* 值为 `False` （默认情况），则在填充检查前，将丢弃既不在标准 base-64 字母表之中也不在备用字母表中的字符。如果 *validate* 为 `True`，这些非 base64 字符将导致 [binascii.Error](https://docs.python.org/zh-cn/3.14/library/binascii.html#binascii.Error)。
+
+有关严格 base64 检查的详情，请参阅 [binascii.a2b_base64()](https://docs.python.org/zh-cn/3.14/library/binascii.html#binascii.a2b_base64)
+
+如果 *altchars* 的长度不为 2 则可以断言（assert）或引发一个 [ValueError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#ValueError)。
+
+```py
+>>> import base64
+>>> value = "eyJoaWQiOjc2NjIxNDYzNiwic2ciOiIyOTU1MDgxYTc1NTU5ZjBjMTE3NjkzYjQyNjU5NjA2MSIsInNpdGUiOjAsInRva2VuIjoiMWJ4Y29BQnRQY3lOYUo4Z3JyZWVGNlEifQ"
+>>> remainder = len(value) % 4
+>>> if remainder:
+...     value += '=' * (4 - remainder)  # 待解码的 ASCII 字符串必须是 4 的倍数，不足的部分用 '=' 补齐
+... 
+>>> base64.b64decode(value).decode()
+'{"hid":766214636,"sg":"2955081a75559f0c117693b426596061","site":0,"token":"1bxcoABtPcyNaJ8grreeF6Q"}'
+>>>
+```
+
 ## 互联网协议与支持
 这章描述的模块实现了互联网协议和相关技术的支持。它们在Python中全被实现了。大多数这些模块都要求系统相关的模块 [socket](https://docs.python.org/3/library/socket.html#module-socket) 存在，目前大多数流行的平台都支持 [socket](https://docs.python.org/3/library/socket.html#module-socket)。下面是一个概述：
 
@@ -6023,13 +6066,55 @@ Python 类型系统是通过 PEP 来标准化的，因此该参考应当广泛�
 sys.**argv**  
 传递给Python脚本的命令行参数列表。`argv[0]` 是脚本的名字 (是否是full pathname依赖于操作系统)。If the command was executed using the [-c](https://docs.python.org/3.6/using/cmdline.html#cmdoption-c) command line option to the interpreter, `argv[0]` 将被设置为字符串 `'-c'`。如果没有脚本名称传递给Python解释器，则 `argv[0]` 是空串。
 
+```sh
+➜  python git:(master) ✗ python --version
+Python 3.13.0
+➜  python git:(master) ✗ cat temp.py
+import sys
+
+def addone():    return int(sys.argv[1]) + 1
+
+print(sys.argv[0])
+print(sys.argv[1:])
+print(addone())
+
+➜  python git:(master) ✗ python temp.py 3
+temp.py
+['3']
+4
+➜  python git:(master) ✗ python -m temp 3
+/home/pi/github/python/temp.py
+['3']
+4
+➜  python git:(master) ✗
+```
+
 循环处理（loop over）标准输入，或者命令行中给出的文件列表，参考 [fileinput](https://docs.python.org/3.6/library/fileinput.html#module-fileinput) 模块。
 <br><br>
 
 sys.**builtin_module_names**  
 一个包含所有被编译进 Python 解释器的模块的名称的字符串元组。 （此信息无法通过任何其他办法获取 --- `modules.keys()` 仅会列出导入的模块。）
 
-sys.builtin_module_names 的值在生成 Python 解释器的那一刻就已被固定。 
+```py
+>>> sys.builtin_module_names
+('_abc', '_ast', '_codecs', '_collections', '_functools', '_imp', '_io', '_locale', '_operator', '_signal', '_sre', '_stat', '_string', '_suggestions', '_symtable', '_sysconfig', '_thread', '_tokenize', '_tracemalloc', '_typing', '_warnings', '_weakref', 'atexit', 'builtins', 'errno', 'faulthandler', 'gc', 'itertools', 'marshal', 'posix', 'pwd', 'sys', 'time')
+>>> len(sys.builtin_module_names)
+33
+>>> [m for m in sys.builtin_module_names if m.startswith('_')]
+['_abc', '_ast', '_codecs', '_collections', '_functools', '_imp', '_io', '_locale', '_operator', '_signal', '_sre', '_stat', '_string', '_suggestions', '_symtable', '_sysconfig', '_thread', '_tokenize', '_tracemalloc', '_typing', '_warnings', '_weakref']
+>>> len([m for m in sys.builtin_module_names if m.startswith('_')])
+22
+>>> [m for m in sys.builtin_module_names if not m.startswith('_')]
+['atexit', 'builtins', 'errno', 'faulthandler', 'gc', 'itertools', 'marshal', 'posix', 'pwd', 'sys', 'time']
+>>> len([m for m in sys.builtin_module_names if not m.startswith('_')])
+11
+>>> hasattr(sys,'__file__')
+False
+>>>
+```
+
+内置模块没有 `__file__` 属性。  
+sys.builtin_module_names 的值在生成 Python 解释器的那一刻就已被固定。  
 
 另请参阅 [sys.stdlib_module_names](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.stdlib_module_names) 列表。
 <br><br>
@@ -10748,6 +10833,20 @@ Uploading example_package_YOUR_USERNAME_HERE-0.0.1.tar.gz
 ```
 
 一旦上传完成，你应该可以在 TestPyPI 上看见你的包；例如： `https://test.pypi.org/project/example_package_YOUR_USERNAME_HERE`。
+
+**使用 API 令牌**  
+* 将你的用户名设置为 `__token__`  
+* 将你的密码设置为令牌的值，包括 `pypi-` 前缀
+
+例如，如果你是使用 [Twine](https://pypi.org/project/twine/) 上传你的包到 PyPI，像这样设置你的 `$HOME/.pypirc` 文件：
+
+```
+[testpypi]
+  username = __token__
+  password = pypi-AgENdGVzdC5weXBpLm9yZwIkOTY0ZTc5ZWYtNWNlMC00MmEzLTl...
+```
+
+通过使用 `$HOME/.pypirc` 文件，可以避免每次上传包都需要输入 API 令牌。
 
 #### 安装你新上传的包
 你可以使用 pip 安装你的包并验证它是否正常工作。创建一个[虚拟环境](https://packaging.python.org/en/latest/tutorials/installing-packages/#creating-and-using-virtual-environments)并从 TestPyPI 安装你的包：
