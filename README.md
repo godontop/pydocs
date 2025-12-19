@@ -997,12 +997,29 @@ True
 
 所有数字类型（复数除外）都支持下列运算（有关运算优先级，请参阅：[运算符优先级](https://docs.python.org/zh-cn/3/reference/expressions.html#operator-summary)）:
 
-运算        |结果            |注释  |完整文档  
-------------|---------------|------|-------  
-`pow(x, y)` |*x* 的 *y* 次幂 |(5)  |[pow()](https://docs.python.org/zh-cn/3/library/functions.html#pow)  
-`x ** y`    |*x* 的 *y* 次幂 |(5)  |    
+运算        |结果                |注释    |完整文档  
+------------|-------------------|--------|-------  
+`x / y`     |x 和 y 的商        |        |  
+`x // y`    |x 与 y 的商向下取整 |(1)(2)  |  
+`x % y`     |`x / y` 的余数     |(2)     |  
+`pow(x, y)` |*x* 的 *y* 次幂    |(5)     |[pow()](https://docs.python.org/zh-cn/3/library/functions.html#pow)  
+`x ** y`    |*x* 的 *y* 次幂    |(5)     |    
 
 注释：
+
+1. 也称为整数除法。 对于 [int](https://docs.python.org/zh-cn/3.14/library/functions.html#int) 类型的操作数，结果的类型为 [int](https://docs.python.org/zh-cn/3.14/library/functions.html#int)。 对于 [float](https://docs.python.org/zh-cn/3.14/library/functions.html#float) 类型的操作数，结果的类型为 [float](https://docs.python.org/zh-cn/3.14/library/functions.html#float)。 总的说来，结果是一个整数，但结果的类型不一定为 [int](https://docs.python.org/zh-cn/3.14/library/functions.html#int)。 结果总是向负无穷的方向舍入： `1//2` 为 `0`，`(-1)//2` 为 `-1`，`1//(-2)` 为 `-1`，`(-1)//(-2)` 为 `0`。
+
+2. 不可用于复数。 而应在适当条件下使用 [abs()](https://docs.python.org/zh-cn/3.14/library/functions.html#abs) 转换为浮点数。
+
+```py
+>>> 134 / 4
+33.5
+>>> 134 // 4
+33
+>>> 134 % 4
+2
+>>>
+```
 
 5. Python 将 `pow(0, 0)` 和 `0 ** 0` 定义为 `1`，这是编程语言的普遍做法。
 
@@ -5541,7 +5558,7 @@ base64.**b64decode**(_s, altchars=None, validate=False_)
 >>> value = "eyJoaWQiOjc2NjIxNDYzNiwic2ciOiIyOTU1MDgxYTc1NTU5ZjBjMTE3NjkzYjQyNjU5NjA2MSIsInNpdGUiOjAsInRva2VuIjoiMWJ4Y29BQnRQY3lOYUo4Z3JyZWVGNlEifQ"
 >>> remainder = len(value) % 4
 >>> if remainder:
-...     value += '=' * (4 - remainder)  # 待解码的 ASCII 字符串必须是 4 的倍数，不足的部分用 '=' 补齐
+...     value += '=' * (4 - remainder)  # 待解码的 ASCII 字符串长度必须是 4 的倍数，不足的部分用 '=' 补齐
 ... 
 >>> base64.b64decode(value).decode()
 '{"hid":766214636,"sg":"2955081a75559f0c117693b426596061","site":0,"token":"1bxcoABtPcyNaJ8grreeF6Q"}'
