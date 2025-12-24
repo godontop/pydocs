@@ -205,6 +205,8 @@
             * [6.2.5. 列表显示](#625-列表显示)
         * [6.14. lambda 表达式](#614-lambda-表达式)
     * [7. 简单语句](#7-简单语句)
+        * [7.1. 表达式语句](#71-表达式语句)
+        * [7.2. 赋值语句](#72-赋值语句)
         * [7.3. assert语句](#73-assert语句)
         * [7.12. global语句](#712-global语句)
     * [8. 复合语句](#8-复合语句)
@@ -8380,6 +8382,151 @@ def <lambda>(parameters):
 请参阅 [函数定义](https://docs.python.org/zh-cn/3.13/reference/compound_stmts.html#function) 了解有关参数列表的句法。 请注意通过 lambda 表达式创建的函数不能包含语句或注释。  
 
 ## 7. 简单语句
+简单语句由一个单独的逻辑行构成。多条简单语句可以存在于同一行内并以分号分隔。 简单语句的语法是：
+
+语句        |语法  
+------------|------------------------  
+**simple\_stmt:** |[expression_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-expression_stmt)<br>\|&emsp;[assert_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-assert_stmt)<br>\|&emsp;[assignment_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-assignment_stmt)<br>\|&emsp;[augmented_assignment_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-augmented_assignment_stmt)<br>\|&emsp;[annotated_assignment_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-annotated_assignment_stmt)<br>\|&emsp;[pass_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-pass_stmt)<br>\|&emsp;[del_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-del_stmt)<br>\|&emsp;[return_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-return_stmt)<br>\|&emsp;[yield_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-yield_stmt)<br>\|&emsp;[raise_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-raise_stmt)<br>\|&emsp;[break_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-break_stmt)<br>\|&emsp;[continue_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-continue_stmt)<br>\|&emsp;[import_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-import_stmt)<br>\|&emsp;[future_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-future_stmt)<br>\|&emsp;[global_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-global_stmt)<br>\|&emsp;[nonlocal_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-nonlocal_stmt)<br>\|&emsp;[type_stmt](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-type_stmt)
+
+### 7.1. 表达式语句
+表达式语句用于（大多数是以交互方式）计算并输出一个值，或者（通常情况下）调用一个过程（即不返回有意义结果的函数；在 Python 中，过程返回值 `None`）。表达式语句的其他用法也是允许的，并且偶尔很有用。表达式语句的语法如下：
+
+**expression\_stmt:** &ensp;[starred_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-starred_expression)
+
+表达式语句会对指定的表达式列表（也可能为单一表达式）进行求值。
+
+在交互模式下，如果结果值不为 `None`，它会通过内置的 [repr()](https://docs.python.org/zh-cn/3.14/library/functions.html#repr) 函数转换为一个字符串，该结果字符串将以单独一行的形式写入标准输出（例外情况是如果结果为 `None`，则该过程调用不产生任何输出。）
+<br><br>
+
+### 7.2. 赋值语句
+赋值语句用于将名称（重）绑定到特定值，以及修改属性或可变对象的成员项：
+
+语句                   |语法  
+-----------------------|-------------  
+**assignment\_stmt:**  |([target_list](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-target_list)&emsp;"=")+&emsp;([starred_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-starred_expression)&emsp;\|&emsp;[yield_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-yield_expression))  
+**target\_list:**      |[target](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-target)&emsp;(","&emsp;[target](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-target))\*&emsp;[","]  
+**target:**            |[identifier](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier)<br>\|&emsp;"("&emsp;\[[target_list](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-target_list)\]&emsp;")"<br>\|&emsp;"["&emsp;\[[target_list](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-target_list)\]&emsp;"]"<br>\|&emsp;[attributeref](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-attributeref)<br>\|&emsp;[subscription](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-subscription)<br>\|&emsp;[slicing](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-slicing)<br>\|&emsp;"*"&emsp;[target](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-target)  
+
+（参见[主表达式](https://docs.python.org/zh-cn/3.14/reference/expressions.html#primaries)一节，了解属性引用（attributeref）、下标（subscription）和切片（slicing）的语法定义。）
+
+赋值语句会对指定的表达式列表进行求值（注意这可能为单一表达式或是由逗号分隔的列表，后者将产生一个元组）并将单一结果对象从左至右逐个赋值给目标列表。
+
+赋值是根据目标（列表）的形式递归定义的。 当目标为一个可变对象的一部分（如属性引用、下标或切片）时，该可变对象必须最终执行赋值并决定其有效性，如果赋值操作不可接受也可能引发异常。 各种类型可用的规则和引发的异常通过对象类型的定义给出（参见 [标准类型层次结构](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#types) 一节）。
+
+对象赋值的目标列表可以包含于圆括号或方括号内，具体操作按以下方式递归地定义。
+
+* 如果目标列表为后面不带逗号、可以包含于圆括号内的单一目标，则将对象赋值给该目标。
+
+* 否则：
+    * 如果目标列表包含一个带有星号前缀的目标，这称为“加星”目标：则该对象至少必须为与目标列表项数减一相同项数的可迭代对象。 该可迭代对象前面的项将按从左至右的顺序被赋值给加星目标之前的目标。 该可迭代对象末尾的项将被赋值给加星目标之后的目标。 然后该可迭代对象中剩余项的列表将被赋值给加星目标（该列表可以为空）。
+
+    * 否则：该对象必须为具有与目标列表相同项数的可迭代对象，这些项将按从左至右的顺序被赋值给对应的目标。
+
+```py
+>>> x, *middle, y, z = [1, 2, 3, 4, 5, 6]
+>>> x
+1
+>>> y
+5
+>>> z
+6
+>>> middle
+[2, 3, 4]
+>>> print(x, middle, y, z)
+1 [2, 3, 4] 5 6
+>>> print(x, middle, y, z, sep='\n')
+1
+[2, 3, 4]
+5
+6
+>>>
+```
+
+对象赋值给单个目标的操作按以下方式递归地定义。
+
+* 如果目标为标识符（名称）：
+
+    * 如果该名称未出现于当前代码块的 [global](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#global) 或 [nonlocal](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#nonlocal) 语句中：该名称将被绑定到当前局部命名空间中的对象。
+
+    * 否则：该名称将被分别绑定到全局命名空间或由 [nonlocal](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#nonlocal) 所确定的外层命名空间中的对象。
+
+  如果该名称已经被绑定则将被重新绑定。这可能导致之前被绑定到该名称的对象的引用计数变为零，造成该对象进入释放过程并调用其析构器（如果存在）。
+
+* 如果目标是一个属性引用：引用中的主表达式会被求值。 它应该产生一个具有可赋值属性的对象；否则将引发 [TypeError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#TypeError)。随后，该对象会被要求将可赋值对象赋值给指定的属性；如果它无法执行赋值，则会引发异常 (通常是 [AttributeError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#AttributeError) 但不一定总是)。
+
+  注意：如果该对象为类实例并且属性引用在赋值运算符的两侧都出现，则右侧表达式 `a.x` 可以访问实例属性或（如果实例属性不存在）类属性。 左侧目标 `a.x` 将总是设定为实例属性，并在必要时创建该实例属性。 因此 `a.x` 的两次出现不一定指向相同的属性：如果右侧表达式指向一个类属性，则左侧会创建一个新的实例属性作为赋值的目标：
+
+```py
+>>> class Cls:
+...     x = 3              # 类变量
+... 
+>>> inst = Cls()
+>>> inst.x = inst.x + 1    # 将 inst.x 改为 4 而 Cls.x 仍为 3
+>>> Cls.x
+3
+>>> inst.x
+4
+>>>
+```
+
+&emsp;此描述并不一定适用于描述符属性，例如通过 [property()](https://docs.python.org/zh-cn/3.14/library/functions.html#property) 创建的属性。
+
+* 如果目标是一个下标（subscription）：首先对引用中的主表达式（primary expression）进行求值，其结果应为一个可变序列对象（例如列表）或映射对象（例如字典）。接着，对下标表达式（subscript expression）进行求值。
+
+  如果主对象是一个可变序列对象（例如列表），则下标必须产生一个整数。如果该整数为负数，则会将其加上序列的长度。所得结果必须是一个非负整数，且小于序列的长度。随后，序列会被要求将被赋值的对象赋给其对应索引的项。如果索引超出有效范围，则会引发 [IndexError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#IndexError)（对序列的下标赋值不能向列表中添加新元素）。
+
+  如果主对象是一个映射对象（例如字典），下标必须具有与该映射的键类型相兼容的类型，然后映射中会创建一个将下标映射到被赋值对象的键/值对。 这可以是替换一个现有键/值对并保持相同键值，也可以是插入一个新键/值对（如果具有相同值的键不存在）。
+
+  对于用户自定义对象，会调用 [\_\_setitem\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__setitem__) 方法并附带适当的参数。
+
+```py
+>>> mylist = [1, 2, 3]
+>>> mylist[1] = 9
+>>> mylist
+[1, 9, 3]
+>>>
+```
+
+**解释：**  
+1. 目标（target）是下标形式：`mylist[1]`  
+2. 主表达式（primary expression）：`mylist`。  
+     主表达式求值后得到一个可变序列对象（列表）。  
+3. 下标表达式（subscript expression）：`1`  
+     下标表达式求值后结果是整数 `1`，作为索引。  
+
+然后 Python 会把对象 `9` 赋值给 `mylist` 中索引为 `1` 的项，这就是 `mylist[1] = 9` 的完整过程。`mylist[1]`被称为 subscription（下标操作/索引操作）。  
+
+被赋值的对象：指赋值语句中 `=` 右边的表达式（即要被赋给目标的值）。  
+
+```py
+mylist[0] = 50
+```
+
+左边（目标）：`mylist[0]` —— 这是要被赋值的“位置”。  
+右边（值）：`50` —— 这是被赋值的对象，也就是实际要存入列表中的数据。  
+
+Python 的赋值语义是：把右边的值（对象）放进左边指定的位置。左边（如 `mylist[0]`）只是一个引用或位置标识符，它本身不是“对象”，而是指向对象存储位置的表达式。  
+
+* 如果目标是一个切片：引用中的主表达式会被求值。 它应当产生一个可变序列对象（例如列表）。 被赋值对象应当是一个相同类型的序列对象。 接下来，下界（lower bound）与上界（upper bound）表达式如果存在的话将被求值；默认值分别为零和序列的长度。 上下边界值应当为整数。 如果某一边界为负值，则会加上序列长度。 求出的边界会被裁剪至介于零和序列长度的开区间中。 最后，将要求序列对象以被赋值序列的项替换该切片。 切片的长度可能与被赋值序列的长度不同，这会在目标序列允许的情况下改变目标序列的长度。
+
+**CPython 实现细节：** 在当前实现中，目标的语法被当作与表达式的语法相同，无效的句法会在代码生成阶段被拒绝，导致不太详细的错误信息。
+
+虽然赋值的定义意味着左手边和右手边之间的重叠是“同时”发生的（例如，`a, b = b, a` 会交换两个变量的值），但在被赋值变量集合内部的重叠却是从左到右依次进行的，有时会引起混淆。例如，下面的程序会输出 `[0, 2]：`
+
+```py
+>>> x = [0, 1]
+>>> i = 0
+>>> i, x[i] = 1, 2       # 先更新 i，再更新 x[i]
+>>> print(x)
+[0, 2]
+>>>
+```
+
+**另请参见：**  
+[PEP 3132](https://peps.python.org/pep-3132/) - 扩展的可迭代对象拆包  
+对 `*target` 特性的规范说明。
+<br><br>
+
 ### 7.3. assert语句
 将调试断言插入到一个程序中，assert 语句是一种方便的方式：
 
