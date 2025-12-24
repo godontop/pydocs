@@ -207,6 +207,7 @@
     * [7. 简单语句](#7-简单语句)
         * [7.1. 表达式语句](#71-表达式语句)
         * [7.2. 赋值语句](#72-赋值语句)
+            * [7.2.1. 增强赋值语句](#721-增强赋值语句)
         * [7.3. assert语句](#73-assert语句)
         * [7.12. global语句](#712-global语句)
     * [8. 复合语句](#8-复合语句)
@@ -8525,6 +8526,28 @@ Python 的赋值语义是：把右边的值（对象）放进左边指定的位�
 **另请参见：**  
 [PEP 3132](https://peps.python.org/pep-3132/) - 扩展的可迭代对象拆包  
 对 `*target` 特性的规范说明。
+<br><br>
+
+### 7.2.1. 增强赋值语句
+增强赋值语句就是在单个语句中将二元运算和赋值语句合为一体：
+
+语句                              |语法   
+----------------------------------|----------------------------  
+**augmented\_assignment\_stmt:**  |[augtarget](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-augtarget)&ensp; [augop](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#grammar-token-python-grammar-augop)&ensp; ([expression_list](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-expression_list)&ensp; \|&ensp; [yield_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-yield_expression))  
+**augtarget:**                    |[identifier](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier)&ensp; \|&ensp; [attributeref](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-attributeref)&ensp; \|&ensp; [subscription](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-subscription)&ensp; \|&ensp; [slicing](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-slicing)  
+**augop:**                        |"+=" &ensp;\|&ensp; "-=" &ensp;\|&ensp; "\*=" &ensp;\|&ensp; "@=" &ensp;\|&ensp; "/=" &ensp;\|&ensp; "//=" &ensp;\|&ensp; "%=" &ensp;\|&ensp; "\*\*="<br>\|&ensp; ">>=" &ensp;\|&ensp; "<<=" &ensp;\|&ensp; "&=" &ensp;\|&ensp; "^=" &ensp;\|&ensp; "\|="  
+
+（请参阅 [主表达式](https://docs.python.org/zh-cn/3.14/reference/expressions.html#primaries) 一节了解最后三种符号的语法定义。）
+
+增强赋值语句将对目标和表达式列表求值（与普通赋值语句不同的是，前者不能为可迭代对象拆包），对两个操作数相应类型的赋值执行指定的二元运算，并将结果赋值给原始目标。 目标仅会被求值一次。
+
+增强赋值语句如 `x += 1` 可以被改写为 `x = x + 1` 以获得类似的、但并非完全等价的效果。 在增强赋值版本中，`x` 仅会被求值一次。 而且，在可能的情况下，实际的运算是 **原地** 执行的，这意味着并不是创建一个新对象并将其赋值给目标，而是直接修改原对象。
+
+不同于普通赋值，增强赋值会在对右手边求值 **之前** 对左手边求值。 例如，`a[i] += f(x)` 首先查找 `a[i]`，然后对 `f(x)` 求值并执行加法操作，最后将结果写回到 `a[i]`。
+
+除了在单个语句中赋值给元组和多个目标的例外情况，增强赋值语句的赋值操作处理方式与普通赋值相同。 类似地，除了可能存在 **原地** 操作行为的例外情况，增强赋值语句执行的二元运算也与普通二元运算相同。
+
+对于属性引用类目标，针对常规赋值的 [关于类和实例属性的警告](https://docs.python.org/zh-cn/3.14/reference/simple_stmts.html#attr-target-note) 也同样适用。
 <br><br>
 
 ### 7.3. assert语句
