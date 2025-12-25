@@ -7653,13 +7653,39 @@ type.**\_\_name\_\_**         |类的名称。 另请参阅: [\_\_name\_\_ 属�
 type.**\_\_qualname\_\_**     |类的 [qualified name](https://docs.python.org/zh-cn/3.12/glossary.html#term-qualified-name)。 另请参阅: [\_\_qualname\_\_ 属性](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#definition.__qualname__)。 
 type.**\_\_module\_\_**       |类定义所在模块的名称。 
 type.**\_\_dict\_\_**         |一个提供类的命名空间的只读视图的 [映射代理](https://docs.python.org/zh-cn/3.12/library/types.html#types.MappingProxyType)。 另请参阅: [\_\_dict\_\_ 属性](https://docs.python.org/zh-cn/3.12/reference/datamodel.html#object.__dict__)。 
-type.**\_\_bases\_\_**        |一个包含类的基类的 [tuple](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)，对于定义为 `class X(A, B, C)` 的类，`X.__bases__` 将等于 `(A, B, C)`。 
+type.**\_\_bases\_\_**        |一个包含类的基类的 [tuple](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)，对于定义为 `class X(A, B, C)` 的类，`X.__bases__` 将等于 `(A, B, C)`。  
+type.**\_\_base\_\_**         |**CPython 实现细节：** 继承链中负责实例内存布局的单一基类。该属性在 C 语言层面对应于 [tp_base](https://docs.python.org/zh-cn/3.14/c-api/typeobj.html#c.PyTypeObject.tp_base)。  
 type.**\_\_doc\_\_**          |类的文档字符串，如果未定义则为 `None`。 不会被子类继承。 
 type.**\_\_annotations\_\_**  |一个包含在类体执行期间收集的 [变量注释](https://docs.python.org/zh-cn/3.12/glossary.html#term-variable-annotation) 的字典。 有关使用 \_\_annotations\_\_ 的最佳实践，请参阅 [注释最佳实践](https://docs.python.org/zh-cn/3.12/howto/annotations.html#annotations-howto)。<br><br>**小心** 当存在元类时直接访问类对象的 \_\_annotations\_\_ 属性可能产生不正确的结果。 此外，对于某些类该属性可能不存在。 请使用 [inspect.get_annotations()](https://docs.python.org/zh-cn/3.12/library/inspect.html#inspect.get_annotations) 来安全地提取类注释。 
 type.**\_\_type\_params\_\_** |一个包含 [通用类](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#generic-classes) 的 [类型形参](https://docs.python.org/zh-cn/3.12/reference/compound_stmts.html#type-params) 的[元组](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)。<br><br>*在版本 3.12 中新增。* 
 type.**\_\_mro\_\_**          |由在方法解析期间当查找基类时将被纳入考虑的类组成的[元组](https://docs.python.org/zh-cn/3.12/library/stdtypes.html#tuple)。 
 
+```py
+>>> import pandas as pd
+>>> import subprocess
+>>> pd.DataFrame
+<class 'pandas.core.frame.DataFrame'>
+>>> print(subprocess.run(["pwd"], capture_output=True, text=True).stdout)
+/home/pi/.pyenv/versions/3.13.0/lib/python3.13/site-packages/pandas/core
+
+>>> print(subprocess.run(["grep", "class DataFrame", "frame.py"], capture_output=True, text=True).stdout)
+class DataFrame(NDFrame, OpsMixin):
+
+>>> pd.DataFrame.__bases__
+(<class 'pandas.core.generic.NDFrame'>, <class 'pandas.core.arraylike.OpsMixin'>)
+>>> pd.DataFrame.__base__
+<class 'pandas.core.generic.NDFrame'>
+>>> pd.DataFrame.to_excel
+<function NDFrame.to_excel at 0x7f929d94e0>
+>>> pd.DataFrame.to_excel is pd.core.generic.NDFrame.to_excel
+True
+>>>
+```
+
+`type.__bases__` 返回类的直接基类（即直接父类）  
+`type.__base__` 返回类的第一个直接基类（即第一个直接父类）
 <br><br>
+
 ##### 3.2.10.2. 特殊方法
 除了上面介绍的特殊属性，所有的 Python 类还具有以下两个方法：
 
@@ -8528,7 +8554,7 @@ Python 的赋值语义是：把右边的值（对象）放进左边指定的位�
 对 `*target` 特性的规范说明。
 <br><br>
 
-### 7.2.1. 增强赋值语句
+#### 7.2.1. 增强赋值语句
 增强赋值语句就是在单个语句中将二元运算和赋值语句合为一体：
 
 语句                              |语法   
@@ -11193,6 +11219,28 @@ TypeError: divmod() takes no keyword arguments
 (0, 3)
 >>> 
 ```
+<br><br>
+
+# Python 术语表
+**decorator -- 装饰器**  
+返回值为另一个函数的函数，通常使用 `@wrapper` 语法形式来进行函数变换。 装饰器的常见例子包括 [classmethod()](https://docs.python.org/zh-cn/3.14/library/functions.html#classmethod) 和 [staticmethod()](https://docs.python.org/zh-cn/3.14/library/functions.html#staticmethod)。
+
+装饰器语法只是一种语法糖，以下两个函数定义在语义上完全等价：
+
+```py
+def f(arg):
+    ...
+f = staticmethod(f)
+
+@staticmethod
+def f(arg):
+    ...
+```
+
+装饰器的核心思想：**在不修改原函数代码的前提下，增强或修改其行为**。  
+装饰器需要返回一个**可调用对象**来替代原函数，`f = staticmethod(f)` 语句就是替换过程。    
+
+同样的概念也适用于类，但通常较少这样使用。有关装饰器的详情可参见 [函数定义](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#function) 和 [类定义](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#class) 的文档。
 <br><br>
 
 # Python Snippets
