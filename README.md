@@ -213,6 +213,7 @@
     * [8. 复合语句](#8-复合语句)
         * [8.4. try 语句](#84-try-语句)
         * [8.5. with 语句](#85-with-语句)
+        * [8.7. 函数定义](#87-函数定义)
 * [Python 教程](#python-教程)
     * [2. 使用Python解释器](#2-使用python解释器)
         * [2.1. 调用解释器](#21-调用解释器)
@@ -952,6 +953,24 @@ class C:
 ```
 
 想了解更多有关静态方法的信息，请参阅 [标准类型层次结构](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#types) 。
+
+```py
+>>> class Mathutils:
+...     @staticmethod
+...     def add(a, b):
+...         return a + b
+... 
+>>> # 无需创建实例，直接通过类调用
+>>> result = Mathutils.add(3, 5)
+>>> print(result)
+8
+>>>
+```
+
+**说明：**  
+* 静态方法：使用 `@staticmethod` 装饰器定义。  
+* 静态方法不需要 `self` 或 `cls` 参数。  
+* 可以直接通过类名调用，无需创建实例对象（或实例化）。  
 
 *在 3.10 版本发生变更：* 静态方法现在继承了方法的属性 ([\_\_module\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#function.__module__)，[\_\_name\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#function.__name__)，[\_\_qualname\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#function.__qualname__)，[\_\_doc\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#function.__doc__) 和 [\_\_annotations\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#function.__annotations__))，并具有新的 `__wrapped__` 属性，现在是属于与常规函数类似的可调用对象。
 <br><br>
@@ -8906,8 +8925,31 @@ with A() as a:
 **另请参考：**
 
 **[PEP 343](https://www.python.org/dev/peps/pep-0343) - "with" 语句**  
-Python [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句的技术规范、背景和示例。  
-<br>  
+Python [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) 语句的技术规范、背景和示例。
+<br><br>
+
+### 8.7. 函数定义
+函数定义就是对用户自定义函数对象的定义（参见 [标准类型层次结构](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#types) 一节）：
+
+语句                        |语法             
+----------------------------|----------------------------  
+**funcdef:**                |\[[decorators](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-decorators)\]&ensp; "def" &ensp;[funcname](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-funcname)&ensp; \[[type_params](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-type_params)\]&ensp; "("&ensp; \[[parameter_list](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-parameter_list)\] &ensp;")"<br>\["->" [expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-expression)\]&ensp; ":" &ensp;[suite](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-suite)  
+**decorators:**             |[decorator](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-decorator)+  
+**decorator:**              |"@"&ensp; [assignment_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-assignment_expression)&ensp; NEWLINE  
+**parameter_list:**         |[defparameter](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-defparameter)&ensp; (","&ensp; [defparameter](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-defparameter))\*&ensp; ","&ensp; "/"&ensp; \[","&ensp; \[[parameter_list_no_posonly](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-parameter_list_no_posonly)\]\]<br>\|&ensp; [parameter_list_no_posonly](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-parameter_list_no_posonly)  
+**parameter_list_no_posonly:**  |[defparameter](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-defparameter)&ensp; (","&ensp; [defparameter](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-defparameter))\*&ensp; \[","&ensp; \[[parameter_list_starargs](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-parameter_list_starargs)\]\]<br>\|&ensp; [parameter_list_starargs](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-parameter_list_starargs)  
+**parameter_list_starargs:**    |"\*"&ensp; \[[star_parameter](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-star_parameter)\]&ensp; (","&ensp; [defparameter](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-defparameter))\*&ensp; \[","&ensp; \[[parameter_star_kwargs](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-parameter_star_kwargs)\]\]<br>\|&ensp; "\*"&ensp; (","&ensp; [defparameter](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-defparameter))+&ensp; \[","&ensp; \[[parameter_star_kwargs](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-parameter_star_kwargs)\]\]<br>\|&ensp; [parameter_star_kwargs](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-parameter_star_kwargs)  
+**parameter\_star\_kwargs:**    |"\*\*"&ensp; [parameter](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-parameter)&ensp; [","]  
+**parameter:**                  |[identifier](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier)&ensp; \[":"&ensp; [expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-expression)\]  
+**star_parameter:**             |[identifier](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier)&ensp; \[":"&ensp; \["\*"\]&ensp; [expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-expression)\]  
+**defparameter:**               |[parameter](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-parameter)&ensp; \["="&ensp; [expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-expression)\]  
+**funcname:**                   |[identifier](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier)  
+
+函数定义是一条可执行语句。 它执行时会在当前局部命名空间中将函数名称绑定到一个函数对象（函数可执行代码的包装器）。 这个函数对象包含对当前全局命名空间的引用，作为函数被调用时所使用的全局命名空间。
+
+函数定义并不会执行函数体；只有当函数被调用时才会执行此操作。 [4]
+
+一个函数定义可以被一个或多个 decorator 表达式所包装。 当函数被定义时将在包含该函数定义的作用域中对装饰器表达式求值。 求值结果必须是一个可调用对象，它会以该函数对象作为唯一参数被唤起。 其返回值将被绑定到函数名称而非函数对象。 多个装饰器会以嵌套方式被应用。 例如以下代码
 
 # Python 教程
 ## 2. 使用Python解释器
