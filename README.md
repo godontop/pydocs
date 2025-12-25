@@ -277,6 +277,7 @@
 * [Python FAQ](#python-faq)
     * [核心语言](#核心语言)
         * [函数形参列表中的斜杠（/）是什么意思？](#函数形参列表中的斜杠是什么意思)
+* [Python 术语表](#python-术语表)
 * [Python Snippets](#python-snippets)
     * [proxy.py](#proxypy)
 * [Anaconda](#anaconda)
@@ -300,22 +301,22 @@ Python 标准库包含提供访问系统功能如文件 I/O 的内置模块（C 
 ### 内置函数
 Python解释器内置了许多总是可用的函数和类型。在这里以字母顺序列出它们。
 
-|          |            |Built-in Functions|          |          |
-|----------|------------|------------------|----------|----------|
-|abs()     |            |                  |          |          |
-|all()     |            |                  |          |          |
-|          |            |hex()             |          |          |
-|          |            |id()              |object()  |sorted()  |
-|ascii()   |enumerate() |input()           |          |          |
-|bin()     |eval()      |int()             |open()    |          |
-|          |exec()      |isinstance()      |ord()     |          |
-|          |            |issubclass()      |pow()     |super()   |
-|          |            |                  |print()   |          |
-|          |            |                  |          |type()    |
-|          |            |                  |range()   |          |
-|          |getattr()   |                  |repr()    |          |
-|          |globals()   |                  |          |          |
-|complex() |hasattr()   |                  |          |          |
+|          |            |Built-in Functions|          |               |
+|----------|------------|------------------|----------|---------------|
+|abs()     |            |                  |          |               |
+|all()     |            |                  |          |               |
+|          |            |hex()             |          |               |
+|          |            |id()              |object()  |sorted()       |
+|ascii()   |enumerate() |input()           |          |staticmethod() |
+|bin()     |eval()      |int()             |open()    |               |
+|          |exec()      |isinstance()      |ord()     |               |
+|          |            |issubclass()      |pow()     |super()        |
+|          |            |                  |print()   |               |
+|          |            |                  |          |type()         |
+|          |            |                  |range()   |               |
+|          |getattr()   |                  |repr()    |               |
+|          |globals()   |                  |          |               |
+|complex() |hasattr()   |                  |          |               |
 
 **abs**(*x*)  
 返回一个数的绝对值。参数可以是一个整型数或者一个浮点数。如果参数是一个复数，its magnitude is returned.  
@@ -920,7 +921,40 @@ True
 
 排序算法只使用 `<` 在项目之间比较。 虽然定义一个 [__lt__()](https://docs.python.org/zh-cn/3.13/reference/datamodel.html#object.__lt__) 方法就足以进行排序，但 [PEP 8](https://peps.python.org/pep-0008/) 建议实现所有六个 [富比较](https://docs.python.org/zh-cn/3.13/reference/expressions.html#comparisons) 。 这将有助于避免在与其他排序工具（如 [max()](https://docs.python.org/zh-cn/3.13/library/functions.html#max) ）使用相同的数据时出现错误，这些工具依赖于不同的底层方法。实现所有六个比较也有助于避免混合类型比较的混乱，因为混合类型比较可以调用反射到 [__gt__()](https://docs.python.org/3.13/reference/datamodel.html#object.__gt__) 的方法。
 
-有关排序示例和简要排序教程，请参阅 [排序的技术](https://docs.python.org/3.13/howto/sorting.html#sortinghowto) 。 
+有关排序示例和简要排序教程，请参阅 [排序的技术](https://docs.python.org/3.13/howto/sorting.html#sortinghowto) 。
+<br><br>
+
+**@staticmethod**  
+将方法转换为静态方法。
+
+静态方法不会接收隐式的第一个参数。要声明一个静态方法，请使用此语法
+
+```py
+class C:
+    @staticmethod
+    def f(arg1, arg2, argN): ...
+```
+
+`@staticmethod` 这样的形式称为函数的 [decorator](https://docs.python.org/zh-cn/3.14/glossary.html#term-decorator) -- 详情参阅 [函数定义](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#function)。
+
+静态方式既可以在类上调用 (如 `C.f()`)，也可以在实例上调用 (如 `C().f()`)。 此外，静态方法 [descriptor](https://docs.python.org/zh-cn/3.14/glossary.html#term-descriptor) 也属于可调用对象，因而它们可以在类定义中使用 (如 `f()`)。
+
+Python 的静态方法与 Java 或 C++ 中的类似。另请参阅 [classmethod()](https://docs.python.org/zh-cn/3.14/library/functions.html#classmethod) ，可用于创建另一种类构造函数。
+
+像所有装饰器一样，也可以像常规函数一样调用 `staticmethod` ，并对其结果执行某些操作。比如某些情况下需要从类主体引用函数并且您希望避免自动转换为实例方法。对于这些情况，请使用此语法：
+
+```py
+def regular_function():
+    ...
+
+class C:
+    method = staticmethod(regular_function)
+```
+
+想了解更多有关静态方法的信息，请参阅 [标准类型层次结构](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#types) 。
+
+*在 3.10 版本发生变更：* 静态方法现在继承了方法的属性 ([\_\_module\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#function.__module__)，[\_\_name\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#function.__name__)，[\_\_qualname\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#function.__qualname__)，[\_\_doc\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#function.__doc__) 和 [\_\_annotations\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#function.__annotations__))，并具有新的 `__wrapped__` 属性，现在是属于与常规函数类似的可调用对象。
+<br><br>
 
 **super**([*type*__[__*, object-or-type*__]]__)  
 *super* 有两种典型的用法。在一个单继承的类层次结构中，*super* 可以被用来引用父类而无需明确地指出它们，从而使代码更易于维护。这种用法与其它程序设计语言中 *super* 的用法十分相似。
