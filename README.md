@@ -4866,8 +4866,21 @@ subprocess.**run**(*args, \*, stdin=None, input=None, stdout=None, stderr=None, 
 >>> subprocess.run('hostname')
 archlinux
 CompletedProcess(args='hostname', returncode=0)
+>>> subprocess.run('pwd', capture_output=True, text=True).stdout
+'/home/pi/.pyenv/versions/3.13.0/lib/python3.13/site-packages/pandas/core\n'
+>>> subprocess.run(['pwd'], capture_output=True, text=True).stdout
+'/home/pi/.pyenv/versions/3.13.0/lib/python3.13/site-packages/pandas/core\n'
+>>> subprocess.run(['grep', 'class DataFrame', 'frame.py'], capture_output=True, text=True).stdout
+'class DataFrame(NDFrame, OpsMixin):\n'
+>>> import shlex
+>>> subprocess.run(shlex.split("grep 'class DataFrame' frame.py"), capture_output=True, text=True)
+CompletedProcess(args=['grep', 'class DataFrame', 'frame.py'], returncode=0, stdout='class DataFrame(NDFrame, OpsMixin):\n', stderr='')
+>>> subprocess.run(shlex.split("grep 'class DataFrame' frame.py"), capture_output=True, text=True).stdout
+'class DataFrame(NDFrame, OpsMixin):\n'
 >>>
 ```
+
+*args* 既可以是字符串，也可以是由字符串构成的列表。  
 
 以上显示的参数仅仅是最常见的一些，[常用参数](https://docs.python.org/zh-cn/3/library/subprocess.html#frequently-used-arguments) 在下面描述（因此在缩写签名中仅使用关键字标示）。完整的函数签名基本和 [Popen](https://docs.python.org/zh-cn/3/library/subprocess.html#subprocess.Popen) 的构造函数一样，此函数接受的大多数参数都被传递给该接口。（*timeout*, *input*, *check* 和 *capture_output* 除外）。
 
@@ -7403,6 +7416,26 @@ True
 [shlex](https://docs.python.org/zh-cn/3.14/library/shlex.html#shlex.shlex) 类使为类似 Unix shell 的简单语法编写词法分析器变得容易。通常可用于编写“迷你语言”（如 Python 应用程序的运行控制文件）或解析带引号的字符串。
 
 [shlex](https://docs.python.org/zh-cn/3.14/library/shlex.html#module-shlex) 模块中定义了以下函数：
+
+shlex.**split**(_s, comments=False, posix=True_)  
+用类似 shell 的语法拆分字符串 *s*。如果 *comments* 为 [False](https://docs.python.org/zh-cn/3.14/library/constants.html#False) (默认值)，则禁用对给定字符串中注释的解析 (将[shlex](https://docs.python.org/zh-cn/3.14/library/shlex.html#shlex.shlex) 实例的 [commenters](https://docs.python.org/zh-cn/3.14/library/shlex.html#shlex.shlex.commenters) 属性设为空字符串)。 本函数默认工作于 POSIX 模式下，但若 *posix* 参数为 False，则采用非 POSIX 模式。
+
+```py
+>>> import shlex
+>>> import subprocess
+>>> subprocess.run(["ls", "frame.py"])
+frame.py
+CompletedProcess(args=['ls', 'frame.py'], returncode=0)
+>>> shlex.split("grep 'class DataFrame' frame.py")
+['grep', 'class DataFrame', 'frame.py']
+>>> subprocess.run(shlex.split("grep 'class DataFrame' frame.py"))
+class DataFrame(NDFrame, OpsMixin):
+CompletedProcess(args=['grep', 'class DataFrame', 'frame.py'], returncode=0)
+>>>
+```
+
+*在 3.12 版本发生变更：* 传入 `None` 作为 *s* 参数现在会引发异常，而不是读取 [sys.stdin](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.stdin)。
+<br><br>
 
 shlex.**join**(_split_command_)  
 将列表 *split_command* 中的 tokens 串联起来，并返回一个字符串。本函数是 [split()](https://docs.python.org/zh-cn/3.14/library/shlex.html#shlex.split) 的逆运算。
