@@ -8978,11 +8978,74 @@ Python [with](https://docs.python.org/3.8/reference/compound_stmts.html#with) �
 **defparameter:**               |[parameter](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#grammar-token-python-grammar-parameter)&ensp; \["="&ensp; [expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-expression)\]  
 **funcname:**                   |[identifier](https://docs.python.org/zh-cn/3.14/reference/lexical_analysis.html#grammar-token-python-grammar-identifier)  
 
-函数定义是一条可执行语句。 它执行时会在当前局部命名空间中将函数名称绑定到一个函数对象（函数可执行代码的包装器）。 这个函数对象包含对当前全局命名空间的引用，作为函数被调用时所使用的全局命名空间。
+函数定义是一条可执行语句。执行该语句时，会将函数名绑定到当前局部命名空间中的一个函数对象（该对象是对函数可执行代码的封装器）。这个函数对象包含一个指向当前全局命名空间的引用，该引用将作为函数被调用时所使用的全局命名空间。
 
-函数定义并不会执行函数体；只有当函数被调用时才会执行此操作。 [4]
+函数定义并不会执行函数体；只有当函数被调用时才会执行。 [4]  
+[4] 作为函数体的第一条语句出现的字符串字面值会被转换为函数的 [\_\_doc\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#function.__doc__) 属性也就是该函数的 [docstring](https://docs.python.org/zh-cn/3.14/glossary.html#term-docstring)。
 
-一个函数定义可以被一个或多个 decorator 表达式所包装。 当函数被定义时将在包含该函数定义的作用域中对装饰器表达式求值。 求值结果必须是一个可调用对象，它会以该函数对象作为唯一参数被唤起。 其返回值将被绑定到函数名称而非函数对象。 多个装饰器会以嵌套方式被应用。 例如以下代码
+一个函数定义可以被一个或多个 [decorator](https://docs.python.org/zh-cn/3.14/glossary.html#term-decorator) 表达式所包装。 当函数被定义时将在包含该函数定义的作用域中对装饰器表达式求值。 求值结果必须是一个可调用对象，它会以该函数对象作为唯一参数被调用。 其返回值将被绑定到函数名称而非原始的函数对象。 多个装饰器会以嵌套方式被应用。 例如，以下代码
+
+```py
+@f1(arg)
+@f2
+def func(): pass
+```
+
+大致等价于
+
+```py
+def func(): pass
+func = f1(arg)(f2(func))
+```
+
+不同之处在于原始函数并不会被临时绑定到名称 `func`。
+
+*在 3.9 版本发生变更：* 函数可使用任何有效的 [assignment_expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-assignment_expression) 来装饰。 在之前版本中，此语法则更为受限，详情参见 [PEP 614](https://peps.python.org/pep-0614/)。
+
+可以在函数名及其形参列表开头圆括号之间加方括号给出一个 [类型形参](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#type-params) 的列表。 这将向静态类型检查器指明该函数是泛型函数。 在运行时，类型形参可以从函数的 [\_\_type\_params\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#function.__type_params__) 属性中获取。 请参阅 [泛型函数](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#generic-functions) 了解详情。
+
+*在 3.12 版本发生变更：* 类型形参列表是在 Python 3.12 中新增的。
+
+当一个或多个 [形参](https://docs.python.org/zh-cn/3.14/glossary.html#term-parameter) 具有 *形参* `=` *表达式* 这样的形式时，该函数就被称为具有“默认形参值”。 对于一个具有默认值的形参，其对应的 [argument](https://docs.python.org/zh-cn/3.14/glossary.html#term-argument) 可以在调用时被省略，在此情况下会用形参的默认值来替代。 如果一个形参具有默认值，后续所有在 "`*`" 之前的形参也必须具有默认值 --- 这是一项语法（syntactic）限制，但并未在语法（grammar）规则中显式表达。
+
+**默认形参值会在执行函数定义时按从左至右的顺序被求值。** 这意味着当函数被定义时将对表达式求值一次，相同的“预计算”值将在每次调用时被使用。 这一点在默认形参为可变对象，例如列表或字典的时候尤其需要重点理解：如果函数修改了该对象（例如向列表添加了一项），则实际上默认值也会被修改。 这通常不是人们所想要的。 绕过此问题的一个方法是使用 `None` 作为默认值，并在函数体中显式地对其进测试，例如：
+
+```py
+def whats_on_the_telly(penguin=None):
+    if penguin is None:
+        penguin = []
+    penguin.append("property of the zoo")
+    return penguin
+```
+
+函数调用的语义在 [调用](https://docs.python.org/zh-cn/3.14/reference/expressions.html#calls) 一节中有更详细的描述。 函数调用总是会给形参列表中列出的所有形参赋值，或是用位置参数，或是用关键字参数，或是用默认值。 如果存在 "`*identifier`" 这样的形式，它会被初始化为一个元组来接收任何额外的位置参数，默认为一个空元组。 如果存在 "`**identifier`" 这样的形式，它会被初始化为一个新的有序映射来接收任何额外的关键字参数，默认为一个相同类型的空映射。 在 "`*`" 或 "`*identifier`" 之后的形参都是仅限关键字形参因而只能通过关键字参数传入。 在 "`/`" 之前的形参都是仅限位置形参因而只能通过位置参数传入。
+
+*在 3.8 版本发生变更：* 可以使用 `/` 函数形参语法来标示仅限位置形参。 请参阅 [PEP 570](https://peps.python.org/pep-0570/) 了解详情。
+
+形参可以带有 [注解](https://docs.python.org/zh-cn/3.14/glossary.html#term-function-annotation)，其形式为在形参名后加 "`: expression`"。 任何形参都可以带注解，甚至 `*identifier` 或 `**identifier` 这样的形参也可以。 （作为特例，`*identifier` 这样的形参可以有 "`: *expression`" 形式的注解。） 函数可以带有“返回”注解，其形式为在形参列表后加 "`-> expression`"。 这些注解可以是任何有效的 Python 表达式。 注解的存在不会改变函数的语义。 有关注解的更多信息，请参阅 [注解](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#annotations)。
+
+*在 3.11 版本发生变更：* 形式为 "`*identifier`" 的形参可以带有 "`: *expression`" 标注。 参见 [PEP 646](https://peps.python.org/pep-0646/)。
+
+创建匿名函数（未绑定到一个名称的函数）以便立即在表达式中使用也是可能的。 这需要使用 lambda 表达式，具体描述见 [lambda 表达式](https://docs.python.org/zh-cn/3.14/reference/expressions.html#lambda) 一节。 请注意 lambda 表达式只是简单函数定义的一种简化写法；在 "[def](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#def)" 语句中定义的函数也可以像用 lambda 表达式定义的函数一样被传递或赋值给其他名称。 "def" 形式实际上更为强大，因为它允许执行多条语句和使用注解。
+
+**程序员注意事项：** 函数属于一类对象。 在一个函数内部执行的 "`def`" 语句会定义一个局部函数并可被返回或传递。 在嵌套函数中使用的自由变量可以访问包含该 def 语句的函数的局部变量。 详情参见 [命名与绑定](https://docs.python.org/zh-cn/3.14/reference/executionmodel.html#naming) 一节。
+
+**参见：**  
+[PEP 3107](https://peps.python.org/pep-3107/) - 函数注解  
+最初的函数注解规范说明。
+
+[PEP 484](https://peps.python.org/pep-0484/) —— 类型提示  
+注解的标准含意定义：类型提示。
+
+[PEP 526](https://peps.python.org/pep-0526/) - 变量注解的语法  
+变量声明的类型提示功能，包括类变量和实例变量。
+
+[PEP 563](https://peps.python.org/pep-0563/) - 延迟的标注求值  
+通过在运行时以字符串形式保留注解而非立即求值，从而支持注解中的前向引用。
+
+[PEP 318](https://peps.python.org/pep-0318/) - 函数和方法的装饰器  
+引入了函数和方法的装饰器。 类装饰器是在 [PEP 3129](https://peps.python.org/pep-3129/) 中引入的。
+<br><br>
 
 # Python 教程
 ## 2. 使用Python解释器
