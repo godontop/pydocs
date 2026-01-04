@@ -25,7 +25,8 @@
     * [MySQL-python](#mysql-python)
     * [NumPy](#numpy)
     * [openpyxl](#openpyxl)
-    * [pandas](#pandas)
+* [pandas](#pandas)
+    * [pandas用户指南](#pandas用户指南)
         * [索引与选择数据](#索引与选择数据)
         * [选项和设置](#选项和设置)
         * [Pandas API 参考](#pandas-api-参考)
@@ -985,7 +986,7 @@ pip install openpyxl
 
 如果需要将 pandas DataFrame 数据导出为 Excle 文件，则必须安装 openpyxl。  
 
-## pandas
+# pandas
 官方网站：[https://pandas.pydata.org](https://pandas.pydata.org)  
 PyPi主页：[https://pypi.org/project/pandas/](https://pypi.org/project/pandas/)  
 pandas 参考手册：[https://pandas.pydata.org/pandas-docs/stable/reference/index.html](https://pandas.pydata.org/pandas-docs/stable/reference/index.html)  
@@ -999,7 +1000,11 @@ $ pip install pandas
 import pandas as pd
 ```
 
+## pandas用户指南
 ### 索引与选择数据
+**注意**  
+Python 和 NumPy 的索引运算符 `[]` 以及属性运算符 `.` 能够在各种使用场景下快速便捷地访问 pandas 数据结构。这使得交互式操作更加直观——如果你已经熟悉 Python 字典和 NumPy 数组的用法，几乎无需额外学习新知识。然而，由于待访问数据的类型无法事先确定，直接使用这些标准运算符在性能优化方面存在一定的局限性。因此，在生产代码中，我们建议你充分利用本章所介绍的经过优化的 pandas 数据访问方法。
+
 #### 索引的不同选择
 为了支持更明确的位置，对象选择已经添加了一些用户要求的基本索引。Pandas 现在支持三种类型的多轴索引。
 
@@ -2100,13 +2105,24 @@ In [604]: pd.options.display.max_rows
 Out[604]: 999
 ```
 
+启用 Copy-On-Write(COW)  
+
+```py
+>>> pd.options.mode.copy_on_write
+False
+>>> pd.options.mode.copy_on_write = True
+>>> pd.options.mode.copy_on_write
+True
+>>>
+```
+
 这个 API 由 5 个相关函数组成，可直接从 pandas 命名空间获得：  
 
 * [get_option()](https://pandas.pydata.org/docs/reference/api/pandas.get_option.html#pandas.get_option) / [set_option()](https://pandas.pydata.org/docs/reference/api/pandas.set_option.html#pandas.set_option) - 获取/设置一个单一选项的值。  
 * [reset_option()](https://pandas.pydata.org/docs/reference/api/pandas.reset_option.html#pandas.reset_option) - 将一个或多个选项重置为其默认值。  
 * [describe_option()](https://pandas.pydata.org/docs/reference/api/pandas.describe_option.html#pandas.describe_option) - 打印一个或多个选项的描述。  
 * [option_context()](https://pandas.pydata.org/docs/reference/api/pandas.option_context.html#pandas.option_context) - 使用一组选项执行代码块，这些选项在执行后恢复为先前的设置。  
-**注意：**开发者可以查看 [pandas/core/config_init.py](https://github.com/pandas-dev/pandas/blob/master/pandas/core/config_init.py) 以了解更多信息。  
+**注意：** 开发者可以查看 [pandas/core/config_init.py](https://github.com/pandas-dev/pandas/blob/master/pandas/core/config_init.py) 以了解更多信息。  
 
 #### Unicode 格式
 **警告：**  
@@ -2429,6 +2445,33 @@ pandas.**to_numeric**(*arg, errors='raise', downcast=None*)
 [https://pandas.pydata.org/docs/reference/general_functions.html](https://pandas.pydata.org/docs/reference/general_functions.html)  
 
 ### Series
+布尔类型的Series  
+
+```py
+In [163]: df
+Out[163]:
+                  原始单号   合计费用  Unnamed: 2
+0  702-8460768-1662653  40.78         NaN
+1  702-1656259-1266619  57.87         NaN
+
+In [167]: df['合计费用'] == 57.87  # 判断'合计费用'列中的值是否等于 57.87，返回一个布尔类型的Series
+Out[167]:
+0    False
+1     True
+Name: 合计费用, dtype: bool
+
+In [168]: type(df['合计费用'] == 57.87)
+Out[168]: pandas.core.series.Series
+
+In [170]: df[df['合计费用'] == 57.87]
+Out[170]:
+                  原始单号   合计费用  Unnamed: 2
+1  702-1656259-1266619  57.87         NaN
+```
+
+df[boolean_Series] 表示返回 boolean_Series 列中所有值为 True 的行。
+<br><br>
+
 #### pandas.Series.abs  
 **Series.abs()**  
 返回具有每个元素的绝对数值的 Series/DataFrame。  
@@ -2606,7 +2649,23 @@ Series.isnull 是 Series.isna 的别名。
 返回一个相同大小的布尔值对象，表明值是否为 NA。 NA 值，例如 None 或 **numpy.NaN**，被映射到 True 值。 其他所有内容都映射到 False 值。空字符串 '' 或 **numpy.inf** 等字符不被视为 NA 值（除非您设置 **pandas.options.mode.use_inf_as_na = True**）。  
 
 **Returns：** **Series**  
-Series 中每个元素的布尔值掩码，表明元素是否为 NA 值。  
+Series 中每个元素的布尔值掩码，表明元素是否为 NA 值。
+<br><br>
+
+#### pandas.Series.item
+**Series.item()**  
+返回底层数据的第一个元素作为一个 Python 标量。  
+
+**返回值：**  
+**标量**  
+Series 或 Index 的第一个元素。  
+
+**抛出**  
+**ValueError**  
+如果数据的长度不是 1。  
+
+只有确定数据的长度为 1 时，才能使用该方法。
+<br><br>
 
 #### pandas.Series.replace
 Series.**replace**(*to_replace=None, value=None, inplace=False, limit=None, regex=False, method='pad'*)  
@@ -2650,6 +2709,106 @@ Series 的值被动态地替换为其它值。
 2  华润材料           3
 ```
 
+#### pandas.Series.str.contains
+```py
+Series.str.contains(pat, case=True, flags=0, na=<no_default>, regex=True)
+```
+
+测试模式或正则表达式是否包含在 Series 或 Index 的字符串中。  
+
+根据给定的模式或正则表达式是否包含在 Series 或 Index 的字符串中，返回对应的布尔型 Series 或 Index。
+
+**参数：**  
+**pat：** ***str***  
+字符序列或正则表达式。  
+
+**na：** ***标量，可选的***  
+为缺失值填充的值。默认值依赖于数组的数据类型。对于对象数据类型，使用 `numpy.nan`。对于可为空的 `StringDtype`，使用 `pandas.NA`。对于 "str" dtype，则使用 `False`。  
+
+**regex：** ***布尔，默认值 True***  
+如果为 True，则认为 pat 是一个正则表达式。  
+
+如果为 False，则将 pat 当做一个字面值字符串。  
+
+**返回值：**  
+**由布尔值组成的 Series 或 Index**  
+一个由布尔值组成的 Series 或 Index，用于指示给定的模式是否包含在该 Series 或 Index 中每个元素的字符串内。  
+
+```py
+>>> df = pd.DataFrame(data={"c1": ["a1-b1", "a1-b2", np.nan, "a1-b3你", "a1-b4好"], "c2": [2, 4, 6, 8, 10]}, index=['a', 'b', 'c', 'd', 'e'])
+>>> df
+       c1  c2
+a   a1-b1   2
+b   a1-b2   4
+c     NaN   6
+d  a1-b3你   8
+e  a1-b4好  10
+>>> df.c1.str.contains(r'[^a-z0-9-]')
+a    False
+b    False
+c      NaN
+d     True
+e     True
+Name: c1, dtype: object  # 只要 Series 的值中有一个 NaN，则其 dtype 就不是 bool 类型
+>>> df.c1.str.contains(r'[^a-z0-9-]', na=False)  # 如果不想让缺失值被视为匹配，则将 na 设为 False
+a    False
+b    False
+c    False
+d     True
+e     True
+Name: c1, dtype: bool    # bool 类型只有 2 个值，只有当 Series 的所有值都是 True 或 False，其 dtype 才是 bool 类型
+>>> df[df.c1.str.contains(r'[^a-z0-9-]', na=False)]
+       c1  c2
+d  a1-b3你   8
+e  a1-b4好  10
+>>> df.c1.str.contains(r'[^a-z0-9-]', na=True)  # 如果想让缺失值视为匹配，则将 na 设为 True
+a    False
+b    False
+c     True
+d     True
+e     True
+Name: c1, dtype: bool
+>>> df[df.c1.str.contains(r'[^a-z0-9-]', na=True)]
+       c1  c2
+c     NaN   6
+d  a1-b3你   8
+e  a1-b4好  10
+>>>
+```
+
+当布尔 Series 中存在空值时，其数据类型将变为 object，这时如果使用布尔向量（bool Series）做筛选，则将抛出 `ValueError: Cannot mask with non-boolean array containing NA / NaN values`。  
+
+```py
+>>> df.c1.str.contains(r'[^a-z0-9-]')
+a    False
+b    False
+c      NaN
+d     True
+e     True
+Name: c1, dtype: object
+>>> try:
+...     df[df.c1.str.contains(r'[^a-z0-9-]')]
+... except ValueError as e:
+...     print(e)
+... 
+Cannot mask with non-boolean array containing NA / NaN values
+>>> df.c1.str.contains(r'[^a-z0-9-]', na=True)
+a    False
+b    False
+c     True
+d     True
+e     True
+Name: c1, dtype: bool
+>>> df[df.c1.str.contains(r'[^a-z0-9-]', na=True)]
+       c1  c2
+c     NaN   6
+d  a1-b3你   8
+e  a1-b4好  10
+>>>
+```
+
+DataFrame 的索引运算符 `[]` 中使用的 boolean_Series 通常由条件表达式生成，只有当生成的 boolean_Series 中的值全是布尔类型（True 或 False）时，才能用来做筛选，否则将抛出 `ValueError: Cannot mask with non-boolean array containing NA / NaN values` 的错误。  
+
 #### pandas.Series.str.extract  
 **Series.str.extract(*pat, flags=0, expand=True*)**  
 
@@ -2663,6 +2822,28 @@ Series 的值被动态地替换为其它值。
 
 **Returns：** **DataFrame 或 Series 或 Index**  
 一个 DataFrame，每个主题字符串一行，每组一列。正则表达式 pat 中的任何捕获组名称都将用于列名称；否则将使用捕获组编号。每个结果列的 dtype 始终是 object，即使没有找到匹配项。如果 **expand=False** 并且 pat 只有一个捕获组，则返回一个 Series （如果主题是系列）或索引（如果主题是索引）。  
+
+```py
+>>> df = pd.DataFrame(data=['a1-b1', 'a1-b2', np.nan, 'a1-b2好', '你好'], columns=['sku'])
+>>> df
+      sku
+0   a1-b1
+1   a1-b2
+2     NaN
+3  a1-b2好
+4      你好
+>>> df.sku.str.extract(r'([a-z1-9]+)')
+     0
+0   a1
+1   a1
+2  NaN
+3   a1
+4  NaN
+>>> 
+```
+
+Series.str.extract 返回的数据长度始终与 Series 一致，空值返回 NaN，未匹配的值也返回 NaN。
+<br><br>
 
 #### pandas.Series.to_dict
 **Series.to_dict(_into=<class 'dict'>_)**  
@@ -2707,8 +2888,27 @@ TR   0.400
 ```
 
 ### DataFrame
+**构造函数**  
+[DataFrame](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame)([data, index, columns, dtype, copy])
+
+二维、大小可变、可能包含异构数据的表格型数据。
+
+**属性及底层数据**  
+坐标轴  
+
+[DataFrame.index](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.index.html#pandas.DataFrame.index)
+
+DataFrame 的索引（行标签）。
+
+DataFrame.columns
+
+The column labels of the DataFrame.
+
 ### pandas.DataFrame
-*class* **pandas.DataFrame(**_**data**=None**, index**=None**, columns**=None**, dtype**=None**, copy**=None_**)** 
+```py
+class pandas.DataFrame(data=None, index=None, columns=None, dtype=None, copy=None)
+```
+
 二维的、尺寸可变的、潜在异构的表格数据。 
 
 数据结构还包含有标签的轴（行和列）。算术运算会在行标签和列标签上进行对齐。可以将其视为一个类似于字典的容器，用于存储 Series 对象。这是 Pandas 的主要数据结构。 
@@ -2723,8 +2923,66 @@ TR   0.400
 用于结果框架（frame）的索引。如果输入数据中没有索引信息且未提供索引，则默认使用范围索引（RangeIndex）。 
 
 **columns：** _**Index 或 array-like**_ 
-当数据没有列标签时，用于结果框架（frame）的列标签，默认为范围索引（RangeIndex，例如 0, 1, 2, …, n）。如果数据中包含列标签，则会执行列选择。 
+当数据没有列标签时，用于结果框架（frame）的列标签，默认为范围索引（RangeIndex，例如 0, 1, 2, …, n）。如果数据中包含列标签，则会执行列选择。  
+当 *data* 中的数据没有标签时，columns 的值用作列标签；当 *data* 中的数据含有标签时，columns 的值用于列的筛选及排序。  
 
+
+**通过列表创建 DataFrame 实例**  
+通过列表创建一个单列或单行的 DataFrame 实例  
+如果未提供index参数，则索引（行标签）默认使用范围索引（RangeIndex）。  
+如果未提供columns参数，则列标签默认使用范围索引（RangeIndex）。  
+
+```py
+>>> df = pd.DataFrame(data=[1, 3, 5, 7])
+>>> df
+   0
+0  1
+1  3
+2  5
+3  7
+>>> df = pd.DataFrame(data=['a1-b1', 'a1-b2', np.nan, 'a1-b2好'],
+                      columns=['sku'])  # 即使是单列，也必须使用数组的形式
+>>> df
+      sku
+0   a1-b1
+1   a1-b2
+2     NaN
+3  a1-b2好
+>>> df = pd.DataFrame(data=[[1, 3, 5, 7]])
+>>> df
+   0  1  2  3
+0  1  3  5  7
+>>> df = pd.DataFrame(data=[[1, 3, 5, 7], [2, 4, 6, 8]])
+>>> df
+   0  1  2  3
+0  1  3  5  7
+1  2  4  6  8
+>>>
+```
+
+当 *data* 参数为一个列表，且其构成元素不是列表时，创建的是一个单列 DataFrame 实例；如果其构成元素为列表时，每一个元素代表 DataFrame 的一行。
+
+**通过字典创建 DataFrame 实例**  
+通过字典创建 DataFrame 实例时，每一个键值对代表一列，其中键为列标签（列名）。  
+如果指定 *index* 参数，*index* 的长度需与列（或DataFrame）的长度一致。  
+
+```py
+>>> df = pd.DataFrame(data={"c1": [1, 3, 5, 7], "c2": [2, 4, 6, 8]})
+>>> df
+   c1  c2
+0   1   2
+1   3   4
+2   5   6
+3   7   8
+>>> df = pd.DataFrame(data={"c1": [1, 3, 5, 7], "c2": [2, 4, 6, 8]}, index=['a', 'b', 'c', 'd'])
+>>> df
+   c1  c2
+a   1   2
+b   3   4
+c   5   6
+d   7   8
+>>>
+```
 
 #### pandas.DataFrame.all
 DataFrame.all(*axis=0, bool_only=None, skipna=True, level=None, \*\*kwargs*)  
@@ -2797,18 +3055,21 @@ False
 等同于 `dataframe / other`，但支持用 fill_value 替换其中一个输入中的缺失数据。使用反向版本，*rtruediv*。    
 
 #### pandas.DataFrame.drop
-**DataFrame.drop(*labels=None, axis=0, index=None, columns=None, level=None, inplace=False, errors='raise')***  
+```py
+DataFrame.drop(labels=None, *, axis=0, index=None, columns=None, level=None, inplace=False, errors='raise')
+```  
 
-从行或列中删除指定的标签。  
+从行或列中删除指定的标签。默认是从 index 轴删除标签，即若未指定轴，默认从索引中查找标签并删除。    
+从 pandas 1.5 版本开始，*labels* 之后的所有参数都是仅关键字参数。  
 
 通过指定标签名称和相应的轴，或直接指定索引或列名称来删除行或列。使用多索引时，可以通过指定级别来移除不同级别的标签。 有关现在未使用的级别的更多信息，请参阅*用户指南 <advanced.shown_levels>*。  
 
 **参数：**  
 **labels： *single label or list-like***  
-要删除的索引或列标签。 元组将用作单个标签，而不被视为一个类似列表。  
+要删除的索引（即行标签）或列标签。 元组将用作单个标签，而不被视为一个类似列表。  
 
 **axis： *{0 or ‘index’, 1 or ‘columns’}, 默认值 0***  
-是否从索引（0 或“index”）或列（1 或“columns”）中删除标签。  
+是否从索引（0 或“index”）或列（1 或“columns”）中删除标签。默认删除行。  
 
 **index： *single label or list-like***  
 替代指定轴（labels，axis=0 相当于 index=labels）。  
@@ -2824,6 +3085,73 @@ False
 
 **Raises： KeyError**  
 如果在所选轴中有任何标签未找到。  
+
+**删除行**  
+根据索引（行标签）删除指定行  
+
+```py
+In [145]: df
+Out[145]:
+                       原始单号   合计费用  Unnamed: 2
+0       702-8460768-1662653  40.78         NaN
+1       702-1656259-1266619  57.87         NaN
+2  5cc719211cb55e42691dea14  36.98         NaN
+3  5cc73780feb248784b49ed32  36.62         NaN
+4       111-3184685-6900237  28.33         NaN
+
+In [146]: df.drop(2)
+Out[146]:
+                       原始单号   合计费用  Unnamed: 2
+0       702-8460768-1662653  40.78         NaN
+1       702-1656259-1266619  57.87         NaN
+3  5cc73780feb248784b49ed32  36.62         NaN
+4       111-3184685-6900237  28.33         NaN
+
+In [161]: df.drop(index=2)  # (index=2) 相当于 (2, axis=0)
+Out[161]:
+                       原始单号   合计费用  Unnamed: 2
+0       702-8460768-1662653  40.78         NaN
+1       702-1656259-1266619  57.87         NaN
+3  5cc73780feb248784b49ed32  36.62         NaN
+4       111-3184685-6900237  28.33         NaN
+```
+
+Pandas 默认使用的索引类型是 RangeIndex。
+
+**删除列**  
+通过列标签与指定轴删除指定列。  
+通过 *columns* 参数删除指定列，删除列时推荐通过 *columns* 参数来删除，使用 *columns* 参数可以避免指定轴的问题。  
+
+```py
+In [156]: df
+Out[156]:
+                  原始单号   合计费用  Unnamed: 2
+0  702-8460768-1662653  40.78         NaN
+1  702-1656259-1266619  57.87         NaN
+
+In [157]: df.drop('Unnamed: 2', axis=1)  # axis=1 表示从列标签中查找并删除列名为 'Unnamed: 2' 的列
+Out[157]:
+                  原始单号   合计费用
+0  702-8460768-1662653  40.78
+1  702-1656259-1266619  57.87
+
+In [158]: df.drop(columns='Unnamed: 2')  # 删除指定的列（列名为'Unnamed: 2'）
+Out[158]:
+                  原始单号   合计费用
+0  702-8460768-1662653  40.78
+1  702-1656259-1266619  57.87
+
+In [198]: try:
+     ...:     df.drop('Unnamed: 2', 1)
+     ...: except TypeError as e:
+     ...:     print("TypeError:", e)
+     ...:
+TypeError: DataFrame.drop() takes from 1 to 2 positional arguments but 3 were given
+```
+
+Python 中，当函数调用时传入了错误数量或类型的参数，会抛出 TypeError。  
+DataFrame.drop() 只接受最多 2 个位置参数（self 和 labels），但上面的代码中传了 3 个（self, 'Unnamed: 2', 1），所以是典型的 TypeError。
+<br><br>
 
 #### pandas.DataFrame.index
 DataFrame.**index**: *Index*  
@@ -2844,6 +3172,172 @@ Out[1436]:
 
 In [1437]: df[df['ts_code'] == '510050.SH'].index                                              
 Out[1437]: Int64Index([906], dtype='int64')
+```
+
+查询符合指定条件的行的索引  
+
+```py
+In [163]: df
+Out[163]:
+                  原始单号   合计费用  Unnamed: 2
+0  702-8460768-1662653  40.78         NaN
+1  702-1656259-1266619  57.87         NaN
+
+In [164]: df.index
+Out[164]: RangeIndex(start=0, stop=2, step=1)
+
+In [165]: df[df['合计费用'] == 57.87].index
+Out[165]: Index([1], dtype='int64')
+```
+<br><br>
+
+#### pandas.DataFrame.loc
+***property*** **DataFrame.loc**  
+Access a group of rows and columns 通过标签或一个布尔数组访问一组行和列。
+
+`.loc[]` 主要基于标签，但也可以与一个布尔数组一起使用。
+
+允许的输入是：
+
+* 一个单独的标签，例如 `5` 或 `'a'`（注意：`5` 被解释为索引的标签（即 `5` 被解释为行标签），而**永远**不会被解释为索引中的整数位置）。  
+* 一个列表或标签数组，例如 `['a', 'b', 'c']`。  
+* 一个带有标签的切片对象，例如 `'a':'f'`。（**警告：** 注意与常规的 Python 切片不同，这里的起始和结束标签均包含在内。）  
+* 一个与被切片的轴长度相同的布尔数组，例如 `[True, False, True]`。  
+* 一个可对齐的布尔型 Series。在进行掩码操作之前，该键（key）的索引会先与目标对象的索引对齐。(就是带有索引的布尔型 Series，键指的是传递给 `.loc` 的那个布尔型 Series)  
+* 一个可对齐的 Index。返回的选取结果的索引将与输入的 Index 一致。  
+* 一个接受单个参数（调用该方法的 Series 或 DataFrame）的可调用函数，并且该函数返回可用于索引的有效输出（即上述任意一种形式）。  
+
+更多信息请参考 [按标签选择](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#indexing-label)。
+
+**抛出：**  
+**KeyError**  
+如果有任意一项未找到。  
+
+**IndexingError**  
+如果传入了一个带索引的键（indexed key），但其索引无法与 DataFrame 的索引对齐。  
+
+单标签。返回行作为一个 Series。  
+df.loc[2]  
+返回索引为 2 的行，返回的类型为 Series。  
+
+```py
+>>> df = pd.DataFrame(data={"c1": [1, 3, 5], "c2": [2, 4, 6]})
+>>> df
+   c1  c2
+0   1   2
+1   3   4
+2   5   6
+>>> df.loc[2]  # 返回索引为 2 的行，返回类型为 Series
+c1    5
+c2    6
+Name: 2, dtype: int64
+>>> type(df.loc[2])
+<class 'pandas.core.series.Series'>
+>>> df.loc[2, 'c1']         # 返回索引为 2，列标签为 'c1' 的数据
+np.int64(5)
+>>> print(df.loc[2, 'c1'])
+5
+>>> type(df.loc[2, 'c1'])
+<class 'numpy.int64'>
+```
+
+`df.loc[2, 'c1']` 可以理解为先取 df 中索引为 `2` 的行，再在该行中取 'c1' 列的数据，后面的几种 `df.loc[]` 的用法只要有列标签的都可以这么理解。  
+
+注意：np.int64(5) 只是在交互式环境中为了调试方便而显示的“repr”形式，实际存储、传输、打印时都是纯数值 5。  
+
+标签列表。使用 `[[]]` 返回一个 DataFrame。  
+df.loc[['a', 'b']]  
+选取索引为 'a' 和 'b' 的行，`.loc[]` 操作的永远是行，而 `[]` 操作的有可能是行，也有可能是列  
+
+
+```py
+>>> df = pd.DataFrame(data=[[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]],
+...                   columns=list("abc"), index=list("abcd"))
+>>> df
+    a   b   c
+a   1   2   3
+b   4   5   6
+c   7   8   9
+d  10  11  12
+>>> df.loc[['a', 'b']]  # 选择行标签（索引）为 'a' 和 'b' 的两行
+   a  b  c
+a  1  2  3
+b  4  5  6
+>>> df[['a', 'b']]      # 选择列标签为 'a' 和 'b' 的两列
+    a   b
+a   1   2
+b   4   5
+c   7   8
+d  10  11
+>>> 
+```
+
+df.loc['b':'d']  
+从行标签（索引）为 'b' 的行开始选取，一直选到行标签为 'd' 的行，包含 'b' 和 'd' 行。  
+
+```py
+>>> df.loc['b':'d']
+    a   b   c
+b   4   5   6
+c   7   8   9
+d  10  11  12
+```
+
+df[[True, False, True, False]]  
+布尔数组的长度需与被切片的轴（即行标签所在的轴）的长度相同  
+
+```py
+>>> df[[True, False, True, False]]  # 按位置（数字索引位置）匹配
+   a  b  c
+a  1  2  3
+c  7  8  9
+```
+
+**可对齐的布尔型 Series**  
+df.loc[df['a'] > 5]  
+筛选出 'a' 列中的值大于 5 的行  
+
+```py
+>>> mask = df['a'] > 5
+>>> type(mask)
+<class 'pandas.core.series.Series'>
+>>> mask    # mask 是一个带有索引（'a', 'b', 'c', 'd'）的布尔 Series。
+a    False
+b    False
+c     True
+d     True
+Name: a, dtype: bool
+>>> df.loc[mask]
+    a   b   c
+c   7   8   9
+d  10  11  12
+>>> df.loc[df['a'] > 8, 'c']
+d    12
+Name: c, dtype: int64
+>>> type(df.loc[df['a'] > 8, 'c'])
+<class 'pandas.core.series.Series'>
+>>> df.loc['d', 'c']
+np.int64(12)
+>>> type(df.loc['d', 'c'])
+<class 'numpy.int64'>
+```
+
+上文中的键指的就是 mask，而键的索引指的是 mask 的索引（'a', 'b', 'c', 'd'）。  
+可以看到当单标签与列标签联合使用时，返回的是数据本身的类型（pandas中的数据类型是采用的Numpy的数据类型，而非标准的Python数据类型）。  
+当可对齐的布尔型 Series 与列标签结合使用时，返回的数据类型是 Series。  
+
+```py
+>>> other_mask = pd.Series(data=[True, False, True, False], index=['c', 'b', 'd', 'a'])
+>>> other_mask
+c     True
+b    False
+d     True
+a    False
+dtype: bool
+>>> df.loc[other_mask]  # 在进行掩码操作前，other_mask 的索引会先与 df 的索引对齐
+    a   b   c
+c   7   8   9
+d  10  11  12
 ```
 
 #### pandas.DataFrame.merge  
