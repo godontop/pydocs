@@ -23,7 +23,10 @@
     * [matplotlib](#matplotlib)
     * [mitmproxy](#mitmproxy)
     * [MySQL-python](#mysql-python)
-    * [NumPy](#numpy)
+* [NumPy](#numpy)
+    * [NumPy API 参考](#numpy-api-参考)
+        * [按主题分类的例程与对象](#按主题分类的例程与对象)
+            * [数学函数](#数学函数)
     * [openpyxl](#openpyxl)
 * [pandas](#pandas)
     * [pandas用户指南](#pandas用户指南)
@@ -692,7 +695,7 @@ MySQLdb is an interface to the popular [MySQL](http://www.mysql.com/) database s
 
 **注意：** 安装 MySQL-python 库以后，导入的模块名是 **MySQLdb**。
 
-## NumPy
+# NumPy
 习惯上，我们按以下方式导入numpy：
 
 ```python
@@ -712,8 +715,73 @@ NumPy **ndarray** 类被用于表示矩阵及向量。一个**向量**是一个�
 
 **ndarray.ndim** 将高速你数组的坐标轴或者维的个数。  
 
-**ndarray.shape** 将显示一个整型数元组用以表明数组的每个维所存储的元素的个数。例如，如果你有一个2行3列的2维数组，则你的数组的形状是 (2, 3)。  
+**ndarray.shape** 将显示一个整型数元组用以表明数组的每个维所存储的元素的个数。例如，如果你有一个2行3列的2维数组，则你的数组的形状是 (2, 3)。
+<br><br>
 
+## NumPy API 参考
+### 按主题分类的例程与对象
+#### 数学函数
+##### numpy.nan_to_num
+```py
+numpy.nan_to_num(x, copy=True, nan=0.0, posinf=None, neginf=None)
+```
+
+将 NaN 替换为 0，将无穷大替换为较大的有限数值（默认行为），或者使用用户通过 [nan](https://numpy.org/doc/stable/reference/constants.html#numpy.nan)、*posinf* 和/或 *neginf* 关键字指定的数值进行替换。
+
+**参数：**  
+**x：** ***标量或类数组***  
+输入数据。如果 x 是有限值，则直接返回其本身。
+
+**nan：** ***整型数、浮点数或布尔值或者整型数、浮点数或布尔值的类数组，可选的***  
+用于填充 NaN 值的值。如果没有传入值，则使用 0.0 代替 NaN 值。
+
+**返回值：**  
+**out：** ***ndarray***  
+x，其中的非有限值已被替换。如果 [copy](https://numpy.org/doc/stable/reference/generated/numpy.copy.html#numpy.copy) 为 False，这可能是 x 本身。  
+
+```py
+>>> df = pd.DataFrame(data={"cost": [20, 30, np.nan, 40]})
+>>> df.cost
+0    20.0
+1    30.0
+2     NaN
+3    40.0
+Name: cost, dtype: float64
+>>> df['price'] = df['cost'] + 10
+>>> df
+   cost  price
+0  20.0   30.0
+1  30.0   40.0
+2   NaN    NaN
+3  40.0   50.0
+>>> np.nan + 10    # NaN 与任何值想加都等于 NaN
+nan
+>>> df.loc[2, 'cost']
+np.float64(nan)
+>>> type(df.loc[2, 'cost'])
+<class 'numpy.float64'>
+>>> df.loc[2, 'cost'] + 10
+np.float64(nan)
+>>> np.nan_to_num(df.loc[2, 'cost'], nan=0.0)
+np.float64(0.0)
+>>> np.nan_to_num(df.loc[2, 'cost'], nan=0.0) + 10
+np.float64(10.0)
+>>> np.nan_to_num(df['cost'], nan=0.0)
+array([20., 30.,  0., 40.])
+>>> df['new_price'] = np.nan_to_num(df['cost'], nan=0.0) + 10
+>>> df
+   cost  price  new_price
+0  20.0   30.0       30.0
+1  30.0   40.0       40.0
+2   NaN    NaN       10.0
+3  40.0   50.0       50.0
+>>> np.nan_to_num(5, nan=0.0)  # 有限值直接返回其本身
+np.int64(5)
+>>>
+```
+
+NaN 与任何值想加都等于 NaN。
+<br><br>
 
 ### numpy.arange
 numpy.**arange**([*start*, ]*stop*, [*step*, ]*dtype=None*)  
@@ -3052,7 +3120,8 @@ False
 **DataFrame.div(_other, axis='columns', level=None, fill_value=None_)**  
 以元素的方式获取 dataframe 和 other 的浮点数除法结果（二进制运算符 *truediv*）。  
 
-等同于 `dataframe / other`，但支持用 fill_value 替换其中一个输入中的缺失数据。使用反向版本，*rtruediv*。    
+等同于 `dataframe / other`，但支持用 fill_value 替换其中一个输入中的缺失数据。使用反向版本，*rtruediv*。
+<br><br>
 
 #### pandas.DataFrame.drop
 ```py
@@ -3060,7 +3129,7 @@ DataFrame.drop(labels=None, *, axis=0, index=None, columns=None, level=None, inp
 ```  
 
 从行或列中删除指定的标签。默认是从 index 轴删除标签，即若未指定轴，默认从索引中查找标签并删除。    
-从 pandas 1.5 版本开始，*labels* 之后的所有参数都是仅关键字参数。  
+从 pandas 1.5 版本开始，*labels* 之后的所有参数都是仅关键字参数。使用位置参数的方式传递仅关键字参数会抛出 TypeError。  
 
 通过指定标签名称和相应的轴，或直接指定索引或列名称来删除行或列。使用多索引时，可以通过指定级别来移除不同级别的标签。 有关现在未使用的级别的更多信息，请参阅*用户指南 <advanced.shown_levels>*。  
 
@@ -3341,13 +3410,37 @@ d  10  11  12
 ```
 
 #### pandas.DataFrame.merge  
-**DataFrame.merge(*right, how='inner', on=None, left_on=None, right_on=None, left_index=False, right_index=False, sort=False, suffixes=('_x', '_y'), copy=True, indicator=False, validate=None)***  
+```py
+DataFrame.merge(right, how='inner', on=None, left_on=None, right_on=None, left_index=False, right_index=False, sort=False, suffixes=('_x', '_y'), copy=None, indicator=False, validate=None)
+``` 
 
-用数据库风格的 join 将 DataFrame 或命名的 Series 对象合并。  
+用数据库风格的 join 将 DataFrame 或命名 Series 对象合并。  
 
 一个命名的 Series 对象被视为具有单个命名列的 DataFrame。  
 
-连接是在列或索引上完成的。 如果在列上连接列，则 DataFrame 索引*将被忽略*。否则，如果合并索引上的索引或列上的索引，则索引将被传递。 执行交叉合并时，不允许合并列规范。  
+连接是在列或索引上完成的。 如果在列上连接列，则 DataFrame 索引*将被忽略*。否则，如果合并索引上的索引或列上的索引，则索引将被传递。 执行交叉合并时，不允许指定任何用于连接的列。  
+
+**警告**  
+如果两个键列中都包含键值为 null 的行，则这些行会相互匹配。这与常规的 SQL 连接行为不同，可能导致意外的结果。  
+
+```py
+>>> df1 = pd.DataFrame({'key': [np.nan, 'A'], 'val1': [1, 2]})
+>>> df1
+   key  val1
+0  NaN     1
+1    A     2
+>>> df2 = pd.DataFrame({'key': [np.nan, 'B'], 'val2': [10, 20]})
+>>> df2
+   key  val2
+0  NaN    10
+1    B    20
+>>> df1.merge(df2, how="inner")
+   key  val1  val2
+0  NaN     1    10
+>>>
+```
+
+Pandas 在 merge 操作中对 null 值做了特殊处理：显式地让 null 与 null 匹配。  
 
 **参数：**  
 **right： *DataFrame or named Series***  
@@ -3362,58 +3455,70 @@ d  10  11  12
 * inner: 使用来自两个帧的键的交集，类似于 SQL 内连接；保留左键的顺序。  
 * cross: 从两个帧创建笛卡尔积，保留左键的顺序。  
 
-***版本 1.2.0 中的新功能。***  
+**on：** ***标签或列表***  
+用于连接的列名或索引层级名称。这些名称必须在两个 DataFrame 中都存在。如果 on 为 None，且不是基于索引进行合并，则默认使用两个 DataFrame 列名的交集。  
 
-**Returns： DataFrame**  
-两个合并对象的 DataFrame。  
+**返回值： DataFrame**  
+两个对象合并后的 DataFrame。  
 
-```python
+```py
+>>> df1 = pd.DataFrame({"sku": ['A', 'B', 'C'], "fulfill": ['Amazon', 'Amazon', 'Amazon']})
+>>> df2 = pd.DataFrame({"sku": ['A', 'B', 'D'], "成本": [10, 20, 30]})
 >>> df1
-     type             order id             sku  ... selling fees  fba fees  total
-0   Order  702-1138646-9141825   HT-CWSBLE8BKS  ...        -7.37       0.0  41.78
-2   Order  701-0152570-2531474   HT-CWSBLD9BKS  ...        -4.42      -8.7  16.36
-3   Order  701-5837171-7378639  HT-CWSBLD9BKXL  ...        -4.54      -8.7  17.02
-4   Order  701-2584669-0129845  HT-CWSBLD9PPXL  ...        -5.34       0.0  30.25
-5   Order  701-2584669-0129845  HT-CWSBLD9WTXL  ...        -5.34       0.0  30.25
-7   Order  701-6310582-5160205   HT-CWSBLD9BKS  ...        -4.42      -8.7  16.36
-8   Order  701-0200508-1054662   HT-CWSBLV8ORS  ...        -5.85       0.0  33.14
-9   Order  701-0909993-5240234   HT-CWSBLD9BKS  ...        -4.42      -8.7  16.36
-10  Order  702-1107566-1984247   HT-CWSBLD9BES  ...        -5.34       0.0  30.25
-12  Order  701-0787880-4570618   HT-CWSBLD9BKM  ...        -4.54      -8.7  17.02
-
-[10 rows x 10 columns]
+  sku fulfill
+0   A  Amazon
+1   B  Amazon
+2   C  Amazon
 >>> df2
-                 sku        采购成本
-0        HT-TWTWG4SG    7.350000
-1       HT-TWTWG4SBE    7.350000
-2        HT-TWTWG4CG    6.700000
-3       HT-TWTWG4CBE    7.350000
-4         HT-TWTSR2R   11.750000
-...              ...         ...
-7179  HT-CWSBLH8BK10   41.333333
-7180    HT-BCPWP2LGY   18.910000
-7181  HT-DWTSWBPD22D   20.200000
-7182   HT-ACANHA10CB   30.000000
-7183     HT-DWTC20BK  135.000000
-
-[7184 rows x 2 columns]
->>> df1 = df1.merge(df2)
+  sku  成本
+0   A  10
+1   B  20
+2   D  30
+>>> df1.merge(df2, on='sku', how="inner")
+  sku fulfill  成本
+0   A  Amazon  10
+1   B  Amazon  20
+>>> df1.merge(df2, on='sku', how="left")
+  sku fulfill    成本
+0   A  Amazon  10.0
+1   B  Amazon  20.0
+2   C  Amazon   NaN
+>>> df1.loc[1, 'sku'] = np.nan
 >>> df1
-    type             order id             sku  ... fba fees  total       采购成本
-0  Order  702-1138646-9141825   HT-CWSBLE8BKS  ...      0.0  41.78  34.560000
-1  Order  701-0152570-2531474   HT-CWSBLD9BKS  ...     -8.7  16.36  39.000000
-2  Order  701-6310582-5160205   HT-CWSBLD9BKS  ...     -8.7  16.36  39.000000
-3  Order  701-0909993-5240234   HT-CWSBLD9BKS  ...     -8.7  16.36  39.000000
-4  Order  701-5837171-7378639  HT-CWSBLD9BKXL  ...     -8.7  17.02  39.000000
-5  Order  701-2584669-0129845  HT-CWSBLD9PPXL  ...      0.0  30.25  39.640288
-6  Order  701-2584669-0129845  HT-CWSBLD9WTXL  ...      0.0  30.25  39.640288
-7  Order  701-0200508-1054662   HT-CWSBLV8ORS  ...      0.0  33.14  40.793333
-8  Order  702-1107566-1984247   HT-CWSBLD9BES  ...      0.0  30.25  40.666667
-9  Order  701-0787880-4570618   HT-CWSBLD9BKM  ...     -8.7  17.02  39.492500
-
-[10 rows x 11 columns]
+   sku fulfill
+0    A  Amazon
+1  NaN  Amazon
+2    C  Amazon
+>>> df1.merge(df2, on='sku', how='inner')
+  sku fulfill  成本
+0   A  Amazon  10
+>>> df1.merge(df2, on='sku', how='left')
+   sku fulfill    成本
+0    A  Amazon  10.0
+1  NaN  Amazon   NaN
+2    C  Amazon   NaN
+>>> df3 = pd.DataFrame({"sku": [], "fulfill": []})
+>>> df3
+Empty DataFrame
+Columns: [sku, fulfill]
+Index: []
+>>> df3.merge(df2, on='sku', how='inner')
+Empty DataFrame
+Columns: [sku, fulfill, 成本]
+Index: []
+>>> df3.merge(df2, on='sku', how='left')
+Empty DataFrame
+Columns: [sku, fulfill, 成本]
+Index: []
 >>>
 ```
+
+当合并类型为 `inner` 时，使用两者的交集，只有当要连接的列（上例中为 'sku' 列）或索引层级中的值在两边都具有时（即两边要连接的列中值的交集），才会保留该值所在的行，其余的行将被直接删除。  
+当合并类型为 `left` 时，将始终保留左侧的行及其索引顺序。对于左侧 `sku` 中没有匹配的值，其合并列中的值将为空（即NaN）。  
+如果左侧的 DataFrame 无数据，则不管是 `inner` 还是 `left` 合并类型，都只增加右侧的列，而不增加数据。
+
+能够使用 df.merge() 完成的工作绝不可使用 for 循环，两者的速度差距是数量级的。
+<br><br>
 
 #### **pandas.DataFrame.reset_index**  
 **DataFrame.reset_index(*level=None, drop=False, inplace=False, col_level=0, col_fill=''*)**  
