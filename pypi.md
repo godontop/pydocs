@@ -2483,10 +2483,25 @@ pandas.**concat**_(objs: Union[Iterable[‘DataFrame’], Mapping[Label, ‘Data
 ```
 
 #### pandas.to_numeric
-pandas.**to_numeric**(*arg, errors='raise', downcast=None*)  
-将参数转换为数字类型。  
+```py
+pandas.to_numeric(arg, errors='raise', downcast=None, dtype_backend=<no_default>)
+```
+
+将参数转换为数值类型。  
 
 默认返回数据类型为 *float64* 或 *int64*，具体取决于提供的数据。使用 *downcast* 参数获取其它数据类型。  
+
+**参数：**  
+**arg：** 标量、列表、元组、一维数组或 Series  
+要被转换的参数。  
+
+**errors：** ***{‘ignore’, ‘raise’, ‘coerce’}, 默认值 ‘raise’***  
+* 如果为 ‘raise’，则无效的解析将引发异常。  
+* 如果为 ‘coerce’，则无效的解析将被设置为 NaN。  
+* 如果为 ‘ignore’，则无效的解析将返回原值。  
+
+***在版本 2.2 发生变更。***  
+“ignore” 已被弃用。请改为显式捕获异常。  
 
 ```python
 >>> df = pd.DataFrame({"股票简称": ["中国电信", "京东方A", "华润材料"], "holders": ["303.1684万", "141.0821万", 3]})
@@ -2509,8 +2524,36 @@ pandas.**to_numeric**(*arg, errors='raise', downcast=None*)
 2  华润材料        3
 ```
 
-参考链接：  
-[https://pandas.pydata.org/docs/reference/general_functions.html](https://pandas.pydata.org/docs/reference/general_functions.html)  
+```py
+>>> df = pd.DataFrame(data={"shipping": [70.5, np.nan, "重发"]})
+>>> df.shipping               # dtype 为 object
+0    70.5
+1     NaN
+2      重发
+Name: shipping, dtype: object 
+>>> df.shipping.fillna(0)
+0    70.5
+1       0
+2      重发
+Name: shipping, dtype: object
+>>> try:
+...     pd.to_numeric(df['shipping'], errors='raise')
+... except ValueError as e:
+...     print('ValueError:', e)
+... 
+ValueError: Unable to parse string "重发" at position 2
+>>> pd.to_numeric(df['shipping'], errors='coerce')  # dtype 为 float64
+0    70.5
+1     NaN
+2     NaN
+Name: shipping, dtype: float64
+>>> pd.to_numeric(df['shipping'], errors='coerce').fillna(0)
+0    70.5
+1     0.0
+2     0.0
+Name: shipping, dtype: float64
+>>>
+``` 
 
 ### Series
 布尔类型的Series  
