@@ -3190,6 +3190,64 @@ dtype: bool
 >>> df.all(axis=None)
 False
 ```
+<br><br>
+
+#### pandas.DataFrame.copy
+**DataFrame.copy**(_**deep**=True_)  
+复制该对象的索引及数据。
+
+当 `deep=True`（默认值），将创建一个复制了调用对象的数据和索引的新对象。修改副本的数据或索引将不会影响原来的对象，反之亦然（参见下面的备注）。  
+
+当 `deep=False` 时，将创建一个没有复制调用对象的数据和索引（仅复制指向数据和索引的引用）的新对象。对原始数据的任何修改都将影响浅拷贝（反之亦然）。
+
+**备注**  
+上面描述的 `deep=False` 的行为将在 pandas 3.0 中发生改变。“写时复制”（Copy-on-Write）机制将被设为默认启用。这意味着，当设置 `deep=False` 返回“浅”拷贝时，将不再进行实际的数据复制。但与传统的浅拷贝不同，对原始数据的更改将不再反映在浅拷贝中（反之亦然）。相反，它利用了一种惰性（或称延迟）拷贝机制，仅在原始对象或浅拷贝中的任一者发生修改时，才会真正复制数据。
+
+你可以通过启用写时复制 `pd.options.mode.copy_on_write = True` 来获得这种未来的行为和改进。
+
+**参数：**  
+**deep：** ***bool，默认值 True***  
+创建一个深拷贝，包含一份数据和索引的副本。当 `deep=False` 时，既不复制索引也不复制数据。
+
+**返回值：**  
+**Series 或 DataFrame**  
+匹配调用者的对象类型。
+
+```py
+>>> fba = {}
+>>> df
+  shipping
+0     70.5
+1      NaN
+2       重发
+>>> fba['BR01'] = df.copy()   # 将 df 的深拷贝赋值给字典的键 'BR01'
+>>> fba['BR01']
+  shipping
+0     70.5
+1      NaN
+2       重发
+>>> df.drop(1, inplace=True)  # 删除原始对象 df 中索引为 1 的行
+>>> df
+  shipping
+0     70.5
+2       重发
+>>> fba['BR01']    # 深拷贝副本内容未变
+  shipping
+0     70.5
+1      NaN
+2       重发
+>>> fba['BR01'].drop(2, inplace=True)  # 修改深拷贝副本的内容
+>>> fba['BR01']
+  shipping
+0     70.5
+1      NaN
+>>> df         # 原对象内容不变
+  shipping
+0     70.5
+2       重发
+>>>
+```
+<br><br>
 
 #### pandas.DataFrame.div
 **DataFrame.div(_other, axis='columns', level=None, fill_value=None_)**  
