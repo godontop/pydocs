@@ -2371,7 +2371,8 @@ pandas.**read_excel**(\*args, \*\*kwargs)
 >>> df1.to_excel("output.xlsx", sheet_name='Sheet_name_1')
 ```
 
-如果您希望写入工作簿中的多个工作表，则需要指定一个 ExcelWriter 对象：  
+如果您希望在工作簿中写入多个工作表，则需要指定一个 ExcelWriter 对象：
+如果未指定 ExcelWriter 对象，则该工作簿中永远都只有最后一个工作表，后写入的工作表会覆盖前面的工作表。   
 
 ```python
 >>> df2 = df1.copy()
@@ -2380,11 +2381,42 @@ pandas.**read_excel**(\*args, \*\*kwargs)
 ...     df2.to_excel(writer, sheet_name='Sheet_name_2')
 ```
 
+```py
+>>> df1.to_excel('output.xlsx', sheet_name='sheet_name_1')
+>>> df2.to_excel('output.xlsx', sheet_name='sheet_name_2')
+>>> pd.ExcelFile('output.xlsx').sheet_names
+['sheet_name_2']
+>>> with pd.ExcelWriter('output2.xlsx') as writer:
+...     df1.to_excel(excel_writer=writer, sheet_name='sheet_name_1')
+...     df2.to_excel(excel_writer=writer, sheet_name='sheet_name_2')
+... 
+>>> pd.ExcelFile('output2.xlsx').sheet_names
+['sheet_name_1', 'sheet_name_2']
+>>>
+```
+
 ExcelWriter 也可用于附加到现有的 Excel 文件：  
 
 ```python
 >>> with pd.ExcelWriter('output.xlsx', mode='a') as writer:
 ...     df.to_excel(writer, sheet_name='Sheet_name_3')
+```
+
+#### pandas.ExcelFile
+```py
+class pandas.ExcelFile(path_or_buffer, engine=None, storage_options=None, engine_kwargs=None)
+```
+
+用于将表格形式的 Excel 工作表解析为 DataFrame 对象的类。
+
+更多文档请参见 read_excel。
+
+查看 Excel 文件中有多个工作表（Sheet）以及工作表的名称    
+
+```py
+>>> pd.ExcelFile('output2.xlsx').sheet_names
+['sheet_name_1', 'sheet_name_2']
+>>>
 ```
 
 #### pandas.ExcelWriter  
