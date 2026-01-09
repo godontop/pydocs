@@ -32,11 +32,12 @@
     * [pandas用户指南](#pandas用户指南)
         * [索引与选择数据](#索引与选择数据)
         * [选项和设置](#选项和设置)
-        * [Pandas API 参考](#pandas-api-参考)
-            * [输入/输出](#输入输出)
-            * [通用函数](#通用函数)
-            * [Series](#series)
-            * [DataFrame](#dataframe)
+    * [Pandas API 参考](#pandas-api-参考)
+        * [输入/输出](#输入输出)
+        * [通用函数](#通用函数)
+        * [Series](#series)
+        * [DataFrame](#dataframe)
+        * [索引对象](#索引对象)
         * [pandas 常见用法](#pandas-常见用法)
     * [pdfplumber](#pdfplumber)
     * [pillow](#pillow)
@@ -3047,7 +3048,7 @@ DataFrame.columns
 
 The column labels of the DataFrame.
 
-### pandas.DataFrame
+#### pandas.DataFrame
 ```py
 class pandas.DataFrame(data=None, index=None, columns=None, dtype=None, copy=None)
 ```
@@ -3190,6 +3191,42 @@ dtype: bool
 >>> df.all(axis=None)
 False
 ```
+<br>
+
+#### pandas.DataFrame.columns
+**DataFrame.columns**  
+DataFrame 的列标签。
+
+```py
+>>> df = pd.DataFrame({'A': [1, 2], 'B': [3, 4]})
+>>> df
+   A  B
+0  1  3
+1  2  4
+>>> df.columns
+Index(['A', 'B'], dtype='object')
+>>> type(df.columns)
+<class 'pandas.core.indexes.base.Index'>
+>>> pd.Index
+<class 'pandas.core.indexes.base.Index'>
+>>> pd.Index is pd.core.indexes.base.Index
+True
+>>> df.columns = ['a', 'c']  # 修改 DataFrame 的列标签
+>>> df
+   a  c
+0  1  3
+1  2  4
+>>> df.columns = ['x'] + df.columns[1:].to_list()
+>>> df
+   x  c
+0  1  3
+1  2  4
+>>>
+```
+
+通过给 `df.columns` 赋值的形式来修改列名时，需使用列表的形式。  
+
+如果要修改完整的列标签名称，建议使用 `df.columns` 赋值的形式来修改列名，如果是部分修改（比如修改指定列的标签名称），建议使用 `df.rename(columns={'old_label': 'new_label'})` 的形式来修改指定列的列名。
 <br><br>
 
 #### pandas.DataFrame.copy
@@ -3247,7 +3284,7 @@ False
 2       重发
 >>>
 ```
-<br><br>
+<br>
 
 #### pandas.DataFrame.div
 **DataFrame.div(_other, axis='columns', level=None, fill_value=None_)**  
@@ -3653,6 +3690,63 @@ Index: []
 能够使用 df.merge() 完成的工作绝不可使用 for 循环，两者的速度差距是数量级的。
 <br><br>
 
+#### pandas.DataFrame.rename
+```py
+DataFrame.rename(mapper=None, *, index=None, columns=None, axis=None, copy=None, inplace=False, level=None, errors='ignore')
+```
+
+重命名列标签或索引标签。
+
+函数 / 字典的值必须是唯一的（一一对应）。不包含在字典 / Series 中的标签将保持不变。列出的额外标签不会引发错误。
+
+更多信息请参考 [用户指南](https://pandas.pydata.org/pandas-docs/stable/user_guide/basics.html#basics-rename)。
+
+**参数：**  
+**mapper：** ***类字典或函数***  
+应用到该轴的值上的类字典型或函数型转换。使用 `mapper` 和 `axis` 来指定要应用 `mapper` 的目标轴，或者直接使用 `index` 和 `columns`。
+
+**index：** ***类字典或函数***  
+指定轴的替代方式（`mapper, axis=0` 等同于 `index=mapper`）。
+
+**columns：** ***类字典或函数***  
+指定轴的替代方式（`mapper, axis=1` 等同于 `columns=mapper`）。
+
+**axis：** ***{0 或 ‘index’, 1 或 ‘columns’}, 默认值 0***  
+应用 `mapper` 的目标轴。可以是轴的名称 (‘index’, ‘columns’) 或数字 (0, 1)。默认值是 ‘index’。
+
+**copy：** ***bool, 默认值 True***  
+同时也复制底层数据。
+
+**备注**  
+*copy* 参数在 Pandas 3.0 版本中将改变其行为。写时复制将被默认启用，这意味着所有带有 *copy* 关键字的方法都将使用一种惰性复制机制来推迟实际的复制操作，并忽略 *copy* 关键字。在未来版本的 Pandas 中，*copy* 关键字将被彻底移除。  
+您现在就可以通过开启“写时复制”功能来体验未来的行为及改进：
+`pd.options.mode.copy_on_write = True`
+
+**inplace：** ***bool, 默认值 False***  
+是否修改 DataFrame 本身，而不是创建一个新的 DataFrame。如果为 True，则 copy 参数的值将被忽略。
+
+**返回值：**  
+**DataFrame 或 None**  
+带有被重命名的轴标签的 DataFrame 或 None 如果 `inplace=True` 的话。
+
+我们强烈推荐使用关键字参数以阐明你的目的。
+
+使用一个映射来重命名列：
+
+```py
+>>> df = pd.DataFrame({"A": [1, 2], "B": [3, 4]})
+>>> df
+   A  B
+0  1  3
+1  2  4
+>>> df.rename(columns={"A": "a", "B": "c"})
+   a  c
+0  1  3
+1  2  4
+>>>
+```
+<br>
+
 #### **pandas.DataFrame.reset_index**  
 **DataFrame.reset_index(*level=None, drop=False, inplace=False, col_level=0, col_fill=''*)**  
 重置索引，或它的一个级别。  
@@ -3808,7 +3902,36 @@ DataFrame.**sort_values**(*by, axis=0, ascending=True, inplace=False, kind='quic
 <br/>
 
 参考链接：  
-[https://pandas.pydata.org/docs/reference/frame.html](https://pandas.pydata.org/docs/reference/frame.html)  
+[https://pandas.pydata.org/docs/reference/frame.html](https://pandas.pydata.org/docs/reference/frame.html)
+<br><br>
+
+### 索引对象
+**索引**  
+这些方法中的许多（或其变体）在包含索引的对象（Series/DataFrame）上均有提供；在直接调用这些方法之前，您大概率应该优先使用那些（对象上的）方法。
+
+[Index](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Index.html#pandas.Index)([data, dtype, copy, name, tupleize_cols])  
+用于索引和对齐的不可变序列。  
+
+#### pandas.Index
+```py
+class pandas.Index(data=None, dtype=None, copy=False, name=None, tupleize_cols=True)
+```  
+用于索引和对齐的不可变序列。
+
+为所有 pandas 对象存储轴标签的基础对象。
+
+***在 2.0.0 版本中发生变更：*** Index 可以容纳所有 Numpy 数值型数据类型（float16 除外）。此前仅支持 int64、uint64 和 float64 数据类型。
+<br><br>
+
+#### pandas.Index.values
+***property*** **Index.values**  
+返回一个代表索引中的数据的数组。
+
+**警告**  
+我们推荐使用 `Index.array` 或 `Index.to_numpy()`，具体取决于您是需要对底层数据的引用，还是需要一个 Numpy 数组。
+
+**返回值：**  
+**数组： numpy.ndarray 或 ExtensionArray**
 
 #### pandas 修改列名
 修改所有列名  
@@ -3826,7 +3949,7 @@ DataFrame.**sort_values**(*by, axis=0, ascending=True, inplace=False, kind='quic
 1  2  4  6  8
 ```
 
-修改指定列名  
+修改指定列列名  
 
 ```python
 >>> df.rename(columns={"C": "c", "D": "d"}, inplace=True)
@@ -3835,6 +3958,7 @@ DataFrame.**sort_values**(*by, axis=0, ascending=True, inplace=False, kind='quic
 0  1  3  5  7
 1  2  4  6  8
 ```
+<br>
 
 ### pandas例子
 pandas 示例   
