@@ -1341,6 +1341,37 @@ _class_ **tuple([**_iterable_**])**
 >>> 
 ```
 
+```py
+>>> try:
+...     ('x', 'y') + ('z')
+... except TypeError as e:
+...     print("TypeError:", e)
+... 
+TypeError: can only concatenate tuple (not "str") to tuple
+>>> type(('z')) 
+<class 'str'>
+>>> type(('z',)) 
+<class 'tuple'>
+>>> type('z',) 
+<class 'str'>
+>>> ('x', 'y') + ('z',)
+('x', 'y', 'z')
+>>> t = 'z',
+>>> ('x', 'y') + t
+('x', 'y', 'z')
+>>> try:
+...     ('x', 'y') + 'z',
+... except TypeError as e:
+...     print("TypeError:", e) 
+... 
+TypeError: can only concatenate tuple (not "str") to tuple
+>>>
+```
+
+单元组的有效形式是 `a,` 或 `(a,)`。因为在函数调用中，`,` 属于参数列表的一部分，表示后面还有参数，所以为了避免歧义，单元组的表示建议始终采用 `(a,)` 的形式。  
+在函数调用中，末尾的逗号是允许的，它会被忽略。所以 `type('z',)` 等价于 `type('z')`。  
+`('x', 'y') + 'z',` 形式报错是因为在 Python 中，`,` 的优先级低于 `+`，所以 `('x', 'y') + 'z',` 先被解析为 `('x','y') + 'z'`（tuple + str → 报错），之后才看到逗号。
+
 构造器将构造一个元组，其中的项与 _iterable_ 中的项具有相同的值与顺序。 _iterable_ 可以是序列、支持迭代的容器或其他可迭代对象。 如果 _iterable_ 已经是一个元组，会不加改变地将其返回。 例如，`tuple('abc')` 返回 `('a', 'b', 'c')` 而 `tuple( [1, 2, 3] )` 返回 `(1, 2, 3)`。 如果没有给出参数，构造器将创建一个空元组 `()`。
 
 ```python
@@ -2974,9 +3005,256 @@ hex_codec  |hex     |将操作数转换为十六进制表示，每个字节有�
 [defaultdict](https://docs.python.org/zh-cn/3/library/collections.html#collections.defaultdict)  |字典的子类，提供了一个工厂函数，为字典查询提供一个默认值  
 [UserDict](https://docs.python.org/zh-cn/3/library/collections.html#collections.UserDict)  |封装了字典对象，简化了字典子类化  
 [UserList](https://docs.python.org/zh-cn/3/library/collections.html#collections.UserList)  |封装了列表对象，简化了列表子类化  
-[UserString](https://docs.python.org/zh-cn/3/library/collections.html#collections.UserString)  |封装了列表对象，简化了字符串子类化  
+[UserString](https://docs.python.org/zh-cn/3/library/collections.html#collections.UserString)  |封装了字符串对象，简化了字符串子类化  
 
-*从版本 3.3 开始弃用，将在版本 3.9 中被移除：* 已将 [容器抽象基类](https://docs.python.org/zh-cn/3/library/collections.abc.html#collections-abstract-base-classes) 移至 [collections.abc](https://docs.python.org/zh-cn/3/library/collections.abc.html#module-collections.abc) 模块。 为了保持向下兼容性，它们在 Python 3.8 版的这个模块中仍然存在。
+#### namedtuple() 带命名字段的元组工厂函数
+命名元组为元组中的每个位置赋予了特定含义，从而让代码更具可读性且能够实现自我文档化。它可以在任何使用常规元组的地方使用，并增加了通过名称（而非位置索引）来访问字段的能力。
+
+```py
+collections.namedtuple(typename, field_names, *, rename=False, defaults=None, module=None)
+```
+
+返回一个新的名为 *typename* 的元组子类。 这个新子类将被用于创建具有既可通过索引和迭代又可通过属性查找来访问字段的元组型对象。 这样的子类实例还将具有文档字符串 (包含 *typename* 和 *field_names*) 和以 `name=value` 格式列出元组内容的 [\_\_repr\_\_()](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#object.__repr__) 方法以方便使用。
+
+*field_names* 是一个像 `[‘x’, ‘y’]` 一样的字符串序列。或者，*field_names* 可以是一个纯字符串，用空白或逗号分隔开字段名，比如 `'x y'` 或者 `'x, y'` 。
+
+任何有效的 Python 标识符都可以作为字段名，除了下划线开头的那些。有效标识符由字母，数字，下划线组成，但首字母不能是数字或下划线，另外不能是[关键字](https://docs.python.org/zh-cn/3.14/library/keyword.html#module-keyword) 比如 *class*、*for*、*return*、*global*、*pass* 或 *raise*。
+
+如果 *rename* 为真，无效字段名会自动转换成位置名。比如 `['abc', 'def', 'ghi', 'abc']` 被转换成 `['abc', '_1', 'ghi', '_3']`，消除关键字 `def` 和重复字段名 `abc` 。
+
+*defaults* 可以是 `None` 或者是一个默认值的 [iterable](https://docs.python.org/zh-cn/3.14/glossary.html#term-iterable) 。因为带有默认值的字段必须位于没有默认值的字段之后，因此 *defaults* 将应用于最右边的参数。例如，如果字段名是 `['x', 'y', 'z']` 而默认值是 `(1, 2)` ，那么 `x` 就必须指定一个参数值 ，`y` 的默认值将为 `1` ，`z` 的默认值为 `2`。
+
+如果定义了 *module*，则命名元组的 [\_\_module\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#type.__module__) 属性将被设为该值。
+
+命名元组实例没有每个实例的字典（指 Python 中的 `__dict__` 属性，普通对象会用它来存储属性，比较占用内存。），因此它们非常轻量级，占用的内存不会比普通元组更多。  
+这里暗指的是普通的用户自定义类实例，它们每个都带有一个 `__dict__` 字典来存储属性，命名元组像普通元组一样，不为每个实例分配字典，因此内存占用极小。
+
+要支持序列化（pickling），应当将命名元组类赋值给一个匹配 *typename* 的变量。  
+这里的 "pickling" 指的是 Python 的 `pickle` 模块，用于将 Python 对象序列化为字节流，以便存储或传输。  
+命名元组类指通过 `namedtuple()` 工厂函数创建出的那个类（例如 `Point`），而不是它的实例（例如 `Point(1, 2)`）。
+
+*在 3.1 版本发生变更：* 添加了对 *rename* 的支持。
+
+*在 3.6 版本发生变更：* *verbose* 和 *rename* 参数成为 [仅限关键字参数](https://docs.python.org/zh-cn/3.14/glossary.html#keyword-only-parameter)。
+
+*在 3.6 版本发生变更：* 添加了 *module* 参数。
+
+*在 3.7 版本发生变更：* 移除了 *verbose* 形参和 \_source 属性。
+
+*在 3.7 版本发生变更：* 添加了 *defaults* 形参和 [\_field\_defaults](https://docs.python.org/zh-cn/3.14/library/collections.html#collections.somenamedtuple._field_defaults) 属性。
+
+```py
+>>> # 基本示例
+>>> from collections import namedtuple
+>>> namedtuple
+<function namedtuple at 0x7f951e7d80>
+>>> Point = namedtuple('Point', ['x', 'y'])
+>>> Point
+<class '__main__.Point'>
+>>> Point.__bases__
+(<class 'tuple'>,)
+>>> Point.__mro__
+(<class '__main__.Point'>, <class 'tuple'>, <class 'object'>)
+>>> type(Point)            # 类是 type 的实例
+<class 'type'>
+>>> isinstance(Point, type)
+True
+>>> p = Point(11, y=22)    # 使用位置或关键字参数进行实例化
+>>> type(p)                # p 是类 Point 的实例
+<class '__main__.Point'>
+>>> p[0] + p[1]            # 像普通元组 (11, 22) 一样可索引
+33
+>>> x, y = p               # 像普通元组一样解包
+>>> x, y
+(11, 22)
+>>> p.x + p.y              # 字段也可以按名称访问
+33
+>>> p                      # 名称=值 风格的易读的 __repr__
+Point(x=11, y=22)
+>>>
+```
+
+在 Python 中，所有类（包括自定义的类、内置类如 `int`、`str`，甚至 `type` 自己）都是 `type` 的实例。
+
+```py
+>>> class A:
+...     pass
+... 
+>>> type(A)
+<class 'type'>
+>>> isinstance(A, type)
+True
+>>> type(int)
+<class 'type'>
+>>> type(str)
+<class 'type'>
+>>> type(type)
+<class 'type'>
+>>>
+```
+
+`type` 是 Python 中默认的元类（metaclass） —— 用来创建类的类。
+
+命名元组在为 [csv](https://docs.python.org/zh-cn/3.14/library/csv.html#module-csv) 或 [sqlite3](https://docs.python.org/zh-cn/3.14/library/sqlite3.html#module-sqlite3) 模块返回的结果元组分配字段名称时特别有用：
+
+```py
+from collections import namedtuple
+
+EmployeeRecord = namedtuple('EmplyeeRecord', 'name, age, title, department, paygrade')
+
+import csv
+for emp in map(EmployeeRecord._make, csv.reader(open("employees.csv", "rb"))):
+    print(emp.name, emp.title)
+
+import sqlite3
+conn = sqlite3.connect('/companydata')
+cursor = conn.cursor()
+cursor.execute('SELECT name, age, title, department, paygrade FROM employees')
+for emp in map(EmployeeRecord._make, cursor.fetchall()):
+    print(emp.name, emp.title)
+```
+
+除了继承元组的方法，命名元组还支持三个额外的方法和两个属性。为了防止字段名冲突，方法和属性以下划线开头。
+
+*classmethod* somenamedtuple.**\_make**(*iterable*)  
+从一个现有的序列或可迭代对象创建新实例的类方法。
+
+```py
+>>> t = [11, 22] 
+>>> Point._make(t)
+Point(x=11, y=22)
+>>>
+```
+
+somenamedtuple.**\_asdict()**  
+返回一个新的 [字典](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#dict)，它将字段名称映射到它们对应的值：
+
+```py
+>>> p = Point(x=11, y=22)
+>>> p._asdict()
+{'x': 11, 'y': 22}
+>>>
+```
+
+*在 3.8 版本发生变更：* 返回一个常规 [dict](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#dict) 而不是 [OrderedDict](https://docs.python.org/zh-cn/3.14/library/collections.html#collections.OrderedDict)。 因为自 Python 3.7 起，常规字典已经保证有序。 如果需要 [OrderedDict](https://docs.python.org/zh-cn/3.14/library/collections.html#collections.OrderedDict) 的额外特性，建议的补救措施是将结果转换为需要的类型：`OrderedDict(nt._asdict())`。
+
+somenamedtuple.**\_replace**(\*\*kwargs)  
+返回一个新的命名元组实例，并将指定字段替换为新的值：
+
+```py
+>>> p = Point(x=11, y=22) 
+>>> p._replace(x=33) 
+Point(x=33, y=22)
+>>> for partnum, record in inventory.items():
+...     inventory[partnum] = record._replace(price=newprices[partnm], timestamp=time.now())
+```
+
+泛型函数 [copy.replace()](https://docs.python.org/zh-cn/3.14/library/copy.html#copy.replace) 也支持命名元组。
+
+*在 3.13 版本发生变更：* 对于无效的关键字参数将引发 [TypeError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#TypeError) 而不是 [ValueError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#ValueError)。
+
+somenamedtuple.**\_fields**  
+列出了字段名的字符串元组。用于提醒和从现有元组创建一个新的命名元组类型。
+
+```py
+>>> p._fields          # 查看字段名  
+('x', 'y')
+>>> Color = namedtuple('Color', 'red green blue')
+>>> Pixel = namedtuple('Pixel', Point._fields + Color._fields)
+>>> Pixel(11, 22, 128, 255, 0) 
+Pixel(x=11, y=22, red=128, green=255, blue=0)
+>>>
+```
+
+\_fields 属性既可以通过 namedtuple 生成的类访问，也可以通过该类的实例访问，因为实例继承了类的属性。
+
+somenamedtuple.**\_field\_defaults**  
+字典将字段名称映射到默认值。
+
+```py
+>>> Account = namedtuple('Account', ['type', 'balance'], defaults=[0])
+>>> Account._field_defaults
+{'balance': 0}
+>>> Account('premium') 
+Account(type='premium', balance=0)
+>>>
+```
+
+若要获取名称存储在字符串中的字段，请使用 [getattr()](https://docs.python.org/zh-cn/3.14/library/functions.html#getattr) 函数：  
+从实际结果来看，应该是获取字段的值，请使用 getattr() 函数：
+
+```py
+>>> getattr(p, 'x') 
+11
+>>>
+```
+
+转换一个字典到命名元组，使用 `**` 两星操作符 (如 [解包实参列表](https://docs.python.org/zh-cn/3.14/tutorial/controlflow.html#tut-unpacking-arguments) 所述)：
+
+```py
+>>> d = {'x': 33, 'y': 44} 
+>>> Point(**d) 
+Point(x=33, y=44)
+>>>
+```
+
+因为一个命名元组是一个常规的 Python 类，它可以很容易的通过子类来增加或更改功能。以下是添加计算字段和固定宽度打印格式的方法：
+
+```py
+>>> class Point(namedtuple('Point', ['x', 'y'])):
+...     __slots__ = ()
+...     @property
+...     def hypot(self):
+...         return (self.x ** 2 + self.y ** 2) ** 0.5
+...     def __str__(self):
+...         return 'Point: x=%6.3f y=%6.3f hypot=%6.3f' % (self.x, self.y, self.hypot)
+...
+>>> for p in Point(3, 4), Point(14, 5/7):
+...     print(p)
+...
+Point: x= 3.000 y= 4.000 hypot= 5.000
+Point: x=14.000 y= 0.714 hypot=14.018
+>>>
+```
+
+上面的子类设置 `__slots__` 为一个空元组。通过阻止创建实例字典保持了较低的内存开销。
+
+通过子类化来添加新的存储字段是没有用的。相反，只需通过 [\_fields](https://docs.python.org/zh-cn/3.14/library/collections.html#collections.somenamedtuple._fields) 属性来创建一个新的命名元组类型即可：
+
+```py
+>>> Point3D = namedtuple('Point3D', Point._fields + ('z',))
+>>>
+```
+
+文档字符串可以自定义，通过直接赋值给 `__doc__` 属性：
+
+```py
+>>> Book = namedtuple('Book', ['id', 'title', 'authors']) 
+>>> Book.__doc__ += ': Hardcover book in active collection' 
+>>> Book.id.__doc__ = '13-digit ISBN' 
+>>> Book.title.__doc__ = 'Title of first printing' 
+>>> Book.authors.__doc__ = 'List of authors sorted by last name' 
+>>> 
+```
+
+*在 3.5 版本发生变更：* 文档字符串属性变成可写。
+
+**另请参见：**  
+* 请参阅 [typing.NamedTuple](https://docs.python.org/zh-cn/3.14/library/typing.html#typing.NamedTuple)，以获取为命名元组添加类型提示的方法。 它还使用 [class](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#class) 关键字提供了一种优雅的句法：
+
+```py
+from typing import NamedTuple
+
+class Component(NamedTuple):
+    part_number: int
+    weight: float
+    description: Optional[str] = None
+```
+
+* 参考 [types.SimpleNamespace()](https://docs.python.org/zh-cn/3.14/library/types.html#types.SimpleNamespace)，了解一种基于底层字典而非元组的可变命名空间。
+
+* [dataclasses](https://docs.python.org/zh-cn/3.14/library/dataclasses.html#module-dataclasses) 模块提供了一个装饰器和一些函数，用于自动将生成的特殊方法添加到用户定义的类中。
+<br><br>
 
 ### collections.abc --- 容器的抽象基类
 *3.3 新版功能:* 该模块曾是 [collections](https://docs.python.org/zh-cn/3/library/collections.html#module-collections) 模块的组成部分。
@@ -4250,7 +4528,7 @@ A buffered text stream over a [BufferedIOBase](https://docs.python.org/3.6/libra
 
 * 此模块中的功能可能无法处理纪元之前或将来的远期日期和时间。未来的截止点由C库决定；对于32位系统，它通常在2038年。
 
-* **2000年（Y2K）问题 ：**Python依赖于平台的C库，它通常没有2000年问题，因为所有日期和时间都在内部表示为自纪元以来的秒数。函数 [strptime()](https://docs.python.org/zh-cn/3/library/time.html#time.strptime) 在给出 `%y` 格式代码时可以解析2位数年份。当解析2位数年份时，它们将根据 POSIX 和 ISO C 标准进行转换：值 69--99 映射到 1969--1999，值 0--68 映射到2000--2068。
+* **2000年（Y2K）问题 ：**  Python依赖于平台的C库，它通常没有2000年问题，因为所有日期和时间都在内部表示为自纪元以来的秒数。函数 [strptime()](https://docs.python.org/zh-cn/3/library/time.html#time.strptime) 在给出 `%y` 格式代码时可以解析2位数年份。当解析2位数年份时，它们将根据 POSIX 和 ISO C 标准进行转换：值 69--99 映射到 1969--1999，值 0--68 映射到2000--2068。
 
 * UTC 是 Coordinated Universal Time (以前叫 Greenwich Mean Time, 或 GMT). 首字母缩略词 UTC 不是一个错误而是英语与法语间的一个折衷。
 
