@@ -48,6 +48,7 @@
         * [codecs — 编解码器注册和相关基类](#codecs--编解码器注册和相关基类)
     * [数据类型](#数据类型)
         * [collections --- 容器数据类型](#collections-----容器数据类型)
+            * [namedtuple() 带命名字段的元组工厂函数](#namedtuple-带命名字段的元组工厂函数)
         * [collections.abc --- 容器的抽象基类](#collectionsabc-----容器的抽象基类)
         * [types --- 动态类型创建和内置类型名称](#types-----动态类型创建和内置类型名称)
             * [标准解释器类型](#标准解释器类型)
@@ -1539,9 +1540,38 @@ str.**join**(*iterable*)
 ```
 
 str.**lower()**  
-Return a copy of the string with all the cased characters [[4]](https://docs.python.org/3.6/library/stdtypes.html#id15) converted to lowercase.
+返回该字符串的副本，其中所有大写字符 [[4]](https://docs.python.org/3.6/library/stdtypes.html#id15) 均已转换为小写。例如：  
+[4]([1](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#id6)，[2](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#id7)，[3](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#id8)，[4](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#id9))
+区分大小写的字符是指所属一般类别属性为 "Lu" (Letter, uppercase)、"Ll" (Letter, lowercase) 或 "Lt" (Letter, titlecase) 之一的字符。  
 
-The lowercasing algorithm used is described in section 3.13 of the Unicode Standard.
+```py
+>>> 'Lower Method Example'.lower()
+'lower method example'
+>>> 
+```
+
+使用的小写算法在 Unicode 标准 3.13 节 ['Default Case Folding'](https://www.unicode.org/versions/Unicode16.0.0/core-spec/chapter-3/#G33992) 中有描述。
+<br><br>
+
+str.**partition**(*sep*, /)  
+在 *sep* 首次出现的位置拆分字符串，返回一个 3 元组，其中包含分隔符之前的部分、分隔符本身，以及分隔符之后的部分。 如果分隔符未找到，则返回的 3 元组中包含字符本身以及两个空字符串。
+<br><br>
+
+str.**removeprefix**(*prefix*, /)  
+如果字符串以 *prefix* 字符串开头，则返回 `string[len(prefix):]`。否则，返回原始字符串第一个副本：
+
+```PY
+>>> 'TestHook'.removeprefix('Test')
+'Hook'
+>>> 'BaseTestCase'.removeprefix('Test')
+'BaseTestCase'
+>>> 
+```
+
+*在版本 3.9 中新增。*  
+
+另请参考 [removesuffix()](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str.removesuffix) 和 [startswith()](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#str.startswith)。
+<br><br>
 
 str.**replace**(*old*, *new*[, *count*])  
 返回一个字符串的副本并将所有子串 *old* 替换为 *new*。如果指定了可选参数 *count*，则仅将前 *count* 个 *old* 替换为 *new*。
