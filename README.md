@@ -204,6 +204,7 @@
             * [6.2.3. 带圆括号的形式](#623-带圆括号的形式)
             * [6.2.4. 列表、集合与字典的显示](#624-列表集合与字典的显示)
             * [6.2.5. 列表显示](#625-列表显示)
+            * [6.2.8. 生成器表达式](#628-生成器表达式)
         * [6.14. lambda 表达式](#614-lambda-表达式)
     * [7. 简单语句](#7-简单语句)
         * [7.1. 表达式语句](#71-表达式语句)
@@ -8751,6 +8752,14 @@ Template(strings=('Hello', '!'), interpolations=(Interpolation('Blaise', 'name',
 **comp\_iter:**      |[comp_for](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_for)&emsp;\|&emsp;[comp_if](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_if)  
 **comp\_if:**        |"if"&emsp;[or_test](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-or_test)&emsp;[[comp_iter](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_iter)]  
 
+`comp_for` 是 “comprehension for” 的缩写，而 `comp` 代表 comprehension（推导式）。  
+
+Python 的 推导式（comprehensions） 包括：  
+* 列表推导式（list comprehension）：`[x for x in xs]`  
+* 集合推导式（set comprehension）：`{x for x in xs}`  
+* 字典推导式（dict comprehension）：`{x: x*2 for x in xs}`  
+* 生成器表达式（generator expression）：`(x for x in xs)`  
+
 推导式的结构是一个单独表达式后面加至少一个 for 子句以及零个或更多个 for 或 if 子句。 在这种情况下，新容器的元素产生方式是将每个 for 或 if 子句视为一个代码块，按从左至右的顺序嵌套，然后每次到达最内层代码块时就对表达式进行求值以产生一个元素。
 
 不过，除了最左边 for 子句中的可迭代表达式，推导式是在另一个隐式嵌套的作用域内执行的。 这能确保赋给目标列表的名称不会“泄露”到外层的作用域。
@@ -8788,6 +8797,71 @@ True
 **list_display:**&ensp;"["&ensp;[[flexible_expression_list](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-flexible_expression_list)&ensp;|&ensp;[comprehension](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comprehension)]&ensp;"]"
 
 列表显示会产生一个新的列表对象，其内容通过一系列表达式或一个推导式来指定。 当提供由逗号分隔的一系列表达式时，其元素会从左至右被求值并按此顺序放入列表对象。 当提供一个推导式时，列表会根据推导式所产生的结果元素进行构建。
+<br><br>
+
+#### 6.2.8. 生成器表达式
+生成器表达式是一种用圆括号括起来的紧凑的生成器表示法。
+
+**generator_expression:** &ensp;"("&ensp; [expression](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-expression) &ensp;[comp_for](https://docs.python.org/zh-cn/3.14/reference/expressions.html#grammar-token-python-grammar-comp_for) &ensp;")"&ensp;
+
+生成器表达式会产生一个新的生成器对象。其语法与推导式相同，区别在于它是用圆括号而不是用方括号或花括号括起来的。
+
+生成器表达式中使用的变量是在生成器对象调用 [\_\_next\_\_()](https://docs.python.org/zh-cn/3.14/reference/expressions.html#generator.__next__) 方法时被惰性求值的（其行为方式与普通生成器相同）。但是，最左侧 for 子句中的可迭代表达式（iterable expression）会立即被求值，并且会立即为该可迭代对象创建[迭代器](https://docs.python.org/zh-cn/3.14/glossary.html#term-iterator)。因此，如果在创建迭代器的过程中产生了错误，该错误会在定义生成器表达式的位置抛出，而不是在检索第一个值的位置才抛出。后续的 for 子句以及最左侧 for 子句内的任何筛选条件无法在外层作用域（enclosing scope）内被求值，因为它们可能会依赖于从最左侧可迭代对象获取的值。 例如：`(x*y for x in range(10) for y in range(x, x+10))`。
+
+圆括号在只附带一个参数的调用中可以被省略。 详情参见 [调用](https://docs.python.org/zh-cn/3.14/reference/expressions.html#calls) 一节。
+
+```py
+>>> import collections
+>>> _PACKAGE_NAMES = ('setuptools', 'pip')
+>>> _Package = collections.namedtuple('Package', ('version', 'wheel_name', 'wheel_path'))
+>>> packages = {}
+>>> packages['pip'] = _Package('21.2.4', None, 'D:/Program Files/Python310/Lib/ensurepip/_bundled/pip-21.2.4-py3-none-any.whl')
+>>> dir_packages = packages
+>>> (name in dir_packages for name in _PACKAGE_NAMES)
+<generator object <genexpr> at 0x7f95f9b780>
+>>> [name in dir_packages for name in _PACKAGE_NAMES]
+[False, True]
+>>> all((name in dir_packages for name in _PACKAGE_NAMES))
+False
+>>> all(name in dir_packages for name in _PACKAGE_NAMES)  # 生成器表达式是 all() 的唯一参数，所以圆括号可以被省略
+False
+>>> all([name in dir_packages for name in _PACKAGE_NAMES])
+False
+>>> 
+```
+
+`[name in dir_packages for name in _PACKAGE_NAMES]` 等价于：
+
+```py
+result = []
+for name in _PACKAGE_NAMES:      # 遍历第一个 name
+    temp = name in dir_packages  # 立即判断这个 name
+    result.append(temp)          # 立即把结果加到列表
+# 循环继续，直到遍历完所有 name
+```
+
+列表推导式的执行过程是：边遍历、边计算、边收集。  
+列表推导式生成的是一个结果列表。列表推导式在创建好的同时就已遍历、计算完。  
+生成器表达式生成的是一个生成器对象，只有真正使用时，才会按需迭代、求值。  
+
+生成器表达式与列表推导式的区别
+
+| 特性 | 生成器表达式 `(x for ...)` | 列表推导式 `[x for ...]` |  
+|------|-----------------------------|----------------------------|  
+| 求值时机 | 惰性（延迟到使用时） | 立即（创建时就计算完） |  
+| 内存占用 | 极低（一次只产生一个值） | 较高（存储全部结果） |  
+| 是否可重复使用 | ❌ 用完即废（一次性迭代器） | ✅ 可多次访问 |  
+| 适用场景 | 大数据、短路操作（如 `all`, `any`） | 需要多次使用或随机访问 |  
+
+为了避免干扰生成器表达式本身的预期操作，禁止在隐式定义的生成器中使用 `yield` 和 `yield from` 表达式。
+
+如果生成器表达式包含 async for 子句或 [await](https://docs.python.org/zh-cn/3.14/reference/expressions.html#await) 表达式，则称为 **异步生成器表达式**。 异步生成器表达式会返回一个新的异步生成器对象，此对象属于异步迭代器 (参见 [异步迭代器](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#async-iterators))。
+
+*在版本 3.6 中新增：* 引入了异步生成器表达式。
+
+*在 3.7 版本发生变更：* 在 Python 3.7 之前，异步生成器表达式只能在 [async def](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#async-def) 协同程序中出现。 从 3.7 开始，任何函数都可以使用异步生成器表达式。
+
+*在 3.8 版本发生变更：* `yield` 和 `yield from` 在隐式嵌套作用域中已被禁用。
 <br><br>
 
 ### 6.14. lambda 表达式
