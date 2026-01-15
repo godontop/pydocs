@@ -145,6 +145,7 @@
         * [site --- 站点专属的配置钩子](#site-----站点专属的配置钩子)
     * [导入模块](#导入模块)
         * [pkgutil --- 包扩展工具](#pkgutil-----包扩展工具)
+        * [runpy —— 定位并执行 Python 模块](#runpy--定位并执行-python-模块)
         * [importlib --- import 的实现](#importlib-----import-的实现)
             * [概述](#概述)
             * [函数](#函数-3)
@@ -7426,6 +7427,79 @@ FileFinder('D:\\Program Files\\Python310\\lib\\site-packages\\selenium') webdriv
 **备注：** 只适用于定义了 `iter_modules()` 方法的 [finder](https://docs.python.org/zh-cn/3.14/glossary.html#term-finder)。 该接口是非标准的，因此本模块还提供了针对 [importlib.machinery.FileFinder](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.machinery.FileFinder) 和 [zipimport.zipimporter](https://docs.python.org/zh-cn/3.14/library/zipimport.html#zipimport.zipimporter) 的实现。  
 
 *在 3.3 版本发生变更:* 更新为直接基于 [importlib](https://docs.python.org/zh-cn/3.14/library/importlib.html#module-importlib) 而不是依赖于包内部的 [PEP 302](https://peps.python.org/pep-0302/) 导入模拟。
+<br><br>
+
+### runpy —— 定位并执行 Python 模块
+**源代码：** [Lib/runpy.py](https://github.com/python/cpython/tree/3.14/Lib/runpy.py)
+
+[runpy](https://docs.python.org/zh-cn/3.14/library/runpy.html#module-runpy) 模块用于定位并运行 Python 的模块，而无需首先导入它们。主要用于实现 [-m](https://docs.python.org/zh-cn/3.14/using/cmdline.html#cmdoption-m) 命令行开关，以允许用 Python 模块命名空间而不是文件系统来定位脚本。
+
+请注意，这**并非**一个沙盒模块——所有代码都在当前进程中执行，函数返回后，任何副作用（例如其他模块的已缓存导入）都将保留。
+
+此外，在 [runpy](https://docs.python.org/zh-cn/3.14/library/runpy.html#module-runpy) 函数返回后，任何由已执行代码定义的函数和类都不能保证正确地工作。如果某使用场景不能接受此限制，那么选用 [importlib](https://docs.python.org/zh-cn/3.14/library/importlib.html#module-importlib) 可能更合适些。
+
+[runpy](https://docs.python.org/zh-cn/3.14/library/runpy.html#module-runpy) 模块提供两个函数：
+
+```py
+runpy.run_module(mod_name, init_globals=None, run_name=None, alter_sys=False)
+```
+
+执行指定模块的代码并返回生成的模块全局字典。首先会使用标准的导入机制（请参阅 [PEP 302](https://peps.python.org/pep-0302/) 了解详情）来定位该模块的代码然后在全新的模块命名空间中执行。
+
+*mod_name* 参数应当是一个绝对模块名。 如果模块名指向一个包而非普通模块，则会导入这个包然后执行这个包中的 [\_\_main\_\_](https://docs.python.org/zh-cn/3.14/library/__main__.html#module-__main__) 子模块再返回模块全局字典。
+
+可选的字典参数 *init_globals* 可用来在代码执行前预填充模块的全局字典。 *init_globals* 不会被修改。 如果在 *init_globals* 中定义了下面的任何一个特殊全局变量，这些定义都会被 [run_module()](https://docs.python.org/zh-cn/3.14/library/runpy.html#runpy.run_module) 覆盖。
+
+特殊全局变量 `__name__`、`__spec__`、`__file__`、`__cached__`、`__loader__` 和 `__package__` 会在模块代码被执行前在全局字典中被设置。（请注意这是一个最小化的变量集合 —— 作为解释器的实现细节其他变量有可能被隐式地设置。）
+
+当可选参数 *run_name* 不为 [None](https://docs.python.org/zh-cn/3.14/library/constants.html#None) 时，`__name__` 被设为 *run_name*；当 *run_name* 为 None 时，如果指定的模块是一个包，则 `__name__` 被设为 `mod_name + '.__main__'`，其它情况下（即当 *run_name* 为 None 且指定的模块为普通模块时），`__name__` 被设为 *mod_name* 参数。
+
+```sh
+➜  tmp git:(master) ✗ mkdir mypkg
+➜  tmp git:(master) ✗ touch mypkg/__init__.py
+➜  tmp git:(master) ✗ touch mypkg/__main__.py
+➜  tmp git:(master) ✗ touch mymod.py
+➜  tmp git:(master) ✗ python
+```
+
+```py
+>>> import runpy
+>>> runpy.run_module('mymod', run_name='custom_name')['__name__']
+'custom_name'
+>>> runpy.run_module('mypkg', run_name='custom_name')['__name__']
+'custom_name'
+>>> runpy.run_module('mypkg')['__name__']
+'mypkg.__main__'
+>>> runpy.run_module('mymod')['__name__']
+'mymod'
+>>> 
+```
+
+`__spec__` 将针对 **实际** 导入的模块进行适当的设置 (也就是说，`__spec__.name` 将始终为 *mod_name* 或 `mod_name + '.__main__'`，而不是 *run_name*)。
+
+```py
+>>> runpy.run_module('mymod', run_name='custom_name')['__spec__'].name
+'mymod'
+>>> runpy.run_module('mypkg', run_name='custom_name')['__spec__'].name
+'mypkg.__main__'
+>>>
+```
+
+`__file__` 、`__cached__`、 `__loader__` 和 `__package__` 根据模块规格进行 [常规设置](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#import-mod-attrs)
+
+如果给出了参数 *alter_sys* 并且值为 [True](https://docs.python.org/zh-cn/3.14/library/constants.html#True)，则 `sys.argv[0]` 会被更新为 `__file__` 的值，且 `sys.modules[__name__]` 会被更新为正在执行模块的临时模块对象。在函数返回之前，`sys.argv[0]` 和 `sys.modules[__name__]` 都会被恢复为其原始值。
+
+请注意对 [sys](https://docs.python.org/zh-cn/3.14/library/sys.html#module-sys) 的这种操作不是线程安全的。 其他线程可能会看到部分初始化（即尚未完全初始化）的模块，以及修改后的参数列表。 建议当从线程代码中调用此函数时不要动（即不修改，保持默认） `sys` 模块。（即保持 `alter_sys=False`）
+
+**参见：** 命令行中的 [-m](https://docs.python.org/zh-cn/3.14/using/cmdline.html#cmdoption-m) 选项提供等效的功能。
+
+*在 3.1 版本发生变更：* 增加了通过查找 [\_\_main\_\_](https://docs.python.org/zh-cn/3.14/library/__main__.html#module-__main__) 子模块来执行包的功能。
+
+*在 3.2 版本发生变更：* 增加了 `__cached__` 全局变量（参见 [PEP 3147](https://peps.python.org/pep-3147/) ）。
+
+*在 3.4 版本发生变更：* 已更新以利用 [PEP 451](https://peps.python.org/pep-0451/) 加入的模块规格功能。使得以这种方式运行的模块能够正确设置 `__cached__`，并确保真正的模块名称总是可以通过 `__spec__.name` 访问。
+
+*在 3.12 版本发生变更：* `__cached__`、`__loader__` 和 `__package__` 的设置已被弃用。替代设置参见 [ModuleSpec](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.machinery.ModuleSpec)。
 <br><br>
 
 ### importlib --- import 的实现
