@@ -6789,6 +6789,15 @@ __main__
 ➜  ~
 ```
 
+```sh
+➜  tmp git:(master) ✗ cat mypkg/__init__.py
+➜  tmp git:(master) ✗ cat mypkg/__main__.py
+print(__name__)
+➜  tmp git:(master) ✗ python -m mypkg
+__main__
+➜  tmp git:(master) ✗
+```
+
 * Python 解释器从标准输入中读取的 Python 代码：
 
 ```sh
@@ -7492,6 +7501,51 @@ runpy.run_module(mod_name, init_globals=None, run_name=None, alter_sys=False)
 请注意对 [sys](https://docs.python.org/zh-cn/3.14/library/sys.html#module-sys) 的这种操作不是线程安全的。 其他线程可能会看到部分初始化（即尚未完全初始化）的模块，以及修改后的参数列表。 建议当从线程代码中调用此函数时不要动（即不修改，保持默认） `sys` 模块。（即保持 `alter_sys=False`）
 
 **参见：** 命令行中的 [-m](https://docs.python.org/zh-cn/3.14/using/cmdline.html#cmdoption-m) 选项提供等效的功能。
+
+```sh
+➜  tmp git:(master) ✗ cat testmod.py
+import sys
+
+print("Module __name__:", __name__)
+print("sys.argv[0]:", sys.argv[0])
+print("__spec__.name:", __spec__.name)
+print("Is this module in sys.modules?", __name__ in sys.modules)
+➜  tmp git:(master) ✗ python -m testmod
+Module __name__: __main__
+sys.argv[0]: /home/pi/github/python/tmp/testmod.py
+__spec__.name: testmod
+Is this module in sys.modules? True
+➜  tmp git:(master) ✗ cat run_test.py
+import runpy
+runpy.run_module('testmod')
+➜  tmp git:(master) ✗ python -m run_test
+Module __name__: testmod
+sys.argv[0]: /home/pi/github/python/tmp/run_test.py
+__spec__.name: testmod
+Is this module in sys.modules? False
+➜  tmp git:(master) ✗ vim run_test.py
+➜  tmp git:(master) ✗ cat run_test.py
+import runpy
+runpy.run_module('testmod', alter_sys=True)
+➜  tmp git:(master) ✗ python -m run_test
+Module __name__: testmod
+sys.argv[0]: /home/pi/github/python/tmp/testmod.py
+__spec__.name: testmod
+Is this module in sys.modules? True
+➜  tmp git:(master) ✗ vim run_test.py
+➜  tmp git:(master) ✗ cat run_test.py
+import runpy
+runpy.run_module('testmod', run_name='__main__', alter_sys=True)
+➜  tmp git:(master) ✗ python -m run_test
+Module __name__: __main__
+sys.argv[0]: /home/pi/github/python/tmp/testmod.py
+__spec__.name: testmod
+Is this module in sys.modules? True
+```
+
+当 `alter_sys=True` 时，更新 `sys.argv[0]` 和 `sys.modules`（即添加 `sys.modules['__name__']`），当 `alter_sys=False` 时，不修改 `sys` 模块。  
+
+`python -m mod_name` 等效于 `runpy.run_module('mod_name', run_name='__main__', alter_sys=True)`。
 
 *在 3.1 版本发生变更：* 增加了通过查找 [\_\_main\_\_](https://docs.python.org/zh-cn/3.14/library/__main__.html#module-__main__) 子模块来执行包的功能。
 
@@ -11273,6 +11327,47 @@ $
 
 **-S**  
 禁用 [site](https://docs.python.org/zh-cn/3.14/library/site.html#module-site) 模块的导入及其对 [sys.path](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.path) 的依赖性操作。 如果 [site](https://docs.python.org/zh-cn/3.14/library/site.html#module-site) 会在稍后被显式地导入也会禁用这些操作 (如果你希望触发它们则应调用 [site.main()](https://docs.python.org/zh-cn/3.14/library/site.html#site.main))。
+
+**-W** arg  
+警告信息的控制。Python 的警告机制默认将警告信息打印到 [sys.stderr](https://docs.python.org/zh-cn/3.14/library/sys.html#sys.stderr)。
+
+最简单的设置是将某个特定操作无条件地应用于进程所发出所有警告 (即使是在默认情况下会忽略的那些警告)：
+
+```
+-Wdefault  # 每个调用位置警告一次
+-Werror    # 转换为异常
+-Walways   # 每次都警告
+-Wall      # 与 -Walways 相同
+-Wmodule   # 每个调用模块警告一次
+-Wonce     # 每个 Python 进程警告一次
+-Wignore   # 从不警告
+```
+
+action 名可以根据需要进行缩写，解释器将会解析为合适的名称。例如，`-Wi` 与 `-Wignore` 相同。
+
+完整的参数形式如下：
+
+```
+action:message:category:module:lineno
+```
+
+空字段匹配所有值；尾部的空字段可以省略。例如，`-W ignore::DeprecationWarning` 将忽略所有的 `DeprecationWarning` 警告。
+
+*action* 字段如上所述，但只适用于匹配其余字段的警告。
+
+*message* 字段必须与整个警告信息相匹配；不区分大小写。
+
+*category* 字段与警告类别相匹配（如 `DeprecationWarning` 等）。必须是个类名；检测消息的实际警告类别是否为指定类别的子类。
+
+*module* 字段匹配的是（完整限定）模块名称；这种匹配是大小写敏感的。
+
+*lineno* 字段匹配行号，其中 0 匹配所有行号，相当于省略了行号。
+
+可以给出多个 [-W](https://docs.python.org/zh-cn/3.14/using/cmdline.html#cmdoption-W) 选项；当某条警告信息匹配上多个选项时，将执行最后一个匹配项的操作。非法 [-W](https://docs.python.org/zh-cn/3.14/using/cmdline.html#cmdoption-W) 选项将被忽略（不过，在触发第一条警告时，会打印出一条关于无效选项的警告信息）。
+
+警告信息还可以用 [PYTHONWARNINGS](https://docs.python.org/zh-cn/3.14/using/cmdline.html#envvar-PYTHONWARNINGS) 环境变量来控制，也可以在 Python 程序中用 [warnings](https://docs.python.org/zh-cn/3.14/library/warnings.html#module-warnings) 模块进行控制。例如， [warnings.filterwarnings()](https://docs.python.org/zh-cn/3.14/library/warnings.html#warnings.filterwarnings) 函数可对警告信息使用正则表达式。
+
+请参阅 [警告过滤器](https://docs.python.org/zh-cn/3.14/library/warnings.html#warning-filter) 和 [警告过滤器的介绍](https://docs.python.org/zh-cn/3.14/library/warnings.html#describing-warning-filters) 了解更多细节。
 <br><br>
 
 ### 1.2. 环境变量
