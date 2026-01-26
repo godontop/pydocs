@@ -151,6 +151,8 @@
             * [函数](#函数-3)
             * [importlib.abc —— 关于导入的抽象基类](#importlibabc--关于导入的抽象基类)
             * [importlib.machinery —— 导入器和路径钩子](#importlibmachinery--导入器和路径钩子)
+        * [importlib.resources -- 包资源的读取、打开和访问](#importlibresources----包资源的读取、打开和访问)
+            * [函数式 API](#函数式-api)
     * [Unix 专属服务](#unix-专属服务)
         * [shlex --- 简单词法分析](#shlex-----简单词法分析)
 * [Python语言参考](#python语言参考)
@@ -7839,6 +7841,95 @@ True
 
 **has_location**  
 如果 spec 的 [origin](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.machinery.ModuleSpec.origin) 指向一个可加载的位置则为 `True`，否则为 `False`。 该值将影响如何解释 origin 以及如何填充模块的 [\_\_file\_\_](https://docs.python.org/zh-cn/3.14/reference/datamodel.html#module.__file__)。
+<br><br>
+
+### importlib.resources -- 包资源的读取、打开和访问
+**源代码：** [Lib/importlib/resources/\_\_init\_\_.py](https://github.com/python/cpython/tree/3.14/Lib/importlib/resources/__init__.py)
+
+> 在版本 3.7 中新增。
+
+此模块充分利用 Python 的导入系统以便提供对 **包** 内部的 **资源** 的访问。
+
+“资源”是指 Python 中与模块或包相关联的类文件资源。 资源可以直接包含在某个包中，包含在包的某个子目录中，或是与不属于任何包的某个模块相邻。 资源可以是文本或二进制数据。 因此，从技术上说一个包的 Python 模块资源 (`.py` 文件)、编译产物 (`__pycache__` 目录) 和安装产物 (如目录中的 [保留文件名](https://docs.python.org/zh-cn/3.14/library/os.path.html#os.path.isreserved)) 就是这个包实际包含的资源。 不过，在实践中，资源主要是指软件包作者专门对外公开的非 Python 产物。
+
+资源可以使用二进制或文本模式打开。
+
+资源大致相当于目录内的文件，不过需要记住这只是一个比喻。 资源和包 **不是** 必须如文件系统上的物理文件和目录那样存在的：例如，一个包及其资源可使用 [zipimport](https://docs.python.org/zh-cn/3.14/library/zipimport.html#module-zipimport) 从一个 ZIP 文件导入。
+
+**备注：** 本模块提供了类似于 [pkg_resources](https://setuptools.readthedocs.io/en/latest/pkg_resources.html) [Basic Resource Access](https://setuptools.readthedocs.io/en/latest/pkg_resources.html#basic-resource-access) 的功能而没有那样高的性能开销。 这使得读取包中的资源更为容易，并具有更为稳定和一致的语义。
+
+此模块的独立向下移植版本在 [使用 importlib.resources](https://importlib-resources.readthedocs.io/en/latest/using.html) 和 [从 pkg_resources 迁移到 importlib.resources](https://importlib-resources.readthedocs.io/en/latest/migration.html) 中提供了更多信息。
+
+想要支持资源读取的 [加载器](https://docs.python.org/zh-cn/3.14/library/importlib.html#importlib.abc.Loader) 应当实现 [importlib.resources.abc.ResourceReader](https://docs.python.org/zh-cn/3.14/library/importlib.resources.abc.html#importlib.resources.abc.ResourceReader) 中规定的 `get_resource_reader(fullname)` 方法。
+
+*class* importlib.resources.**Anchor**  
+代表资源的锚点，可以是一个 [模块对象](https://docs.python.org/zh-cn/3.14/library/types.html#types.ModuleType) 或字符串形式的模块名称。 定义为 `Union[str, ModuleType]`。
+<br><br>
+
+#### 函数式 API
+提供了一组简化的、向下兼容的辅助函数。 这些函数允许通过单次函数调用完成常见操作。
+
+对于以下所有函数：
+
+* *anchor* 是一个 [Anchor](https://docs.python.org/zh-cn/3.14/library/importlib.resources.html#importlib.resources.Anchor)，就像在 [files()](https://docs.python.org/zh-cn/3.14/library/importlib.resources.html#importlib.resources.files) 中一样。 与在 `files` 中不同，它不可被省略。
+
+* *path\_names* 是相对于 anchor 的资源的路径名的各个组成部分。 例如，要获取名为 `info.txt` 的资源的文本，使用:
+
+```py
+importlib.resources.read_text(my_module, "info.txt")
+```
+
+类似于 [Traversable.joinpath](https://docs.python.org/zh-cn/3.14/library/importlib.resources.abc.html#importlib.resources.abc.Traversable)，单独的组成部分应当使用正斜杠 (`/`) 作为路径分隔符。 例如，下面这些条目是等价的：
+
+```py
+importlib.resources.read_binary(my_module, "pics/painting.png")
+importlib.resources.read_binary(my_module, "pics", "painting.png")
+```
+
+出于保持向下兼容性的理由，如果给出了多个 *path\_names* 则读取文本的函数需要一个显式的 *encoding* 参数。 例如，要获取 `info/chapter1.txt` 的文本，使用：
+
+```py
+importlib.resources.read_text(my_module, "info", "chapter1.txt",
+                              encoding='utf-8')
+```
+
+importlib.resources.**open\_binary**(_anchor, \*path\_names_)  
+打开指定的资源用于二进制读取。
+
+请参阅 [介绍文档](https://docs.python.org/zh-cn/3.14/library/importlib.resources.html#importlib-resources-functional) 了解 *anchor* 和 *path\_names* 的详情。
+
+此函数返回一个 [BinaryIO](https://docs.python.org/zh-cn/3.14/library/typing.html#typing.BinaryIO) 对象，即一个打开供读取的二进制流。
+
+此函数大致等价于：
+
+```py
+files(anchor).joinpath(*path_names).open('rb')
+```
+
+*在 3.13 版本发生变更：* 可接受多个 *path\_names*。
+<br><br>
+
+importlib.resources.**read\_binary**(_anchor, \*path\_names_)  
+以 [bytes](https://docs.python.org/zh-cn/3.14/library/stdtypes.html#bytes) 形式读取并返回指定资源的内容。
+
+请参阅 [介绍文档](https://docs.python.org/zh-cn/3.14/library/importlib.resources.html#importlib-resources-functional) 了解 *anchor* 和 *path\_names* 的详情。
+
+此函数大致等价于：
+
+```py
+files(anchor).joinpath(*path_names).read_bytes()
+```
+
+```py
+>>> from importlib import resources
+>>> from ensurepip import _bundled
+>>> whl = resources.read_binary(_bundled, 'pip-22.0.4-py3-none-any.whl')
+>>> type(whl)
+<class 'bytes'>
+>>>
+```
+
+*在 3.13 版本发生变更：* 可接受多个 *path\_names*。
 <br><br>
 
 ## Unix 专属服务
