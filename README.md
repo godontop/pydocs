@@ -58,6 +58,8 @@
         * [itertools -- 为高效循环创建迭代器的函数](#itertools----为高效循环创建迭代器的函数)
     * [文件和目录访问](#文件和目录访问)
         * [os.path — 通用路径名操作](#ospath--通用路径名操作)
+        * [tempfile --- 生成临时文件和目录](#tempfile-----生成临时文件和目录)
+            * [例子](#例子)
         * [glob --- Unix 风格的路径名模式扩展](#glob-----unix-风格的路径名模式扩展)
     * [文件格式](#文件格式)
         * [csv — CSV文件读写](#csv--csv文件读写)
@@ -3695,6 +3697,107 @@ print(DIR_OF_GITHUB)
 /home/pi
 /home/pi/github
 ➜  ~ 
+```
+
+### tempfile --- 生成临时文件和目录
+**源代码：** [Lib/tempfile.py](https://github.com/python/cpython/tree/3.14/Lib/tempfile.py)
+
+该模块可以创建临时文件和目录。它适用于所有受支持的平台。 [TemporaryFile](https://docs.python.org/zh-cn/3.14/library/tempfile.html#tempfile.TemporaryFile)、[NamedTemporaryFile](https://docs.python.org/zh-cn/3.14/library/tempfile.html#tempfile.NamedTemporaryFile)、[TemporaryDirectory](https://docs.python.org/zh-cn/3.14/library/tempfile.html#tempfile.TemporaryDirectory) 和 [SpooledTemporaryFile](https://docs.python.org/zh-cn/3.14/library/tempfile.html#tempfile.SpooledTemporaryFile) 是提供自动清理功能的高层级接口并可用作 [上下文管理器](https://docs.python.org/zh-cn/3.14/glossary.html#term-context-manager)。 [mkstemp()](https://docs.python.org/zh-cn/3.14/library/tempfile.html#tempfile.mkstemp) 和 [mkdtemp()](https://docs.python.org/zh-cn/3.14/library/tempfile.html#tempfile.mkdtemp) 是需要执行手动清理的低层级函数。
+
+所有由用户调用的函数和构造函数都带有参数，这些参数可以设置临时文件和临时目录的路径和名称。该模块生成的文件名包括一串随机字符，在公共的临时目录中，这些字符可以让创建文件更加安全。为了保持向后兼容性，参数的顺序有些奇怪。所以为了代码清晰，建议使用关键字参数。
+
+这个模块定义了以下内容供用户调用：
+
+*class* tempfile.**TemporaryDirectory**(_suffix=None, prefix=None, dir=None, ignore\_cleanup\_errors=False, \*, delete=True_)  
+这个类会使用与 [mkdtemp()](https://docs.python.org/zh-cn/3.14/library/tempfile.html#tempfile.mkdtemp) 相同的规则安全地创建一个临时目录。结果对象可以被用作 [上下文管理器](https://docs.python.org/zh-cn/3.14/glossary.html#term-context-manager) (参见 [例子](https://docs.python.org/zh-cn/3.14/library/tempfile.html#tempfile-examples))。在完成上下文或销毁临时目录对象时，新创建的临时目录及其所有内容会从文件系统中被移除。
+
+**name**  
+可以从所返回对象的 name 属性中提取目录名称。当返回的对象被用作 [上下文管理器](https://docs.python.org/zh-cn/3.14/glossary.html#term-context-manager) 时，这个 name 将被作为 [with](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#with) 语句中 as 子句的目标，如果存在该子句的话。
+
+**cleanup()**  
+此目录可通过调用 cleanup() 方法来显式地清理。如果 *ignore\_cleanup\_errors* 为真值，则在显式或隐式清理（例如在 Windows 上 [PermissionError](https://docs.python.org/zh-cn/3.14/library/exceptions.html#PermissionError) 移除打开的文件）期间出现的未处理异常将被忽略，并且剩余的可移除条目会被“尽可能”地删除。在其他情况下，错误将在任何上下文清理发生时被引发（如 cleanup() 调用，退出上下文管理器、对象被作为垃圾回收或解释器关闭等情况）。
+
+*delete* 参数可被用于禁止在退出上下文时清理目录树。 虽然在退出上下文时禁止此操作看起来可能很不常见，但这在进行调试或在你的清理行为需要以其他逻辑为条件时将会很有用处。
+
+引发一个 [审计事件](https://docs.python.org/zh-cn/3.14/library/sys.html#auditing) `tempfile.mkdtemp` 并附带参数 `fullpath`。
+
+```py
+>>> with tempfile.TemporaryDirectory() as tmpdirname:
+...     print('created temporary directroy', tmpdirname)
+...     y.sh('ls /tmp')
+... 
+created temporary directroy /tmp/tmp5dx6awdj
+systemd-private-fddeac569392492c96735c9d9e79abb4-ModemManager.service-7S86IV
+systemd-private-fddeac569392492c96735c9d9e79abb4-systemd-logind.service-rfm9Tx
+systemd-private-fddeac569392492c96735c9d9e79abb4-systemd-timesyncd.service-nFd5ps
+tmp5dx6awdj
+tmux-1000
+>>> y.sh('ls /tmp')
+systemd-private-fddeac569392492c96735c9d9e79abb4-ModemManager.service-7S86IV
+systemd-private-fddeac569392492c96735c9d9e79abb4-systemd-logind.service-rfm9Tx
+systemd-private-fddeac569392492c96735c9d9e79abb4-systemd-timesyncd.service-nFd5ps
+tmux-1000
+>>>
+```
+
+当退出上下文管理器时，默认会删除创建的临时目录。（因为 delete 参数的默认值是 True）
+
+> 在版本 3.2 中新增。
+
+> 在 3.10 版本发生变更: 添加了 *ignore\_cleanup\_errors* 形参。
+
+> 在 3.12 版本发生变更: 增加了 *delete* 形参。
+<br>
+
+#### 例子
+以下是 tempfile 模块的一些典型用法示例：
+
+```py
+>>> import tempfile
+>>> # 创建一个临时文件并向其写入一些数据
+>>> fp = tempfile.TemporaryFile()
+>>> fp.write(b'Hello world!')
+12
+>>> # 从文件读取数据
+>>> fp.seek(0)
+0
+>>> fp.read()
+b'Hello world!'
+>>> # 关闭文件，它将被删除
+>>> fp.close()
+>>> 
+>>> # 使用上下文管理器创建一个临时文件
+>>> with tempfile.TemporaryFile() as fp:
+...     fp.write(b'Hello world!')
+...     fp.seek(0)
+...     fp.read()
+... 
+12
+0
+b'Hello world!'
+>>> # 现在文件已经被关闭并移除
+>>> 
+>>> # 使用上下文管理器创建一个临时文件
+>>> # 关闭该文件，再使用文件名再次打开该文件
+>>> with tempfile.NamedTemporaryFile(delete_on_close=False) as fp:
+...     fp.write(b'Hello world!')
+...     fp.close()
+...     # 文件已被关闭，但未被删除
+...     # 使用文件名再次打开该文件
+...     with open(fp.name, mode='rb') as f:
+...         f.read()
+... 
+12
+b'Hello world!'
+>>> # 现在文件已被移除
+>>> 
+>>> # 使用上下文管理器创建一个临时目录
+>>> with tempfile.TemporaryDirectory() as tmpdirname:
+...     print('created temporary directory', tmpdirname)
+... 
+created temporary directory /tmp/tmpk4yfr9n4
+>>> # 目录及其内容已被移除
+>>> 
 ```
 
 ### glob --- Unix 风格的路径名模式扩展
