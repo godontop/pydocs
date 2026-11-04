@@ -5853,6 +5853,9 @@ True
 json.**load**(*fp, \*, cls=None, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, object_pairs_hook=None, \*\*kw*)  
 使用这个 [转换表](https://docs.python.org/zh-cn/3.8/library/json.html#json-to-py-table) 将 *fp* (一个支持 `.read()` 并包含一个 JSON 文档的 [text file](https://docs.python.org/zh-cn/3.8/glossary.html#term-text-file) 或者 [binary file](https://docs.python.org/zh-cn/3.8/glossary.html#term-binary-file)) 反序列化为一个 Python 对象。
 
+**参数：**  
+**fp** 文件类对象
+
 *object_hook* 是一个可选的函数，它会被调用于每一个解码出的对象字面量（即一个 [dict](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#dict)）。*object_hook* 的返回值会取代原本的 [dict](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#dict)。这一特性能够被用于实现自定义解码器（如 [JSON-RPC](http://www.jsonrpc.org/) 的类型提示)。
 
 *object_pairs_hook* is an optional function that will be called with the result of any object literal decoded with an ordered list of pairs. *object_pairs_hook* 的返回值将被用来替换 [dict](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#dict)。这一特性能够被用于实现自定义解码器。如果也定义了 *object_hook*，应优先考虑 *object_pairs_hook*。
@@ -5873,7 +5876,10 @@ json.**load**(*fp, \*, cls=None, object_hook=None, parse_float=None, parse_int=N
 
 *在 3.6 版更改:* 所有的可选参数现在是 [keyword-only](https://docs.python.org/zh-cn/3.8/glossary.html#keyword-only-parameter) 的了。
 
-*在 3.6 版更改:* *fp* 现在可以是一个 [二进制文件](https://docs.python.org/zh-cn/3.8/glossary.html#term-binary-file)。输入编码必须是 UTF-8, UTF-16 或者 UTF-32.
+*在 3.6 版更改:* *fp* 现在可以是一个 [二进制文件](https://docs.python.org/zh-cn/3.8/glossary.html#term-binary-file)。输入编码必须是 UTF-8, UTF-16 或者 UTF-32。
+
+**json.load 的第一个参数 fp 是一个文件类型的对象，json.loads 的第一个参数 s 是字符串或字节或字节数组类型。**
+<br><br>
 
 json.**loads**(*s, \*, cls=None, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, object_pairs_hook=None, \*\*kw*)  
 使用这个 [转换表](https://docs.python.org/zh-cn/3.8/library/json.html#json-to-py-table) 将 *s* (一个包含一个 JSON 文档的 [str](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#str), [bytes](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#bytes) 或 [bytearray](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#bytearray) 实例) 反序列化为一个 Python 对象。
@@ -5885,6 +5891,9 @@ json.**loads**(*s, \*, cls=None, object_hook=None, parse_float=None, parse_int=N
 *从版本 3.1 开始被弃用，将在版本 3.9 中被移除：* *encoding* 关键字参数。
 
 *在 3.6 版更改:* *s* 现在可以为 [bytes](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#bytes) 或 [bytearray](https://docs.python.org/zh-cn/3.8/library/stdtypes.html#bytearray) 类型。 输入编码应为 UTF-8, UTF-16 或 UTF-32。
+
+**json.load 的第一个参数 fp 是一个文件类型的对象，json.loads 的第一个参数 s 是字符串或字节或字节数组类型。**
+<br><br>
 
 #### 编码器和解码器
 *class* json.**JSONDecoder**(*\*, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, strict=True, object_pairs_hook=None*)  
