@@ -12160,6 +12160,16 @@ def f(arg):
 同样的概念也适用于类，但通常较少这样使用。有关装饰器的详情可参见 [函数定义](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#function) 和 [类定义](https://docs.python.org/zh-cn/3.14/reference/compound_stmts.html#class) 的文档。
 <br><br>
 
+**file object -- 文件对象**  
+对外提供面向文件 API 以使用下层资源的对象（带有 read() 或 write() 这样的方法）。根据其创建方式的不同，文件对象可以处理对真实磁盘文件，对其他类型存储，或是对通讯设备的访问（例如标准输入/输出、内存缓冲区、套接字、管道等等）。文件对象也被称为 **文件类对象** 或 **流**。
+
+实际上共有三种类别的文件对象: 原始 [二进制文件](https://docs.python.org/zh-cn/3.7/glossary.html#term-binary-file), 缓冲 [二进制文件](https://docs.python.org/zh-cn/3.7/glossary.html#term-binary-file) 以及 [文本文件](https://docs.python.org/zh-cn/3.7/glossary.html#term-text-file)。它们的接口定义均在 [io](https://docs.python.org/zh-cn/3.7/library/io.html#module-io) 模块中。创建文件对象的规范方式是使用 [open()](https://docs.python.org/zh-cn/3.7/library/functions.html#open) 函数。
+<br><br>
+
+**file\-like object \-\- 文件类对象**  
+[file object](https://docs.python.org/zh-cn/3.7/glossary.html#term-file-object) 的同义词。
+<br><br>
+
 # Python Snippets
 ## proxy.py
 Python HTTPS 代理代码
